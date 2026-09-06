@@ -1,0 +1,16 @@
+# 로컬 전용 설정 — API 키가 들어갈 수 있어 절대 올리지 않습니다
+.claude/settings.local.json
+
+# 사내 원본 자료 — 공개 저장소에 올리지 않습니다 (로컬에만 둡니다)
+# CLAUDE.md · docs/slide-guide.md 가 이 경로들을 참조하지만, 저장소에는 포함되지 않습니다
+docs/old/
+docs/M1자료/
+docs/M2자료/
+docs/M3자료/
+docs/M4자료/
+docs/*.csv
+
+# OS
+Thumbs.db
+.DS_Store
+desktop.ini

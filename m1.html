@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>M1. H-Chat으로 시작하는 AI 업무 활용 — AX 중급과정</title>
+<link rel="stylesheet" href="assets/css/deck.css">
+</head>
+<body>
+
+<div class="stage">
+
+  <!-- 1. 표지 ---------------------------------------------------------- -->
+  <section class="slide slide--cover is-active">
+    <img class="cover-logo" src="assets/img/mincoding-logo.png" alt="mincoding">
+    <div class="cover-text">
+      <p class="cover-eyebrow">Module 1.</p>
+      <h1 class="cover-title">H-Chat으로 시작하는<br>AI 업무 활용</h1>
+    </div>
+  </section>
+
+  <!-- 2. 학습목표와 흐름 ------------------------------------------------ -->
+  <section class="slide">
+    <div class="slide-head"><h2>이 시간에 할 일</h2><span class="head-tag">M1</span></div>
+    <div class="slide-body">
+      <p class="lead" style="margin-bottom:26px">
+        대화형 AI의 기본 원리와 H-Chat 핵심 기능을 이해하고,<br>
+        <strong class="navy">말로 부탁해 웹페이지 한 장을 직접 만들어</strong> 봅니다.
+      </p>
+
+      <table class="agenda">
+        <thead>
+          <tr><th style="width:126px">구분</th><th>내용</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="m">개념</td><td>AI 활용의 변화 — 대화형 AI에서 Agent까지</td></tr>
+          <tr><td class="m">개념+실습</td><td>H-Chat 모델·기능 한눈에 이해 <span style="color:#7C8698">· 모델이란 무엇인가</span></td></tr>
+          <tr><td class="m">개념+실습</td><td>말로 만드는 웹페이지 <span style="color:#7C8698">· 첫 페이지 만들고 · 말로 고쳐보기</span></td></tr>
+          <tr><td class="m">실습</td><td>나만의 웹페이지 만들기 <span style="color:#7C8698">· 결과물을 교육 플랫폼에 올리기</span></td></tr>
+          <tr><td class="m">공유</td><td>서로의 결과물 보기 — 어떤 문장으로 만들었는지 나누기</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 3. [M1-1] AI 활용의 변화 ------------------------------------------ -->
+  <section class="slide">
+    <div class="slide-head"><h2>AI 활용의 변화</h2><span class="head-tag">M1-1 · 개념</span></div>
+    <div class="slide-body">
+      <p class="lead" style="margin-bottom:30px">
+        AI를 <strong class="navy">‘질문하면 답하는 챗봇’</strong> 정도로만 쓰면,
+        이후에 배울 자동화가 왜 필요한지 와닿지 않습니다.
+      </p>
+
+      <div class="flow">
+        <div class="flow-step">
+          <p class="flow-no">STEP 1</p>
+          <p class="flow-name">대화형 AI</p>
+          <p class="flow-desc">물어보면 답한다.<br>매번 새로 설명해야 한다.</p>
+        </div>
+        <div class="flow-arrow">›</div>
+        <div class="flow-step is-now">
+          <p class="flow-no">STEP 2 — 오늘 M1</p>
+          <p class="flow-name">반복업무 구조화</p>
+          <p class="flow-desc">자주 하는 일의 기준·자료를<br>미리 넣어두고 재사용한다.</p>
+        </div>
+        <div class="flow-arrow">›</div>
+        <div class="flow-step">
+          <p class="flow-no">STEP 3 — M2 이후</p>
+          <p class="flow-name">Agent 활용</p>
+          <p class="flow-desc">여러 파일을 읽고 처리하며<br>업무를 대신 수행한다.</p>
+        </div>
+      </div>
+
+      <div class="note">
+        대화형 AI에서 Agent로 확장되며 업무 효율화가 가능해집니다.
+        오늘은 그 <strong class="navy">두 번째 칸</strong>부터 시작합니다.
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. [M1-2] H-Chat 화면에서 세 가지 찾기 ------------------------------ -->
+  <section class="slide">
+    <div class="slide-head"><h2>H-Chat 모델·기능 한눈에 이해</h2><span class="head-tag">M1-2 · 개념</span></div>
+    <div class="slide-body slide-body--top" style="padding-top:32px">
+      <p class="lead" style="margin-bottom:20px">
+        오늘 쓸 기능은 <strong class="navy">세 가지</strong>입니다. 화면에서 위치부터 찾아봅시다.
+      </p>
+
+      <div class="split" style="gap:30px">
+        <div class="split-main">
+          <div class="pin-wrap">
+            <img src="assets/img/m1-hchat-screen.png" alt="H Chat Pro 화면 — 모델 선택, 프로젝트, 커넥터 위치">
+            <span class="pin-box" style="left:25.2%;top:0.5%;width:16.5%;height:5.4%"><span class="pin-no">1</span></span>
+            <span class="pin-box" style="left:1.0%;top:29.0%;width:21.0%;height:4.6%"><span class="pin-no">2</span></span>
+            <span class="pin-box" style="left:31.2%;top:72.8%;width:16.6%;height:4.2%"><span class="pin-no">3</span></span>
+          </div>
+        </div>
+
+        <div class="split-side" style="flex:0 0 392px">
+          <div class="numbered">
+            <div class="numbered-item">
+              <span class="n">1</span>
+              <p class="numbered-name">모델</p>
+              <p class="numbered-desc">업무에 따라 선택하는 <b>엔진</b></p>
+              <p class="numbered-where">화면 위쪽 모델 이름을 눌러 바꾼다</p>
+            </div>
+            <div class="numbered-item">
+              <span class="n">2</span>
+              <p class="numbered-name">프로젝트</p>
+              <p class="numbered-desc">반복업무 전용 <b>작업공간</b></p>
+              <p class="numbered-where">왼쪽 메뉴 · 기준과 자료를 미리 넣어둔다</p>
+            </div>
+            <div class="numbered-item">
+              <span class="n">3</span>
+              <p class="numbered-name">커넥터</p>
+              <p class="numbered-desc">업무자료와 연결하는 <b>통로</b></p>
+              <p class="numbered-where">입력창 [+] &gt; 커넥터 · Confluence / Jira</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. [M1-2] 모델이란 무엇인가 -------------------------------------- -->
+  <section class="slide">
+    <div class="slide-head"><h2>모델이란?</h2><span class="head-tag">M1-2 · 개념</span></div>
+    <div class="slide-body">
+      <p class="lead" style="margin-bottom:18px">
+        모델은 내 말을 알아듣고 <strong class="navy">대신 글을 써주는 ‘AI의 머리’</strong>입니다.
+      </p>
+
+      <div class="flow" style="margin-bottom:18px">
+        <div class="flow-step">
+          <p class="flow-no">STEP 1</p>
+          <p class="flow-name">내가 말한다</p>
+          <p class="flow-desc">‘월간 실적 보고서 써줘’처럼 평소 말투로 부탁합니다.</p>
+        </div>
+        <div class="flow-arrow">›</div>
+        <div class="flow-step is-now">
+          <p class="flow-no">STEP 2</p>
+          <p class="flow-name">모델이 생각한다</p>
+          <p class="flow-desc">수없이 많은 글을 미리 읽어둔 AI가 다음 말을 이어 붙입니다.</p>
+        </div>
+        <div class="flow-arrow">›</div>
+        <div class="flow-step">
+          <p class="flow-no">STEP 3</p>
+          <p class="flow-name">답이 나온다</p>
+          <p class="flow-desc">몇 초 만에 보고서 초안 한 편이 만들어집니다.</p>
+        </div>
+      </div>
+
+      <div class="kv kv--2">
+        <div class="kv-item">
+          <p class="kv-name">왜 모델이 여러 개일까요?</p>
+          <p class="kv-like">회사마다 따로 만들어, <b>잘하는 일이 다릅니다.</b></p>
+          <p class="kv-when">그래서 H-Chat 안에 여러 모델이 함께 들어 있다</p>
+        </div>
+        <div class="kv-item">
+          <p class="kv-name">그럼 우리는 뭐를 하나요?</p>
+          <p class="kv-like">만들 필요 없이 일에 맞는 것으로 <b>골라 쓰기만</b> 하면 됩니다.</p>
+          <p class="kv-when">대화창은 그대로, 화면 위쪽 모델 이름만 바꾸면 끝</p>
+        </div>
+      </div>
+
+      <div class="note" style="margin-top:16px">
+        자동차는 그대로 두고 <strong class="navy">엔진만 바꾸는 것</strong>과 같습니다. 힘 센 엔진, 빠른 엔진 중에서 골라 끼우는 셈입니다.
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. [M1-2] 세 회사는 무엇이 다른가 ------------------------------------ -->
+  <section class="slide">
+    <div class="slide-head"><h2>모델 — 세 회사는 무엇이 다른가</h2><span class="head-tag">M1-2 · 개념</span></div>
+    <div class="slide-body">
+      <p class="lead" style="margin-bottom:26px">
+        H-Chat Pro에는 <strong class="navy">OpenAI · Claude · Gemini</strong> 세 회사의 모델이 들어 있습니다.
+        회사마다 <strong class="navy">잘하는 일이 다릅니다.</strong>
+      </p>
+
+      <div class="vs">
+        <div class="vs-item">
+          <p class="vs-name">OpenAI</p>
+          <p class="vs-char">두루 무난한 만능형</p>
+          <p class="vs-line vs-line--pro">문서 · 요약 · 번역</p>
+          <p class="vs-line vs-line--pro">품질과 속도의 균형</p>
+          <p class="vs-line vs-line--con">특정 영역의 1등은 아님</p>
+        </div>
+
+        <div class="vs-item">
+          <p class="vs-name">Claude</p>
+          <p class="vs-char">깊게 파고드는 분석가</p>
+          <p class="vs-line vs-line--pro">추론 · 긴 문서 이해</p>
+          <p class="vs-line vs-line--pro">코딩 · 도구 사용</p>
+          <p class="vs-line vs-line--con">비용이 가장 높음</p>
+        </div>
+
+        <div class="vs-item">
+          <p class="vs-name">Gemini</p>
+          <p class="vs-char">빠르고 저렴한 실무형</p>
+          <p class="vs-line vs-line--pro">이미지 생성 · 이해</p>
+          <p class="vs-line vs-line--pro">저비용 · 빠른 속도</p>
+          <p class="vs-line vs-line--con">복잡한 추론은 아쉬움</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7. [M1-2] 같은 회사 안에서도 둘 --------------------------------------- -->
+  <section class="slide">
+    <div class="slide-head"><h2>같은 회사 안에서도 둘로 나뉜다</h2><span class="head-tag">M1-2 · 개념</span></div>
+    <div class="slide-body slide-body--top" style="padding-top:24px">
+      <p class="lead" style="margin-bottom:16px">
+        이름은 어렵지만 구조는 간단합니다. 회사마다 <strong class="navy">‘알바생 두 명’</strong>이 있다고 생각하세요.
+      </p>
+
+      <div class="split" style="gap:28px">
+        <div class="split-side" style="flex:0 0 206px">
+          <div class="shot"><img src="assets/img/m1-model-select.png" alt="H Chat Pro 모델 선택 목록"></div>
+        </div>
+
+        <div class="split-main">
+          <div class="kv kv--2" style="margin-bottom:14px">
+            <div class="kv-item">
+              <p class="kv-name">똑똑하지만 비싼 알바생</p>
+              <p class="kv-like">시간이 좀 걸려도 <b>깊이 생각하고 꼼꼼하게</b> 해냅니다.</p>
+              <p class="kv-when">보고서 초안 · 복잡한 판단 · 중요한 문서</p>
+            </div>
+            <div class="kv-item">
+              <p class="kv-name">덜 똑똑해도 빠르고 싼 알바생</p>
+              <p class="kv-like">깊이는 덜해도 <b>즉시, 많이</b> 처리해 줍니다.</p>
+              <p class="kv-when">단순 요약 · 형식 정리 · 반복·대량 작업</p>
+            </div>
+          </div>
+
+          <table class="agenda agenda--fill agenda--sm">
+            <thead>
+              <tr><th style="width:110px">회사</th><th>똑똑한 쪽</th><th>빠른 쪽</th></tr>
+            </thead>
+            <tbody>
+              <tr><td class="m">OpenAI</td><td>GPT-5.6 Terra</td><td>GPT-5.6 Luna</td></tr>
+              <tr><td class="m">Claude</td><td>Claude Sonnet 5</td><td>Claude Haiku 4.5</td></tr>
+              <tr><td class="m">Gemini</td><td>Gemini 3.7 Flash</td><td>Gemini 3.5 Flash Lite</td></tr>
+            </tbody>
+          </table>
+
+          <div class="note" style="margin-top:14px">
+            외우지 마세요. <strong class="navy">헷갈리면 ‘똑똑한 쪽’으로 시작</strong>하고,
+            단순·반복 작업이면 ‘빠른 쪽’으로 바꾸면 됩니다.
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8. [M1-3] 웹페이지 · HTML이란 -------------------------------------- -->
+  <section class="slide">
+    <div class="slide-head"><h2>이번에는 눈에 보이는 결과물을 만듭니다</h2><span class="head-tag">M1-3 · 개념</span></div>
+    <div class="slide-body">
+      <p class="lead" style="margin-bottom:24px">
+        지금까지 AI는 <strong class="navy">글</strong>을 써 줬습니다.
+        이번에는 <strong class="navy">웹페이지 한 장</strong>을 직접 만들어 봅니다.
+      </p>
+
+      <div class="kv kv--3">
+        <div class="kv-item">
+          <p class="kv-name">웹페이지란?</p>
+          <p class="kv-like">인터넷에서 보는 <b>한 장의 화면</b>입니다.</p>
+          <p class="kv-when">사내 공지 · 뉴스 · 쇼핑몰 화면 모두 웹페이지</p>
+        </div>
+        <div class="kv-item">
+          <p class="kv-name">HTML이란?</p>
+          <p class="kv-like">그 화면을 어떻게 그릴지 적어둔 <b>설계도 한 장</b>입니다.</p>
+          <p class="kv-when">브라우저가 설계도를 읽어 화면으로 그려준다</p>
+        </div>
+        <div class="kv-item">
+          <p class="kv-name">내가 할 일은?</p>
+          <p class="kv-like">설계도는 <b>AI가 씁니다.</b> 나는 말로 부탁만 합니다.</p>
+          <p class="kv-when">코딩 지식 · 프로그램 설치 필요 없음</p>
+        </div>
+      </div>
+
+      <div class="note">
+        서버도, 개발 도구도 필요 없습니다. <strong class="navy">파일 하나면 끝</strong>입니다.
+      </div>
+    </div>
+  </section>
+
+  <!-- 9. [M1-3] 만드는 순서 네 단계 ---------------------------------------- -->
+  <section class="slide">
+    <div class="slide-head"><h2>부탁하고 → 미리보기로 확인하면 끝</h2><span class="head-tag">M1-3 · 개념</span></div>
+    <div class="slide-body">
+      <p class="lead" style="margin-bottom:22px">
+        오늘 실습의 순서는 <strong class="navy">네 단계</strong>뿐입니다.
+      </p>
+
+      <div class="flow">
+        <div class="flow-step">
+          <p class="flow-no">STEP 1</p>
+          <p class="flow-name">말로 부탁한다</p>
+          <p class="flow-desc">H-Chat에 “이런 페이지 만들어줘”라고 씁니다.</p>
+        </div>
+        <div class="flow-arrow">›</div>
+        <div class="flow-step">
+          <p class="flow-no">STEP 2</p>
+          <p class="flow-name">코드를 받는다</p>
+          <p class="flow-desc">AI가 설계도(HTML)를 통째로 써 줍니다.</p>
+        </div>
+        <div class="flow-arrow">›</div>
+        <div class="flow-step">
+          <p class="flow-no">STEP 3</p>
+          <p class="flow-name">미리보기를 누른다</p>
+          <p class="flow-desc">결과 아래 <strong>[HTML 미리보기]</strong>를 클릭합니다.</p>
+        </div>
+        <div class="flow-arrow">›</div>
+        <div class="flow-step is-now">
+          <p class="flow-no">STEP 4</p>
+          <p class="flow-name">말로 고친다</p>
+          <p class="flow-desc">“이렇게 바꿔줘” 한 문장이면 다시 그려집니다.</p>
+        </div>
+      </div>
+
+      <div class="note">
+        프로그램 설치도, 파일 저장도 필요 없습니다.
+        <strong class="navy">채팅 화면 안에서 만들고 바로 확인</strong>합니다.
+      </div>
+    </div>
+  </section>
+
+  <!-- 10. [M1-3] 실습 : 첫 웹페이지 만들기 ---------------------------------- -->
+  <section class="slide">
+    <div class="slide-head"><h2>[실습] 첫 웹페이지 만들기</h2><span class="head-tag">M1-3 · 실습</span></div>
+    <div class="slide-body" style="padding-top:30px">
+      <div class="split">
+        <div class="split-main">
+          <ol class="steps">
+            <li>H-Chat 새 대화 열기 — 모델은 <strong class="navy">‘똑똑한 쪽’</strong>으로</li>
+            <li>아래 문장을 <strong>그대로 붙여넣고</strong> 실행</li>
+            <li>결과가 나오면 <strong class="navy">다음 장</strong>에서 화면으로 확인</li>
+          </ol>
+
+          <div class="pbox">
+            <p class="pbox-t">그대로 붙여넣는 문장</p>
+            <p>나를 소개하는 웹페이지를 <b>HTML 파일 하나로</b> 만들어줘.</p>
+            <p>제목은 ‘OOO의 소개 페이지’, 인사말 한 줄, 내가 좋아하는 것 3가지 목록을 넣어줘.</p>
+            <p>디자인도 같은 파일 안에 넣고, <b>코드 전체</b>를 한 번에 보여줘.</p>
+          </div>
+        </div>
+
+        <div class="split-side">
+          <div class="side-box">
+            <p class="side-t">왜 하는가</p>
+            <p class="side-d">코딩을 배우지 않고도 <strong>말 한 문장으로 결과물이 만들어진다</strong>는 것을 직접 확인합니다.</p>
+          </div>
+          <div class="side-box">
+            <p class="side-t">준비물</p>
+            <p class="side-d">H-Chat Pro 새 대화 1개</p>
+            <p class="side-d">이름 자리(OOO)에는 본인 이름을 넣습니다</p>
+          </div>
+          <div class="side-box side-box--warn">
+            <p class="side-t">무엇이 남는가</p>
+            <p class="side-d">내 손으로 만든 <strong>웹페이지 화면 1개</strong></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 11. [M1-3] 미리보기로 결과 확인 -------------------------------------- -->
+  <section class="slide">
+    <div class="slide-head"><h2>결과 확인 — [HTML 미리보기]</h2><span class="head-tag">M1-3 · 실습</span></div>
+    <div class="slide-body">
+      <p class="lead" style="margin-bottom:16px">
+        결과 아래 <strong class="navy">[HTML 미리보기]</strong>를 누르면
+        <strong class="navy">오른쪽에 화면이 바로</strong> 뜹니다.
+      </p>
+
+      <div class="figure">
+        <div class="pin-wrap" style="width:812px">
+          <img src="assets/img/m1-html-preview.png" alt="H-Chat 결과에서 HTML 미리보기를 누르면 오른쪽에 완성 화면이 표시된 모습">
+          <span class="pin-box" style="left:0.8%;top:41.4%;width:51.4%;height:8.8%"><span class="pin-no">1</span></span>
+          <span class="pin-box" style="left:61.2%;top:1.0%;width:38.0%;height:97.4%"><span class="pin-no">2</span></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 12. [M1-3] 말로 고치기 (Before → After) ------------------------------ -->
+  <section class="slide">
+    <div class="slide-head"><h2>마음에 안 들면 — 말로 고칩니다</h2><span class="head-tag">M1-3 · 시연</span></div>
+    <div class="slide-body">
+      <p class="lead" style="margin-bottom:16px">
+        코드를 건드리지 않습니다. <strong class="navy">“이렇게 바꿔줘”</strong> 한 문장이면 화면이 다시 그려집니다.
+      </p>
+
+      <div class="shots" style="gap:26px">
+        <div>
+          <div class="shot" style="width:290px"><img src="assets/img/m1-web-before.png" alt="처음 만들어진 소개 페이지"></div>
+          <p class="shot-cap">① 처음 결과</p>
+        </div>
+
+        <div style="flex:0 0 410px; align-self:center">
+          <div class="pbox">
+            <p class="pbox-t">고칠 때 쓴 문장</p>
+            <p>인사하기 버튼을 누르면 폭죽이 터지게 해줘.</p>
+          </div>
+        </div>
+
+        <div>
+          <div class="shot" style="width:300px"><img src="assets/img/m1-web-after.png" alt="인사하기 버튼과 폭죽 효과가 더해진 소개 페이지"></div>
+          <p class="shot-cap">② 고친 결과</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 13. [M1-3] 자주 쓰는 수정 문장 ---------------------------------------- -->
+  <section class="slide">
+    <div class="slide-head"><h2>이렇게 말하면 고쳐집니다</h2><span class="head-tag">M1-3 · 시연</span></div>
+    <div class="slide-body">
+      <p class="lead" style="margin-bottom:24px">
+        외울 필요 없습니다. <strong class="navy">평소 말투 그대로</strong> 부탁하면 됩니다.
+      </p>
+
+      <div class="kv">
+        <div class="kv-item">
+          <p class="kv-name">색 · 분위기</p>
+          <p class="kv-like">“배경을 하늘색으로 바꿔줘”</p>
+          <p class="kv-when">밝게 · 차분하게 같은 말도 알아듣는다</p>
+        </div>
+        <div class="kv-item">
+          <p class="kv-name">배치 · 크기</p>
+          <p class="kv-like">“제목을 가운데로, 더 크게 해줘”</p>
+          <p class="kv-when">답답하다 · 여백이 좁다도 그대로 전달</p>
+        </div>
+        <div class="kv-item">
+          <p class="kv-name">내용 추가</p>
+          <p class="kv-like">“맨 아래 버튼을 넣고, 누르면 인사말이 뜨게 해줘”</p>
+          <p class="kv-when">표 · 사진 자리 · 목록도 같은 방식</p>
+        </div>
+        <div class="kv-item">
+          <p class="kv-name">기기 대응</p>
+          <p class="kv-like">“휴대폰에서도 잘 보이게 해줘”</p>
+          <p class="kv-when">화면 크기에 맞춰 알아서 정리해 준다</p>
+        </div>
+      </div>
+
+      <div class="note">
+        한 번에 다 고치려 하지 말고 <strong class="navy">한 번에 하나씩</strong> 부탁하는 편이 훨씬 빠릅니다.
+      </div>
+    </div>
+  </section>
+
+  <!-- 14. [M1-4] 실습 : 나만의 웹페이지 자유 창작 ----------------------------- -->
+  <section class="slide">
+    <div class="slide-head"><h2>[실습] 나만의 웹페이지 만들기</h2><span class="head-tag">M1-4 · 실습</span></div>
+    <div class="slide-body">
+      <div class="split" style="gap:32px">
+        <div class="split-main">
+          <ol class="steps steps--lg">
+            <li>무엇을 만들지 정한다 <small>다음 장의 예시에서 골라도 됩니다</small></li>
+            <li>H-Chat에 <strong class="navy">한 문장</strong>으로 부탁한다</li>
+            <li><strong class="navy">[HTML 미리보기]</strong>로 결과를 확인한다</li>
+            <li>마음에 들 때까지 <strong class="navy">말로 고친다</strong></li>
+          </ol>
+        </div>
+
+        <div class="split-side side-lg">
+          <div class="side-box">
+            <p class="side-t">왜 하는가</p>
+            <p class="side-d">처음부터 끝까지 <strong>자연어만으로</strong> 결과물 하나를 완성해 봅니다.</p>
+          </div>
+          <div class="side-box">
+            <p class="side-t">규칙</p>
+            <p class="side-d">정답 없음 · 잘 만들 필요 없음</p>
+            <p class="side-d">업무와 관련 없어도 괜찮습니다</p>
+          </div>
+          <div class="side-box side-box--warn">
+            <p class="side-t">막히면</p>
+            <p class="side-d">손 들어 조교 호출 — <strong>완료본 예제 파일</strong>을 받아 이어서 진행합니다.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 15. [M1-4] 무엇을 만들까 ---------------------------------------------- -->
+  <section class="slide">
+    <div class="slide-head"><h2>무엇을 만들까 — 예시</h2><span class="head-tag">M1-4 · 실습</span></div>
+    <div class="slide-body">
+      <p class="lead" style="margin-bottom:24px">
+        떠오르지 않으면 <strong class="navy">아래에서 하나 골라</strong> 그대로 부탁해도 됩니다.
+      </p>
+
+      <div class="kv">
+        <div class="kv-item">
+          <p class="kv-name">나를 소개하는 한 장</p>
+          <p class="kv-like">이름 · 하는 일 · 좋아하는 것</p>
+          <p class="kv-when">가장 빠르게 완성된다</p>
+        </div>
+        <div class="kv-item">
+          <p class="kv-name">우리 팀 안내 페이지</p>
+          <p class="kv-like">팀 소개 · 담당 업무 · 연락 방법</p>
+          <p class="kv-when">실제 업무에 바로 응용 가능</p>
+        </div>
+        <div class="kv-item">
+          <p class="kv-name">오늘 배운 것 정리</p>
+          <p class="kv-like">모델 · 부탁하는 문장 · 만드는 순서</p>
+          <p class="kv-when">복습 카드로 남는다</p>
+        </div>
+        <div class="kv-item">
+          <p class="kv-name">D-day · 목록 페이지</p>
+          <p class="kv-like">여행지 · 맛집 · 남은 날짜 세기</p>
+          <p class="kv-when">움직이는 화면까지 만들어 준다</p>
+        </div>
+      </div>
+
+      <div class="note">
+        <strong class="navy">잘 만드는 것</strong>이 목적이 아닙니다.
+        <strong class="navy">‘말로 만들어진다’</strong>는 감각을 얻는 것이 목적입니다.
+      </div>
+    </div>
+  </section>
+
+  <!-- 16. [M1-4] 실습 : 결과물 올리기 -------------------------------------- -->
+  <section class="slide">
+    <div class="slide-head"><h2>[실습] 만든 페이지를 플랫폼에 올리기</h2><span class="head-tag">M1-4 · 실습</span></div>
+    <div class="slide-body" style="padding-top:28px">
+      <div class="split" style="gap:30px">
+        <div class="split-main">
+          <ol class="steps">
+            <li>완성된 코드를 <strong class="navy">복사</strong>해 <span class="mono">이름.html</span> 로 저장
+              <small>메모장 &gt; 다른 이름으로 저장 · 파일 형식 <span class="mono">모든 파일</span> · 인코딩 <span class="mono">UTF-8</span></small></li>
+            <li><span class="mono">hyundai.mincoding.co.kr</span> 강의장 접속</li>
+            <li>상단 <strong class="navy">[질문있어요]</strong> 메뉴 클릭</li>
+            <li>공지글 <strong class="navy">‘나만의 창작물을 올려주세요’</strong> 열기</li>
+            <li>댓글 작성창의 <strong class="navy">파일 업로드</strong>로 내 파일을 첨부하고
+              한 줄 소개를 쓴 뒤 <strong>[입력]</strong></li>
+          </ol>
+
+          <div class="note" style="margin-top:16px">
+            올리고 나면 <strong class="navy">다른 사람 댓글</strong>에서 서로의 작품을 열어볼 수 있습니다.
+          </div>
+        </div>
+
+        <div class="split-side" style="flex:0 0 468px">
+          <div>
+            <div class="shot"><img src="assets/img/m1-board-list.png" alt="강의장 상단 질문있어요 메뉴와 공지글 목록"></div>
+            <p class="shot-cap">③④ 질문있어요 &gt; 공지글 열기</p>
+          </div>
+          <div style="margin-top:14px">
+            <div class="shot"><img src="assets/img/m1-board-comment.png" alt="댓글 작성창의 파일 업로드 버튼"></div>
+            <p class="shot-cap">⑤ 댓글 작성창 &gt; 파일 업로드</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 17. [M1-5] 공유 + 현업 적용 -------------------------------------------- -->
+  <section class="slide">
+    <div class="slide-head"><h2>서로 보고 · 한 줄 남기기</h2><span class="head-tag">M1-5 · 공유</span></div>
+    <div class="slide-body">
+      <p class="lead" style="margin-bottom:24px">
+        올라온 결과물을 함께 봅니다.
+        <strong class="navy">잘 만든 사람이 아니라, 어떻게 부탁했는지</strong>를 봅니다.
+      </p>
+
+      <ul class="dash-list" style="font-size:22px">
+        <li>제출 목록에서 <strong class="navy">다른 사람 작품 3개</strong> 열어보기</li>
+        <li>마음에 드는 것 1개를 고르고 <strong>어디가 좋았는지 한 줄</strong> 남기기</li>
+        <li>몇 명은 화면을 공유하고, <strong class="navy">어떤 문장으로 부탁했는지</strong> 그대로 읽어보기</li>
+      </ul>
+
+      <div class="note">
+        <strong class="navy">현업 적용</strong> — 오늘 만든 것은 코딩이 아니라 <strong class="navy">문장</strong>입니다.
+        같은 방법으로 업무 안내 페이지 · 행사 안내 · 사내 설문 안내 화면도 만들 수 있습니다.
+      </div>
+    </div>
+  </section>
+
+  <!-- 18. M1 정리 ------------------------------------------------------------- -->
+  <section class="slide">
+    <div class="slide-head"><h2>M1 정리</h2><span class="head-tag">M1 · 정리</span></div>
+    <div class="slide-body">
+      <p class="lead" style="margin-bottom:24px">
+        기능 이름이 아니라 <strong class="navy">‘업무에서 언제 쓰는지’</strong>로 기억하세요.
+      </p>
+
+      <div class="recap">
+        <div class="recap-row">
+          <span class="recap-k">모델</span>
+          <span class="recap-v">업무 성격(정확성·창의성·속도)에 맞춰 <strong>엔진을 바꿔 끼운다</strong></span>
+        </div>
+        <div class="recap-row">
+          <span class="recap-k">만들기</span>
+          <span class="recap-v">부탁 → 저장 → 열기. <strong>HTML 파일 한 장이 웹페이지 한 장</strong>이 된다</span>
+        </div>
+        <div class="recap-row">
+          <span class="recap-k">고치기</span>
+          <span class="recap-v">코드를 건드리지 않고 <strong>한 번에 하나씩 말로</strong> 고친다</span>
+        </div>
+        <div class="recap-row">
+          <span class="recap-k">공유</span>
+          <span class="recap-v">결과물을 플랫폼에 올려 <strong>누구나 볼 수 있는 화면</strong>으로 남긴다</span>
+        </div>
+      </div>
+
+      <div class="note">
+        <strong class="navy">다음 M2</strong> — 지금까지는 <strong>한 번 묻고 한 번 받는</strong> 사용이었습니다.
+        이제 H-Chat Pro의 <strong class="navy">프로젝트 · 커넥터</strong>로 같은 일을 계속 맡기고,
+        내 PC의 파일까지 다루는 <strong class="navy">H-Chat 데스크탑</strong>으로 넘어갑니다.
+      </div>
+    </div>
+  </section>
+
+  <!-- 19. [M2 준비] H-Chat 데스크탑 내려받기 --------------------------------- -->
+  <section class="slide">
+    <div class="slide-head"><h2>H-Chat 데스크탑 내려받기</h2><span class="head-tag">M2 준비</span></div>
+    <div class="slide-body">
+      <p class="lead" style="margin-bottom:20px">
+        쉬는 시간에 <strong class="navy">미리 받아두세요.</strong>
+        H-Chat Pro <strong class="navy">오른쪽 위 다운로드 아이콘 &gt; Desktop</strong> 입니다.
+      </p>
+
+      <div class="shots" style="gap:34px">
+        <div>
+          <div class="shot" style="width:250px"><img src="assets/img/m2-desktop-download.png" alt="H Chat Pro 오른쪽 위 다운로드 메뉴 — Camp / API Platform / Desktop"></div>
+          <p class="shot-cap">① 오른쪽 위 ⤓ &gt; Desktop</p>
+        </div>
+        <div>
+          <div class="shot" style="width:588px"><img src="assets/img/m2-desktop-first.png" alt="H Chat Desktop 첫 화면"></div>
+          <p class="shot-cap">② 설치하고 실행한 첫 화면</p>
+        </div>
+      </div>
+
+      <div class="note">
+        대화창도 모델 선택도 <strong class="navy">Pro와 비슷합니다.</strong>
+        무엇이 다른지는 <strong class="navy">M2</strong>에서 다룹니다.
+      </div>
+    </div>
+  </section>
+
+  <!-- 20. 마무리 ----------------------------------------------------------------- -->
+  <section class="slide slide--cover">
+    <img class="cover-logo" src="assets/img/mincoding-logo.png" alt="mincoding">
+    <div class="cover-text">
+      <h1 class="cover-title" style="font-size:64px">감사합니다.</h1>
+      <p class="cover-meta">이어서 M2. H-Chat 더 깊이 쓰기</p>
+    </div>
+  </section>
+
+</div>
+
+<nav class="deck-bar">
+  <a class="deck-home" href="index.html">← 목차</a>
+
+  <div class="deck-nav">
+    <button class="deck-arrow" id="prev" type="button" aria-label="이전 슬라이드" title="이전 (←)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"
+           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <polyline points="15 5 8 12 15 19"></polyline>
+      </svg>
+    </button>
+
+    <div class="deck-meta">
+      <span class="deck-title">M1. H-Chat으로 시작하는 AI 업무 활용</span>
+      <span class="deck-count" id="count">1 / 20</span>
+    </div>
+
+    <button class="deck-arrow" id="next" type="button" aria-label="다음 슬라이드" title="다음 (→)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"
+           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <polyline points="9 5 16 12 9 19"></polyline>
+      </svg>
+    </button>
+  </div>
+
+  <span class="deck-hint">← → · 마우스 휠</span>
+</nav>
+
+<script src="assets/js/deck.js"></script>
+</body>
+</html>

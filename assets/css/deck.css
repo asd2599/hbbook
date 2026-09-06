@@ -1,0 +1,898 @@
+/* ==========================================================================
+   AX 중급과정 HTML 교안 — 공통 스타일
+   팔레트는 기존 PPT 교안(docs/old/)에서 추출한 값을 그대로 사용
+   ========================================================================== */
+
+:root {
+  --navy:        #164194;  /* 헤더 바 · 제목 · 본문 강조 */
+  --navy-deep:   #204273;  /* 표지 하단 블롭 */
+  --green:       #70AD47;  /* 액센트 */
+  --red:         #FF0000;  /* 중요 표시 */
+  --gray-shape:  #F2F2F2;  /* 표지 좌상단 도형 */
+  --ink:         #1A1A1A;
+  --ink-soft:    #4A4A4A;
+  --line:        #D8DEE9;
+  --bg:          #E9ECF1;  /* 슬라이드 바깥 배경 */
+
+  --slide-w: 1280px;
+  --slide-h: 720px;        /* 16:9 */
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: "Pretendard", "Pretendard Variable", -apple-system, BlinkMacSystemFont,
+               "Malgun Gothic", "맑은 고딕", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---------- 슬라이드 무대 ---------------------------------------------- */
+
+/* 상단 바(56px) 아래 남은 영역의 정중앙에 슬라이드를 놓는다 */
+.stage {
+  position: fixed;
+  inset: 56px 0 0 0;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+
+.slide {
+  position: absolute;
+  width: var(--slide-w);
+  height: var(--slide-h);
+  background: #fff;
+  overflow: hidden;
+  box-shadow: 0 8px 40px rgba(20, 40, 80, .18);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity .18s ease;
+}
+
+.slide.is-active { opacity: 1; visibility: visible; }
+
+/* 화면 크기에 맞춰 JS가 --scale 을 설정한다 */
+.slide { transform: scale(var(--scale, 1)); transform-origin: center center; }
+
+/* ---------- 표지 / 마무리 슬라이드 -------------------------------------- */
+
+.slide--cover { display: grid; place-items: center; }
+
+.slide--cover::before {   /* 좌상단 밝은 회색 라운드 도형 */
+  content: "";
+  position: absolute;
+  left: -30px; top: -34px;
+  width: 444px; height: 150px;
+  background: var(--gray-shape);
+  border-radius: 0 0 40px 40px;
+}
+
+.slide--cover::after {    /* 우하단 네이비 블롭 */
+  content: "";
+  position: absolute;
+  right: -56px; bottom: 0;
+  width: 553px; height: 131px;
+  background: var(--navy-deep);
+  border-radius: 118px 64px 0 0 / 96px 48px 0 0;
+}
+
+.cover-logo {
+  position: absolute;
+  top: 34px; right: 56px;
+  width: 190px;
+  opacity: .85;
+}
+
+.cover-text { position: relative; text-align: center; z-index: 1; }
+
+.cover-eyebrow {
+  margin: 0;
+  font-size: 60px;
+  font-weight: 800;
+  letter-spacing: -.01em;
+  color: var(--green);
+}
+
+.cover-title {
+  margin: 4px 0 0;
+  font-size: 60px;
+  font-weight: 800;
+  letter-spacing: -.02em;
+  color: var(--navy);
+  line-height: 1.28;
+}
+
+.cover-meta {
+  margin: 40px 0 0;
+  font-size: 19px;
+  color: var(--ink-soft);
+  letter-spacing: -.01em;
+}
+
+/* ---------- 본문 슬라이드 ----------------------------------------------- */
+
+.slide-head {
+  position: relative;
+  height: 77px;
+  background: var(--navy);
+  display: flex;
+  align-items: center;
+  padding: 0 0 0 84px;
+}
+
+.slide-head h2 {
+  margin: 0;
+  font-size: 29px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: -.02em;
+}
+
+/* 헤더 바 좌하단의 사선 노치 */
+.slide-head::after {
+  content: "";
+  position: absolute;
+  left: 0; top: 100%;
+  border-style: solid;
+  border-width: 22px 0 0 46px;
+  border-color: var(--navy) transparent transparent transparent;
+}
+
+.slide-body {
+  padding: 46px 84px 56px;
+  height: calc(var(--slide-h) - 77px);
+  overflow: hidden;
+  /* 내용을 세로 가운데에 놓는다. safe center 이므로 내용이 길면
+     위로 넘쳐 잘리지 않고 위쪽 정렬로 자동 복귀한다. */
+  display: flex;
+  flex-direction: column;
+  justify-content: safe center;
+}
+/* 위쪽부터 채워야 하는 슬라이드 */
+.slide-body--top { justify-content: flex-start; }
+
+/* ---------- 본문 타이포 ------------------------------------------------- */
+
+.lead {                    /* 슬라이드 도입 문장 */
+  margin: 0 0 26px;
+  font-size: 27px;
+  line-height: 1.55;
+  color: var(--navy);
+  letter-spacing: -.02em;
+}
+
+.lead--lg { font-size: 31px; }
+.lead + .lead { margin-top: -14px; }
+
+.sub {
+  margin: 0 0 20px;
+  font-size: 22px;
+  line-height: 1.6;
+  color: var(--ink);
+  letter-spacing: -.01em;
+}
+
+.hl   { color: var(--red); font-weight: 700; }   /* 중요 */
+.navy { color: var(--navy); font-weight: 700; }
+.grn  { color: var(--green); font-weight: 700; }
+.mono {
+  font-family: "Consolas", "D2Coding", ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: .95em;
+}
+
+.block-title {
+  margin: 0 0 10px;
+  font-size: 25px;
+  font-weight: 700;
+  color: var(--navy);
+  letter-spacing: -.02em;
+}
+
+/* 들여쓴 항목 목록 (원본 교안의 하이픈 리스트) */
+.dash-list { margin: 0 0 22px; padding: 0 0 0 30px; list-style: none; }
+.dash-list > li {
+  position: relative;
+  margin: 0 0 13px;
+  font-size: 21px;
+  line-height: 1.55;
+  color: var(--ink);
+  letter-spacing: -.01em;
+}
+.dash-list > li::before {
+  content: "–";
+  position: absolute;
+  left: -22px;
+  color: var(--ink-soft);
+}
+.dash-list > li small { display: block; font-size: 18px; color: var(--ink-soft); margin-top: 3px; }
+
+/* ---------- 이미지 ------------------------------------------------------ */
+
+.shots { display: flex; gap: 22px; align-items: flex-start; justify-content: center; }
+.shots--top { align-items: flex-start; }
+
+.shot {
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: #fff;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(20, 40, 80, .07);
+}
+.shot img { display: block; width: 100%; height: auto; }
+
+.shot-cap {
+  margin: 8px 0 0;
+  font-size: 15px;
+  color: var(--ink-soft);
+  text-align: center;
+  letter-spacing: -.01em;
+}
+
+.figure { text-align: center; }
+
+/* ---------- 카드 (강의 주제 3분할 등) ----------------------------------- */
+
+.cards { display: flex; gap: 28px; justify-content: center; }
+
+.card {
+  flex: 0 0 250px;
+  min-height: 145px;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  padding: 20px 16px;
+  color: #fff;
+  font-size: 23px;
+  font-weight: 600;
+  line-height: 1.45;
+  letter-spacing: -.02em;
+  background: linear-gradient(160deg, #4B7DD1 0%, #2F5FB5 55%, #26509E 100%);
+  box-shadow: 0 3px 12px rgba(20, 40, 80, .2);
+}
+
+/* ---------- 안내 박스 --------------------------------------------------- */
+
+.note {
+  margin: 24px 0 0;
+  padding: 18px 24px;
+  background: #F5F7FB;
+  border-left: 5px solid var(--navy);
+  font-size: 20px;
+  line-height: 1.6;
+  color: var(--ink);
+  letter-spacing: -.01em;
+}
+.note--warn { background: #FFF5F5; border-left-color: var(--red); }
+
+/* ---------- 상단 컨트롤 바 ---------------------------------------------- */
+
+.deck-bar {
+  position: fixed;
+  left: 0; right: 0; top: 0;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 18px;
+  background: rgba(255, 255, 255, .94);
+  border-bottom: 1px solid var(--line);
+  backdrop-filter: blur(8px);
+  z-index: 50;
+}
+
+/* 목차로 돌아가기 */
+.deck-home {
+  font-size: 15px;
+  color: var(--navy);
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  padding: 8px 14px;
+  text-decoration: none;
+  white-space: nowrap;
+  letter-spacing: -.01em;
+}
+.deck-home:hover { background: #F0F4FA; border-color: #B9C6DC; }
+
+/* 가운데 정렬 그룹 : ‹  제목 n/N  › */
+.deck-nav {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  min-width: 0;
+}
+
+/* 큰 화살표 버튼 — 눈에 잘 띄도록 네이비 채움 */
+.deck-arrow {
+  flex: 0 0 auto;
+  width: 46px; height: 46px;
+  display: grid;
+  place-items: center;
+  border: none;
+  border-radius: 50%;
+  background: var(--navy);
+  color: #fff;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(22, 65, 148, .28);
+  transition: background .13s ease, transform .13s ease, box-shadow .13s ease;
+}
+.deck-arrow svg { width: 22px; height: 22px; display: block; }
+.deck-arrow:hover:not(:disabled) {
+  background: #1B4FB0;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(22, 65, 148, .34);
+}
+.deck-arrow:active:not(:disabled) { transform: translateY(0); }
+.deck-arrow:disabled {
+  background: #C8D0DE;
+  box-shadow: none;
+  cursor: default;
+}
+.deck-arrow:focus-visible { outline: 3px solid #9DBBF0; outline-offset: 2px; }
+
+.deck-meta {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  min-width: 0;
+}
+
+.deck-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--navy);
+  letter-spacing: -.02em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.deck-count {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 15px;
+  color: var(--ink-soft);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* 번호를 입력해 바로 이동하는 칸 — 동작은 deck.js 가 붙인다 */
+.deck-jump {
+  width: 44px;
+  padding: 3px 4px;
+  font: inherit;
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  color: var(--navy);
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  outline: none;
+}
+.deck-jump:hover  { border-color: #B9C6DD; }
+.deck-jump:focus  { border-color: var(--navy); box-shadow: 0 0 0 3px rgba(22, 65, 148, .12); }
+.deck-total { color: var(--ink-soft); }
+
+/* 조작 안내 */
+.deck-hint {
+  font-size: 13px;
+  color: #8A94A6;
+  white-space: nowrap;
+  letter-spacing: -.01em;
+}
+
+@media (max-width: 900px) {
+  .deck-hint { display: none; }
+  .deck-title { font-size: 14px; }
+  .deck-nav { gap: 12px; }
+}
+
+/* 슬라이드 우하단 페이지 번호 */
+.slide-no {
+  position: absolute;
+  right: 30px; bottom: 18px;
+  font-size: 15px;
+  color: #9AA6B8;
+  font-variant-numeric: tabular-nums;
+}
+
+@media print {
+  .deck-bar, .deck-title, .pbox-copy { display: none; }
+  .stage { position: static; display: block; }
+  .slide {
+    position: static;
+    opacity: 1; visibility: visible;
+    transform: none !important;
+    page-break-after: always;
+    box-shadow: none;
+  }
+}
+
+/* ---------- 일정 표 ----------------------------------------------------- */
+
+.agenda {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 20px;
+  letter-spacing: -.01em;
+}
+.agenda th {
+  text-align: left;
+  padding: 13px 16px;
+  background: #F0F3F9;
+  color: var(--navy);
+  border-bottom: 2px solid var(--navy);
+  font-weight: 700;
+}
+.agenda td {
+  padding: 13px 16px;
+  border-bottom: 1px solid #E4E9F1;
+}
+.agenda tbody tr:last-child td { border-bottom: none; }
+.agenda td.m { font-weight: 700; color: var(--navy); }
+
+/* ==========================================================================
+   본문 컴포넌트 — M1~M5 공용
+   ========================================================================== */
+
+/* ---------- 헤더 우측 세션 태그 ------------------------------------------ */
+
+.head-tag {
+  position: absolute;
+  right: 40px; top: 50%;
+  transform: translateY(-50%);
+  font-size: 15px;
+  color: #A9C0E8;
+  letter-spacing: -.01em;
+  white-space: nowrap;
+}
+
+/* ---------- 단계 흐름 (A → B → C) ---------------------------------------- */
+
+.flow { display: flex; align-items: stretch; }
+
+.flow-step {
+  flex: 1 1 0;
+  min-width: 0;
+  background: #F5F7FB;
+  border: 1px solid var(--line);
+  border-top: 4px solid var(--navy);
+  border-radius: 8px;
+  padding: 24px 22px 26px;
+}
+.flow-step.is-now { background: #EAF0FA; border-color: #A9BCDD; border-top-color: var(--green); }
+
+.flow-no   { font-size: 13px; font-weight: 700; letter-spacing: .08em; color: var(--green); }
+.flow-name { margin: 5px 0 0; font-size: 22px; font-weight: 700; color: var(--navy); letter-spacing: -.02em; line-height: 1.35; }
+.flow-desc { margin: 12px 0 0; font-size: 18px; line-height: 1.58; color: var(--ink-soft); letter-spacing: -.01em; }
+
+.flow-arrow {
+  flex: 0 0 52px;
+  display: grid;
+  place-items: center;
+  color: #A9BCDD;
+  font-size: 28px;
+  line-height: 1;
+}
+
+/* ---------- 개념 카드 (기능 = 비유) --------------------------------------- */
+
+.kv { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
+.kv--3 { grid-template-columns: repeat(3, 1fr); }
+
+.kv-item {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-top: 4px solid var(--navy);
+  border-radius: 10px;
+  padding: 20px 20px 22px;
+}
+.kv-name { margin: 0; font-size: 21px; font-weight: 700; color: var(--navy); letter-spacing: -.02em; }
+.kv-like { margin: 9px 0 0; font-size: 18px; line-height: 1.52; color: var(--ink); letter-spacing: -.01em; }
+.kv-like b { color: var(--green); }
+.kv-when { margin: 12px 0 0; padding-top: 11px; border-top: 1px dashed #DCE3EE; font-size: 16px; line-height: 1.48; color: #7C8698; letter-spacing: -.01em; }
+
+/* ---------- 번호 절차 목록 ------------------------------------------------ */
+
+.steps { counter-reset: step; list-style: none; margin: 0; padding: 0; }
+.steps > li {
+  position: relative;
+  margin: 0 0 19px;
+  padding-left: 42px;
+  font-size: 22px;
+  line-height: 1.52;
+  color: var(--ink);
+  letter-spacing: -.01em;
+}
+.steps > li:last-child { margin-bottom: 0; }
+.steps > li::before {
+  counter-increment: step;
+  content: counter(step);
+  position: absolute;
+  left: 0; top: 2px;
+  width: 29px; height: 29px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--navy);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+}
+.steps small { display: block; margin-top: 4px; font-size: 18px; color: var(--ink-soft); }
+
+/* ---------- 본문 2단 (절차 | 옆 상자) ------------------------------------- */
+
+.split { display: flex; gap: 26px; align-items: flex-start; }
+.split-main { flex: 1 1 auto; min-width: 0; }
+.split-side { flex: 0 0 322px; }
+
+.side-box {
+  background: #F5F7FB;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 17px 19px;
+}
+.side-box + .side-box { margin-top: 14px; }
+.side-box--warn { background: #FFF5F5; border-color: #F3D3D3; }
+
+.side-t {
+  margin: 0 0 6px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: .07em;
+  color: var(--navy);
+}
+.side-box--warn .side-t { color: var(--red); }
+.side-d { margin: 0; font-size: 17px; line-height: 1.58; color: var(--ink); letter-spacing: -.01em; }
+.side-d + .side-d { margin-top: 7px; }
+
+/* ---------- Before → After ------------------------------------------------ */
+
+.ba { display: grid; grid-template-columns: 1fr 1fr; gap: 26px; }
+
+.ba-col { border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: #fff; }
+.ba-head { padding: 12px 20px; font-size: 19px; font-weight: 700; color: #fff; letter-spacing: -.01em; }
+.ba--before .ba-head { background: #8A94A6; }
+.ba--after  .ba-head { background: var(--navy); }
+.ba-body { padding: 19px 20px 21px; font-size: 19px; line-height: 1.62; color: var(--ink); letter-spacing: -.01em; }
+.ba-body ul { margin: 0; padding-left: 20px; }
+.ba-body li { margin-bottom: 10px; }
+.ba-quote {
+  display: block;
+  background: #F5F7FB;
+  border-left: 3px solid #C3CBD8;
+  padding: 12px 16px;
+  margin: 0 0 14px;
+  font-size: 18px;
+  color: var(--ink-soft);
+}
+.ba--after .ba-quote { border-left-color: var(--green); }
+
+/* ---------- COSTAR 7칸 ---------------------------------------------------- */
+
+.costar { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+
+.costar-cell {
+  background: #F5F7FB;
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--navy);
+  border-radius: 6px;
+  padding: 16px 17px 18px;
+}
+.costar-cell--sum { background: #EAF0FA; border-left-color: var(--green); }
+.costar-t { margin: 0; font-size: 19px; font-weight: 700; color: var(--navy); letter-spacing: -.02em; }
+.costar-d { margin: 6px 0 0; font-size: 16px; line-height: 1.48; color: var(--ink-soft); letter-spacing: -.01em; }
+
+/* ---------- 채워 넣는 표 --------------------------------------------------- */
+
+.agenda td.blank { color: #C3CBD8; letter-spacing: .12em; }
+.agenda--fill td, .agenda--fill th { font-size: 19px; }
+
+/* 조밀한 표 — 슬라이드에 다른 요소가 많을 때 */
+.agenda--sm td, .agenda--sm th { padding: 9px 16px; font-size: 18px; }
+
+/* ---------- 핵심 한 줄 요약 ------------------------------------------------ */
+
+.recap { display: grid; gap: 12px; }
+.recap-row {
+  display: grid;
+  grid-template-columns: 210px 1fr;
+  align-items: baseline;
+  gap: 20px;
+  padding: 18px 22px;
+  background: #F5F7FB;
+  border-left: 4px solid var(--navy);
+  border-radius: 0 6px 6px 0;
+}
+.recap-k { font-size: 21px; font-weight: 700; color: var(--navy); letter-spacing: -.02em; }
+.recap-v { font-size: 19px; line-height: 1.5; color: var(--ink); letter-spacing: -.01em; }
+
+/* ---------- 화면 캡처 위 콜아웃 표시 --------------------------------------- */
+/* 스크린샷의 특정 영역을 빨간 테두리로 감싸고 번호를 붙인다.
+   위치·크기는 이미지 대비 % 로 지정하므로 이미지 폭이 바뀌어도 따라간다. */
+
+.pin-wrap { position: relative; display: inline-block; line-height: 0; }
+.pin-wrap img { display: block; width: 100%; height: auto; }
+
+.pin-box {
+  position: absolute;
+  border: 2.5px solid var(--red);
+  border-radius: 5px;
+  pointer-events: none;
+}
+
+.pin-no {
+  position: absolute;
+  right: -33px; top: 50%;
+  transform: translateY(-50%);
+  width: 26px; height: 26px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--red);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+/* 번호가 붙은 설명 카드 */
+.numbered { display: grid; gap: 14px; }
+
+.numbered-item {
+  position: relative;
+  padding: 15px 18px 16px 52px;
+  background: #F5F7FB;
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--navy);
+  border-radius: 8px;
+}
+.numbered-item > .n {
+  position: absolute;
+  left: 15px; top: 16px;
+  width: 26px; height: 26px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--red);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+}
+.numbered-name { margin: 0; font-size: 21px; font-weight: 700; color: var(--navy); letter-spacing: -.02em; }
+.numbered-desc { margin: 6px 0 0; font-size: 17px; line-height: 1.5; color: var(--ink); letter-spacing: -.01em; }
+.numbered-desc b { color: var(--green); }
+.numbered-where { margin: 7px 0 0; font-size: 15px; color: #7C8698; letter-spacing: -.01em; }
+
+/* ---------- 모델 목록 ------------------------------------------------------ */
+
+.models { display: grid; gap: 13px; }
+
+.model-grp {
+  background: #F5F7FB;
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--navy);
+  border-radius: 8px;
+  padding: 13px 18px 15px;
+}
+.model-vendor { margin: 0 0 8px; font-size: 18px; font-weight: 700; color: var(--navy); letter-spacing: -.01em; }
+.model-row { display: flex; gap: 12px; align-items: baseline; }
+.model-row + .model-row { margin-top: 6px; }
+.model-name { flex: 0 0 168px; font-size: 17px; font-weight: 700; color: var(--ink); letter-spacing: -.01em; }
+.model-use  { flex: 1 1 auto; font-size: 16px; line-height: 1.45; color: var(--ink-soft); letter-spacing: -.01em; }
+
+/* ---------- 장단점 비교 카드 ----------------------------------------------- */
+
+.vs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+
+.vs-item {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-top: 4px solid var(--navy);
+  border-radius: 10px;
+  padding: 24px 24px 26px;
+}
+.vs-name { margin: 0; font-size: 27px; font-weight: 800; color: var(--navy); letter-spacing: -.02em; }
+.vs-char { margin: 6px 0 18px; font-size: 19px; font-weight: 700; color: var(--green); letter-spacing: -.01em; }
+
+.vs-line {
+  position: relative;
+  margin: 0 0 13px;
+  padding-left: 26px;
+  font-size: 21px;
+  line-height: 1.45;
+  color: var(--ink);
+  letter-spacing: -.01em;
+}
+.vs-line:last-child { margin-bottom: 0; }
+.vs-line::before { position: absolute; left: 0; top: 0; font-weight: 800; }
+.vs-line--pro::before { content: "+"; color: var(--green); }
+.vs-line--con::before { content: "\2212"; color: var(--red); }
+
+/* 개념 카드 2열 */
+.kv--2 { grid-template-columns: repeat(2, 1fr); }
+
+/* ---------- 그대로 붙여넣는 프롬프트 상자 -------------------------------- */
+/* 교육생이 화면의 문장을 그대로 옮겨 적지 않도록, 상자마다 [복사] 버튼을
+   deck.js가 자동으로 붙인다. 복사되는 것은 제목(.pbox-t)을 뺀 문장 전체다. */
+
+.pbox {
+  position: relative;
+  background: #F5F7FB;
+  border: 1px solid var(--line);
+  border-left: 5px solid var(--navy);
+  border-radius: 8px;
+  padding: 16px 112px 18px 22px;
+}
+.pbox-t {
+  margin: 0 0 10px;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: .06em;
+  color: var(--green);
+}
+.pbox p {
+  margin: 0 0 7px;
+  font-size: 19px;
+  line-height: 1.55;
+  color: var(--ink);
+  letter-spacing: -.01em;
+}
+.pbox p:last-of-type { margin-bottom: 0; }
+.pbox b { color: var(--navy); }
+
+.pbox-copy {
+  position: absolute;
+  top: 14px; right: 14px;
+  padding: 8px 18px;
+  border: 1.5px solid var(--navy);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--navy);
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -.01em;
+  cursor: pointer;
+}
+.pbox-copy:hover { background: var(--navy); color: #fff; }
+.pbox-copy.is-done { background: var(--green); border-color: var(--green); color: #fff; }
+
+/* ---------- 실습 타이머 버튼 --------------------------------------------- */
+/* 누르면 작은 창(timer.html)이 열려 남은 시간을 센다. 동작은 deck.js가 붙인다. */
+
+.btn-timer {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  margin-top: 22px;
+  padding: 13px 30px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--navy);
+  color: #fff;
+  font-family: inherit;
+  font-size: 21px;
+  font-weight: 700;
+  letter-spacing: -.01em;
+  cursor: pointer;
+}
+.btn-timer::before {
+  content: "";
+  width: 0; height: 0;
+  border-left: 12px solid #fff;
+  border-top: 8px solid transparent;
+  border-bottom: 8px solid transparent;
+}
+.btn-timer:hover { background: var(--navy-deep); }
+.btn-timer .btn-sub { font-size: 16px; font-weight: 600; opacity: .8; }
+
+@media print { .btn-timer { display: none; } }
+
+/* ---------- 큰 글씨 변형 (항목이 적어 여백이 남는 슬라이드용) ------------- */
+
+.steps--lg > li { font-size: 30px; line-height: 1.5; margin-bottom: 44px; padding-left: 56px; }
+.steps--lg > li::before { width: 38px; height: 38px; top: 4px; font-size: 19px; }
+.steps--lg small { margin-top: 8px; font-size: 22px; }
+
+.side-lg .side-box { padding: 19px 21px; }
+.side-lg .side-box + .side-box { margin-top: 16px; }
+.side-lg .side-t { margin-bottom: 8px; font-size: 15px; }
+.side-lg .side-d { font-size: 21px; line-height: 1.5; }
+.side-lg .side-d + .side-d { margin-top: 9px; }
+
+/* ---------- 외부 자료 열기 버튼 ------------------------------------------- */
+/* 영상·문서 등 바깥 자료로 나가는 링크를 눈에 띄게 둘 때 쓴다.
+   deck.js가 외부 링크에 target="_blank" 를 자동으로 붙인다. */
+
+.btn-link {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 15px 28px;
+  border-radius: 999px;
+  background: var(--navy);
+  color: #fff;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -.01em;
+  text-decoration: none;
+  box-shadow: 0 3px 12px rgba(22, 65, 148, .25);
+}
+.btn-link:hover { background: var(--navy-deep); }
+.btn-link::before { content: "▶"; font-size: 16px; }
+
+/* ---------- 정답 확인 상자 (.quiz) ---------------------------------------
+   교육생이 답을 적어 보고 [확인]을 눌러 정답을 여는 작은 문제 상자.
+   동작은 deck.js 가 붙인다.                                                */
+
+.quiz {
+  border: 1px solid var(--line);
+  border-left: 5px solid var(--navy);
+  border-radius: 10px;
+  background: #F5F7FB;
+  padding: 20px 24px 22px;
+}
+
+.quiz-q { margin: 0 0 14px; font-size: 21px; line-height: 1.5; color: var(--ink); letter-spacing: -.01em; }
+
+.quiz-row { display: flex; align-items: center; gap: 12px; }
+
+.quiz-in {
+  flex: 0 0 250px;
+  height: 46px;
+  padding: 0 16px;
+  font: inherit;
+  font-size: 20px;
+  color: var(--ink);
+  background: #fff;
+  border: 1.5px solid #C6D0E2;
+  border-radius: 8px;
+  outline: none;
+}
+.quiz-in:focus { border-color: var(--navy); box-shadow: 0 0 0 3px rgba(22, 65, 148, .12); }
+
+.quiz-btn {
+  height: 46px;
+  padding: 0 26px;
+  font: inherit;
+  font-size: 19px;
+  font-weight: 700;
+  color: #fff;
+  background: var(--navy);
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.quiz-btn:hover { background: var(--navy-deep); }
+
+.quiz-mark { font-size: 20px; font-weight: 700; letter-spacing: -.01em; }
+.quiz.is-ok .quiz-mark { color: var(--green); }
+.quiz.is-no .quiz-mark { color: var(--red); }
+
+.quiz-ans {
+  margin: 16px 0 0;
+  padding-top: 14px;
+  border-top: 1px dashed #C6D0E2;
+  font-size: 20px;
+  line-height: 1.6;
+  color: var(--ink-soft);
+  letter-spacing: -.01em;
+}
+.quiz-ans strong { color: var(--navy); }
+
+@media print {
+  .quiz-row { display: none; }
+  .quiz-ans { display: block !important; }
+}

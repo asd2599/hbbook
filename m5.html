@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>M5. 나만의 업무 혁신 PoC 설계 — AX 중급과정</title>
+<link rel="stylesheet" href="assets/css/deck.css">
+</head>
+<body>
+
+<div class="stage">
+
+  <!-- 1. 표지 ------------------------------------------------------------------------ -->
+  <section class="slide slide--cover is-active">
+    <img class="cover-logo" src="assets/img/mincoding-logo.png" alt="mincoding">
+    <div class="cover-text">
+      <p class="cover-eyebrow">Module 5.</p>
+      <h1 class="cover-title">나만의 업무 혁신 PoC 설계</h1>
+    </div>
+  </section>
+
+  <!-- 2. 이 시간에 할 일 ----------------------------------------------------------------- -->
+  <section class="slide">
+    <div class="slide-head"><h2>이 시간에 할 일</h2><span class="head-tag">M5</span></div>
+    <div class="slide-body">
+      <p class="lead" style="margin-bottom:22px">
+        오늘 배운 것 중 <strong class="navy">내 업무에 맞는 것 하나</strong>를 골라,<br>
+        <strong class="navy">한 장짜리 개선안</strong>으로 만듭니다.
+      </p>
+
+      <table class="agenda">
+        <thead>
+          <tr><th style="width:126px">구분</th><th>내용</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="m">Step 1</td><td>내 업무에서 <strong>반복되는 일 하나</strong>를 고릅니다</td></tr>
+          <tr><td class="m">Step 2</td><td><strong>넣는 것 · 하는 일 · 나오는 것</strong> 세 칸으로 그립니다</td></tr>
+          <tr><td class="m">Step 3</td><td><strong>한 장</strong>으로 정리합니다 — 문제 · 데이터 · 방식 · 효과 · 검증</td></tr>
+          <tr><td class="m">Step 4</td><td>서로 보여 주고 <strong>의견을 주고받습니다</strong></td></tr>
+          <tr><td class="m">마무리</td><td>오늘 배운 것 정리 · <strong>내일 첫 행동</strong> 정하기</td></tr>
+        </tbody>
+      </table>
+
+      <div class="note" style="margin-top:20px">
+        만들지 않습니다. <strong class="navy">무엇을 만들지 정하는</strong> 시간입니다.
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. PoC란 ------------------------------------------------------------------------ -->
+  <section class="slide">
+    <div class="slide-head"><h2>PoC — 작게 해 보고 판단하는 것</h2><span class="head-tag">M5 · 개념</span></div>
+    <div class="slide-body">
+      <p class="lead" style="margin-bottom:22px">
+        거창한 기획서가 아닙니다. <strong class="navy">되는지 작게 확인해 보는 실험</strong>입니다.
+      </p>
+
+      <div class="ba">
+        <div class="ba-col ba--before">
+          <p class="ba-head">이런 건 PoC가 아닙니다</p>
+          <div class="ba-body">
+            <p>“우리 부서 전체 업무를 AI로 바꾸겠다”</p>
+            <p>“전사 시스템과 연동되는 플랫폼을 만들겠다”</p>
+            <p class="ba-quote">너무 커서 시작할 수가 없습니다. 오늘 안에 확인되지 않습니다.</p>
+          </div>
+        </div>
+        <div class="ba-col ba--after">
+          <p class="ba-head">이런 게 PoC입니다</p>
+          <div class="ba-body">
+            <p>“매주 쓰는 회의록을 <strong>10분 만에</strong> 만들어 보겠다”</p>
+            <p>“설문 결과를 <strong>한 화면으로</strong> 보고 보고서까지 뽑아 보겠다”</p>
+            <p class="ba-quote">작아서 이번 주에 해 볼 수 있습니다. 되는지 안 되는지가 바로 나옵니다.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="note" style="margin-top:20px">
+        M4에서 만든 것이 이미 PoC입니다. 이번엔 <strong class="navy">내 업무로</strong> 한 번 더 합니다.
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. 오늘 배운 재료 ------------------------------------------------------------------ -->
+  <section class="slide">
+    <div class="slide-head"><h2>오늘 배운 것 중에서 고릅니다</h2><span class="head-tag">M5 · 개념</span></div>
+    <div class="slide-body">
+      <p class="lead" style="margin-bottom:20px">
+        새로 배울 것은 없습니다. <strong class="navy">오늘 손으로 해 본 것</strong>이 전부 재료입니다.
+      </p>
+
+      <div class="kv kv--3">
+        <div class="kv-item">
+          <p class="kv-name">H-Chat 프로젝트</p>
+          <p class="kv-like">반복업무 전용 작업공간</p>
+          <p class="kv-when">같은 일을 매번 같은 기준으로</p>
+        </div>
+        <div class="kv-item">
+          <p class="kv-name">CLAUDE.md</p>
+          <p class="kv-like">항상 적용되는 공통 기준</p>
+          <p class="kv-when">우리 팀 양식 · 말투 · 금지사항</p>
+        </div>
+        <div class="kv-item">
+          <p class="kv-name">Skill</p>
+          <p class="kv-like">필요할 때 불러 쓰는 레시피</p>
+          <p class="kv-when">자주 쓰는 절차를 명령어 하나로</p>
+        </div>
+      </div>
+
+      <div class="kv kv--3" style="margin-top:14px">
+        <div class="kv-item">
+          <p class="kv-name">Subagent</p>
+          <p class="kv-like">업무 분담</p>
+          <p class="kv-when">긴 일을 나눠 맡겨 정확하게</p>
+        </div>
+        <div class="kv-item">
+          <p class="kv-name">대시보드</p>
+          <p class="kv-like">반복 확인 화면</p>
+          <p class="kv-when">매번 열어 보는 자료를 한 화면으로</p>
+        </div>
+        <div class="kv-item">
+          <p class="kv-name">업무도구(앱)</p>
+          <p class="kv-like">동료에게 건네는 프로그램</p>
+          <p class="kv-when">나만 쓰던 것을 팀이 함께</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. 다른 사람들이 만든 것 -------------------------------------------------------------- -->
+  <section class="slide">
+    <div class="slide-head"><h2>다른 사람들은 이런 걸 만들었습니다</h2><span class="head-tag">M5 · 개념</span></div>
+    <div class="slide-body">
+      <div style="display:flex; gap:30px; align-items:center">
+        <div>
+          <div class="shot" style="width:470px"><img src="assets/img/m5-examples.png" alt="교육 플랫폼의 업무용 도구 예시 목록"></div>
+          <p class="shot-cap">교육 플랫폼 · 조직문화 업무자동화 프로젝트 예시</p>
+        </div>
+        <div style="flex:1 1 auto; min-width:0">
+          <p class="lead" style="margin-bottom:16px">
+            떠오르지 않으면 <strong class="navy">남의 것부터</strong> 봅니다.
+          </p>
+          <ul class="dash-list">
+            <li>영수증 OCR · 이력서 사전 평가<small>매번 눈으로 확인하던 것을 대신 읽게</small></li>
+            <li>사내 문서 요약 · 메일 분류기<small>쌓이기만 하던 자료를 정리하게</small></li>
+            <li>보고서 · PPT 자동 작성<small>양식은 같고 내용만 바뀌는 일</small></li>
+            <li>설문조사 페이지 · 불량 검출<small>M4에서 만든 것과 같은 결</small></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. 이 정도까지 갑니다 --------------------------------------------------------------- -->
+  <section class="slide">
+    <div class="slide-head"><h2>작게 시작해서 여기까지 갑니다</h2><span class="head-tag">M5 · 개념</span></div>
+    <div class="slide-body">
+      <p class="lead" style="margin-bottom:16px">
+        “수시 보고와 자가 평가를 대조해 본다” — <strong class="navy">한 줄에서 시작한 것</strong>입니다.
+      </p>
+      <div class="shots" style="gap:22px">
+        <div>
+          <div class="shot" style="width:540px"><img src="assets/img/m5-poc-a.png" alt="수시 보고와 자가 평가를 교차 검증하는 화면"></div>
+          <p class="shot-cap">① 흩어진 기록을 한 화면에 모아 대조</p>
+        </div>
+        <div>
+          <div class="shot" style="width:540px"><img src="assets/img/m5-poc-b.png" alt="AI가 피드백 초안을 생성하는 화면"></div>
+          <p class="shot-cap">② 근거를 들어 초안까지 자동 작성</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7. Step 1 개념 -------------------------------------------------------------------- -->
+  <section class="slide">
+    <div class="slide-head"><h2>Step 1 — 무엇을 고를까</h2><span class="head-tag">M5-1 · 개념</span></div>
+    <div class="slide-body">
+      <p class="lead" style="margin-bottom:22px">
+        “AI로 뭘 할까”가 아니라 <strong class="navy">“내가 매번 뭘 하고 있나”</strong>부터 봅니다.
+      </p>
+
+      <div class="flow">
+        <div class="flow-step">
+          <p class="flow-name">반복</p>
+          <p class="flow-desc">매일 · 매주 · 매달 같은 일을 또 한다</p>
+        </div>
+        <div class="flow-arrow">+</div>
+        <div class="flow-step">
+          <p class="flow-name">수작업</p>
+          <p class="flow-desc">복사 · 붙여넣기 · 옮겨 적기가 많다</p>
+        </div>
+        <div class="flow-arrow">+</div>
+        <div class="flow-step is-now">
+          <p class="flow-name">시간</p>
+          <p class="flow-desc">한 번에 30분 이상 걸린다</p>
+        </div>
+      </div>
+
+      <div class="note" style="margin-top:22px">
+        셋이 겹치는 일이 <strong class="navy">가장 좋은 후보</strong>입니다.
+        이번 주에 <strong>두 번 이상 한 일</strong>부터 떠올려 보세요.
+      </div>
+    </div>
+  </section>
+
+  <!-- 8. [실습] 하나 고르기 --------------------------------------------------------------- -->
+  <section class="slide">
+    <div class="slide-head"><h2>[실습] 내 업무에서 하나 고릅니다</h2><span class="head-tag">M5-1 · 실습</span></div>
+    <div class="slide-body">
+      <div class="split">
+        <div class="split-main">
+          <ol class="steps steps--lg">
+            <li>평소 업무를 <strong>떠오르는 대로</strong> 적습니다</li>
+            <li>그중 <strong>반복 · 수작업 · 시간</strong>이 겹치는 것에 표시합니다</li>
+            <li><strong>하나만</strong> 고르고, 아래 한 줄로 적습니다</li>
+          </ol>
+          <div class="pbox" style="margin-top:6px">
+            <p class="pbox-t">이 한 줄이 Step 1의 결과입니다</p>
+            <p>[업무명] 을 매 [주기] 하는데, 지금 [N분] 걸린다</p>
+          </div>
+        </div>
+        <div class="split-side side-lg">
+          <div class="side-box">
+            <p class="side-t">예시</p>
+            <p class="side-d">“<strong>주간 회의록 정리</strong>를 매주 하는데, 지금 <strong>40분</strong> 걸린다”</p>
+          </div>
+          <div class="side-box side-box--warn" style="margin-top:12px">
+            <p class="side-t">고르지 말 것</p>
+            <p class="side-d">한 번뿐인 일, 남의 일, 사내 기밀이 꼭 필요한 일.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 9. Step 2 개념 -------------------------------------------------------------------- -->
+  <section class="slide">
+    <div class="slide-head"><h2>Step 2 — 세 칸이면 충분합니다</h2><span class="head-tag">M5-2 · 개념</span></div>
+    <div class="slide-body">
+      <p class="lead" style="margin-bottom:22px">
+        아무리 복잡해 보여도, 업무는 결국 <strong class="navy">넣고 · 하고 · 나오고</strong> 셋입니다.
+      </p>
+
+      <div class="flow">
+        <div class="flow-step">
+          <p class="flow-name">넣는 것</p>
+          <p class="flow-desc">매번 들어오는 자료<br>메일 · 엑셀 · 녹취 · 양식</p>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+          <p class="flow-name">하는 일</p>
+          <p class="flow-desc">한 줄로<br>정리한다 · 요약한다 · 만든다 · 검토한다</p>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step is-now">
+          <p class="flow-name">나오는 것</p>
+          <p class="flow-desc">손에 남는 것<br>회의록 · 보고서 · 화면 · 메일</p>
+        </div>
+      </div>
+
+      <div class="note" style="margin-top:22px">
+        M4에서 만든 것도 이 세 칸이었습니다 —
+        <strong class="navy">설문 CSV → AI가 인사이트를 뽑는다 → 보고서 PPT</strong>
+      </div>
+    </div>
+  </section>
+
+  <!-- 10. [실습] 세 칸 그리기 -------------------------------------------------------------- -->
+  <section class="slide">
+    <div class="slide-head"><h2>[실습] 세 칸으로 그립니다</h2><span class="head-tag">M5-2 · 실습</span></div>
+    <div class="slide-body">
+      <div class="split">
+        <div class="split-main">
+          <ol class="steps steps--lg">
+            <li><strong>넣는 것</strong> — 매번 어떤 자료가 들어오는지</li>
+            <li><strong>하는 일</strong> — 그 자료로 무엇을 하는지 한 줄</li>
+            <li><strong>나오는 것</strong> — 끝나면 무엇이 손에 남는지</li>
+            <li>세 칸을 <strong>교육 플랫폼에 올립니다</strong></li>
+          </ol>
+        </div>
+        <div class="split-side side-lg">
+          <div class="side-box">
+            <p class="side-t">막힐 때</p>
+            <p class="side-d">“하는 일”이 두 줄 이상이면 <strong>아직 큽니다.</strong> 한 줄로 줄어들 때까지 잘라 내세요.</p>
+          </div>
+          <div class="side-box" style="margin-top:12px">
+            <p class="side-t">여기서 갈립니다</p>
+            <p class="side-d">나 혼자 쓰면 <strong>자동화</strong>, 남에게 건네면 <strong>업무도구</strong>. 한 줄로 표시해 두세요.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 11. Step 3 개념 — 좋은 PoC의 기준 ------------------------------------------------------ -->
+  <section class="slide">
+    <div class="slide-head"><h2>Step 3 — 좋은 PoC의 네 가지 조건</h2><span class="head-tag">M5-3 · 개념</span></div>
+    <div class="slide-body">
+      <p class="lead" style="margin-bottom:20px">
+        네 개 중 <strong class="hl">하나라도 빠지면</strong> 시작하고도 흐지부지됩니다.
+      </p>
+
+      <div class="costar">
+        <div class="costar-cell">
+          <p class="costar-t">작게 시작</p>
+          <p class="costar-d">이번 주에 해 볼 수 있는 크기인가</p>
+        </div>
+        <div class="costar-cell">
+          <p class="costar-t">데이터 확보</p>
+          <p class="costar-d">지금 내 손에 있는 자료인가</p>
+        </div>
+        <div class="costar-cell">
+          <p class="costar-t">효과 측정</p>
+          <p class="costar-d">몇 분이 줄었는지 셀 수 있는가</p>
+        </div>
+        <div class="costar-cell costar-cell--sum">
+          <p class="costar-t">사람 검토</p>
+          <p class="costar-d">마지막에 사람이 확인하는가</p>
+        </div>
+      </div>
+
+      <div class="note" style="margin-top:22px">
+        특히 마지막이 중요합니다. <strong class="navy">사람이 확인하지 않는 자동화는 쓰이지 않습니다.</strong>
+      </div>
+    </div>
+  </section>
+
+  <!-- 12. [실습] 한 장으로 정리 ------------------------------------------------------------- -->
+  <section class="slide">
+    <div class="slide-head"><h2>[실습] 한 장으로 정리합니다</h2><span class="head-tag">M5-3 · 실습</span></div>
+    <div class="slide-body">
+      <p class="lead" style="margin-bottom:18px">
+        아래 다섯 칸만 채우면 <strong class="navy">한 장짜리 개선안</strong>이 됩니다.
+      </p>
+
+      <div class="costar" style="grid-template-columns:repeat(3,1fr)">
+        <div class="costar-cell">
+          <p class="costar-t">① 문제</p>
+          <p class="costar-d">무엇이 반복되고 얼마나 걸리는지 1~2줄</p>
+        </div>
+        <div class="costar-cell">
+          <p class="costar-t">② 데이터</p>
+          <p class="costar-d">무엇을 넣을 것인지 1줄</p>
+        </div>
+        <div class="costar-cell">
+          <p class="costar-t">③ AI 활용 방식</p>
+          <p class="costar-d">프로젝트 · CLAUDE.md · Skill · Subagent · 대시보드 중</p>
+        </div>
+      </div>
+      <div class="costar" style="grid-template-columns:repeat(3,1fr); margin-top:14px">
+        <div class="costar-cell">
+          <p class="costar-t">④ 기대 결과</p>
+          <p class="costar-d">산출물 1종 · 몇 분이 줄어드는지</p>
+        </div>
+        <div class="costar-cell costar-cell--sum">
+          <p class="costar-t">⑤ 검증 방법</p>
+          <p class="costar-d">어떤 지표로 · 누가 확인 · 언제</p>
+        </div>
+        <div class="costar-cell">
+          <p class="costar-t">이름 · 부서</p>
+          <p class="costar-d">누가 제안했는지 남깁니다</p>
+        </div>
+      </div>
+
+      <div class="note" style="margin-top:20px">
+        다 쓰면 <strong class="navy">교육 플랫폼에 올립니다.</strong>
+        내일 점심에 팀장님께 그대로 보여 드릴 수 있는 한 장이면 충분합니다.
+      </div>
+    </div>
+  </section>
+
+  <!-- 13. Step 4 — 피드백 3축 ------------------------------------------------------------- -->
+  <section class="slide">
+    <div class="slide-head"><h2>Step 4 — 서로 봐 주는 세 가지 눈</h2><span class="head-tag">M5-4 · 개념</span></div>
+    <div class="slide-body">
+      <p class="lead" style="margin-bottom:22px">
+        “좋네요”는 도움이 되지 않습니다. <strong class="navy">세 가지만</strong> 봐 줍니다.
+      </p>
+
+      <div class="vs">
+        <div class="vs-item">
+          <p class="vs-name">업무 효과</p>
+          <p class="vs-char">정말 시간이 줄어드는가</p>
+          <p class="vs-line vs-line--pro">줄어드는 분이 눈에 보인다</p>
+          <p class="vs-line vs-line--con">“편해진다”만 있고 숫자가 없다</p>
+        </div>
+        <div class="vs-item">
+          <p class="vs-name">실현 가능성</p>
+          <p class="vs-char">이번 주에 해 볼 수 있는가</p>
+          <p class="vs-line vs-line--pro">자료가 이미 내 손에 있다</p>
+          <p class="vs-line vs-line--con">남의 승인·시스템 연동이 먼저다</p>
+        </div>
+        <div class="vs-item">
+          <p class="vs-name">AI 활용</p>
+          <p class="vs-char">AI가 맞는 자리에 있는가</p>
+          <p class="vs-line vs-line--pro">읽고 · 정리하고 · 초안 쓰는 일</p>
+          <p class="vs-line vs-line--con">판단과 책임까지 맡기고 있다</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 14. [공유] 발표 ------------------------------------------------------------------- -->
+  <section class="slide">
+    <div class="slide-head"><h2>[공유] 서로 보여 주고, 의견을 받습니다</h2><span class="head-tag">M5-4 · 공유</span></div>
+    <div class="slide-body">
+      <div class="split">
+        <div class="split-main">
+          <ol class="steps steps--lg">
+            <li>몇 분이 <strong>1분씩 발표</strong>합니다<small>문제 · 방식 · 기대 효과, 이 셋만</small></li>
+            <li>듣는 사람은 <strong>세 가지 눈</strong>으로 한 마디씩 답합니다</li>
+            <li>다른 사람 것을 보고 <strong>내 것을 고칩니다</strong></li>
+          </ol>
+          <p style="margin:14px 0 0"><a class="btn-link" href="https://hyundai.mincoding.co.kr">hyundai.mincoding.co.kr 열기</a></p>
+        </div>
+        <div class="split-side side-lg">
+          <div class="side-box">
+            <p class="side-t">왜 남의 것을 보나</p>
+            <p class="side-d">내 업무만 보면 아이디어가 한 방향으로 갑니다. 남의 것에서 <strong>내 업무에 쓸 것</strong>이 나옵니다.</p>
+          </div>
+          <div class="side-box side-box--warn" style="margin-top:12px">
+            <p class="side-t">한 달 뒤</p>
+            <p class="side-d">해 본 결과를 <strong>팀에 공유</strong>하기로 오늘 약속합니다.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 15. 내일 첫 행동 ------------------------------------------------------------------ -->
+  <section class="slide">
+    <div class="slide-head"><h2>내일 아침, 첫 행동 하나</h2><span class="head-tag">마무리</span></div>
+    <div class="slide-body">
+      <p class="lead--lg" style="margin-bottom:22px; text-align:center">
+        오늘 배운 것은 <strong class="navy">쓰지 않으면 사흘 안에 사라집니다.</strong>
+      </p>
+
+      <div class="pbox" style="margin-bottom:20px">
+        <p class="pbox-t">카드에 한 줄만 적습니다</p>
+        <p>내일 아침, [무엇]을 [어떤 도구]로 10분만 해 보겠다</p>
+      </div>
+
+      <div class="note">
+        거창하지 않아도 됩니다. <strong class="grn">“내일 회의록 하나를 Claude Code로 만들어 보겠다”</strong> 정도면 충분합니다.<br>
+        10분이면 되는 일부터 시작하는 사람이, 결국 끝까지 갑니다.
+      </div>
+    </div>
+  </section>
+
+  <!-- 16. 오늘 배운 것 정리 --------------------------------------------------------------- -->
+  <section class="slide">
+    <div class="slide-head"><h2>오늘 배운 것 — 한 줄 요약</h2><span class="head-tag">마무리</span></div>
+    <div class="slide-body">
+      <div class="recap">
+        <div class="recap-row">
+          <span class="recap-k">H-Chat</span>
+          <span class="recap-v">대화하고, <strong>반복업무는 프로젝트로 고정</strong>해 둔다</span>
+        </div>
+        <div class="recap-row">
+          <span class="recap-k">Claude Code</span>
+          <span class="recap-v">여러 파일을 읽고 <strong>반복해서 처리</strong>하는 업무 Agent</span>
+        </div>
+        <div class="recap-row">
+          <span class="recap-k">CLAUDE.md</span>
+          <span class="recap-v">항상 적용되는 <strong>공통 기준</strong> — 한 번 적으면 매번 지켜진다</span>
+        </div>
+        <div class="recap-row">
+          <span class="recap-k">Skill</span>
+          <span class="recap-v">자주 쓰는 <strong>반복 절차</strong>를 내 명령어 하나로</span>
+        </div>
+        <div class="recap-row">
+          <span class="recap-k">Subagent</span>
+          <span class="recap-v"><strong>업무 분담</strong> — 나눠 맡기면 결과가 정확해진다</span>
+        </div>
+        <div class="recap-row">
+          <span class="recap-k">대시보드 · 앱</span>
+          <span class="recap-v">매번 확인하는 자료를 <strong>한 화면</strong>으로, 동료에게는 파일 하나로</span>
+        </div>
+        <div class="recap-row">
+          <span class="recap-k">PoC</span>
+          <span class="recap-v">작은 <strong>업무 개선 실험</strong> — 오늘 한 장으로 적어 둔 그것</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 17. 마무리 ---------------------------------------------------------------------- -->
+  <section class="slide slide--cover">
+    <img class="cover-logo" src="assets/img/mincoding-logo.png" alt="mincoding">
+    <div class="cover-text">
+      <h1 class="cover-title" style="font-size:64px">수고하셨습니다.</h1>
+      <p class="cover-meta">내일 아침, 10분부터 시작하세요</p>
+    </div>
+  </section>
+
+</div>
+
+<nav class="deck-bar">
+  <a class="deck-home" href="index.html">← 목차</a>
+
+  <div class="deck-nav">
+    <button class="deck-arrow" id="prev" type="button" aria-label="이전 슬라이드" title="이전 (←)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"
+           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <polyline points="15 5 8 12 15 19"></polyline>
+      </svg>
+    </button>
+
+    <div class="deck-meta">
+      <span class="deck-title">M5. 나만의 업무 혁신 PoC 설계</span>
+      <span class="deck-count" id="count">1 / 17</span>
+    </div>
+
+    <button class="deck-arrow" id="next" type="button" aria-label="다음 슬라이드" title="다음 (→)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"
+           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <polyline points="9 5 16 12 9 19"></polyline>
+      </svg>
+    </button>
+  </div>
+
+  <span class="deck-hint">← → · 마우스 휠</span>
+</nav>
+
+<script src="assets/js/deck.js"></script>
+</body>
+</html>
