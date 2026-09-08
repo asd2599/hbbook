@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>팀 프로젝트 Tracking System — 인버터설계1팀</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+/* ── 리셋 & 기본 ── */
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Malgun Gothic","Apple SD Gothic Neo","Noto Sans KR",sans-serif;background:#f0f2f5;font-size:13px;color:#111;line-height:1.5}
+input,select,button,textarea{font-family:inherit;font-size:13px}
+button{cursor:pointer;transition:all .15s}
+button:active{transform:scale(.97)}
+input:focus,select:focus{outline:2px solid #002C5F;outline-offset:0}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:#f1f1f1}
+::-webkit-scrollbar-thumb{background:#c4c4c4;border-radius:3px}
+
+/* ── 화면 전환 ── */
+.screen{display:none!important}
+.screen.active{display:flex!important}
+
+/* ── 로그인 ── */
+#loginScreen{min-height:100vh;align-items:center;justify-content:center;background:linear-gradient(135deg,#001830 0%,#002C5F 60%,#1a4a8a 100%);flex-direction:column;padding:2rem}
+.login-card{width:100%;max-width:500px;background:#fff;border-radius:20px;padding:2.5rem;box-shadow:0 20px 60px rgba(0,0,0,.35)}
+.brand-bars{display:flex;justify-content:center;gap:6px;margin-bottom:16px}
+.brand-bar{width:6px;height:36px;border-radius:3px}
+.login-title{text-align:center;font-size:19px;font-weight:800;letter-spacing:-.5px;margin-bottom:4px}
+.login-sub{text-align:center;font-size:12px;color:#9ca3af;margin-bottom:2rem}
+.test-mode-box{border:2px solid #e5e7eb;border-radius:12px;padding:12px 16px;margin-bottom:20px;cursor:pointer;transition:all .2s;background:#f9fafb}
+.test-mode-box.active{border-color:#f97316;background:#fff7ed}
+.test-mode-box .tm-label{font-weight:700;font-size:13px;color:#374151;display:flex;align-items:center;gap:10px}
+.test-mode-box.active .tm-label{color:#ea580c}
+.tm-hint-text{font-size:11px;color:#9a3412;margin-top:6px;display:none}
+.test-mode-box.active .tm-hint-text{display:block}
+.checkbox-custom{width:20px;height:20px;border:2px solid #d1d5db;border-radius:4px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:#fff;transition:all .2s}
+.checkbox-custom.checked{background:#f97316;border-color:#f97316}
+.checkbox-custom.checked::after{content:"✓";color:#fff;font-size:13px;line-height:1}
+.field-group{margin-bottom:14px}
+.field-label{font-size:11px;font-weight:700;color:#6b7280;display:block;margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px}
+.field-row{display:flex;gap:8px;align-items:center}
+.field-input{flex:1;padding:9px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:13px;color:#111;transition:border-color .2s}
+.field-input:focus{border-color:#002C5F}
+.hint-btn{font-size:11px;color:#9a3412;background:#fff7ed;border:1px solid #fed7aa;border-radius:6px;padding:6px 10px;cursor:pointer;white-space:nowrap;flex-shrink:0;font-weight:600;display:none}
+.hint-btn.visible{display:inline-flex;align-items:center;gap:4px}
+.hint-btn:hover{background:#ffedd5}
+.outlook-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-top:1px solid #f3f4f6;margin-top:6px}
+.toggle{width:38px;height:22px;background:#e5e7eb;border-radius:11px;position:relative;cursor:pointer;transition:background .2s}
+.toggle.on{background:#002C5F}
+.toggle-knob{width:18px;height:18px;background:#fff;border-radius:50%;position:absolute;top:2px;left:2px;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.toggle.on .toggle-knob{left:18px}
+.btn-row{display:flex;gap:10px;margin-top:20px}
+.btn{padding:11px;border:none;border-radius:10px;font-weight:800;font-size:13px;letter-spacing:.3px;transition:all .2s}
+.btn-secondary{flex:1;background:#fff;border:1.5px solid #e5e7eb;color:#374151}
+.btn-secondary:hover{background:#f9fafb}
+.btn-primary{flex:2;background:#002C5F;color:#fff}
+.btn-primary:hover{background:#003a7a}
+
+/* ── 메인 레이아웃 ── */
+#mainScreen{flex-direction:column;height:100vh;overflow:hidden}
+.test-banner{background:#f97316;color:#fff;padding:7px 20px;display:flex;align-items:center;justify-content:space-between;font-size:12px;font-weight:600;flex-shrink:0}
+.test-banner button{background:rgba(255,255,255,.22);border:none;color:#fff;padding:4px 12px;border-radius:6px;font-size:11px;font-weight:700}
+.app-header{background:#002C5F;color:#fff;padding:10px 20px;display:flex;align-items:center;gap:10px;flex-shrink:0}
+.header-bars{display:flex;gap:4px}
+.header-bar{width:4px;height:18px;border-radius:2px}
+.header-title{font-size:14px;font-weight:800;letter-spacing:-.3px}
+.header-sub{font-size:10px;opacity:.65;margin-top:2px}
+.header-user{margin-left:auto;font-size:11px;opacity:.8}
+.nav{display:flex;background:#fff;border-bottom:1px solid #e5e7eb;flex-shrink:0}
+.nav-btn{padding:10px 18px;border:none;border-bottom:3px solid transparent;background:none;font-size:13px;font-weight:400;color:#6b7280;cursor:pointer;transition:all .15s}
+.nav-btn.active{font-weight:700;color:#002C5F;border-bottom-color:#002C5F}
+.content-area{flex:1;overflow:auto;display:flex;flex-direction:column}
+
+/* ── 서브 화면 ── */
+.sub-screen{display:none;flex:1;overflow:auto;flex-direction:column}
+.sub-screen.active{display:flex}
+
+/* ── 요약 카드 ── */
+.summary-cards{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;padding:14px 18px}
+.sum-card{border-radius:10px;padding:12px 14px}
+.sum-card-label{font-size:10px;font-weight:700;margin-bottom:4px;opacity:.75}
+.sum-card-val{font-size:26px;font-weight:900}
+
+/* ── 필터 ── */
+.filter-row{display:flex;gap:8px;padding:0 18px 10px;flex-wrap:wrap}
+.filter-select{padding:6px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:12px;background:#fff;color:#374151}
+
+/* ── 테이블 ── */
+.table-wrap{padding:0 18px 18px;overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:12px;min-width:860px}
+thead tr{background:#f9fafb;border-bottom:2px solid #e5e7eb}
+th{padding:9px 10px;text-align:left;font-weight:700;color:#374151;white-space:nowrap}
+tbody tr{border-bottom:1px solid #f3f4f6;background:#fff;transition:background .15s}
+tbody tr:hover{background:#f5f8ff}
+tbody tr.danger-row{background:#fff8f8}
+td{padding:10px}
+td:first-child{padding-left:0}
+.project-link{color:#002C5F;font-weight:700;background:none;border:none;cursor:pointer;font-size:12px;text-decoration:underline;text-align:left;padding:0;line-height:1.3;transition:opacity .15s}
+.project-link:hover{opacity:.75}
+.brand-bar-cell{width:4px;height:34px;border-radius:2px;flex-shrink:0}
+.brand-badge{padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap}
+.status-badge{padding:3px 8px;border-radius:20px;font-size:11px;font-weight:700}
+.risk-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.risk-dot.danger{animation:pulse 1.5s infinite}
+.src-badge{padding:2px 7px;border-radius:4px;font-size:11px;font-weight:700;color:#fff}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+
+/* ── 모달 팝업 ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;z-index:999}
+.modal-box{background:#fff;border-radius:16px;padding:2rem;max-width:400px;width:90%;border:3px solid #ef4444;text-align:center;animation:fadeIn .25s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:none}}
+.modal-icon{font-size:32px;margin-bottom:8px}
+.modal-title{font-size:17px;font-weight:800;color:#dc2626;margin-bottom:8px}
+.modal-body{font-size:13px;color:#374151;line-height:1.7;margin-bottom:16px}
+.modal-btn{width:100%;padding:10px;background:#dc2626;color:#fff;border:none;border-radius:10px;font-weight:800;cursor:pointer;font-size:14px}
+
+/* ── 간트 차트 ── */
+.gantt-header-row{display:flex;align-items:center;gap:12px;padding:14px 18px}
+.gantt-back-btn{padding:7px 14px;background:#f3f4f6;border:none;border-radius:8px;font-weight:700;font-size:12px;color:#374151}
+.gantt-back-btn:hover{background:#e5e7eb}
+.gantt-project-bar{flex:1;border-radius:10px;padding:10px 18px;color:#fff;display:flex;justify-content:space-between;align-items:center}
+.gantt-project-name{font-size:14px;font-weight:800}
+.gantt-project-sub{font-size:11px;opacity:.8;margin-top:2px}
+.gantt-stats{display:flex;gap:20px;font-size:12px}
+.gantt-stat{text-align:center}
+.gantt-stat-val{font-weight:900;font-size:18px;display:block}
+.gantt-stat-lbl{opacity:.8}
+.gantt-wrap{margin:0 18px;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;background:#fff}
+.gantt-date-header{display:flex;border-bottom:1px solid #e5e7eb;background:#f9fafb;height:30px}
+.gantt-label-col{width:175px;flex-shrink:0;border-right:1px solid #e5e7eb;padding:7px 10px;font-size:10px;font-weight:700;color:#9ca3af;display:flex;align-items:center}
+.gantt-chart-area{flex:1;position:relative}
+.gantt-task-row{display:flex;border-bottom:1px solid #f3f4f6;min-height:44px}
+.gantt-task-row:last-child{border-bottom:none}
+.gantt-task-label{width:175px;flex-shrink:0;padding:8px 10px;border-right:1px solid #f3f4f6;background:#fafafa}
+.gantt-task-name{font-size:11px;font-weight:600;color:#374151;line-height:1.3}
+.gantt-task-owner{font-size:10px;color:#9ca3af;margin-top:1px}
+.gantt-bar-area{flex:1;position:relative;display:flex;align-items:center}
+.gantt-week-line{position:absolute;top:0;bottom:0;width:1px;background:#f3f4f6}
+.gantt-today-line{position:absolute;top:0;bottom:0;width:2px;background:rgba(239,68,68,.6);z-index:2}
+.gantt-bar{position:absolute;height:26px;border-radius:4px;display:flex;align-items:center;padding-left:6px;cursor:pointer;z-index:3;transition:opacity .15s;min-width:4px}
+.gantt-bar:hover{opacity:.82}
+.gantt-bar-label{font-size:10px;color:#fff;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:90%}
+.gantt-legend{display:flex;gap:14px;padding:10px 18px 16px;font-size:11px;color:#6b7280;flex-wrap:wrap}
+.legend-item{display:flex;align-items:center;gap:5px}
+.legend-dot{width:14px;height:8px;border-radius:2px}
+.legend-today{width:2px;height:14px;background:#ef4444}
+
+/* ── 툴팁 ── */
+.gantt-tooltip{position:fixed;background:#1f2937;color:#fff;border-radius:8px;padding:10px 14px;font-size:12px;z-index:9999;pointer-events:none;line-height:1.8;box-shadow:0 4px 16px rgba(0,0,0,.35);display:none}
+.gantt-tooltip.visible{display:block}
+
+/* ── 워크로드 ── */
+.workload-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:16px 18px 14px}
+.chart-card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:14px}
+.chart-card-title{font-size:13px;font-weight:700;color:#111;margin-bottom:10px}
+.score-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;padding:0 18px 14px}
+.score-card{border-radius:10px;padding:12px 10px;text-align:center}
+.score-avatar{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;margin:0 auto 8px}
+.score-name{font-size:12px;font-weight:700;color:#111}
+.score-role{font-size:10px;color:#9ca3af;margin-bottom:6px}
+.score-val{font-size:22px;font-weight:900;line-height:1}
+.score-badge{font-size:10px;padding:2px 8px;border-radius:20px;display:inline-block;font-weight:700;margin:4px 0}
+.score-detail{font-size:10px;color:#9ca3af}
+.ai-box{margin:0 18px 18px;background:#fffbeb;border:1.5px solid #fde68a;border-radius:12px;padding:14px}
+.ai-box-title{font-size:13px;font-weight:700;color:#92400e;margin-bottom:8px}
+.ai-box-text{font-size:12px;color:#78350f;line-height:1.9}
+
+/* ── 회의록 ── */
+.minutes-wrap{padding:16px 18px}
+.minutes-input-card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px;margin-bottom:14px}
+.minutes-input-title{font-size:13px;font-weight:700;color:#111;margin-bottom:10px}
+.minutes-input-row{display:flex;gap:10px}
+.minutes-url-input{flex:1;padding:9px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:13px;color:#111}
+.minutes-url-input:focus{outline:none;border-color:#002C5F}
+.minutes-analyze-btn{padding:9px 18px;background:#002C5F;color:#fff;border:none;border-radius:8px;font-weight:700;white-space:nowrap}
+.minutes-analyze-btn:hover{background:#003a7a}
+.minutes-hint{font-size:11px;color:#9a3412;margin-top:6px}
+.action-items-card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px;display:none}
+.action-items-card.visible{display:block;animation:fadeIn .25s ease}
+.action-items-title{font-size:13px;font-weight:700;color:#111;margin-bottom:10px}
+.action-item-row{border:1.5px solid #f3f4f6;border-radius:10px;padding:12px;margin-bottom:10px;background:#fafafa;transition:all .2s}
+.action-item-row.checked{border-color:#bfdbfe;background:#f0f9ff}
+.action-item-inner{display:flex;gap:10px;align-items:flex-start}
+.action-item-chk{width:16px;height:16px;margin-top:2px;accent-color:#2563eb;cursor:pointer;flex-shrink:0}
+.action-item-content{flex:1}
+.action-item-text{font-size:12px;font-weight:700;color:#111;margin-bottom:8px}
+.action-item-fields{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.field-small{padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;font-size:12px;color:#374151;background:#fff}
+.priority-badge-high{background:#fee2e2;color:#dc2626;padding:3px 8px;border-radius:6px;font-size:11px;font-weight:700}
+.priority-badge-mid{background:#fef3c7;color:#d97706;padding:3px 8px;border-radius:6px;font-size:11px;font-weight:700}
+.action-footer{display:flex;gap:10px;justify-content:flex-end;align-items:center;margin-top:14px}
+.success-msg{padding:8px 14px;background:#dcfce7;color:#15803d;border-radius:8px;font-size:12px;font-weight:700;display:none}
+.success-msg.visible{display:block;animation:fadeIn .2s ease}
+.jira-btn{padding:9px 20px;background:#002C5F;color:#fff;border:none;border-radius:8px;font-weight:800;font-size:13px}
+.jira-btn:hover{background:#003a7a}
+.jira-btn:disabled{background:#9ca3af;cursor:not-allowed}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════ -->
+<!--  화면 0: 로그인                         -->
+<!-- ═══════════════════════════════════════ -->
+<div id="loginScreen" class="screen active" style="flex-direction:column">
+  <div class="login-card">
+    <div class="brand-bars">
+      <div class="brand-bar" style="background:#002C5F"></div>
+      <div class="brand-bar" style="background:#BB162B"></div>
+      <div class="brand-bar" style="background:#9C8340"></div>
+    </div>
+    <div class="login-title">팀 프로젝트 Tracking System</div>
+    <div class="login-sub">인버터설계1팀 · 현대자동차그룹</div>
+
+    <!-- 테스트 모드 -->
+    <div class="test-mode-box" id="testModeBox" onclick="toggleTestMode()">
+      <div class="tm-label">
+        <div class="checkbox-custom" id="tmCheckbox"></div>
+        🧪 테스트 모드로 실행
+      </div>
+      <div class="tm-hint-text">입력칸 옆 힌트 버튼을 클릭하면 자동 입력됩니다</div>
+    </div>
+
+    <!-- 입력 필드 -->
+    <div class="field-group">
+      <label class="field-label">사내 공통 ID</label>
+      <div class="field-row">
+        <input class="field-input" id="inp_id" type="text" placeholder="사내 공통 ID"/>
+        <button class="hint-btn" id="hint_id" onclick="fillHint('inp_id','정태영')">💡 정태영</button>
+      </div>
+    </div>
+    <div class="field-group">
+      <label class="field-label">Password</label>
+      <div class="field-row">
+        <input class="field-input" id="inp_pw" type="password" placeholder="Password"/>
+        <button class="hint-btn" id="hint_pw" onclick="fillHint('inp_pw','정태영')">💡 정태영</button>
+      </div>
+    </div>
+    <div class="field-group">
+      <label class="field-label">Confluence API Key</label>
+      <div class="field-row">
+        <input class="field-input" id="inp_ck" type="text" placeholder="Confluence API Key"/>
+        <button class="hint-btn" id="hint_ck" onclick="fillHint('inp_ck','aaaaa')">💡 aaaaa</button>
+      </div>
+    </div>
+    <div class="field-group">
+      <label class="field-label">JIRA API Key</label>
+      <div class="field-row">
+        <input class="field-input" id="inp_jk" type="text" placeholder="JIRA API Key"/>
+        <button class="hint-btn" id="hint_jk" onclick="fillHint('inp_jk','bbbbb')">💡 bbbbb</button>
+      </div>
+    </div>
+
+    <div class="outlook-row">
+      <span style="font-size:12px;color:#9ca3af">Outlook 이메일 연동 (선택)</span>
+      <div class="toggle" id="outlookToggle" onclick="this.classList.toggle('on')">
+        <div class="toggle-knob"></div>
+      </div>
+    </div>
+
+    <div class="btn-row" id="loginBtns">
+      <button class="btn btn-secondary" id="connectBtn" onclick="testConnect()">연결 테스트</button>
+      <button class="btn btn-primary" onclick="doLogin()">시작하기 →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════ -->
+<!--  화면 1~4: 메인                         -->
+<!-- ═══════════════════════════════════════ -->
+<div id="mainScreen" class="screen" style="flex-direction:column;height:100vh">
+  <!-- 테스트 배너 -->
+  <div class="test-banner" id="testBanner" style="display:none">
+    <span>🧪 현재 테스트 모드입니다 — 실제 데이터가 아닙니다</span>
+    <button onclick="exitTestMode()">실제 모드로 전환</button>
+  </div>
+
+  <!-- 헤더 -->
+  <div class="app-header">
+    <div class="header-bars">
+      <div class="header-bar" style="background:#ffffff"></div>
+      <div class="header-bar" style="background:#BB162B;opacity:.75"></div>
+      <div class="header-bar" style="background:#9C8340;opacity:.6"></div>
+    </div>
+    <div>
+      <div class="header-title">팀 프로젝트 Tracking System</div>
+      <div class="header-sub">인버터설계1팀 · 현대자동차그룹</div>
+    </div>
+    <div class="header-user">👤 정태영 팀장</div>
+  </div>
+
+  <!-- 네비 -->
+  <div class="nav">
+    <button class="nav-btn active" onclick="setTab('dashboard',this)">대시보드</button>
+    <button class="nav-btn" onclick="setTab('workload',this)">워크로드 분석</button>
+    <button class="nav-btn" onclick="setTab('minutes',this)">회의록 처리</button>
+  </div>
+
+  <div class="content-area">
+    <!-- 대시보드 -->
+    <div class="sub-screen active" id="tab_dashboard">
+      <div class="summary-cards" id="summaryCards"></div>
+      <div class="filter-row">
+        <select class="filter-select" id="filterBrand" onchange="renderTable()">
+          <option>전체</option>
+          <option>현대</option><option>기아</option><option>제네시스</option>
+        </select>
+        <select class="filter-select" id="filterOwner" onchange="renderTable()">
+          <option>전체</option>
+          <option>정태영</option><option>김철수</option><option>이영희</option><option>박민수</option><option>최지현</option>
+        </select>
+        <select class="filter-select" id="filterStatus" onchange="renderTable()">
+          <option>전체</option><option>Open</option><option>In Progress</option><option>Closed</option>
+        </select>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>프로젝트명</th><th>브랜드</th><th>중요도</th><th>시급도</th>
+              <th>담당자</th><th>검토중</th><th>마감일</th><th>상태</th><th>위험도</th><th>출처</th>
+            </tr>
+          </thead>
+          <tbody id="projectTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 간트 차트 -->
+    <div class="sub-screen" id="tab_gantt">
+      <div class="gantt-header-row">
+        <button class="gantt-back-btn" onclick="backToDashboard()">← 대시보드</button>
+        <div class="gantt-project-bar" id="ganttProjectBar">
+          <div>
+            <div class="gantt-project-name" id="ganttProjectName"></div>
+            <div class="gantt-project-sub" id="ganttProjectSub"></div>
+          </div>
+          <div class="gantt-stats" id="ganttStats"></div>
+        </div>
+      </div>
+      <div class="gantt-wrap">
+        <div class="gantt-date-header">
+          <div class="gantt-label-col">TASK</div>
+          <div class="gantt-chart-area" id="ganttDateRow" style="height:30px;position:relative"></div>
+        </div>
+        <div id="ganttRows"></div>
+      </div>
+      <div class="gantt-legend" id="ganttLegend"></div>
+    </div>
+
+    <!-- 워크로드 -->
+    <div class="sub-screen" id="tab_workload">
+      <div class="workload-grid">
+        <div class="chart-card">
+          <div class="chart-card-title">팀원별 담당 프로젝트</div>
+          <canvas id="workloadChart" height="190"></canvas>
+        </div>
+        <div class="chart-card">
+          <div class="chart-card-title">완료율 주간 추이</div>
+          <canvas id="trendChart" height="190"></canvas>
+        </div>
+      </div>
+      <div style="font-size:13px;font-weight:700;color:#111;padding:0 18px 10px">팀원별 업무 과중도</div>
+      <div class="score-grid" id="scoreGrid"></div>
+      <div class="ai-box">
+        <div class="ai-box-title">🤖 Claude AI 추천안</div>
+        <div class="ai-box-text" id="aiText"></div>
+      </div>
+    </div>
+
+    <!-- 회의록 -->
+    <div class="sub-screen" id="tab_minutes">
+      <div class="minutes-wrap">
+        <div class="minutes-input-card">
+          <div class="minutes-input-title">Confluence 회의록 URL 입력</div>
+          <div class="minutes-input-row">
+            <input class="minutes-url-input" id="minutesUrl" placeholder="https://confluence.hyundai.com/pages/..."/>
+            <button class="minutes-analyze-btn" onclick="analyzeMinutes()">분석 시작</button>
+          </div>
+          <div class="minutes-hint" id="minutesHint" style="display:none">🧪 테스트 모드: 가상 회의록 데이터로 분석합니다</div>
+        </div>
+        <div class="action-items-card" id="actionItemsCard">
+          <div class="action-items-title" id="actionItemsTitle">추출된 Action Item</div>
+          <div id="actionItemsList"></div>
+          <div class="action-footer">
+            <div class="success-msg" id="successMsg"></div>
+            <button class="jira-btn" onclick="submitToJira()">JIRA 이슈 생성 (<span id="checkedCount">2</span>건)</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 위험 팝업 -->
+<div class="modal-overlay" id="dangerModal" style="display:none">
+  <div class="modal-box">
+    <div class="modal-icon">⚠️</div>
+    <div class="modal-title">마감 임박 위험 알림</div>
+    <div class="modal-body" id="dangerModalBody"></div>
+    <button class="modal-btn" onclick="document.getElementById('dangerModal').style.display='none'">확인</button>
+  </div>
+</div>
+
+<!-- 간트 툴팁 -->
+<div class="gantt-tooltip" id="ganttTooltip"></div>
+
+<script>
+/* ════════════════════════════════════════
+   데이터
+════════════════════════════════════════ */
+const TODAY = new Date(2026,4,15);
+
+const BC = {
+  현대: {p:"#002C5F",l:"#dce8f5"},
+  기아: {p:"#BB162B",l:"#fde8eb"},
+  제네시스: {p:"#9C8340",l:"#f5eed8"},
+  미지정: {p:"#666",l:"#f0f0f0"}
+};
+
+const MEMBERS = [
+  {name:"정태영",role:"팀장"},
+  {name:"김철수",role:"선임연구원"},
+  {name:"이영희",role:"선임연구원"},
+  {name:"박민수",role:"연구원"},
+  {name:"최지현",role:"연구원"}
+];
+
+const PROJECTS = [
+  {id:1,name:"IONIQ 5 인버터 개발",brand:"현대",importance:"높음",urgency:"높음",
+   owner:"김철수",reviewer:"정태영",deadline:"2026-06-10",status:"In Progress",risk:"위험",source:"JIRA",
+   tasks:[
+    {id:"T1-1",name:"인버터 회로 설계 검토",owner:"김철수",start:"2026-04-28",end:"2026-05-10",status:"Closed"},
+    {id:"T1-2",name:"열방출 시뮬레이션",owner:"이영희",start:"2026-05-01",end:"2026-05-25",status:"In Progress"},
+    {id:"T1-3",name:"EMC 사전 테스트",owner:"박민수",start:"2026-05-15",end:"2026-06-01",status:"In Progress"},
+    {id:"T1-4",name:"최종 성능 검증",owner:"김철수",start:"2026-05-28",end:"2026-06-08",status:"Open"},
+    {id:"T1-5",name:"보고서 작성",owner:"정태영",start:"2026-06-05",end:"2026-06-10",status:"Open"}
+  ]},
+  {id:2,name:"IONIQ 6 인버터 성능 검증",brand:"현대",importance:"높음",urgency:"중간",
+   owner:"이영희",reviewer:"김철수",deadline:"2026-07-15",status:"In Progress",risk:"주의",source:"Confluence",
+   tasks:[
+    {id:"T2-1",name:"기준값 설정 및 측정 계획",owner:"이영희",start:"2026-05-01",end:"2026-05-15",status:"Closed"},
+    {id:"T2-2",name:"출력 특성 측정",owner:"박민수",start:"2026-05-13",end:"2026-06-05",status:"In Progress"},
+    {id:"T2-3",name:"효율 분석 리포트",owner:"이영희",start:"2026-06-01",end:"2026-06-25",status:"Open"},
+    {id:"T2-4",name:"개선안 도출 및 적용",owner:"최지현",start:"2026-06-20",end:"2026-07-10",status:"Open"},
+    {id:"T2-5",name:"최종 검증 및 승인",owner:"정태영",start:"2026-07-08",end:"2026-07-15",status:"Open"}
+  ]},
+  {id:3,name:"EV6 인버터 열관리 개선",brand:"기아",importance:"높음",urgency:"높음",
+   owner:"박민수",reviewer:"이영희",deadline:"2026-05-18",status:"In Progress",risk:"위험",source:"Outlook",
+   tasks:[
+    {id:"T3-1",name:"열분포 현황 분석",owner:"박민수",start:"2026-04-20",end:"2026-05-05",status:"Closed"},
+    {id:"T3-2",name:"냉각 경로 설계 변경",owner:"박민수",start:"2026-05-01",end:"2026-05-14",status:"In Progress"},
+    {id:"T3-3",name:"개선 후 열 시뮬레이션",owner:"최지현",start:"2026-05-10",end:"2026-05-17",status:"Open"},
+    {id:"T3-4",name:"실차 검증",owner:"김철수",start:"2026-05-15",end:"2026-05-18",status:"Open"}
+  ]},
+  {id:4,name:"EV9 인버터 신뢰성 평가",brand:"기아",importance:"중간",urgency:"중간",
+   owner:"최지현",reviewer:"박민수",deadline:"2026-08-01",status:"Open",risk:"정상",source:"JIRA",
+   tasks:[
+    {id:"T4-1",name:"신뢰성 평가 계획 수립",owner:"최지현",start:"2026-05-20",end:"2026-06-03",status:"Open"},
+    {id:"T4-2",name:"내구성 시험 (1차)",owner:"최지현",start:"2026-06-03",end:"2026-06-30",status:"Open"},
+    {id:"T4-3",name:"중간 결과 분석",owner:"이영희",start:"2026-06-28",end:"2026-07-10",status:"Open"},
+    {id:"T4-4",name:"내구성 시험 (2차)",owner:"최지현",start:"2026-07-10",end:"2026-07-28",status:"Open"},
+    {id:"T4-5",name:"최종 보고서",owner:"정태영",start:"2026-07-25",end:"2026-08-01",status:"Open"}
+  ]},
+  {id:5,name:"GV60 인버터 EMI 분석",brand:"제네시스",importance:"중간",urgency:"낮음",
+   owner:"이영희",reviewer:"최지현",deadline:"2026-07-30",status:"Open",risk:"정상",source:"MS Office",
+   tasks:[
+    {id:"T5-1",name:"EMI 측정 환경 구성",owner:"이영희",start:"2026-05-26",end:"2026-06-10",status:"Open"},
+    {id:"T5-2",name:"주파수별 노이즈 측정",owner:"박민수",start:"2026-06-10",end:"2026-07-01",status:"Open"},
+    {id:"T5-3",name:"차폐 설계 검토",owner:"이영희",start:"2026-06-28",end:"2026-07-18",status:"Open"},
+    {id:"T5-4",name:"규격 적합성 확인",owner:"최지현",start:"2026-07-15",end:"2026-07-30",status:"Open"}
+  ]}
+];
+
+const DEMO_ITEMS = [
+  {id:1,action:"IONIQ 5 EMC 테스트 결과 검토 및 보고서 초안 작성",owner:"박민수",dl:"2026-05-25",proj:"IONIQ 5 인버터 개발",pri:"높음",chk:true},
+  {id:2,action:"EV6 냉각 경로 설계 변경안 최종 승인 요청",owner:"김철수",dl:"2026-05-20",proj:"EV6 인버터 열관리 개선",pri:"높음",chk:true},
+  {id:3,action:"GV60 EMI 측정 장비 셋업 완료 확인",owner:"이영희",dl:"2026-05-28",proj:"GV60 인버터 EMI 분석",pri:"중간",chk:false}
+];
+
+/* ════════════════════════════════════════
+   유틸
+════════════════════════════════════════ */
+const pd = s => { const[y,m,d]=s.split("-").map(Number); return new Date(y,m-1,d); };
+const dd = (a,b) => Math.round((b-a)/86400000);
+const fmt = d => `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,"0")}.${String(d.getDate()).padStart(2,"0")}`;
+const daysLeft = s => dd(TODAY, pd(s));
+const sBg = s => s==="Closed"?"#dcfce7":s==="In Progress"?"#dbeafe":"#f3f4f6";
+const sCol = s => s==="Closed"?"#15803d":s==="In Progress"?"#1d4ed8":"#6b7280";
+const rCol = r => r==="위험"?"#ef4444":r==="주의"?"#f59e0b":"#22c55e";
+const srcBg = s => s==="JIRA"?"#2684FF":s==="Confluence"?"#172B4D":s==="Outlook"?"#0078D4":"#D34326";
+const imp = v => v==="높음"?"#dc2626":v==="중간"?"#d97706":"#6b7280";
+
+let testMode = false;
+let workloadChartInst = null;
+let trendChartInst = null;
+
+/* ════════════════════════════════════════
+   로그인
+════════════════════════════════════════ */
+function toggleTestMode(){
+  testMode = !testMode;
+  const box = document.getElementById("testModeBox");
+  const chk = document.getElementById("tmCheckbox");
+  box.classList.toggle("active", testMode);
+  chk.classList.toggle("checked", testMode);
+  ["id","pw","ck","jk"].forEach(k => {
+    document.getElementById("hint_"+k).classList.toggle("visible", testMode);
+  });
+  const cb = document.getElementById("connectBtn");
+  cb.style.display = testMode ? "none" : "block";
+}
+
+function fillHint(inputId, val){
+  event.stopPropagation();
+  document.getElementById(inputId).value = val;
+}
+
+function testConnect(){
+  const btn = document.getElementById("connectBtn");
+  btn.textContent = "확인 중...";
+  btn.disabled = true;
+  setTimeout(() => { btn.textContent = "✅ 연결됨"; btn.disabled = false; }, 2000);
+}
+
+function doLogin(){
+  document.getElementById("loginScreen").classList.remove("active");
+  document.getElementById("mainScreen").classList.add("active");
+  if(testMode){
+    document.getElementById("testBanner").style.display = "flex";
+    document.getElementById("minutesHint").style.display = "block";
+  }
+  initDashboard();
+  showDangerPopup();
+}
+
+function exitTestMode(){
+  testMode = false;
+  document.getElementById("mainScreen").classList.remove("active");
+  document.getElementById("loginScreen").classList.add("active");
+  document.getElementById("testBanner").style.display = "none";
+  document.getElementById("testModeBox").classList.remove("active");
+  document.getElementById("tmCheckbox").classList.remove("checked");
+  ["id","pw","ck","jk"].forEach(k => document.getElementById("hint_"+k).classList.remove("visible"));
+  document.getElementById("connectBtn").style.display = "block";
+}
+
+/* ════════════════════════════════════════
+   네비게이션
+════════════════════════════════════════ */
+function setTab(tabId, btn){
+  document.querySelectorAll(".nav-btn").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  document.querySelectorAll(".sub-screen").forEach(s => s.classList.remove("active"));
+  document.getElementById("tab_"+tabId).classList.add("active");
+  if(tabId === "workload") renderWorkload();
+}
+
+function backToDashboard(){
+  document.querySelectorAll(".sub-screen").forEach(s => s.classList.remove("active"));
+  document.getElementById("tab_dashboard").classList.add("active");
+  document.querySelectorAll(".nav-btn")[0].classList.add("active");
+  document.querySelectorAll(".nav-btn")[1].classList.remove("active");
+  document.querySelectorAll(".nav-btn")[2].classList.remove("active");
+}
+
+/* ════════════════════════════════════════
+   대시보드
+════════════════════════════════════════ */
+function initDashboard(){
+  renderSummary();
+  renderTable();
+}
+
+function renderSummary(){
+  const allTasks = PROJECTS.flatMap(p=>p.tasks);
+  const thisWk = PROJECTS.filter(p=>{ const d=daysLeft(p.deadline); return d>=0&&d<=7&&p.status!=="Closed"; }).length;
+  const cards = [
+    {lbl:"전체 Task",val:allTasks.length,c:"#374151",bg:"#f9fafb"},
+    {lbl:"Open",val:allTasks.filter(t=>t.status==="Open").length,c:"#6b7280",bg:"#f3f4f6"},
+    {lbl:"진행 중",val:allTasks.filter(t=>t.status==="In Progress").length,c:"#1d4ed8",bg:"#dbeafe"},
+    {lbl:"완료",val:allTasks.filter(t=>t.status==="Closed").length,c:"#15803d",bg:"#dcfce7"},
+    {lbl:"금주 마감",val:thisWk,c:"#dc2626",bg:"#fee2e2"}
+  ];
+  document.getElementById("summaryCards").innerHTML = cards.map(c=>
+    `<div class="sum-card" style="background:${c.bg}">
+      <div class="sum-card-label" style="color:${c.c}">${c.lbl}</div>
+      <div class="sum-card-val" style="color:${c.c}">${c.val}</div>
+    </div>`
+  ).join("");
+}
+
+function renderTable(){
+  const fBrand = document.getElementById("filterBrand").value;
+  const fOwner = document.getElementById("filterOwner").value;
+  const fStatus = document.getElementById("filterStatus").value;
+  const rows = PROJECTS.filter(p=>
+    (fBrand==="전체"||p.brand===fBrand) &&
+    (fOwner==="전체"||p.owner===fOwner) &&
+    (fStatus==="전체"||p.status===fStatus)
+  );
+  document.getElementById("projectTableBody").innerHTML = rows.map(p => {
+    const bc = BC[p.brand];
+    const d = daysLeft(p.deadline);
+    const dColor = d<=3?"#dc2626":d<=7?"#d97706":"#374151";
+    return `<tr class="${p.risk==="위험"?"danger-row":""}">
+      <td>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div class="brand-bar-cell" style="background:${bc.p}"></div>
+          <button class="project-link" onclick="openGantt(${p.id})">${p.name}</button>
+        </div>
+      </td>
+      <td><span class="brand-badge" style="background:${bc.l};color:${bc.p}">${p.brand}</span></td>
+      <td><span style="color:${imp(p.importance)};font-weight:700">${p.importance}</span></td>
+      <td><span style="color:${imp(p.urgency)};font-weight:700">${p.urgency}</span></td>
+      <td style="font-weight:600">${p.owner}</td>
+      <td style="color:#6b7280">${p.reviewer}</td>
+      <td>
+        <div style="color:${dColor};font-weight:${d<=7?700:400}">${p.deadline}</div>
+        <div style="font-size:10px;color:${dColor};font-weight:600">D-${d}</div>
+      </td>
+      <td><span class="status-badge" style="background:${sBg(p.status)};color:${sCol(p.status)}">${p.status}</span></td>
+      <td>
+        <div style="display:flex;align-items:center;gap:4px">
+          <div class="risk-dot ${p.risk==="위험"?"danger":""}" style="background:${rCol(p.risk)}"></div>
+          <span style="color:${rCol(p.risk)};font-weight:700;font-size:12px">${p.risk}</span>
+        </div>
+      </td>
+      <td><span class="src-badge" style="background:${srcBg(p.source)}">${p.source}</span></td>
+    </tr>`;
+  }).join("");
+}
+
+function showDangerPopup(){
+  const danger = PROJECTS.find(p=>daysLeft(p.deadline)>=0&&daysLeft(p.deadline)<=3&&p.status!=="Closed");
+  if(!danger) return;
+  const bc = BC[danger.brand];
+  document.getElementById("dangerModalBody").innerHTML =
+    `<strong style="color:${bc.p}">${danger.name}</strong> 프로젝트 마감까지<br>
+     <strong style="color:#dc2626;font-size:22px">D-${daysLeft(danger.deadline)}</strong> (${danger.deadline})<br>
+     담당: ${danger.owner} | 상태: ${danger.status}`;
+  document.getElementById("dangerModal").style.display = "flex";
+}
+
+/* ════════════════════════════════════════
+   간트 차트
+════════════════════════════════════════ */
+function openGantt(projectId){
+  document.querySelectorAll(".sub-screen").forEach(s=>s.classList.remove("active"));
+  document.querySelectorAll(".nav-btn").forEach(b=>b.classList.remove("active"));
+  document.getElementById("tab_gantt").classList.add("active");
+  renderGantt(projectId);
+}
+
+function renderGantt(pid){
+  const p = PROJECTS.find(x=>x.id===pid);
+  if(!p) return;
+  const bc = BC[p.brand];
+
+  // 날짜 범위
+  const allDates = p.tasks.flatMap(t=>[pd(t.start),pd(t.end)]);
+  const cs = new Date(Math.min(...allDates)); cs.setDate(cs.getDate()-4);
+  const ce = new Date(Math.max(...allDates)); ce.setDate(ce.getDate()+4);
+  const total = dd(cs,ce);
+  const pct = d => Math.max(0,Math.min(100,dd(cs,d)/total*100));
+  const tp = pct(TODAY);
+
+  // 헤더
+  const done = p.tasks.filter(t=>t.status==="Closed").length;
+  const late = p.tasks.filter(t=>t.status!=="Closed"&&dd(TODAY,pd(t.end))<0).length;
+  const cr = Math.round(done/p.tasks.length*100);
+  const d = daysLeft(p.deadline);
+
+  document.getElementById("ganttProjectBar").style.background = bc.p;
+  document.getElementById("ganttProjectName").textContent = p.name;
+  document.getElementById("ganttProjectSub").textContent = `${fmt(pd(p.tasks[0].start))} ~ ${fmt(pd(p.deadline))}`;
+  document.getElementById("ganttStats").innerHTML =
+    `<div class="gantt-stat"><span class="gantt-stat-val">${cr}%</span><span class="gantt-stat-lbl">완료율</span></div>
+     <div class="gantt-stat"><span class="gantt-stat-val" style="${late?"color:#fbbf24":""}">${late}</span><span class="gantt-stat-lbl">지연</span></div>
+     <div class="gantt-stat"><span class="gantt-stat-val">D-${d}</span><span class="gantt-stat-lbl">남은일</span></div>`;
+
+  // 주 레이블
+  const wks = [];
+  const cur = new Date(cs); cur.setDate(cur.getDate()-cur.getDay());
+  while(cur<=ce){ wks.push({dt:new Date(cur),pct:pct(cur)}); cur.setDate(cur.getDate()+7); }
+
+  const dateRow = document.getElementById("ganttDateRow");
+  dateRow.innerHTML = wks.map(w=>
+    `<div style="position:absolute;left:${w.pct}%;top:50%;transform:translate(-50%,-50%);font-size:10px;color:#9ca3af;white-space:nowrap">
+      ${String(w.dt.getMonth()+1).padStart(2,"0")}/${String(w.dt.getDate()).padStart(2,"0")}
+    </div>`
+  ).join("") +
+  `<div style="position:absolute;left:${tp}%;top:2px;font-size:9px;font-weight:900;color:#ef4444;transform:translateX(-50%);white-space:nowrap">▼ TODAY</div>`;
+
+  // Task 행
+  const taskBarColor = t => {
+    if(t.status==="Closed") return "#16a34a";
+    if(dd(TODAY,pd(t.end))<0) return "#ef4444";
+    if(t.status==="In Progress") return bc.p;
+    return "#9ca3af";
+  };
+
+  document.getElementById("ganttRows").innerHTML = p.tasks.map((t,i)=>{
+    const left = pct(pd(t.start));
+    const width = pct(pd(t.end)) - left;
+    const barColor = taskBarColor(t);
+    const wkLines = wks.map(w=>`<div class="gantt-week-line" style="left:${w.pct}%"></div>`).join("");
+    const label = width>7 ? `<span class="gantt-bar-label">${t.owner}</span>` : "";
+    return `<div class="gantt-task-row">
+      <div class="gantt-task-label">
+        <div class="gantt-task-name">${t.name}</div>
+        <div class="gantt-task-owner">${t.owner}</div>
+      </div>
+      <div class="gantt-bar-area">
+        ${wkLines}
+        <div class="gantt-today-line" style="left:${tp}%"></div>
+        <div class="gantt-bar" style="left:${left}%;width:${Math.max(width,.5)}%;background:${barColor}"
+          onmouseenter="showTooltip(event,'${t.name}','${t.owner}','${t.start}','${t.end}','${t.status}','${barColor}')"
+          onmouseleave="hideTooltip()">
+          ${label}
+        </div>
+      </div>
+    </div>`;
+  }).join("");
+
+  // 범례
+  const legendItems = [
+    {lbl:"Closed",c:"#16a34a"},{lbl:"In Progress",c:bc.p},{lbl:"Open",c:"#9ca3af"},{lbl:"지연",c:"#ef4444"}
+  ];
+  document.getElementById("ganttLegend").innerHTML =
+    legendItems.map(l=>`<div class="legend-item"><div class="legend-dot" style="background:${l.c}"></div><span>${l.lbl}</span></div>`).join("") +
+    `<div class="legend-item"><div class="legend-today"></div><span>Today</span></div>`;
+}
+
+function showTooltip(e, name, owner, start, end, status, color){
+  const t = document.getElementById("ganttTooltip");
+  t.innerHTML = `<div style="font-weight:800;margin-bottom:3px">${name}</div>
+    <div>담당: ${owner}</div>
+    <div>${start} ~ ${end}</div>
+    <div style="color:${color};font-weight:700;margin-top:2px">${status}</div>`;
+  t.style.left = (e.clientX+10)+"px";
+  t.style.top = (e.clientY-55)+"px";
+  t.classList.add("visible");
+}
+function hideTooltip(){ document.getElementById("ganttTooltip").classList.remove("visible"); }
+
+/* ════════════════════════════════════════
+   워크로드
+════════════════════════════════════════ */
+function renderWorkload(){
+  const mData = MEMBERS.map(m=>{
+    const prj = PROJECTS.filter(p=>p.owner===m.name);
+    const tasks = PROJECTS.flatMap(p=>p.tasks).filter(t=>t.owner===m.name);
+    const iScore = prj.reduce((s,p)=>s+(p.importance==="높음"?3:p.importance==="중간"?2:1),0);
+    const wScore = +(tasks.length*(iScore||1)/Math.max(prj.length,1)).toFixed(1);
+    return {
+      name:m.name, role:m.role, prj:prj.length, tasks:tasks.length,
+      현대:prj.filter(p=>p.brand==="현대").length,
+      기아:prj.filter(p=>p.brand==="기아").length,
+      제네시스:prj.filter(p=>p.brand==="제네시스").length,
+      score:wScore
+    };
+  });
+
+  // 막대 차트
+  if(workloadChartInst) workloadChartInst.destroy();
+  const wCtx = document.getElementById("workloadChart").getContext("2d");
+  workloadChartInst = new Chart(wCtx, {
+    type:"bar",
+    data:{
+      labels:mData.map(m=>m.name),
+      datasets:[
+        {label:"현대",data:mData.map(m=>m.현대),backgroundColor:"#002C5F"},
+        {label:"기아",data:mData.map(m=>m.기아),backgroundColor:"#BB162B"},
+        {label:"제네시스",data:mData.map(m=>m.제네시스),backgroundColor:"#9C8340"}
+      ]
+    },
+    options:{responsive:true,plugins:{legend:{labels:{font:{size:11},boxWidth:12}}},
+      scales:{x:{stacked:true,ticks:{font:{size:11}}},y:{stacked:true,ticks:{font:{size:11},stepSize:1}}}}
+  });
+
+  // 추이 차트
+  if(trendChartInst) trendChartInst.destroy();
+  const tCtx = document.getElementById("trendChart").getContext("2d");
+  trendChartInst = new Chart(tCtx, {
+    type:"line",
+    data:{
+      labels:["4주 전","3주 전","2주 전","지난주","이번주"],
+      datasets:[{label:"완료율",data:[42,55,61,68,73],borderColor:"#002C5F",backgroundColor:"rgba(0,44,95,.1)",
+        pointBackgroundColor:"#002C5F",pointRadius:5,borderWidth:2.5,tension:.3}]
+    },
+    options:{responsive:true,plugins:{legend:{labels:{font:{size:11},boxWidth:12}}},
+      scales:{x:{ticks:{font:{size:10}}},y:{min:30,max:100,ticks:{font:{size:10},callback:v=>v+"%"}}}}
+  });
+
+  // 과중도 카드
+  document.getElementById("scoreGrid").innerHTML = mData.map(m=>{
+    const lv = m.score>=10?"위험":m.score>=6?"주의":"정상";
+    const lc = lv==="위험"?"#dc2626":lv==="주의"?"#d97706":"#16a34a";
+    const lb = lv==="위험"?"#fee2e2":lv==="주의"?"#fef3c7":"#dcfce7";
+    return `<div class="score-card" style="border:1.5px solid ${lc}40;background:#fafafa">
+      <div class="score-avatar" style="background:${lb};color:${lc}">${m.name[0]}</div>
+      <div class="score-name">${m.name}</div>
+      <div class="score-role">${m.role}</div>
+      <div class="score-val" style="color:${lc}">${m.score}</div>
+      <div class="score-badge" style="background:${lb};color:${lc}">${lv}</div>
+      <div class="score-detail">Task ${m.tasks}건·프로젝트 ${m.prj}개</div>
+    </div>`;
+  }).join("");
+
+  // AI 추천
+  const top = mData.reduce((a,b)=>b.score>a.score?b:a,mData[0]);
+  document.getElementById("aiText").innerHTML =
+    `⚠️ <strong>${top.name}</strong> 님 업무 과중 (점수: ${top.score}) — EV6 인버터 열관리 개선의 "실차 검증"을 이영희 님께 이관 검토 권장<br>
+     🚨 <strong>EV6 인버터 열관리 개선</strong> 마감 D-3 — 박민수 님 즉각 집중 지원 필요<br>
+     ✅ <strong>최지현</strong> 님 여유 있음 — EV9 신뢰성 평가 시작 및 추가 Task 배분 적기`;
+}
+
+/* ════════════════════════════════════════
+   회의록
+════════════════════════════════════════ */
+let actionItems = JSON.parse(JSON.stringify(DEMO_ITEMS));
+
+function analyzeMinutes(){
+  const url = document.getElementById("minutesUrl").value;
+  if(!url.trim() && !testMode) { alert("URL을 입력해주세요."); return; }
+  const btn = document.querySelector(".minutes-analyze-btn");
+  btn.textContent = "분석 중 ⏳";
+  btn.disabled = true;
+  setTimeout(()=>{
+    btn.textContent = "분석 시작";
+    btn.disabled = false;
+    actionItems = JSON.parse(JSON.stringify(DEMO_ITEMS));
+    renderActionItems();
+    document.getElementById("actionItemsCard").classList.add("visible");
+  }, 2200);
+}
+
+function renderActionItems(){
+  const checked = actionItems.filter(i=>i.chk).length;
+  document.getElementById("actionItemsTitle").textContent = `추출된 Action Item (${checked}/${actionItems.length}개 선택)`;
+  document.getElementById("checkedCount").textContent = checked;
+  document.getElementById("actionItemsList").innerHTML = actionItems.map((it,idx)=>{
+    const memberOpts = MEMBERS.map(m=>`<option ${m.name===it.owner?"selected":""}>${m.name}</option>`).join("");
+    const projOpts = PROJECTS.map(p=>`<option ${p.name===it.proj?"selected":""}>${p.name}</option>`).join("");
+    return `<div class="action-item-row ${it.chk?"checked":""}" id="aiRow_${idx}">
+      <div class="action-item-inner">
+        <input class="action-item-chk" type="checkbox" ${it.chk?"checked":""} onchange="toggleItem(${idx},this.checked)"/>
+        <div class="action-item-content">
+          <div class="action-item-text">${it.action}</div>
+          <div class="action-item-fields">
+            <select class="field-small" onchange="actionItems[${idx}].owner=this.value">${memberOpts}</select>
+            <input class="field-small" type="date" value="${it.dl}" onchange="actionItems[${idx}].dl=this.value"/>
+            <select class="field-small" style="max-width:200px" onchange="actionItems[${idx}].proj=this.value">${projOpts}</select>
+            <span class="${it.pri==="높음"?"priority-badge-high":"priority-badge-mid"}">${it.pri}</span>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+function toggleItem(idx, chk){
+  actionItems[idx].chk = chk;
+  document.getElementById("aiRow_"+idx).classList.toggle("checked", chk);
+  const checked = actionItems.filter(i=>i.chk).length;
+  document.getElementById("actionItemsTitle").textContent = `추출된 Action Item (${checked}/${actionItems.length}개 선택)`;
+  document.getElementById("checkedCount").textContent = checked;
+}
+
+function submitToJira(){
+  const checked = actionItems.filter(i=>i.chk).length;
+  if(checked===0) return;
+  const msg = document.getElementById("successMsg");
+  msg.textContent = `✅ ${testMode?"가상":"JIRA"} 등록 완료! (${checked}건)`;
+  msg.classList.add("visible");
+  setTimeout(()=>msg.classList.remove("visible"), 3000);
+}
+
+/* ════════════════════════════════════════
+   초기화
+════════════════════════════════════════ */
+window.onload = () => {
+  document.getElementById("loginScreen").classList.add("active");
+};
+</script>
+</body>
+</html>

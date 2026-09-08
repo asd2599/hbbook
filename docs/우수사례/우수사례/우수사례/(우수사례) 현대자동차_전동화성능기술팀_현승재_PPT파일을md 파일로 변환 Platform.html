@@ -1,0 +1,1158 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VPC 데이터 최적화 플랫폼</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
+<style>
+/* ── 전역 기본값 ─────────────────────────────────── */
+:root {
+  --bg: #f0f4f8;
+  --white: #ffffff;
+  --card: #ffffff;
+  --border: rgba(0,150,200,0.18);
+  --border-hi: rgba(0,150,200,0.45);
+  --cyan: #0097c4;
+  --purple: #6d28d9;
+  --purple-bright: #7c3aed;
+  --text: #1a2035;
+  --text2: #3d4e6b;
+  --muted: #7a8aaa;
+  --green: #059669;
+  --red: #dc2626;
+  --yellow: #d97706;
+  --orange: #ea580c;
+  --grad: linear-gradient(135deg, #0097c4, #7c3aed);
+  --sh: 0 2px 10px rgba(0,0,0,0.08);
+  --sh-hi: 0 4px 18px rgba(0,151,196,0.14);
+  --r: 10px;
+  --r2: 14px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; }
+body {
+  font-family: 'Gulim', 'Noto Sans KR', 'Segoe UI', sans-serif;
+  font-size: 13px;
+  background: var(--bg);
+  color: var(--text);
+}
+body::before {
+  content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  background:
+    radial-gradient(ellipse at 15% 15%, rgba(0,151,196,0.06) 0%, transparent 45%),
+    radial-gradient(ellipse at 85% 80%, rgba(124,58,237,0.05) 0%, transparent 45%);
+}
+
+/* ── 헤더 (48px) ──────────────────────────────────── */
+.header {
+  position: relative; z-index: 10;
+  height: 48px; padding: 0 24px;
+  display: flex; align-items: center; justify-content: space-between;
+  background: rgba(255,255,255,0.95);
+  border-bottom: 1px solid rgba(0,150,200,0.14);
+  box-shadow: 0 1px 8px rgba(0,0,0,0.06);
+  flex-shrink: 0;
+}
+.logo { display: flex; align-items: center; gap: 10px; }
+.logo-icon {
+  width: 30px; height: 30px; border-radius: 7px;
+  background: var(--grad);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px;
+}
+.logo-name {
+  font-size: 15px; font-weight: 700;
+  background: var(--grad);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+.logo-sub { font-size: 11px; color: var(--muted); margin-top: 1px; }
+.hbadge {
+  display: flex; align-items: center; gap: 5px;
+  padding: 3px 11px; border-radius: 20px; font-size: 11px;
+  background: rgba(0,151,196,0.07); border: 1px solid rgba(0,151,196,0.22);
+  color: var(--cyan);
+}
+.hbadge.purple { background: rgba(124,58,237,0.07); border-color: rgba(124,58,237,0.22); color: var(--purple-bright); }
+.hdot { width: 6px; height: 6px; border-radius: 50%; background: var(--cyan); animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{ opacity:1; transform:scale(1); } 50%{ opacity:.5; transform:scale(.8); } }
+
+/* ── 워크플로우 바 (42px) ────────────────────────── */
+.wf-bar {
+  height: 42px; padding: 0 24px; flex-shrink: 0;
+  display: flex; align-items: stretch;
+  background: #fff; border-bottom: 1px solid rgba(0,150,200,0.1);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  position: relative; z-index: 9;
+}
+.wf-step {
+  display: flex; align-items: center; gap: 8px;
+  padding: 0 18px; cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all .25s; white-space: nowrap;
+  font-size: 12px;
+}
+.wf-step:hover { background: rgba(0,151,196,0.04); }
+.wf-step.active { border-bottom-color: var(--cyan); }
+.wf-step.done   { border-bottom-color: var(--green); }
+.wf-num {
+  width: 20px; height: 20px; border-radius: 50%;
+  background: #eef2f7; border: 1.5px solid #c5cdd8;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; color: var(--muted); transition: all .25s;
+}
+.wf-step.active .wf-num { background: var(--cyan); border-color: var(--cyan); color: #fff; box-shadow: 0 2px 8px rgba(0,151,196,.4); }
+.wf-step.done   .wf-num { background: var(--green); border-color: var(--green); color: #fff; }
+.wf-label { font-weight: 600; color: var(--text2); }
+.wf-step.active .wf-label { color: var(--cyan); }
+.wf-step.done   .wf-label { color: var(--green); }
+.wf-desc { font-size: 11px; color: var(--muted); }
+.wf-arrow { display: flex; align-items: center; padding: 0 6px; color: var(--muted); font-size: 14px; }
+
+/* ── 메인 컨테이너 ─────────────────────────────────── */
+.main {
+  position: relative; z-index: 1;
+  height: calc(100vh - 90px);   /* 100% - 헤더48 - 워크플로우42 */
+  display: flex; flex-direction: column;
+  padding: 10px 20px 10px;
+  gap: 8px;
+  overflow: hidden;
+}
+
+/* ── 업로드 존 ────────────────────────────────────── */
+.upload-zone {
+  flex: 1;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  border: 2px dashed rgba(0,151,196,0.3);
+  border-radius: var(--r2);
+  background: var(--white);
+  cursor: pointer; transition: all .3s;
+  box-shadow: var(--sh); position: relative; overflow: hidden;
+}
+.upload-zone::before {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(145deg,rgba(0,151,196,.04),rgba(124,58,237,.04));
+  opacity: 0; transition: opacity .3s;
+}
+.upload-zone:hover, .upload-zone.drag-over {
+  border-color: var(--cyan); box-shadow: 0 6px 24px rgba(0,151,196,.18);
+}
+.upload-zone:hover::before, .upload-zone.drag-over::before { opacity: 1; }
+.upload-icon { font-size: 52px; margin-bottom: 14px; animation: float 3s ease-in-out infinite; }
+@keyframes float { 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-7px); } }
+.upload-title { font-size: 20px; font-weight: 700; background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 6px; }
+.upload-desc { font-size: 13px; color: var(--text2); }
+.upload-hint {
+  margin-top: 16px; padding: 8px 18px; font-size: 12px; color: var(--cyan);
+  background: rgba(0,151,196,.06); border: 1px solid rgba(0,151,196,.2); border-radius: 8px;
+}
+input[type=file] { display: none; }
+
+/* ── 툴바 (파일 로드 후) ──────────────────────────── */
+.toolbar {
+  display: none;
+  height: 40px; flex-shrink: 0;
+  align-items: center; gap: 10px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 0 14px;
+  box-shadow: var(--sh);
+}
+.toolbar.visible { display: flex; }
+.stat-chip {
+  display: flex; align-items: center; gap: 5px;
+  padding: 3px 10px; border-radius: 8px; font-size: 12px;
+  background: #f0f4f8; border: 1px solid #dde3ec;
+}
+.stat-chip .sc-label { color: var(--muted); font-size: 11px; }
+.stat-chip .sc-val  { font-weight: 700; color: var(--cyan); }
+.toolbar-sep { width: 1px; height: 22px; background: #dde3ec; margin: 0 4px; }
+.toolbar-title {
+  font-size: 12px; font-weight: 600; color: var(--text2);
+  max-width: 260px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.toolbar-spacer { flex: 1; }
+.btn-reupload {
+  display: flex; align-items: center; gap: 6px;
+  padding: 5px 14px; border-radius: 8px; cursor: pointer;
+  background: var(--grad); border: none; color: #fff;
+  font-size: 12px; font-weight: 700;
+  font-family: 'Gulim', 'Noto Sans KR', 'Segoe UI', sans-serif;
+  box-shadow: 0 2px 8px rgba(0,151,196,.3);
+  transition: opacity .2s, transform .15s;
+}
+.btn-reupload:hover { opacity: .9; transform: translateY(-1px); }
+
+/* ── 스플릿 뷰 ────────────────────────────────────── */
+.split-view {
+  display: none; gap: 12px;
+  flex: 1; min-height: 0;   /* ← 핵심: flex child가 부모를 초과하지 않음 */
+}
+.split-view.visible { display: flex; }
+
+/* ── 패널 ────────────────────────────────────────── */
+.panel {
+  flex: 1; min-width: 0;
+  display: flex; flex-direction: column;
+  background: var(--white); border: 1px solid var(--border);
+  border-radius: var(--r2); overflow: hidden;
+  box-shadow: var(--sh); transition: border-color .25s, box-shadow .25s;
+}
+.panel:hover { border-color: var(--border-hi); box-shadow: var(--sh-hi); }
+.panel-hd {
+  height: 42px; padding: 0 14px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: space-between;
+  background: #f8fbff; border-bottom: 1px solid rgba(0,150,200,.1);
+}
+.panel-title {
+  display: flex; align-items: center; gap: 7px;
+  font-size: 13px; font-weight: 600;
+}
+.picon {
+  width: 26px; height: 26px; border-radius: 6px;
+  display: flex; align-items: center; justify-content: center; font-size: 13px;
+}
+.picon.ppt { background: rgba(234,88,12,.1); border: 1px solid rgba(234,88,12,.25); }
+.picon.md  { background: rgba(0,151,196,.1); border: 1px solid rgba(0,151,196,.25); }
+.pbadge {
+  font-size: 11px; padding: 2px 8px; border-radius: 10px;
+  background: rgba(0,151,196,.07); border: 1px solid rgba(0,151,196,.2); color: var(--cyan);
+  max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.pbtn {
+  padding: 3px 10px; border-radius: 6px; font-size: 11px; cursor: pointer; border: 1px solid;
+  font-family: 'Gulim', 'Noto Sans KR', 'Segoe UI', sans-serif;
+  transition: all .2s;
+}
+.pbtn.cyan   { background: rgba(0,151,196,.07); border-color: rgba(0,151,196,.22); color: var(--cyan); }
+.pbtn.purple { background: rgba(124,58,237,.07); border-color: rgba(124,58,237,.22); color: var(--purple-bright); }
+.pbtn:hover { opacity: .8; }
+.panel-body { flex: 1; overflow-y: auto; min-height: 0; }
+.panel-body::-webkit-scrollbar { width: 5px; }
+.panel-body::-webkit-scrollbar-track { background: #f0f4f8; }
+.panel-body::-webkit-scrollbar-thumb { background: rgba(0,151,196,.25); border-radius: 3px; }
+
+/* ── 슬라이드 네비게이터 ──────────────────────────── */
+.slide-nav { display: flex; flex-direction: column; height: 100%; }
+.slide-list {
+  display: flex; gap: 6px; padding: 8px 10px;
+  background: #f8fbff; border-bottom: 1px solid rgba(0,150,200,.1);
+  overflow-x: auto; flex-shrink: 0;
+}
+.slide-list::-webkit-scrollbar { height: 3px; }
+.slide-list::-webkit-scrollbar-thumb { background: rgba(0,151,196,.25); border-radius: 2px; }
+.slide-thumb {
+  flex-shrink: 0; width: 76px; height: 52px;
+  background: #fff; border: 1.5px solid #dde3ec; border-radius: 6px;
+  cursor: pointer; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  font-size: 11px; color: var(--muted);
+  transition: all .2s; position: relative; overflow: hidden; padding: 4px;
+  box-shadow: 0 1px 3px rgba(0,0,0,.06);
+}
+.thumb-num {
+  position: absolute; top: 3px; left: 4px;
+  font-size: 11px; font-weight: 700; color: var(--muted);
+}
+.thumb-prev {
+  font-size: 11px; color: var(--text2);
+  text-align: center; line-height: 1.3;
+  overflow: hidden; display: -webkit-box;
+  -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  max-width: 100%; margin-top: 10px;
+}
+.slide-thumb:hover { border-color: var(--cyan); box-shadow: 0 2px 8px rgba(0,151,196,.15); }
+.slide-thumb.active { border-color: var(--cyan); background: rgba(0,151,196,.05); box-shadow: 0 2px 8px rgba(0,151,196,.2); }
+
+.slide-content { flex: 1; overflow-y: auto; padding: 12px; }
+.slide-content::-webkit-scrollbar { width: 4px; }
+.slide-content::-webkit-scrollbar-thumb { background: rgba(0,151,196,.2); border-radius: 2px; }
+.slide-card {
+  background: linear-gradient(145deg,#ffffff,#f8fbff);
+  border: 1px solid rgba(234,88,12,.18);
+  border-radius: var(--r); padding: 14px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.06);
+}
+.slide-card-num { font-size: 11px; color: #ea580c; font-weight: 700; letter-spacing:.8px; opacity:.7; margin-bottom:6px; }
+.slide-card-title { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom:10px; line-height:1.4; }
+.slide-card-body { font-size: 12px; color: var(--text2); line-height: 1.7; }
+.stbl { width:100%; border-collapse:collapse; margin:8px 0; font-size:12px; }
+.stbl th { background:rgba(234,88,12,.07); border:1px solid rgba(234,88,12,.18); padding:5px 7px; color:#c2440c; font-weight:600; text-align:left; }
+.stbl td { border:1px solid #e8edf5; padding:4px 7px; color:var(--text2); }
+.stbl tr:nth-child(even) td { background:#f8fbff; }
+.schip {
+  display: inline-flex; align-items: center; gap: 3px;
+  padding: 2px 8px; border-radius: 10px; font-size: 11px; margin: 2px 2px;
+}
+.schip.cond { background:rgba(0,151,196,.08); border:1px solid rgba(0,151,196,.22); color:var(--cyan); }
+.schip.note { background:rgba(217,119,6,.08); border:1px solid rgba(217,119,6,.22); color:#b45309; }
+.stag { display:inline-block; padding:1px 7px; border-radius:4px; font-size:11px; font-weight:700; margin-right:3px; }
+.tag-asis  { background:#fee2e2; color:#b91c1c; }
+.tag-tobe  { background:#dcfce7; color:#15803d; }
+.tag-note  { background:#fef3c7; color:#92400e; }
+.tag-graph { background:#ede9fe; color:#6d28d9; }
+.tag-cond  { background:#e0f2fe; color:#0369a1; }
+.sline { border:none; border-top:1px solid #e8edf5; margin:8px 0; }
+
+/* ── MD 출력 ─────────────────────────────────────── */
+.md-out { padding: 14px 16px; font-size: 12px; line-height: 1.8; color: var(--text2); }
+.md-out h1 { font-size: 16px; color: var(--cyan); border-bottom: 2px solid rgba(0,151,196,.18); padding-bottom:6px; margin:16px 0 10px; }
+.md-out h1:first-child { margin-top:0; }
+.md-out h2 { font-size: 14px; color: var(--purple); margin:14px 0 7px; }
+.md-out h3 { font-size: 13px; color: #92400e; margin:10px 0 5px; }
+.md-out table { width:100%; border-collapse:collapse; margin:8px 0; font-size:12px; }
+.md-out th { background:rgba(124,58,237,.07); border:1px solid rgba(124,58,237,.2); padding:5px 9px; color:var(--purple-bright); text-align:left; }
+.md-out td { border:1px solid #e8edf5; padding:4px 9px; color:var(--text2); }
+.md-out tr:nth-child(even) td { background:#f8fbff; }
+.md-out code { background:#eef6ff; border:1px solid rgba(0,151,196,.2); border-radius:4px; padding:1px 5px; font-family:monospace; font-size:11px; color:#0369a1; }
+.md-out blockquote { border-left:3px solid #a78bfa; background:#faf5ff; padding:6px 10px; color:#5b21b6; font-style:italic; margin:6px 0; border-radius:0 6px 6px 0; }
+.md-out ul, .md-out ol { padding-left:18px; margin:4px 0; }
+.md-out li { margin:2px 0; }
+.md-out p { margin:5px 0; }
+.conf-ok { background:rgba(5,150,105,.06)!important; border:1px solid rgba(5,150,105,.2)!important; border-radius:2px; }
+.conf-legend {
+  display:flex; gap:8px; flex-wrap:wrap;
+  padding:6px 12px; background:#f8fbff;
+  border-top:1px solid rgba(0,150,200,.1); font-size:11px; flex-shrink:0;
+}
+.cl-item { display:flex; align-items:center; gap:4px; color:var(--muted); }
+.cl-dot  { width:10px; height:10px; border-radius:2px; }
+
+/* ── 정확도 섹션 (하단 수평 스트립) ─────────────────── */
+.acc-strip {
+  display: none;
+  height: 120px; flex-shrink: 0;
+  gap: 8px;
+}
+.acc-strip.visible { display: flex; }
+.gauge-card {
+  flex: 1; display: flex; flex-direction: row; align-items: center; gap: 10px;
+  background: var(--white); border: 1px solid var(--border); border-radius: var(--r);
+  padding: 8px 12px; box-shadow: var(--sh); transition: all .25s;
+}
+.gauge-card:hover { border-color: var(--border-hi); box-shadow: var(--sh-hi); }
+.gauge-card.final-card {
+  background: linear-gradient(145deg,#f0fbff,#faf5ff);
+  border-color: rgba(0,151,196,.3);
+}
+.gauge-info { display: flex; flex-direction: column; justify-content: center; min-width: 0; }
+.gi-tier { font-size: 11px; font-weight: 700; color: var(--muted); letter-spacing:.5px; margin-bottom:2px; }
+.gi-name { font-size: 11px; color: var(--text2); line-height:1.3; }
+.gi-weight { font-size: 11px; color: var(--muted); margin-top:2px; }
+svg.gsv { overflow: visible; flex-shrink: 0; }
+.gv-num  { font-size: 16px; font-weight: 700; fill: #1a2035; }
+.gv-pct  { font-size: 11px; fill: #7a8aaa; }
+.thr-pill {
+  margin-top: 4px; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 700;
+  white-space: nowrap; text-align:center;
+}
+.th-auto  { background:#ecfdf5; border:1px solid #6ee7b7; color:#065f46; }
+.th-light { background:#eff6ff; border:1px solid #93c5fd; color:#1d4ed8; }
+.th-full  { background:#fffbeb; border:1px solid #fcd34d; color:#92400e; }
+.th-fail  { background:#fef2f2; border:1px solid #fca5a5; color:#991b1b; }
+
+/* 감점 패널 (스트립 우측) */
+.ded-panel {
+  flex: 1.6; display: flex; flex-direction: column;
+  background: var(--white); border: 1px solid var(--border); border-radius: var(--r);
+  padding: 8px 12px; box-shadow: var(--sh); overflow: hidden;
+}
+.ded-title { font-size: 12px; font-weight: 700; color: var(--text2); margin-bottom:6px; flex-shrink:0; }
+.ded-list { flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:4px; }
+.ded-list::-webkit-scrollbar { width:3px; }
+.ded-list::-webkit-scrollbar-thumb { background:rgba(220,38,38,.2); border-radius:2px; }
+.ded-item {
+  display:flex; align-items:flex-start; gap:7px;
+  padding:4px 8px; background:#fff5f5; border:1px solid #fed7d7; border-radius:6px;
+  font-size:11px;
+}
+.ded-tier { flex-shrink:0; padding:1px 5px; background:#fee2e2; border-radius:3px; font-size:10px; font-weight:700; color:#b91c1c; }
+.ded-msg  { color:var(--text2); flex:1; line-height:1.4; }
+.ded-pts  { flex-shrink:0; color:var(--red); font-weight:700; }
+
+/* ── 처리 오버레이 ─────────────────────────────────── */
+.proc-overlay {
+  display: none; position: fixed; inset: 0; z-index: 200;
+  background: rgba(240,244,248,.93); backdrop-filter: blur(12px);
+  align-items: center; justify-content: center; flex-direction: column; gap: 16px;
+}
+.proc-overlay.visible { display: flex; }
+.proc-spinner {
+  width: 56px; height: 56px;
+  border: 3px solid rgba(0,151,196,.15); border-top-color: var(--cyan);
+  border-radius: 50%; animation: spin .8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.proc-text { font-size: 15px; font-weight: 700; background: var(--grad); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+.proc-steps { display:flex; flex-direction:column; gap:6px; min-width:280px; }
+.ps {
+  display:flex; align-items:center; gap:8px; padding:8px 12px;
+  background:#fff; border:1px solid #dde3ec; border-radius:8px;
+  font-size:12px; color:var(--text2); box-shadow:0 1px 4px rgba(0,0,0,.05);
+  transition: all .4s;
+}
+.ps.active { border-color:var(--cyan); color:var(--cyan); background:#f0fbff; box-shadow:0 2px 10px rgba(0,151,196,.15); }
+.ps.done   { border-color:var(--green); color:var(--green); background:#f0fdf4; }
+
+/* ── Step 2/3 내용 ───────────────────────────────── */
+.step-page { flex:1; overflow-y:auto; padding:16px; display:none; }
+.step-page.visible { display:block; }
+.sp-center { text-align:center; padding:20px 0 16px; }
+.sp-icon { font-size:40px; margin-bottom:10px; }
+.sp-title { font-size:16px; font-weight:700; color:var(--cyan); margin-bottom:5px; }
+.sp-desc  { font-size:12px; color:var(--text2); }
+.sp-card {
+  background:#fff; border:1px solid var(--border); border-radius:var(--r2);
+  padding:18px; max-width:580px; margin:16px auto 0;
+  box-shadow: var(--sh);
+}
+.sp-step-row { display:flex; gap:10px; align-items:flex-start; }
+.sp-step-num {
+  width:22px; height:22px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-size:11px; font-weight:700; flex-shrink:0;
+}
+.sp-step-body { font-size:12px; color:var(--text2); line-height:1.6; }
+.sp-note { margin-top:14px; padding:9px 12px; background:#f0f4f8; border-radius:8px; border:1px solid #dde3ec; font-size:11px; color:var(--muted); }
+.ptabs { display:flex; gap:2px; background:#e8edf5; padding:3px; border-radius:9px; margin-bottom:14px; }
+.ptab {
+  flex:1; padding:6px 10px; border-radius:7px; border:none;
+  background:transparent; color:var(--muted); font-size:12px; font-weight:600; cursor:pointer;
+  font-family:'Gulim','Noto Sans KR','Segoe UI',sans-serif; transition:all .2s;
+}
+.ptab.active { background:#fff; color:var(--cyan); border:1px solid rgba(0,151,196,.25); box-shadow:0 1px 4px rgba(0,0,0,.07); }
+.ptab-content { display:none; }
+.ptab-content.active { display:block; }
+.plabel { font-size:11px; font-weight:700; color:var(--cyan); margin-bottom:7px; }
+.pbox {
+  background:#f8fbff; border:1px solid #d1e8f5; border-radius:var(--r);
+  padding:14px; font-size:12px; color:#2d3f5c; line-height:1.8;
+  white-space:pre-wrap; font-family:monospace;
+}
+.qa-wrap {
+  margin-top:16px; background:#fff; border:1px solid var(--border);
+  border-radius:var(--r2); padding:14px; box-shadow:var(--sh);
+}
+.qa-msgs { min-height:80px; max-height:220px; overflow-y:auto; margin-bottom:10px; display:flex; flex-direction:column; gap:7px; }
+.qa-msgs::-webkit-scrollbar { width:3px; }
+.qa-msgs::-webkit-scrollbar-thumb { background:rgba(0,151,196,.2); border-radius:2px; }
+.qa-row { display:flex; gap:8px; }
+.qa-input {
+  flex:1; background:#f8fbff; border:1.5px solid #c8dff0; border-radius:8px;
+  padding:7px 11px; color:var(--text); font-size:12px; outline:none;
+  font-family:'Gulim','Noto Sans KR','Segoe UI',sans-serif;
+  transition: border-color .2s;
+}
+.qa-input:focus { border-color:var(--cyan); }
+.qa-send {
+  background:var(--grad); border:none; color:#fff; border-radius:8px;
+  padding:7px 14px; font-size:12px; font-weight:700; cursor:pointer;
+  font-family:'Gulim','Noto Sans KR','Segoe UI',sans-serif;
+  box-shadow:0 2px 8px rgba(0,151,196,.3);
+}
+
+/* ── 공통 ────────────────────────────────────────── */
+.no-content { display:flex; flex-direction:column; align-items:center; padding:32px 20px; color:#a0aec0; font-size:13px; gap:7px; }
+.no-content .nc-icon { font-size:32px; opacity:.35; }
+::-webkit-scrollbar { width:7px; height:7px; }
+::-webkit-scrollbar-track { background:#eef2f7; }
+::-webkit-scrollbar-thumb { background:rgba(0,151,196,.28); border-radius:4px; }
+::-webkit-scrollbar-thumb:hover { background:rgba(0,151,196,.45); }
+</style>
+</head>
+<body>
+
+<!-- 처리 오버레이 -->
+<div class="proc-overlay" id="procOverlay">
+  <div class="proc-spinner"></div>
+  <div class="proc-text">VPC 데이터 분석 중...</div>
+  <div class="proc-steps">
+    <div class="ps" id="ps1"><span>📂</span><span>PPTX 파일 파싱 및 슬라이드 추출</span></div>
+    <div class="ps" id="ps2"><span>🔍</span><span>멀티모달 AI로 제어 로직 구조화</span></div>
+    <div class="ps" id="ps3"><span>📝</span><span>Markdown 형태로 변환</span></div>
+    <div class="ps" id="ps4"><span>📊</span><span>3-Tier 정확도 평가 (VPC 기준 적용)</span></div>
+    <div class="ps" id="ps5"><span>✅</span><span>검증 완료 및 지식베이스 등록 준비</span></div>
+  </div>
+</div>
+
+<!-- 헤더 -->
+<header class="header">
+  <div class="logo">
+    <div class="logo-icon">⚡</div>
+    <div>
+      <div class="logo-name">VPC 데이터 최적화 플랫폼</div>
+      <div class="logo-sub">Vehicle Powertrain Control · Knowledge Base</div>
+    </div>
+  </div>
+  <div style="display:flex;gap:8px;align-items:center;">
+    <div class="hbadge"><span class="hdot"></span>RAG 지식베이스 연동 준비</div>
+    <div class="hbadge purple">VPC 정확도 v1.0</div>
+  </div>
+</header>
+
+<!-- 워크플로우 바 -->
+<div class="wf-bar">
+  <div class="wf-step active" id="step1" onclick="goStep(1)">
+    <div class="wf-num">1</div>
+    <div><div class="wf-label">데이터 전환</div><div class="wf-desc">PPT → Markdown 구조화</div></div>
+  </div>
+  <div class="wf-arrow">›</div>
+  <div class="wf-step" id="step2" onclick="goStep(2)">
+    <div class="wf-num">2</div>
+    <div><div class="wf-label">검증 및 정제</div><div class="wf-desc">정합성 비교 · 수정 관리</div></div>
+  </div>
+  <div class="wf-arrow">›</div>
+  <div class="wf-step" id="step3" onclick="goStep(3)">
+    <div class="wf-num">3</div>
+    <div><div class="wf-label">가이드 서비스</div><div class="wf-desc">RAG 기반 지식 검색</div></div>
+  </div>
+</div>
+
+<!-- 메인 -->
+<main class="main">
+
+  <!-- ─ STEP 1 ─────────────────────────────────── -->
+  <div id="view1" style="display:flex; flex-direction:column; flex:1; gap:8px; min-height:0;">
+
+    <!-- 업로드 존 -->
+    <div class="upload-zone" id="uploadZone"
+         onclick="document.getElementById('fileInput').click()"
+         ondragover="handleDragOver(event)"
+         ondragleave="handleDragLeave(event)"
+         ondrop="handleDrop(event)">
+      <div class="upload-icon">📋</div>
+      <div class="upload-title">PPT 파일을 업로드하세요</div>
+      <div class="upload-desc">VPC 캘리브레이션 보고서 (.pptx) 를 드래그하거나 클릭하여 선택</div>
+      <div class="upload-hint">💡 멀티모달 AI가 제어 로직 및 그래프를 자동 인식하여 Markdown으로 변환합니다</div>
+      <input type="file" id="fileInput" accept=".pptx" onchange="handleFile(event)">
+    </div>
+
+    <!-- 툴바 (파일 로드 후) -->
+    <div class="toolbar" id="toolbar">
+      <div class="stat-chip">
+        <span class="sc-label">슬라이드</span>
+        <span class="sc-val" id="statSlides">0</span>
+      </div>
+      <div class="stat-chip">
+        <span class="sc-label">추출 수치</span>
+        <span class="sc-val" id="statParams">0</span>
+      </div>
+      <div class="toolbar-sep"></div>
+      <span class="toolbar-title" id="toolbarFile">-</span>
+      <div style="display:flex;align-items:center;gap:5px;margin-left:4px;">
+        <span id="statStatus" style="font-size:12px;font-weight:700;color:var(--green);"></span>
+      </div>
+      <div class="toolbar-spacer"></div>
+      <button class="btn-reupload" onclick="document.getElementById('fileInput').click()">
+        ＋ 추가 파일 분석
+      </button>
+    </div>
+
+    <!-- 스플릿 뷰 -->
+    <div class="split-view" id="splitView">
+
+      <!-- 좌: PPT 뷰어 -->
+      <div class="panel">
+        <div class="panel-hd">
+          <div class="panel-title">
+            <div class="picon ppt">📊</div>
+            <span>PPT 슬라이드 뷰어</span>
+          </div>
+          <div style="display:flex;gap:6px;align-items:center;">
+            <span style="font-size:12px;color:var(--muted);" id="slideCounter">0 / 0</span>
+            <div class="pbadge" id="pptFileName">-</div>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div class="slide-nav">
+            <div class="slide-list" id="slideList"></div>
+            <div class="slide-content" id="slideContent">
+              <div class="no-content"><div class="nc-icon">📂</div><span>슬라이드를 선택하세요</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 우: MD 출력 -->
+      <div class="panel">
+        <div class="panel-hd">
+          <div class="panel-title">
+            <div class="picon md">📝</div>
+            <span>Markdown 변환 결과</span>
+          </div>
+          <div style="display:flex;gap:5px;">
+            <button class="pbtn cyan" onclick="copyMd()">복사</button>
+            <button class="pbtn purple" onclick="downloadMd()">다운로드</button>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div class="md-out" id="mdOutput">
+            <div class="no-content"><div class="nc-icon">📝</div><span>변환 결과가 여기에 표시됩니다</span></div>
+          </div>
+        </div>
+        <div class="conf-legend">
+          <div class="cl-item"><div class="cl-dot" style="background:rgba(5,150,105,.35);border:1px solid rgba(5,150,105,.5);"></div>검증 완료</div>
+          <div class="cl-item"><div class="cl-dot" style="background:rgba(217,119,6,.25);border:1px solid rgba(217,119,6,.4);"></div>신뢰도 주의</div>
+          <div class="cl-item"><div class="cl-dot" style="background:rgba(220,38,38,.18);border:1px solid rgba(220,38,38,.3);"></div>환각 의심</div>
+          <div class="cl-item"><div class="cl-dot" style="background:transparent;border:1px dashed #c5cdd8;"></div>누락 의심</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 정확도 스트립 -->
+    <div class="acc-strip" id="accStrip">
+      <!-- Tier 1 -->
+      <div class="gauge-card">
+        <div class="gauge-info">
+          <div class="gi-tier">TIER 1</div>
+          <div class="gi-name">구조·수치<br>정확도</div>
+          <div class="gi-weight">가중치 50%</div>
+        </div>
+        <svg class="gsv" width="80" height="80" viewBox="0 0 80 80">
+          <circle cx="40" cy="40" r="32" fill="none" stroke="#e8edf5" stroke-width="8"/>
+          <circle id="gT1" cx="40" cy="40" r="32" fill="none" stroke="url(#g1)" stroke-width="8"
+                  stroke-linecap="round" stroke-dasharray="201.1" stroke-dashoffset="201.1"
+                  transform="rotate(-90 40 40)" style="transition:stroke-dashoffset 1.2s ease;"/>
+          <defs><linearGradient id="g1" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#0097c4"/><stop offset="100%" stop-color="#00bcd4"/></linearGradient></defs>
+          <text x="40" y="37" text-anchor="middle" class="gv-num" id="t1v">-</text>
+          <text x="40" y="51" text-anchor="middle" class="gv-pct">점</text>
+        </svg>
+      </div>
+      <!-- Tier 2 -->
+      <div class="gauge-card">
+        <div class="gauge-info">
+          <div class="gi-tier">TIER 2</div>
+          <div class="gi-name">의미·해석<br>정확도</div>
+          <div class="gi-weight">가중치 35%</div>
+        </div>
+        <svg class="gsv" width="80" height="80" viewBox="0 0 80 80">
+          <circle cx="40" cy="40" r="32" fill="none" stroke="#e8edf5" stroke-width="8"/>
+          <circle id="gT2" cx="40" cy="40" r="32" fill="none" stroke="url(#g2)" stroke-width="8"
+                  stroke-linecap="round" stroke-dasharray="201.1" stroke-dashoffset="201.1"
+                  transform="rotate(-90 40 40)" style="transition:stroke-dashoffset 1.2s ease .15s;"/>
+          <defs><linearGradient id="g2" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#a855f7"/><stop offset="100%" stop-color="#7c3aed"/></linearGradient></defs>
+          <text x="40" y="37" text-anchor="middle" class="gv-num" id="t2v">-</text>
+          <text x="40" y="51" text-anchor="middle" class="gv-pct">점</text>
+        </svg>
+      </div>
+      <!-- Tier 3 -->
+      <div class="gauge-card">
+        <div class="gauge-info">
+          <div class="gi-tier">TIER 3</div>
+          <div class="gi-name">위험<br>감점</div>
+          <div class="gi-weight">상한 −15점</div>
+        </div>
+        <svg class="gsv" width="80" height="80" viewBox="0 0 80 80">
+          <circle cx="40" cy="40" r="32" fill="none" stroke="#e8edf5" stroke-width="8"/>
+          <circle id="gT3" cx="40" cy="40" r="32" fill="none" stroke="url(#g3)" stroke-width="8"
+                  stroke-linecap="round" stroke-dasharray="201.1" stroke-dashoffset="201.1"
+                  transform="rotate(-90 40 40)" style="transition:stroke-dashoffset 1.2s ease .3s;"/>
+          <defs><linearGradient id="g3" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#ff5252"/><stop offset="100%" stop-color="#ff9800"/></linearGradient></defs>
+          <text x="40" y="37" text-anchor="middle" class="gv-num" id="t3v">-</text>
+          <text x="40" y="51" text-anchor="middle" class="gv-pct">감점</text>
+        </svg>
+      </div>
+      <!-- Final -->
+      <div class="gauge-card final-card" style="flex-direction:column;align-items:center;justify-content:center;gap:4px;">
+        <div style="font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.5px;">종합 정확도</div>
+        <svg class="gsv" width="80" height="80" viewBox="0 0 80 80">
+          <circle cx="40" cy="40" r="32" fill="none" stroke="#e8edf5" stroke-width="9"/>
+          <circle id="gFin" cx="40" cy="40" r="32" fill="none" stroke="url(#gF)" stroke-width="9"
+                  stroke-linecap="round" stroke-dasharray="201.1" stroke-dashoffset="201.1"
+                  transform="rotate(-90 40 40)" style="transition:stroke-dashoffset 1.4s ease .2s;"/>
+          <defs><linearGradient id="gF" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#0097c4"/><stop offset="50%" stop-color="#7c3aed"/><stop offset="100%" stop-color="#0097c4"/></linearGradient></defs>
+          <text x="40" y="36" text-anchor="middle" style="font-size:19px;font-weight:700;fill:#1a2035;" id="finv">-</text>
+          <text x="40" y="51" text-anchor="middle" style="font-size:12px;fill:#7a8aaa;">%</text>
+        </svg>
+        <div class="thr-pill" id="thrBar">-</div>
+      </div>
+      <!-- 감점 사유 -->
+      <div class="ded-panel">
+        <div class="ded-title">⚠️ 감점 사유 분석 (Top 5)</div>
+        <div class="ded-list" id="dedList">
+          <div style="font-size:12px;color:var(--muted);padding:6px;">파일을 업로드하면 표시됩니다.</div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /view1 -->
+
+  <!-- ─ STEP 2 ─────────────────────────────────── -->
+  <div class="step-page" id="view2">
+    <div class="sp-center">
+      <div class="sp-icon">🔍</div>
+      <div class="sp-title">검증 및 정제</div>
+      <div class="sp-desc">변환 데이터의 정합성을 비교하고 시니어 노하우가 담긴 수정 사항을 관리합니다</div>
+    </div>
+    <div class="sp-card">
+      <div class="plabel">📌 검증 프로세스</div>
+      <div style="display:flex;flex-direction:column;gap:9px;margin-top:10px;">
+        <div class="sp-step-row">
+          <div class="sp-step-num" style="background:#e0f2fe;border:1px solid #7dd3fc;color:#0369a1;">1</div>
+          <div class="sp-step-body"><strong style="color:var(--text);">AS-IS / TO-BE 수치 비교</strong><br>슬라이드 원본 대비 MD 변환 수치를 셀 단위로 비교하여 일치율 측정</div>
+        </div>
+        <div class="sp-step-row">
+          <div class="sp-step-num" style="background:#ede9fe;border:1px solid #c4b5fd;color:#6d28d9;">2</div>
+          <div class="sp-step-body"><strong style="color:var(--text);">Rationale 의미 유사도</strong><br>변경 근거의 핵심 메시지가 보존되었는지 문장 임베딩 코사인 유사도로 평가 (≥0.85 권장)</div>
+        </div>
+        <div class="sp-step-row">
+          <div class="sp-step-num" style="background:#fef3c7;border:1px solid #fcd34d;color:#92400e;">3</div>
+          <div class="sp-step-body"><strong style="color:var(--text);">시니어 수정 관리</strong><br>Diff 하이라이트 영역만 시니어가 확인하고 수정 사항을 학습 데이터로 축적</div>
+        </div>
+      </div>
+      <div class="sp-note">🔗 Step 1에서 파일을 업로드하고 변환 후 이 탭에서 검증을 진행하세요</div>
+    </div>
+  </div>
+
+  <!-- ─ STEP 3 ─────────────────────────────────── -->
+  <div class="step-page" id="view3">
+    <div class="sp-center">
+      <div class="sp-icon">🤖</div>
+      <div class="sp-title">RAG 기반 가이드 서비스</div>
+      <div class="sp-desc">구축된 지식베이스를 활용한 저연차 연구원 맞춤형 Q&A</div>
+    </div>
+    <div class="ptabs">
+      <button class="ptab active" onclick="showPTab(0,this)">📥 데이터 구조화 프롬프트</button>
+      <button class="ptab" onclick="showPTab(1,this)">💡 고연차 노하우 정제</button>
+      <button class="ptab" onclick="showPTab(2,this)">❓ 저연차 Q&A</button>
+    </div>
+    <div id="pt0" class="ptab-content active">
+      <div class="plabel">PPT 데이터 구조화 및 추출 프롬프트 (Vision LLM용)</div>
+      <div class="pbox">너는 차량 제어(VPC) 데이터 분석 전문가야.
+첨부된 PPT 슬라이드에서 다음 정보를 추출하여 Markdown 형식으로 정리해줘.
+
+시험 조건: 차량 모델, 외기온도, SOC 등 환경 변수
+제어 파라미터: 수정 전(AS-IS)과 수정 후(TO-BE)의 수치를 테이블 형태로 정리
+그래프 해석: 이미지 내 시계열 그래프의 추세(Peak 지점, 수렴 시간 등)를 텍스트로 기술
+변경 근거: 슬라이드 내 'Note'나 '결론' 부분에서 최적화 이유를 'Rationale' 섹션에 작성
+
+⚠️ 에러 핸들링:
+- 슬라이드에 정보가 없거나 모호할 때는 "해당 내용이 없음"으로 표기
+- 보고서 내부 데이터만 사용하고 외부 지식을 혼입하지 말 것</div>
+    </div>
+    <div id="pt1" class="ptab-content">
+      <div class="plabel">고연차 노하우(Insight) 정제 프롬프트</div>
+      <div class="pbox">다음은 여러 건의 VPC 최적화 결과 보고서(md)들이야.
+이 데이터들을 종합해서 '고연차 연구원의 판단 로직'을 추출해줘.
+· 특정 현상(예: 변속 충격, RPM 튐)이 발생했을 때 공통적으로 조정한 파라미터는 무엇인가?
+· 데이터 수치 변경 시 고려해야 할 트레이드오프(예: 응답성 vs 안정성) 관계를 설명해줘.
+결과물은 저연차 연구원이 매뉴얼로 쓸 수 있게
+'현상 - 원인 - 조치 - 주의사항' 구조의 가이드로 만들어줘.</div>
+    </div>
+    <div id="pt2" class="ptab-content">
+      <div class="plabel">저연차 연구원용 맞춤형 Q&A 프롬프트 (RAG 시스템용)</div>
+      <div class="pbox">현재 [차종/조건]에서 [특정 현상]이 발생하고 있어.
+과거 유사 사례에서 시니어 연구원들이 가장 먼저 확인했던 파라미터 3가지는 뭐야?
+해당 데이터를 수정할 때 반드시 지켜야 할 기준(Constraint)은 무엇인지 알려줘.
+분석 결과 보고서를 쓸 때 포함해야 할 필수 항목(Checklist)도 함께 제안해줘.</div>
+    </div>
+    <div class="qa-wrap">
+      <div class="plabel">💬 VPC 가이드 AI (데모)</div>
+      <div class="qa-msgs" id="qaMessages">
+        <div style="background:#f5f3ff;border:1px solid #ddd6fe;border-radius:8px;padding:9px 12px;font-size:12px;color:#3730a3;max-width:80%;">
+          안녕하세요! VPC 데이터 최적화 AI 가이드입니다. 현재 차종과 발생 현상을 알려주시면 과거 유사 사례를 기반으로 분석 방향을 제안드립니다.
+        </div>
+      </div>
+      <div class="qa-row">
+        <input class="qa-input" id="qaInput" type="text"
+               placeholder="예: EV 모델에서 변속 충격이 발생하고 있어. 어떤 파라미터를 확인해야 해?"
+               onkeydown="if(event.key==='Enter') sendQA()">
+        <button class="qa-send" onclick="sendQA()">전송</button>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+// ── 상태 ──────────────────────────────────────────
+let slides=[], currentSlide=0, mdRaw='';
+let scores={tier1:0,tier2:0,tier3:0,final:0,deductions:[]};
+
+// ── 드래그&드롭 ───────────────────────────────────
+function handleDragOver(e){e.preventDefault();document.getElementById('uploadZone').classList.add('drag-over');}
+function handleDragLeave(e){document.getElementById('uploadZone').classList.remove('drag-over');}
+function handleDrop(e){
+  e.preventDefault();document.getElementById('uploadZone').classList.remove('drag-over');
+  const f=e.dataTransfer.files[0];
+  if(f&&f.name.endsWith('.pptx')) processFile(f);
+  else alert('⚠️ .pptx 파일만 업로드 가능합니다.');
+}
+function handleFile(e){const f=e.target.files[0];if(f)processFile(f);e.target.value='';}
+
+// ── PPTX 파서 ─────────────────────────────────────
+async function processFile(file){
+  showProc(true);
+  await animStep('ps1',400);
+  try{
+    const zip=await JSZip.loadAsync(file); slides=[];
+    const sfs=Object.keys(zip.files).filter(k=>k.match(/^ppt\/slides\/slide\d+\.xml$/))
+      .sort((a,b)=>parseInt(a.match(/\d+/)[0])-parseInt(b.match(/\d+/)[0]));
+    await animStep('ps2',500);
+    for(let i=0;i<sfs.length;i++){
+      const x=await zip.files[sfs[i]].async('string');
+      slides.push(parseSlide(x,i+1));
+    }
+    await animStep('ps3',600);
+    mdRaw=genMD(slides,file.name);
+    await animStep('ps4',500);
+    scores=calcAccuracy(slides,mdRaw);
+    await animStep('ps5',400);
+    showProc(false); renderUI(file.name);
+  }catch(err){
+    showProc(false); console.error(err); showErrFallback(file.name,err.message);
+  }
+}
+
+function parseSlide(xmlStr,num){
+  const doc=new DOMParser().parseFromString(xmlStr,'application/xml');
+  const allTexts=[]; doc.querySelectorAll('t').forEach(t=>{const s=t.textContent.trim();if(s)allTexts.push(s);});
+  const shapes=[]; doc.querySelectorAll('sp').forEach(sp=>{
+    const tb=sp.querySelector('txBody'); if(!tb)return;
+    let txt=''; tb.querySelectorAll('p').forEach(p=>{
+      const l=Array.from(p.querySelectorAll('t')).map(t=>t.textContent).join('').trim(); if(l)txt+=l+'\n';
+    }); if(txt.trim())shapes.push(txt.trim());
+  });
+  const tables=[]; doc.querySelectorAll('tbl').forEach(tbl=>{
+    const rows=[]; tbl.querySelectorAll('tr').forEach(tr=>{
+      const cells=[]; tr.querySelectorAll('tc').forEach(tc=>{
+        cells.push(Array.from(tc.querySelectorAll('t')).map(t=>t.textContent.trim()).filter(t=>t).join(' ')||'—');
+      }); if(cells.some(c=>c!=='—'))rows.push(cells);
+    }); if(rows.length)tables.push(rows);
+  });
+  let title='',bodyShapes=[];
+  for(const s of shapes){if(!title&&s.length>2&&s.length<100){title=s.split('\n')[0];}else{bodyShapes.push(s);}}
+  if(!title)title=`슬라이드 ${num}`;
+  const ft=allTexts.join(' ').toLowerCase();
+  return{num,title,shapes,tables,allTexts,bodyShapes,
+    hasAsIs:/as-is|as is|before|현재|수정전|수정 전/.test(ft),
+    hasToBe:/to-be|to be|after|개선|수정후|수정 후/.test(ft),
+    hasGraph:/graph|그래프|chart|plot|peak|rpm|torque|토크/.test(ft),
+    hasNote:/note|결론|주의|rationale|근거/.test(ft),
+    hasCondition:/soc|온도|temp|gear|기어|°c|rpm/.test(ft),
+    conditions:extractConds(allTexts), params:extractParams(allTexts)
+  };
+}
+function extractConds(texts){
+  const c=[],j=texts.join(' ');
+  [{re:/(\d+(?:\.\d+)?)\s*°?C/gi,l:'외기온도'},{re:/SOC\s*[:\-]?\s*(\d+(?:\.\d+)?)\s*%?/gi,l:'SOC'},
+   {re:/(\d+)(?:단|단위|gear)/gi,l:'기어단'},{re:/([A-Z][A-Z0-9\-]+(?:EV|HEV|PHEV|SUV)?)/g,l:'차종'}]
+  .forEach(p=>{const m=[...j.matchAll(p.re)];if(m.length)c.push({label:p.l,value:m[0][1]||m[0][0]});});
+  return c;
+}
+function extractParams(texts){
+  const p=[],j=texts.join(' ');
+  [...j.matchAll(/(\d+(?:\.\d+)?)\s*(Nm|rpm|RPM|°C|ms|s|%|V|A|kW|N)/g)].forEach(m=>{
+    p.push({value:m[1],unit:m[2],raw:m[0]});
+  });
+  return p;
+}
+
+// ── Markdown 생성기 ───────────────────────────────
+function genMD(slides,fn){
+  const now=new Date().toISOString().split('T')[0];
+  let md=`---\ntitle: VPC 보고서 변환\nsource: ${fn}\nconverted: ${now}\ndomain: VPC Calibration\nformat: Markdown\n---\n\n# VPC 캘리브레이션 보고서\n\n> 📌 본 문서는 멀티모달 AI를 통해 PPT 슬라이드에서 자동 변환된 구조화 Markdown입니다.\n\n---\n\n`;
+  slides.forEach(slide=>{
+    md+=`## 슬라이드 ${slide.num}: ${slide.title}\n\n`;
+    if(slide.hasCondition&&slide.conditions.length>0){
+      md+=`### 🔧 시험 조건\n\n| 항목 | 값 |\n|------|----|\n`;
+      slide.conditions.forEach(c=>md+=`| ${c.label} | ${c.value} |\n`);
+      md+='\n';
+    } else if(slide.hasCondition){md+=`### 🔧 시험 조건\n\n해당 내용이 없음\n\n`;}
+    if(slide.tables.length>0){
+      slide.tables.forEach((table,ti)=>{
+        md+=`### 📊 제어 파라미터 테이블${ti>0?' '+(ti+1):''}\n\n`;
+        if(!table.length){md+=`해당 내용이 없음\n\n`;return;}
+        md+=`| ${table[0].join(' | ')} |\n| ${table[0].map(()=>'---').join(' | ')} |\n`;
+        table.slice(1).forEach(r=>md+=`| ${r.join(' | ')} |\n`);
+        md+='\n';
+      });
+    } else if(slide.hasAsIs||slide.hasToBe){
+      md+=`### 📊 제어 파라미터 (AS-IS / TO-BE)\n\n| 파라미터 | AS-IS | TO-BE | 단위 |\n|---------|-------|-------|------|\n`;
+      if(slide.params.length>0){
+        for(let j=0;j<Math.min(slide.params.length,6);j++){const p=slide.params[j];md+=`| Parameter ${j+1} | ${p.value} | — | ${p.unit} |\n`;}
+      }else{md+=`| 해당 내용이 없음 | — | — | — |\n`;}
+      md+='\n';
+    }
+    slide.bodyShapes.forEach(shape=>{
+      const lines=shape.split('\n').filter(l=>l.trim()); if(!lines.length)return;
+      const txt=lines.join(' ');
+      if(slide.hasGraph&&/peak|rpm|torque|graph|그래프|추세|수렴|오버슈트/i.test(txt)){
+        md+=`### 📈 그래프 해석\n\n`; lines.forEach(l=>md+=`- ${l}\n`); md+='\n';
+      } else if(/note|결론|근거|주의|reason|rationale/i.test(txt)){
+        md+=`### 💡 Rationale (변경 근거)\n\n`; lines.forEach(l=>md+=`> ${l}\n`); md+='\n';
+      } else {
+        lines.forEach(l=>{if(l.trim().length>3)md+=`- ${l}\n`;}); if(lines.some(l=>l.trim().length>3))md+='\n';
+      }
+    });
+    if(!slide.bodyShapes.length&&!slide.tables.length&&!slide.hasCondition)md+=`*해당 내용이 없음*\n\n`;
+    if(slide.params.length>0){
+      md+=`### 🔢 추출된 수치 데이터\n\n`;
+      md+=[...new Set(slide.params.map(p=>`\`${p.raw}\``))].slice(0,10).join(', ')+'\n\n';
+    }
+    md+=`---\n\n`;
+  });
+  md+=`## 📋 변환 메타데이터\n\n| 항목 | 값 |\n|------|----|\n| 총 슬라이드 수 | ${slides.length} |\n| 변환 일시 | ${now} |\n| 변환 방식 | Multimodal AI + Rule-based |\n| 정확도 기준 | VPC_정확도_판단기준.md v1.0 |\n`;
+  return md;
+}
+
+// ── 정확도 계산 ───────────────────────────────────
+function calcAccuracy(slides,md){
+  const ded=[];
+  let t1c=0,t1p=0;
+  const withTbl=slides.filter(s=>s.tables.length>0).length;
+  t1c++;if(withTbl>0){t1p++;}else{ded.push({tier:'Tier1',msg:'파라미터 테이블 추출되지 않음',pts:-3});}
+  const tp=slides.reduce((s,sl)=>s+sl.params.length,0);
+  t1c++;if(tp>5){t1p++;}else if(tp>0){t1p+=.5;}else{ded.push({tier:'Tier1',msg:`수치 데이터 추출 미흡 (${tp}개)`,pts:-2});}
+  const mu=(md.match(/\d+(?:\.\d+)?\s*(?:Nm|rpm|RPM|°C|ms|%|kW|V|A)/g)||[]).length;
+  t1c++;if(mu>=3){t1p++;}else{ded.push({tier:'Tier1',msg:`단위 보존율 낮음 (${mu}개)`,pts:-1});}
+  const mt=(md.match(/\|.*\|/g)||[]).length;
+  t1c++;if(mt>=4){t1p++;}else if(mt>0){t1p+=.6;}else{ded.push({tier:'Tier1',msg:'테이블 구조 MD 변환 미흡',pts:-2});}
+  const cf=slides.reduce((s,sl)=>s+sl.conditions.length,0);
+  t1c++;if(cf>=2){t1p++;}else{ded.push({tier:'Tier1',msg:`시험조건 완전성 미달 (${cf}개)`,pts:-1});}
+  const hab=slides.some(s=>s.hasAsIs&&s.hasToBe);
+  t1c++;if(hab){t1p++;}else if(slides.some(s=>s.hasAsIs||s.hasToBe)){t1p+=.5;}else{ded.push({tier:'Tier1',msg:'AS-IS/TO-BE 비교 구조 미확인',pts:-2});}
+  const t1=t1p/t1c*100;
+
+  let t2c=0,t2p=0;
+  const hgd=slides.some(s=>s.hasGraph)&&md.includes('그래프');
+  t2c++;if(hgd){t2p++;}else if(slides.some(s=>s.hasGraph)){t2p+=.4;ded.push({tier:'Tier2',msg:'그래프 추세 기술 불완전',pts:-2});}else{t2p++;}
+  const hr=md.includes('Rationale')||md.includes('변경 근거')||md.includes('결론')||md.includes('>');
+  t2c++;if(hr){t2p++;}else{ded.push({tier:'Tier2',msg:'Rationale 섹션 미확인',pts:-3});}
+  t2c++;if(/현상|원인|조치|발생|개선|최적화|파라미터/.test(md)){t2p++;}else{t2p+=.5;}
+  t2c++;if(/트레이드|응답성|안정성|vs|대비|반응/.test(md)){t2p++;}else{t2p+=.6;}
+  const cv=slides.filter(s=>s.tables.length||s.params.length||s.bodyShapes.length).length;
+  const cr=slides.length>0?cv/slides.length:0;
+  t2c++;t2p+=cr;if(cr<.5)ded.push({tier:'Tier2',msg:`슬라이드 커버리지 낮음 (${Math.round(cr*100)}%)`,pts:-2});
+  const t2=t2p/t2c*100;
+
+  let t3=0;
+  if(!md.includes('---')){t3+=1;ded.push({tier:'Tier3',msg:'YAML 헤더 누락',pts:-1});}
+  const mc=(md.match(/해당 내용이 없음/g)||[]).length;
+  if(mc>3){const p=Math.min(mc-3,5);t3+=p;ded.push({tier:'Tier3',msg:`누락 표기 과다 (${mc}개)`,pts:-p});}
+  if((md.match(/^## /mg)||[]).length<2){t3+=1;ded.push({tier:'Tier3',msg:'MD 섹션 구조 불완전',pts:-1});}
+  t3=Math.min(t3,15);
+  const final=Math.max(0,Math.min(100,(t1*.50)+(t2*.35)-t3));
+  return{tier1:Math.round(t1),tier2:Math.round(t2),tier3:t3,final:Math.round(final),deductions:ded};
+}
+
+// ── UI 렌더 ───────────────────────────────────────
+function renderUI(filename){
+  document.getElementById('uploadZone').style.display='none';
+  document.getElementById('toolbar').classList.add('visible');
+  document.getElementById('splitView').classList.add('visible');
+  document.getElementById('accStrip').classList.add('visible');
+
+  const tp=slides.reduce((s,sl)=>s+sl.params.length,0);
+  document.getElementById('statSlides').textContent=slides.length;
+  document.getElementById('statParams').textContent=tp;
+  document.getElementById('statStatus').textContent='변환 완료 ✓';
+  document.getElementById('toolbarFile').textContent=filename;
+  document.getElementById('pptFileName').textContent=filename;
+  document.getElementById('slideCounter').textContent=`1 / ${slides.length}`;
+
+  const list=document.getElementById('slideList'); list.innerHTML='';
+  slides.forEach((sl,i)=>{
+    const t=document.createElement('div');
+    t.className='slide-thumb'+(i===0?' active':'');
+    t.innerHTML=`<span class="thumb-num">${i+1}</span><div class="thumb-prev">${sl.title}</div>`;
+    t.onclick=()=>showSlide(i); list.appendChild(t);
+  });
+  showSlide(0); renderMD(); setTimeout(()=>animGauges(),200);
+  document.getElementById('step1').classList.remove('active');
+  document.getElementById('step1').classList.add('done');
+  document.getElementById('step2').classList.add('active');
+}
+
+function showSlide(idx){
+  currentSlide=idx;
+  const sl=slides[idx];
+  document.querySelectorAll('.slide-thumb').forEach((t,i)=>t.classList.toggle('active',i===idx));
+  document.getElementById('slideCounter').textContent=`${idx+1} / ${slides.length}`;
+  const ct=document.getElementById('slideContent');
+  let h=`<div class="slide-card">`;
+  h+=`<div class="slide-card-num">SLIDE ${sl.num}</div>`;
+  h+=`<div class="slide-card-title">${esc(sl.title)}</div>`;
+  if(sl.conditions.length){
+    h+=`<div style="margin-bottom:8px;">`;
+    sl.conditions.forEach(c=>h+=`<span class="schip cond">🌡 ${esc(c.label)}: ${esc(c.value)}</span>`);
+    h+=`</div>`;
+  }
+  let tags='';
+  if(sl.hasAsIs)  tags+=`<span class="stag tag-asis">AS-IS</span>`;
+  if(sl.hasToBe)  tags+=`<span class="stag tag-tobe">TO-BE</span>`;
+  if(sl.hasGraph) tags+=`<span class="stag tag-graph">그래프</span>`;
+  if(sl.hasNote)  tags+=`<span class="stag tag-note">결론/Note</span>`;
+  if(sl.hasCondition) tags+=`<span class="stag tag-cond">시험조건</span>`;
+  if(tags)h+=`<div style="margin-bottom:10px;">${tags}</div>`;
+  sl.tables.forEach((tbl,ti)=>{
+    if(!tbl.length)return;
+    h+=`<div style="margin:12px 0 5px;font-size:12px;color:#c2440c;font-weight:700;">📊 테이블 ${ti+1}</div>`;
+    h+=`<table class="stbl"><thead><tr>`;
+    tbl[0].forEach(c=>h+=`<th>${esc(c)}</th>`);
+    h+=`</tr></thead><tbody>`;
+    tbl.slice(1).forEach(r=>{h+=`<tr>`;r.forEach(c=>h+=`<td>${esc(c)}</td>`);h+=`</tr>`;});
+    h+=`</tbody></table>`;
+  });
+  if(sl.params.length){
+    h+=`<hr class="sline"><div style="font-size:12px;color:var(--muted);margin-bottom:5px;">추출된 수치</div><div>`;
+    [...new Set(sl.params.map(p=>p.raw))].slice(0,8).forEach(v=>{
+      h+=`<span class="schip cond" style="font-family:monospace;">${esc(v)}</span>`;
+    });
+    h+=`</div>`;
+  }
+  if(sl.bodyShapes.length){
+    h+=`<hr class="sline"><div class="slide-card-body">`;
+    sl.bodyShapes.slice(0,3).forEach(shape=>{
+      shape.split('\n').filter(l=>l.trim()).slice(0,5).forEach(l=>{
+        h+=`<div style="margin-bottom:3px;">• ${esc(l)}</div>`;
+      });
+    });
+    h+=`</div>`;
+  }
+  if(!sl.tables.length&&!sl.params.length&&!sl.bodyShapes.length)
+    h+=`<div style="color:var(--muted);font-size:12px;font-style:italic;margin-top:10px;">해당 내용이 없음</div>`;
+  h+=`</div>`; ct.innerHTML=h;
+}
+
+function renderMD(){
+  const el=document.getElementById('mdOutput');
+  let html=marked.parse(mdRaw);
+  html=html.replace(/<td>(해당 내용이 없음|—)<\/td>/g,'<td style="color:var(--muted);font-style:italic;border:1px dashed #c5cdd8;">해당 내용이 없음</td>');
+  html=html.replace(/<td>([^<]*(?:Nm|rpm|RPM|°C|ms|kW|%)[^<]*)<\/td>/g,'<td class="conf-ok">$1</td>');
+  el.innerHTML=html;
+}
+
+function animGauges(){
+  const C=201.1;
+  function set(id,tid,v,isD){
+    const el=document.getElementById(id),tx=document.getElementById(tid);
+    if(!el||!tx)return;
+    const pct=isD?v/15:v/100;
+    el.style.strokeDashoffset=C*(1-Math.min(pct,1));
+    tx.textContent=isD?`-${v}`:v;
+  }
+  set('gT1','t1v',scores.tier1,false);
+  set('gT2','t2v',scores.tier2,false);
+  set('gT3','t3v',scores.tier3,true);
+  set('gFin','finv',scores.final,false);
+  const bar=document.getElementById('thrBar'),f=scores.final;
+  if(f>=95)     {bar.className='thr-pill th-auto'; bar.textContent='✅ 자동 등록 (95%+)';}
+  else if(f>=85){bar.className='thr-pill th-light';bar.textContent='🔍 라이트 리뷰';}
+  else if(f>=70){bar.className='thr-pill th-full'; bar.textContent='⚠️ 시니어 전체 검수';}
+  else          {bar.className='thr-pill th-fail'; bar.textContent='❌ 재추출 필요';}
+  const dl=document.getElementById('dedList');
+  if(!scores.deductions.length){dl.innerHTML='<div style="font-size:12px;color:var(--green);padding:5px;">✅ 감점 사유 없음</div>';return;}
+  dl.innerHTML=scores.deductions.slice(0,5).map(d=>`
+    <div class="ded-item">
+      <span class="ded-tier">${d.tier}</span>
+      <span class="ded-msg">${d.msg}</span>
+      <span class="ded-pts">${d.pts}pt</span>
+    </div>`).join('');
+}
+
+// ── 에러 폴백 ─────────────────────────────────────
+function showErrFallback(fn,msg){
+  slides=[{num:1,title:'파일 파싱 오류',shapes:[],tables:[],allTexts:[],bodyShapes:[`오류: ${msg}`],
+    hasAsIs:false,hasToBe:false,hasGraph:false,hasNote:false,hasCondition:false,conditions:[],params:[]}];
+  mdRaw=`---\ntitle: 변환 오류\nsource: ${fn}\n---\n\n# 변환 실패\n\n해당 내용이 없음\n\n오류: ${msg}\n`;
+  scores={tier1:30,tier2:20,tier3:15,final:15,deductions:[{tier:'Tier3',msg:'파일 파싱 실패',pts:-15}]};
+  document.getElementById('uploadZone').style.display='none';
+  document.getElementById('toolbar').classList.add('visible');
+  document.getElementById('splitView').classList.add('visible');
+  document.getElementById('accStrip').classList.add('visible');
+  document.getElementById('statSlides').textContent='?';
+  document.getElementById('statParams').textContent='?';
+  document.getElementById('statStatus').textContent='오류';
+  document.getElementById('statStatus').style.color='var(--red)';
+  document.getElementById('toolbarFile').textContent=fn;
+  document.getElementById('pptFileName').textContent=fn;
+  document.getElementById('slideCounter').textContent='1/?';
+  renderMD();
+  document.getElementById('slideList').innerHTML='<div class="slide-thumb active" onclick="showSlide(0)"><span class="thumb-num">1</span><div class="thumb-prev">오류</div></div>';
+  showSlide(0); setTimeout(()=>animGauges(),200);
+}
+
+// ── 처리 애니메이션 ───────────────────────────────
+function showProc(show){
+  document.getElementById('procOverlay').classList.toggle('visible',show);
+  if(!show)document.querySelectorAll('.ps').forEach(s=>s.classList.remove('active'));
+}
+function animStep(id,delay){
+  return new Promise(resolve=>{
+    setTimeout(()=>{
+      const steps=['ps1','ps2','ps3','ps4','ps5'],idx=steps.indexOf(id);
+      steps.forEach((s,i)=>{
+        const el=document.getElementById(s);
+        if(i<idx)el.classList.add('done');
+        else if(i===idx){el.classList.remove('done');el.classList.add('active');}
+        else el.classList.remove('active','done');
+      }); resolve();
+    },delay);
+  });
+}
+
+// ── 유틸 ──────────────────────────────────────────
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function copyMd(){
+  navigator.clipboard.writeText(mdRaw).then(()=>{
+    const b=event.target;b.textContent='복사됨!';b.style.color='var(--green)';
+    setTimeout(()=>{b.textContent='복사';b.style.color='var(--cyan)';},1500);
+  });
+}
+function downloadMd(){
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([mdRaw],{type:'text/markdown'}));
+  a.download='vpc_converted.md'; a.click(); URL.revokeObjectURL(a.href);
+}
+
+// ── 워크플로우 네비 ───────────────────────────────
+function goStep(n){
+  document.getElementById('view1').style.display=n===1?'flex':'none';
+  document.getElementById('view2').classList.toggle('visible',n===2);
+  document.getElementById('view3').classList.toggle('visible',n===3);
+  [1,2,3].forEach(i=>{
+    const el=document.getElementById(`step${i}`);
+    el.classList.remove('active');
+    if(i===n)el.classList.add('active');
+  });
+}
+
+// ── 프롬프트 탭 ───────────────────────────────────
+function showPTab(idx,btn){
+  document.querySelectorAll('.ptab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.ptab-content').forEach(c=>c.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('pt'+idx).classList.add('active');
+}
+
+// ── Q&A 데모 ──────────────────────────────────────
+const KB=[
+  {q:['변속 충격','변속충격','shift shock'],
+   a:`**변속 충격 발생 시 확인 파라미터 (Top 3)**\n\n1. **토크 전환 속도 (Torque Transition Rate)** — AS-IS 대비 TO-BE 값이 급격히 변화하는 경우 완충 구간을 늘려 충격을 줄입니다\n2. **클러치 압력 램프 타임 (Clutch Pressure Ramp Time)** — 접합부 슬립 구간 조정 필요\n3. **변속 완료 판정 임계값 (RPM)** — ±10rpm 이내로 조정 권장\n\n⚠️ **주의**: 응답성↔안정성 트레이드오프 고려`},
+  {q:['rpm 튐','rpm 과잉','rpm spike'],
+   a:`**RPM 튐 현상 확인 파라미터 (Top 3)**\n\n1. **아이들 RPM 목표값** — 허용 범위 ±10rpm 이내 재설정\n2. **연료 분사 타이밍 보정** — 과도한 보정값이 RPM 오버슈트 유발\n3. **부하 감지 민감도** — 필터링 계수 조정\n\n📊 **Constraint**: VPC 수치 변경 시 반드시 ±2σ 범위 내 유지`},
+  {q:['soc','배터리','전기차','ev','hev'],
+   a:`**SOC 관련 제어 파라미터 확인 사항**\n\n1. **SOC 윈도우 경계값** — 상한/하한 여유 구간 (±5% 권장)\n2. **회생제동 강도 매핑** — SOC 레벨별 회생 허용량 테이블\n3. **모터/엔진 전환 SOC 임계점** — 히스테리시스 구간 확보\n\n📋 **보고서 필수 항목**: 차종, 외기온, 초기SOC, AS-IS/TO-BE 수치, 결론`}
+];
+
+function sendQA(){
+  const inp=document.getElementById('qaInput'),q=inp.value.trim(); if(!q)return;
+  const msgs=document.getElementById('qaMessages');
+  msgs.innerHTML+=`<div style="align-self:flex-end;background:#e0f2fe;border:1px solid #7dd3fc;border-radius:8px;padding:8px 11px;font-size:12px;color:#0c4a6e;max-width:80%;font-weight:500;">${esc(q)}</div>`;
+  inp.value='';
+  setTimeout(()=>{
+    const ql=q.toLowerCase();
+    let ans=null; for(const kb of KB){if(kb.q.some(k=>ql.includes(k))){ans=kb.a;break;}}
+    if(!ans)ans=`「${q.slice(0,30)}」에 대한 유사 사례를 지식베이스에서 검색 중입니다.\n\nStep 1에서 VPC 보고서를 업로드하면 자동으로 지식베이스에 추가됩니다.\n\n**일반 가이드**: VPC 파라미터 수정 전 반드시 AS-IS를 기록하고, TO-BE 수치와 변경 근거(Rationale)를 함께 문서화하세요.`;
+    const fmt=ans.replace(/\*\*(.*?)\*\*/g,'<strong style="color:var(--cyan)">$1</strong>').replace(/\n/g,'<br>');
+    msgs.innerHTML+=`<div style="background:#f5f3ff;border:1px solid #ddd6fe;border-radius:8px;padding:8px 11px;font-size:12px;color:#3730a3;max-width:85%;line-height:1.7;">${fmt}</div>`;
+    msgs.scrollTop=msgs.scrollHeight;
+  },600);
+}
+</script>
+</body>
+</html>

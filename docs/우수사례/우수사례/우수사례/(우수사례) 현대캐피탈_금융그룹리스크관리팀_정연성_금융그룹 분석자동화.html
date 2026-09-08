@@ -1,0 +1,1360 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>금융복합기업집단 공시 분석 플랫폼 | Hyundai Capital Services</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+/* ══ RESET ═══════════════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 14px; }
+
+/* ══ 현대캐피탈 공식 디자인 토큰 ══════════════════════════════
+   홈페이지 분석 결과:
+   - 메인 네이비  : #0d2b6e  (gnb, footer 배경, 헤딩)
+   - 포인트 블루  : #00aad2  (txt_blue, bg_blue, btn_grd)
+   - 흰 배경      : #ffffff
+   - 섹션 배경    : #f7f8fa  (bg_gradient 계열)
+   - 테두리       : #e0e4e9
+   - 본문 텍스트  : #1a1a1a / #333333
+   - 보조 텍스트  : #666666
+   - 힌트 텍스트  : #999999
+   - 포인트 레드  : #e63311  (경고, 강조)
+   - 성공 그린    : #00845a
+   - 앰버         : #c07800
+══════════════════════════════════════════════════════════════ */
+:root {
+  --hc-navy:       #0d2b6e;
+  --hc-navy-dark:  #081d4d;
+  --hc-navy-mid:   #1a3d8f;
+  --hc-blue:       #00aad2;
+  --hc-blue-dark:  #008cb2;
+  --hc-blue-light: #e8f7fb;
+  --hc-blue-pale:  #f0fafd;
+  --red:           #e63311;
+  --red-light:     #fff2ef;
+  --green:         #00845a;
+  --green-light:   #eaf6f2;
+  --amber:         #c07800;
+  --amber-light:   #fef8ec;
+  --bg-white:      #ffffff;
+  --bg-section:    #f7f8fa;
+  --bg-input:      #f9fafb;
+  --border:        #e0e4e9;
+  --border-mid:    #cdd3db;
+  --text-dark:     #1a1a1a;
+  --text-body:     #333333;
+  --text-sub:      #666666;
+  --text-hint:     #999999;
+  --shadow-xs:     0 1px 3px rgba(13,43,110,0.07);
+  --shadow-sm:     0 2px 8px rgba(13,43,110,0.09);
+  --shadow-md:     0 4px 20px rgba(13,43,110,0.12);
+  --radius-sm:     4px;
+  --radius-md:     8px;
+  --radius-lg:     12px;
+  --mono: 'IBM Plex Mono', monospace;
+  --font-scale: 1;
+  --chart-h: 160px;
+}
+
+body {
+  font-family: 'Noto Sans KR', sans-serif;
+  background: var(--bg-section);
+  color: var(--text-body);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ══ SCROLLBAR ═══════════════════════════════════════════════ */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: var(--bg-section); }
+::-webkit-scrollbar-thumb { background: var(--border-mid); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #aab4c0; }
+
+/* ══════════════════════════════════════════════════════════════
+   LOGIN — 현대캐피탈 스타일
+   배경: 메인 네이비 그라데이션 (bg_gradient)
+══════════════════════════════════════════════════════════════ */
+#login-screen {
+  position: fixed; inset: 0; z-index: 9999;
+  background: linear-gradient(160deg, #0d2b6e 0%, #1a3d8f 40%, #0a5fa0 100%);
+  display: flex; align-items: center; justify-content: center;
+}
+.login-card {
+  background: #fff;
+  border-radius: var(--radius-lg);
+  width: 400px;
+  padding: 44px 40px 36px;
+  box-shadow: 0 32px 80px rgba(0,0,0,0.28);
+}
+.login-logo-row {
+  display: flex; align-items: center; gap: 0;
+  justify-content: center; margin-bottom: 28px;
+}
+/* HCS 로고 — 현대캐피탈 스타일 그대로 */
+.login-brand-mark {
+  display: flex; align-items: center; gap: 10px;
+}
+.login-brand-mark .hcs-tag {
+  background: var(--hc-navy);
+  color: #fff;
+  font-size: 15px; font-weight: 700; letter-spacing: 3px;
+  padding: 7px 14px; border-radius: var(--radius-sm);
+}
+.login-brand-mark .brand-name {
+  font-size: 13px; font-weight: 500; color: var(--text-sub); letter-spacing: .3px;
+}
+.login-title {
+  font-size: 22px; font-weight: 700; color: var(--hc-navy);
+  text-align: center; margin-bottom: 4px; letter-spacing: -.3px;
+}
+.login-subtitle {
+  font-size: 12px; color: var(--text-hint); text-align: center; margin-bottom: 28px;
+}
+.login-field { margin-bottom: 12px; }
+.login-field label {
+  display: block; font-size: 11px; font-weight: 700; color: var(--text-sub);
+  text-transform: uppercase; letter-spacing: .5px; margin-bottom: 5px;
+}
+.login-field input {
+  width: 100%; padding: 11px 14px;
+  border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+  font-size: 13px; font-family: 'Noto Sans KR', sans-serif;
+  color: var(--text-dark); background: var(--bg-white);
+  outline: none; transition: border-color .15s, box-shadow .15s;
+}
+.login-field input:focus {
+  border-color: var(--hc-blue);
+  box-shadow: 0 0 0 3px rgba(0,170,210,0.12);
+}
+.login-error { color: var(--red); font-size: 11px; margin-top: 6px; display: none; }
+/* btn_grd — 현대캐피탈 그라데이션 버튼 */
+.login-btn {
+  width: 100%; padding: 13px;
+  background: linear-gradient(135deg, var(--hc-blue) 0%, var(--hc-blue-dark) 100%);
+  color: #fff; border: none; border-radius: var(--radius-sm);
+  font-size: 14px; font-weight: 700; cursor: pointer;
+  font-family: 'Noto Sans KR', sans-serif; margin-top: 8px;
+  letter-spacing: .3px; transition: opacity .15s;
+}
+.login-btn:hover { opacity: .88; }
+.login-hint {
+  font-size: 11px; color: var(--text-hint); text-align: center; margin-top: 18px; line-height: 1.7;
+}
+.login-hint a { color: var(--hc-blue); text-decoration: none; }
+
+/* ══════════════════════════════════════════════════════════════
+   HEADER — 현대캐피탈 gnb 스타일
+   배경: #0d2b6e (메인 네이비)
+   로고 아래 하이라이트 라인: #00aad2
+══════════════════════════════════════════════════════════════ */
+.header {
+  background: var(--hc-navy);
+  height: 56px;
+  display: flex; align-items: center;
+  padding: 0 24px;
+  justify-content: space-between;
+  flex-shrink: 0; position: relative; z-index: 100;
+}
+/* 현대캐피탈 특징 — 헤더 하단 포인트 라인 없음, 대신 로고 바로 우측에 포인트 */
+.header-left { display: flex; align-items: center; gap: 14px; }
+.home-btn {
+  width: 32px; height: 32px; border-radius: var(--radius-sm);
+  background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.18);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; color: rgba(255,255,255,0.8); font-size: 14px;
+  transition: all .15s; flex-shrink: 0;
+}
+.home-btn:hover { background: rgba(255,255,255,0.2); color: #fff; }
+.logo-wrap { display: flex; align-items: center; gap: 10px; }
+/* HCS 뱃지 — 현대캐피탈 스타일 */
+.logo-hcs {
+  font-size: 13px; font-weight: 700; color: #fff; letter-spacing: 2.5px;
+  background: var(--hc-blue); padding: 4px 11px;
+  border-radius: var(--radius-sm);
+}
+.logo-divider { width: 1px; height: 16px; background: rgba(255,255,255,0.25); }
+.logo-text { font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.9); letter-spacing: -.2px; }
+.logo-sub { font-size: 11px; color: rgba(255,255,255,0.4); }
+.header-right { display: flex; align-items: center; gap: 12px; }
+.live-indicator {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 11px; color: var(--hc-blue);
+  border: 1px solid rgba(0,170,210,0.4);
+  padding: 3px 9px; border-radius: 20px;
+  background: rgba(0,170,210,0.08);
+}
+.live-dot {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: var(--hc-blue); animation: livepulse 2s infinite;
+}
+@keyframes livepulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.8)} }
+.header-clock { font-family: var(--mono); font-size: 11px; color: rgba(255,255,255,0.38); }
+.header-user-info { display: flex; align-items: center; gap: 7px; }
+.user-avatar {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: var(--hc-blue); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700; flex-shrink: 0;
+}
+.user-name { font-size: 12px; color: rgba(255,255,255,0.85); }
+.user-role { font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 3px; }
+.role-admin { background: rgba(230,51,17,0.2); color: #ff8875; border: 1px solid rgba(230,51,17,0.35); }
+.role-user  { background: rgba(0,170,210,0.2); color: #6dd5ea; border: 1px solid rgba(0,170,210,0.35); }
+.role-view  { background: rgba(0,132,90,0.2);  color: #5dd4b0; border: 1px solid rgba(0,132,90,0.35); }
+/* ⚙ 기어 버튼 */
+.gear-btn {
+  width: 30px; height: 30px; border-radius: var(--radius-sm);
+  background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.14);
+  color: rgba(255,255,255,0.6); font-size: 15px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; transition: all .2s;
+}
+.gear-btn:hover { background: rgba(255,255,255,0.18); color: #fff; transform: rotate(55deg); }
+/* btn_wht — 현대캐피탈 흰색 테두리 버튼 */
+.logout-btn {
+  padding: 5px 11px; font-size: 11px; border-radius: var(--radius-sm);
+  background: transparent; border: 1px solid rgba(255,255,255,0.3);
+  color: rgba(255,255,255,0.7); cursor: pointer;
+  font-family: 'Noto Sans KR', sans-serif; transition: all .15s;
+}
+.logout-btn:hover { background: rgba(255,255,255,0.1); color: #fff; border-color: rgba(255,255,255,0.5); }
+
+/* ══════════════════════════════════════════════════════════════
+   MAIN LAYOUT
+══════════════════════════════════════════════════════════════ */
+.main-wrap { flex: 1; display: flex; overflow: hidden; }
+
+/* ── LEFT: 대시보드 ──────────────────────────────────────────── */
+.panel-dash {
+  flex: 1; min-width: 0;
+  display: flex; flex-direction: column; overflow: hidden;
+  border-right: 1px solid var(--border);
+  background: var(--bg-white);
+}
+
+/* 탭 툴바 */
+.panel-toolbar {
+  background: var(--bg-white);
+  border-bottom: 1px solid var(--border);
+  padding: 0 18px; height: 46px;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-shrink: 0;
+  box-shadow: var(--shadow-xs);
+}
+.tab-group { display: flex; gap: 2px; }
+.tab {
+  padding: 7px 16px; font-size: calc(11px * var(--font-scale));
+  font-weight: 500; border-radius: var(--radius-sm);
+  cursor: pointer; color: var(--text-hint);
+  border: 1px solid transparent; transition: all .15s;
+  font-family: 'Noto Sans KR', sans-serif;
+}
+.tab:hover:not(.active) { background: var(--bg-section); color: var(--text-sub); }
+.tab.active {
+  background: var(--hc-blue-light);
+  color: var(--hc-navy); font-weight: 700;
+  border-color: rgba(0,170,210,0.3);
+}
+.toolbar-r { display: flex; align-items: center; gap: 8px; }
+.t-select {
+  font-size: 11px; background: var(--bg-white);
+  border: 1px solid var(--border); border-radius: var(--radius-sm);
+  color: var(--text-sub); padding: 5px 10px;
+  font-family: 'Noto Sans KR', sans-serif; cursor: pointer; outline: none;
+}
+.t-select:focus { border-color: var(--hc-blue); }
+.t-btn {
+  font-size: 11px; background: var(--bg-section);
+  border: 1px solid var(--border); border-radius: var(--radius-sm);
+  color: var(--text-sub); padding: 5px 11px; cursor: pointer;
+  font-family: 'Noto Sans KR', sans-serif; transition: all .15s;
+}
+.t-btn:hover { background: var(--hc-blue-light); border-color: rgba(0,170,210,0.4); color: var(--hc-navy); }
+
+/* 필터 바 */
+.filter-bar {
+  background: var(--bg-section);
+  border-bottom: 1px solid var(--border);
+  padding: 7px 18px; display: flex; align-items: center;
+  gap: 6px; flex-shrink: 0; flex-wrap: wrap;
+}
+.filter-label {
+  font-size: 10px; color: var(--text-hint);
+  font-weight: 700; text-transform: uppercase; letter-spacing: .5px;
+  white-space: nowrap;
+}
+/* 현대캐피탈 스타일 필터 칩 */
+.chip {
+  padding: 3px 11px; font-size: 10px; font-weight: 500;
+  border-radius: 20px; cursor: pointer; transition: all .12s;
+  font-family: 'Noto Sans KR', sans-serif; white-space: nowrap;
+  background: var(--bg-white); border: 1px solid var(--border); color: var(--text-sub);
+}
+.chip.on { background: var(--hc-navy); border-color: var(--hc-navy); color: #fff; }
+.chip:hover:not(.on) { background: var(--hc-blue-light); border-color: rgba(0,170,210,0.4); color: var(--hc-navy); }
+.chip.all  { background: var(--hc-blue-light); border-color: rgba(0,170,210,0.4); color: var(--hc-navy); font-weight: 700; }
+.chip.all:hover  { background: var(--hc-blue); color: #fff; border-color: var(--hc-blue); }
+.chip.none { background: var(--red-light); border-color: rgba(230,51,17,0.3); color: var(--red); font-weight: 700; }
+.chip.none:hover { background: var(--red); color: #fff; border-color: var(--red); }
+.chip-div { width: 1px; height: 14px; background: var(--border); margin: 0 2px; }
+
+/* 대시보드 본문 */
+.dash-body { flex: 1; overflow-y: auto; padding: 16px 18px; background: var(--bg-section); }
+
+/* KPI 카드 */
+.kpi-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin-bottom: 16px; }
+.kpi {
+  background: var(--bg-white); border: 1px solid var(--border);
+  border-radius: var(--radius-md); padding: 14px 16px;
+  box-shadow: var(--shadow-xs); position: relative; overflow: hidden;
+}
+/* 현대캐피탈 포인트 블루 상단 라인 */
+.kpi::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: var(--hc-blue);
+}
+.kpi.kpi-red::before { background: var(--red); }
+.kpi-label {
+  font-size: calc(10px * var(--font-scale)); color: var(--text-hint);
+  font-weight: 500; margin-bottom: 6px; text-transform: uppercase; letter-spacing: .4px;
+}
+.kpi-val {
+  font-size: calc(22px * var(--font-scale)); font-weight: 700;
+  color: var(--hc-navy); font-family: var(--mono); line-height: 1;
+}
+.kpi-unit { font-size: calc(11px * var(--font-scale)); font-weight: 400; color: var(--text-hint); margin-left: 2px; }
+.kpi-delta { font-size: 10px; margin-top: 5px; }
+.delta-up   { color: var(--green); }
+.delta-down { color: var(--red); }
+.delta-neu  { color: var(--text-hint); }
+
+/* 섹션 헤더 */
+.section-hdr {
+  font-size: 10px; font-weight: 700; color: var(--text-hint);
+  text-transform: uppercase; letter-spacing: .7px; margin-bottom: 8px;
+  display: flex; align-items: center; gap: 8px;
+}
+.section-hdr::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+/* 차트 카드 */
+.chart-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+.chart-card {
+  background: var(--bg-white); border: 1px solid var(--border);
+  border-radius: var(--radius-md); padding: 14px; box-shadow: var(--shadow-xs);
+}
+.chart-card-wide {
+  background: var(--bg-white); border: 1px solid var(--border);
+  border-radius: var(--radius-md); padding: 14px;
+  box-shadow: var(--shadow-xs); margin-bottom: 10px; overflow-x: auto;
+}
+.chart-title {
+  font-size: calc(11px * var(--font-scale)); font-weight: 700;
+  color: var(--text-sub); margin-bottom: 10px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.chart-wrap { position: relative; height: var(--chart-h); }
+
+/* 데이터 테이블 */
+.dtable { width: 100%; border-collapse: collapse; font-size: calc(11px * var(--font-scale)); min-width: 480px; }
+.dtable th {
+  background: var(--bg-section); color: var(--text-hint); font-weight: 700;
+  text-align: left; padding: 7px 10px; border-bottom: 2px solid var(--border);
+  font-size: calc(10px * var(--font-scale)); text-transform: uppercase; letter-spacing: .4px; white-space: nowrap;
+}
+.dtable td { padding: 8px 10px; border-bottom: 1px solid var(--border); color: var(--text-sub); vertical-align: middle; }
+.dtable tbody tr:hover td { background: var(--hc-blue-pale); }
+.dtable td strong { color: var(--text-dark); font-weight: 700; }
+.mono { font-family: var(--mono); }
+.vup   { color: var(--green);  font-family: var(--mono); font-weight: 600; }
+.vdown { color: var(--red);    font-family: var(--mono); font-weight: 600; }
+
+/* 현대캐피탈 스타일 필 */
+.pill { display: inline-block; padding: 2px 9px; border-radius: 20px; font-size: 10px; font-weight: 600; }
+.p-blue   { background: var(--hc-blue-light); color: var(--hc-navy); border: 1px solid rgba(0,170,210,.3); }
+.p-navy   { background: var(--hc-navy); color: #fff; }
+.p-green  { background: var(--green-light); color: var(--green); border: 1px solid rgba(0,132,90,.25); }
+.p-amber  { background: var(--amber-light); color: var(--amber); border: 1px solid rgba(192,120,0,.25); }
+.p-red    { background: var(--red-light); color: var(--red); border: 1px solid rgba(230,51,17,.25); }
+.p-gray   { background: var(--bg-section); color: var(--text-hint); border: 1px solid var(--border); }
+
+/* ── RIGHT: AI 채팅 ─────────────────────────────────────────── */
+.panel-chat {
+  width: 338px; flex-shrink: 0;
+  display: flex; flex-direction: column;
+  background: var(--bg-white); border-left: 1px solid var(--border);
+}
+/* 채팅 헤더 — 네이비 */
+.chat-hdr {
+  background: var(--hc-navy);
+  padding: 12px 14px; flex-shrink: 0;
+  border-bottom: 3px solid var(--hc-blue);
+}
+.chat-hdr-inner { display: flex; align-items: center; gap: 9px; }
+.ai-avatar {
+  width: 34px; height: 34px; border-radius: 50%;
+  background: var(--hc-blue);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 700; color: #fff; flex-shrink: 0;
+}
+.chat-name { font-size: 13px; font-weight: 700; color: #fff; }
+.chat-sub  { font-size: 10px; color: rgba(255,255,255,0.5); margin-top: 1px; }
+.rag-row {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 10px; color: var(--hc-blue);
+  margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.1);
+}
+.rag-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--hc-blue); animation: livepulse 1.5s infinite; }
+/* 채팅 바디 */
+.chat-body {
+  flex: 1; overflow-y: auto; padding: 12px;
+  display: flex; flex-direction: column; gap: 10px;
+  background: var(--bg-section);
+}
+.msg-ai .msg-from { font-size: 10px; font-weight: 700; color: var(--hc-blue); margin-bottom: 3px; }
+.msg-ai .bubble {
+  background: var(--bg-white); border: 1px solid var(--border);
+  border-radius: 0 var(--radius-md) var(--radius-md) var(--radius-md);
+  padding: 10px 13px; font-size: calc(12px * var(--font-scale));
+  color: var(--text-sub); line-height: 1.7; box-shadow: var(--shadow-xs);
+}
+.msg-ai .bubble strong { color: var(--text-dark); }
+.msg-user { align-self: flex-end; max-width: 88%; }
+/* btn_grd 계열 채팅 말풍선 */
+.msg-user .bubble {
+  background: var(--hc-navy); color: #d9eaf7;
+  border-radius: var(--radius-md) 0 var(--radius-md) var(--radius-md);
+  padding: 9px 13px; font-size: calc(12px * var(--font-scale)); line-height: 1.6;
+}
+.src-tag {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: var(--hc-blue-light); color: var(--hc-navy-mid); font-size: 10px; font-weight: 600;
+  padding: 3px 8px; border-radius: var(--radius-sm);
+  margin: 5px 3px 0 0; cursor: pointer;
+  border: 1px solid rgba(0,170,210,.35); transition: all .12s;
+}
+.src-tag:hover { background: var(--hc-blue); color: #fff; border-color: var(--hc-blue); }
+.chat-input-area {
+  padding: 10px; border-top: 1px solid var(--border);
+  background: var(--bg-white); flex-shrink: 0;
+}
+.suggestions { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 8px; }
+/* btn_wht 계열 제안 버튼 */
+.sugg {
+  font-size: 10px; font-weight: 500; padding: 4px 10px;
+  border: 1px solid var(--hc-blue); border-radius: 20px;
+  color: var(--hc-blue); background: var(--bg-white); cursor: pointer;
+  font-family: 'Noto Sans KR', sans-serif; transition: all .12s;
+}
+.sugg:hover { background: var(--hc-blue); color: #fff; }
+.input-row { display: flex; gap: 6px; }
+.chat-input {
+  flex: 1; padding: 9px 12px; background: var(--bg-input);
+  border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+  font-size: 12px; color: var(--text-dark);
+  font-family: 'Noto Sans KR', sans-serif; outline: none; transition: border .15s;
+}
+.chat-input:focus { border-color: var(--hc-blue); background: var(--bg-white); }
+.chat-input::placeholder { color: var(--text-hint); }
+/* btn_grd 전송 버튼 */
+.send-btn {
+  background: linear-gradient(135deg, var(--hc-blue), var(--hc-blue-dark));
+  color: #fff; border: none; border-radius: var(--radius-sm);
+  padding: 9px 14px; cursor: pointer; font-size: 12px; font-weight: 700;
+  font-family: 'Noto Sans KR', sans-serif; transition: opacity .15s;
+}
+.send-btn:hover { opacity: .86; }
+.typing { display: flex; gap: 4px; align-items: center; padding: 2px 0; }
+.tdot { width: 6px; height: 6px; border-radius: 50%; background: var(--border-mid); animation: tybounce 1.2s infinite; }
+.tdot:nth-child(2){animation-delay:.2s}.tdot:nth-child(3){animation-delay:.4s}
+@keyframes tybounce{0%,80%,100%{opacity:.25;transform:translateY(0)}40%{opacity:1;transform:translateY(-3px)}}
+
+/* ══════════════════════════════════════════════════════════════
+   BOTTOM — 공시원문 + 뉴스
+   상단 네이비 바, 흰 배경
+══════════════════════════════════════════════════════════════ */
+.panel-bottom {
+  height: 174px; flex-shrink: 0;
+  background: var(--bg-white); border-top: 3px solid var(--hc-navy);
+  display: flex; flex-direction: column;
+}
+.bottom-hdr {
+  background: var(--hc-navy); padding: 7px 18px;
+  display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
+}
+.bh-left { display: flex; align-items: center; gap: 16px; }
+.bh-item { display: flex; align-items: center; gap: 7px; }
+.bh-label { font-size: 11px; font-weight: 700; color: rgba(255,255,255,.85); text-transform: uppercase; letter-spacing: .5px; }
+.src-bdg { background: var(--hc-blue); color: #fff; font-size: 9px; font-weight: 700; padding: 2px 7px; border-radius: 3px; }
+.news-bdg { background: var(--red); color: #fff; font-size: 9px; font-weight: 700; padding: 2px 7px; border-radius: 3px; }
+.bh-right { font-size: 10px; color: rgba(255,255,255,0.3); }
+.bottom-body { flex: 1; display: flex; overflow: hidden; }
+
+/* 공시원문 */
+.src-pane { flex: 1; display: flex; overflow: hidden; border-right: 1px solid var(--border); }
+.src-list {
+  width: 194px; flex-shrink: 0; overflow-y: auto; padding: 6px;
+  border-right: 1px solid var(--border); background: var(--bg-section);
+}
+.src-item {
+  padding: 6px 8px; border-radius: var(--radius-sm); cursor: pointer;
+  font-size: 11px; color: var(--text-sub); border: 1px solid transparent;
+  display: flex; align-items: flex-start; gap: 6px; transition: all .12s; margin-bottom: 3px;
+}
+.src-item:hover { background: var(--hc-blue-pale); border-color: rgba(0,170,210,.2); }
+.src-item.active { background: var(--hc-blue-light); border-color: rgba(0,170,210,.35); color: var(--hc-navy); }
+.src-nm { font-weight: 600; font-size: 10px; line-height: 1.4; color: var(--text-dark); }
+.src-pg { font-size: 10px; color: var(--text-hint); margin-top: 1px; }
+.src-excerpt { flex: 1; padding: 10px 14px; overflow-y: auto; font-size: 11.5px; color: var(--text-sub); line-height: 1.8; }
+.src-pgref {
+  font-family: var(--mono); font-size: 10px; color: var(--text-hint);
+  margin-bottom: 7px; display: flex; align-items: center; gap: 6px;
+}
+/* 하이라이트 — 현대캐피탈 포인트 블루 계열 */
+.hl   { background: #fff5b4; color: #7a5c00; padding: 0 3px; border-radius: 2px; }
+.hl-r { background: var(--red-light); color: var(--red); padding: 0 3px; border-radius: 2px; }
+.pg-tag { background: var(--hc-blue-light); color: var(--hc-navy); font-weight: 700; padding: 1px 7px; border-radius: 3px; border: 1px solid rgba(0,170,210,.3); }
+
+/* 뉴스 패널 */
+.news-pane {
+  width: 292px; flex-shrink: 0; display: flex; flex-direction: column;
+  background: var(--bg-white); border-left: 1px solid var(--border);
+}
+.news-hdr {
+  padding: 6px 10px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
+  background: var(--bg-section);
+}
+.news-hdr-title { font-size: 10px; font-weight: 700; color: var(--text-hint); text-transform: uppercase; letter-spacing: .5px; }
+.news-filter {
+  font-size: 10px; background: var(--bg-white); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); color: var(--text-sub); padding: 3px 8px;
+  font-family: 'Noto Sans KR', sans-serif; outline: none; cursor: pointer;
+}
+.news-filter:focus { border-color: var(--hc-blue); }
+.news-list { flex: 1; overflow-y: auto; padding: 4px 7px; }
+.news-item {
+  padding: 6px 7px; border-radius: var(--radius-sm); margin-bottom: 3px;
+  cursor: pointer; border: 1px solid transparent; transition: all .12s;
+}
+.news-item:hover { background: var(--hc-blue-pale); border-color: rgba(0,170,210,.2); }
+.news-item-top { display: flex; align-items: center; gap: 5px; margin-bottom: 3px; }
+.ng-badge {
+  font-size: 9px; font-weight: 700; padding: 1px 6px; border-radius: 3px;
+  background: var(--hc-blue-light); color: var(--hc-navy); border: 1px solid rgba(0,170,210,.3);
+}
+.ng-badge.r { background: var(--red-light); color: var(--red); border-color: rgba(230,51,17,.25); }
+.ng-badge.a { background: var(--amber-light); color: var(--amber); border-color: rgba(192,120,0,.25); }
+.ng-badge.g { background: var(--green-light); color: var(--green); border-color: rgba(0,132,90,.25); }
+.news-date { font-size: 9px; color: var(--text-hint); font-family: var(--mono); margin-left: auto; }
+.news-title { font-size: 11px; color: var(--text-sub); line-height: 1.4; }
+.news-title:hover { color: var(--hc-navy); }
+.news-source { font-size: 9px; color: var(--text-hint); margin-top: 2px; }
+
+/* ══════════════════════════════════════════════════════════════
+   설정 오버레이 — 슬라이드인
+══════════════════════════════════════════════════════════════ */
+.ov-bg {
+  position: fixed; inset: 0; background: rgba(13,43,110,0.35); z-index: 800;
+  display: none; align-items: flex-start; justify-content: flex-end;
+}
+.ov-bg.open { display: flex; }
+.settings-panel {
+  width: 380px; height: 100%; background: var(--bg-white);
+  border-left: 1px solid var(--border); overflow-y: auto;
+  box-shadow: -8px 0 40px rgba(13,43,110,0.15);
+  display: flex; flex-direction: column;
+}
+.settings-hdr {
+  background: var(--hc-navy); padding: 16px 20px;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-shrink: 0; border-bottom: 3px solid var(--hc-blue);
+}
+.settings-hdr-title { font-size: 14px; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 8px; }
+.settings-close {
+  width: 28px; height: 28px; border-radius: var(--radius-sm);
+  background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.2);
+  color: #fff; cursor: pointer; font-size: 15px;
+  display: flex; align-items: center; justify-content: center; transition: all .15s;
+}
+.settings-close:hover { background: rgba(230,51,17,.35); border-color: rgba(230,51,17,.5); }
+.s-body { padding: 20px; }
+.s-sec { margin-bottom: 24px; }
+.s-sec-title {
+  font-size: 10px; font-weight: 700; color: var(--text-hint); text-transform: uppercase;
+  letter-spacing: .7px; margin-bottom: 12px; padding-bottom: 7px;
+  border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 6px;
+}
+.s-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.s-row label { font-size: 12px; color: var(--text-body); }
+.s-sel {
+  font-size: 11px; background: var(--bg-white); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); color: var(--text-dark); padding: 5px 10px;
+  font-family: 'Noto Sans KR', sans-serif; outline: none; cursor: pointer; min-width: 120px;
+}
+.s-sel:focus { border-color: var(--hc-blue); }
+/* 토글 */
+.toggle { position: relative; width: 38px; height: 20px; }
+.toggle input { opacity: 0; width: 0; height: 0; }
+.toggle-sl {
+  position: absolute; inset: 0; background: var(--border);
+  border-radius: 20px; cursor: pointer; transition: .25s; border: 1px solid var(--border-mid);
+}
+.toggle-sl::before {
+  content: ''; position: absolute; width: 14px; height: 14px;
+  left: 2px; top: 2px; background: #fff; border-radius: 50%;
+  transition: .25s; box-shadow: 0 1px 3px rgba(0,0,0,.2);
+}
+.toggle input:checked + .toggle-sl { background: var(--hc-blue); border-color: var(--hc-blue-dark); }
+.toggle input:checked + .toggle-sl::before { transform: translateX(18px); }
+/* 색상 스와치 */
+.swatches { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+.swatch {
+  width: 30px; height: 30px; border-radius: var(--radius-sm); cursor: pointer;
+  border: 2px solid transparent; transition: all .15s; box-shadow: var(--shadow-xs);
+}
+.swatch:hover { transform: scale(1.1); }
+.swatch.active { border-color: var(--text-dark); box-shadow: 0 0 0 3px rgba(0,170,210,.25); }
+/* 폰트 크기 */
+.fsz-btns { display: flex; gap: 6px; }
+.fsz-btn {
+  padding: 5px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border);
+  background: var(--bg-section); color: var(--text-sub);
+  font-family: 'Noto Sans KR', sans-serif; cursor: pointer; font-size: 11px; transition: all .12s;
+}
+.fsz-btn.active { background: var(--hc-navy); border-color: var(--hc-navy); color: #fff; }
+.fsz-btn:hover:not(.active) { background: var(--hc-blue-light); border-color: rgba(0,170,210,.4); color: var(--hc-navy); }
+/* 유저 테이블 */
+.utbl { width: 100%; border-collapse: collapse; font-size: 11px; margin-top: 8px; }
+.utbl th {
+  background: var(--bg-section); color: var(--text-hint); font-weight: 700;
+  text-align: left; padding: 6px 9px; border-bottom: 2px solid var(--border);
+  font-size: 10px; text-transform: uppercase; letter-spacing: .3px;
+}
+.utbl td { padding: 7px 9px; border-bottom: 1px solid var(--border); color: var(--text-sub); }
+.utbl tr:hover td { background: var(--hc-blue-pale); }
+.rb-admin { background: var(--red-light); color: var(--red); border: 1px solid rgba(230,51,17,.25); font-size: 9px; padding: 2px 7px; border-radius: 3px; font-weight: 700; }
+.rb-user  { background: var(--hc-blue-light); color: var(--hc-navy); border: 1px solid rgba(0,170,210,.3); font-size: 9px; padding: 2px 7px; border-radius: 3px; font-weight: 700; }
+.rb-view  { background: var(--green-light); color: var(--green); border: 1px solid rgba(0,132,90,.25); font-size: 9px; padding: 2px 7px; border-radius: 3px; font-weight: 700; }
+.ua-btn {
+  font-size: 10px; padding: 3px 8px; border-radius: var(--radius-sm);
+  border: 1px solid var(--border); background: var(--bg-section); color: var(--text-sub);
+  font-family: 'Noto Sans KR', sans-serif; transition: all .12s; margin-right: 2px; cursor: pointer;
+}
+.ua-btn:hover { background: var(--hc-blue-light); border-color: rgba(0,170,210,.4); color: var(--hc-navy); }
+.ua-del { border-color: rgba(230,51,17,.3); color: var(--red); }
+.ua-del:hover { background: var(--red); color: #fff; border-color: var(--red); }
+.add-user-btn {
+  width: 100%; padding: 9px; border-radius: var(--radius-sm); margin-top: 10px;
+  background: var(--bg-section); border: 1.5px dashed rgba(0,170,210,.5);
+  color: var(--hc-navy-mid); cursor: pointer; font-size: 12px;
+  font-family: 'Noto Sans KR', sans-serif; transition: all .15s;
+}
+.add-user-btn:hover { background: var(--hc-blue-light); }
+/* PW 변경 */
+.pw-form { display: flex; flex-direction: column; gap: 10px; margin-top: 8px; }
+.pw-field label { font-size: 10px; color: var(--text-hint); display: block; margin-bottom: 4px; font-weight: 600; text-transform: uppercase; letter-spacing: .3px; }
+.pw-field input {
+  width: 100%; padding: 9px 12px; background: var(--bg-white);
+  border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+  color: var(--text-dark); font-size: 12px;
+  font-family: 'Noto Sans KR', sans-serif; outline: none; transition: border .15s;
+}
+.pw-field input:focus { border-color: var(--hc-blue); background: var(--hc-blue-pale); }
+.pw-submit {
+  padding: 10px; border-radius: var(--radius-sm);
+  background: linear-gradient(135deg, var(--hc-blue), var(--hc-blue-dark));
+  color: #fff; border: none; cursor: pointer; font-size: 12px; font-weight: 700;
+  font-family: 'Noto Sans KR', sans-serif; transition: opacity .15s;
+}
+.pw-submit:hover { opacity: .88; }
+.pw-msg { font-size: 11px; text-align: center; padding: 7px; border-radius: var(--radius-sm); display: none; }
+.pw-msg.ok  { background: var(--green-light); color: var(--green); border: 1px solid rgba(0,132,90,.25); display: block; }
+.pw-msg.err { background: var(--red-light); color: var(--red); border: 1px solid rgba(230,51,17,.25); display: block; }
+
+/* TOAST */
+.toast {
+  position: fixed; bottom: 24px; left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: var(--hc-navy); color: #fff; border-radius: var(--radius-md);
+  padding: 10px 22px; font-size: 12px; z-index: 9998;
+  transition: transform .3s ease; white-space: nowrap; box-shadow: var(--shadow-md);
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<!-- ══ LOGIN ══════════════════════════════════════════════════ -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo-row">
+      <div class="login-brand-mark">
+        <span class="hcs-tag">HCS</span>
+        <span class="brand-name">Hyundai Capital Services</span>
+      </div>
+    </div>
+    <div class="login-title">공시 분석 플랫폼</div>
+    <div class="login-subtitle">금융복합기업집단 리스크관리 · 금융그룹리스크관리팀</div>
+    <div class="login-field">
+      <label>사용자 ID</label>
+      <input type="text" id="login-id" value="admin" placeholder="아이디를 입력하세요">
+    </div>
+    <div class="login-field">
+      <label>비밀번호</label>
+      <input type="password" id="login-pw" value="1234" placeholder="비밀번호를 입력하세요"
+             onkeydown="if(event.key==='Enter')doLogin()">
+      <div class="login-error" id="login-error">아이디 또는 비밀번호가 올바르지 않습니다.</div>
+    </div>
+    <button class="login-btn" onclick="doLogin()">로그인</button>
+    <div class="login-hint">
+      테스트: <strong>admin</strong>/1234 (관리자) · <strong>user1</strong>/1234 (일반)<br>
+      문의: <a href="mailto:hcs-riskteam@hyundaicapital.com">hcs-riskteam@hyundaicapital.com</a>
+    </div>
+  </div>
+</div>
+
+<!-- ══ APP ════════════════════════════════════════════════════ -->
+<div id="main-app" style="display:none;flex-direction:column;height:100vh;">
+
+  <header class="header">
+    <div class="header-left">
+      <button class="home-btn" onclick="goHome()" title="홈으로">🏠</button>
+      <div class="logo-wrap">
+        <span class="logo-hcs">HCS</span>
+        <span class="logo-divider"></span>
+        <span class="logo-text">금융복합기업집단 공시 분석 플랫폼</span>
+        <span class="logo-sub" style="margin-left:8px">금융그룹리스크관리팀</span>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="live-indicator"><div class="live-dot"></div>실시간 모니터링</div>
+      <div class="header-clock" id="clock">--:--:--</div>
+      <div class="header-user-info">
+        <div class="user-avatar" id="uavatar">김</div>
+        <span class="user-name" id="uname">김정근 리더</span>
+        <span class="user-role role-admin" id="urole">관리자</span>
+      </div>
+      <button class="gear-btn" onclick="openSettings()" title="개인화 설정">⚙</button>
+      <button class="logout-btn" onclick="doLogout()">로그아웃</button>
+    </div>
+  </header>
+
+  <div class="main-wrap" id="main-wrap">
+    <!-- LEFT -->
+    <div class="panel-dash">
+      <div class="panel-toolbar">
+        <div class="tab-group">
+          <div class="tab active" onclick="switchTab(this,'asset')">자산 현황</div>
+          <div class="tab" onclick="switchTab(this,'capital')">자본적정성</div>
+          <div class="tab" onclick="switchTab(this,'intra')">내부거래</div>
+          <div class="tab" onclick="switchTab(this,'litigation')">소송 리스크</div>
+        </div>
+        <div class="toolbar-r">
+          <select class="t-select" id="sel-period" onchange="renderAll()">
+            <option>2024년 4분기</option>
+            <option>2024년 3분기</option>
+            <option>2024년 2분기</option>
+            <option>2024년 1분기</option>
+          </select>
+          <button class="t-btn" onclick="renderAll()">↻ 새로고침</button>
+        </div>
+      </div>
+      <div class="filter-bar">
+        <span class="filter-label">그룹 필터</span>
+        <span class="chip all" onclick="selectAll(true)">모두</span>
+        <span class="chip none" onclick="selectAll(false)">모두 해제</span>
+        <span class="chip-div"></span>
+        <span class="chip on" onclick="toggleGrp(this,'현대차')">현대차</span>
+        <span class="chip on" onclick="toggleGrp(this,'삼성')">삼성</span>
+        <span class="chip on" onclick="toggleGrp(this,'한화')">한화</span>
+        <span class="chip on" onclick="toggleGrp(this,'롯데')">롯데</span>
+        <span class="chip on" onclick="toggleGrp(this,'교보')">교보</span>
+        <span class="chip on" onclick="toggleGrp(this,'미래에셋')">미래에셋</span>
+        <span class="chip on" onclick="toggleGrp(this,'DB')">DB</span>
+      </div>
+      <div class="dash-body" id="dash-body"></div>
+    </div>
+
+    <!-- RIGHT: CHAT -->
+    <div class="panel-chat" id="panel-chat-el">
+      <div class="chat-hdr">
+        <div class="chat-hdr-inner">
+          <div class="ai-avatar">AI</div>
+          <div>
+            <div class="chat-name">공시 AI 비서</div>
+            <div class="chat-sub">RAG 기반 · 7개 그룹 공시문서 연동</div>
+          </div>
+        </div>
+        <div class="rag-row"><div class="rag-dot"></div>벡터 DB 연결됨 · 2024Q4 인덱싱 완료 · 문서 47건</div>
+      </div>
+      <div class="chat-body" id="chat-body">
+        <div class="msg msg-ai">
+          <div class="msg-from">● AI 비서</div>
+          <div class="bubble">안녕하세요! 금융복합기업집단 공시 AI 비서입니다.<br><br>7개 그룹의 최신 공시 보고서를 실시간으로 검색하여 근거 기반 답변을 제공합니다. 아래 예시 질문을 클릭해보세요.</div>
+        </div>
+      </div>
+      <div class="chat-input-area">
+        <div class="suggestions">
+          <span class="sugg" onclick="askQ(this.textContent)">현대차증권 소송 현황</span>
+          <span class="sugg" onclick="askQ(this.textContent)">삼성생명 자본적정성</span>
+          <span class="sugg" onclick="askQ(this.textContent)">한화그룹 내부거래</span>
+          <span class="sugg" onclick="askQ(this.textContent)">그룹별 총자산 순위</span>
+        </div>
+        <div class="input-row">
+          <input class="chat-input" id="chat-input" type="text" placeholder="공시 내용에 대해 질문하세요..."
+                 onkeydown="if(event.key==='Enter')sendChat()">
+          <button class="send-btn" onclick="sendChat()">전송</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOTTOM -->
+  <div class="panel-bottom" id="panel-bottom-el">
+    <div class="bottom-hdr">
+      <div class="bh-left">
+        <div class="bh-item">
+          <span class="bh-label">📄 공시 원문 근거</span>
+          <span class="src-bdg" id="src-count">대기</span>
+        </div>
+        <div class="bh-item">
+          <span class="bh-label">📰 관련 최신 뉴스</span>
+          <span class="news-bdg" id="news-count">16건</span>
+        </div>
+      </div>
+      <div class="bh-right">AI 답변 출처 하이라이트 · 뉴스 실시간 연동</div>
+    </div>
+    <div class="bottom-body">
+      <div class="src-pane" id="src-pane-el">
+        <div class="src-list" id="src-list">
+          <div style="padding:10px 6px;font-size:11px;color:var(--text-hint)">AI 답변 후 관련 문서가 표시됩니다.</div>
+        </div>
+        <div class="src-excerpt" id="src-excerpt">
+          <div style="padding:18px 0;text-align:center;color:var(--text-hint);font-size:12px">질문을 입력하면 근거 원문이 하이라이트되어 표시됩니다.</div>
+        </div>
+      </div>
+      <div class="news-pane" id="news-pane-el">
+        <div class="news-hdr">
+          <span class="news-hdr-title">금융그룹 관련 최신 뉴스</span>
+          <select class="news-filter" id="news-filter" onchange="renderNews()">
+            <option value="all">전체 그룹</option>
+            <option value="현대차">현대차</option>
+            <option value="삼성">삼성</option>
+            <option value="한화">한화</option>
+            <option value="롯데">롯데</option>
+            <option value="교보">교보</option>
+            <option value="미래에셋">미래에셋</option>
+            <option value="DB">DB</option>
+          </select>
+        </div>
+        <div class="news-list" id="news-list"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══ SETTINGS ═══════════════════════════════════════════════ -->
+<div class="ov-bg" id="ov-bg" onclick="if(event.target===this)closeSettings()">
+  <div class="settings-panel">
+    <div class="settings-hdr">
+      <div class="settings-hdr-title">⚙ 개인화 설정</div>
+      <button class="settings-close" onclick="closeSettings()">✕</button>
+    </div>
+    <div class="s-body">
+
+      <div class="s-sec">
+        <div class="s-sec-title">🎨 화면 테마</div>
+        <div class="s-row">
+          <label>배경 모드</label>
+          <select class="s-sel" id="theme-sel" onchange="setTheme(this.value)">
+            <option value="light">라이트 모드 (기본)</option>
+            <option value="dark">다크 모드</option>
+          </select>
+        </div>
+        <div style="font-size:12px;color:var(--text-sub);margin-bottom:8px">포인트 색상</div>
+        <div class="swatches">
+          <div class="swatch active" style="background:#00aad2" onclick="setAccent('#00aad2','#008cb2',this)" title="HCS 블루 (기본)"></div>
+          <div class="swatch" style="background:#0d2b6e" onclick="setAccent('#0d2b6e','#081d4d',this)" title="HCS 네이비"></div>
+          <div class="swatch" style="background:#e63311" onclick="setAccent('#e63311','#c22a0c',this)" title="레드"></div>
+          <div class="swatch" style="background:#00845a" onclick="setAccent('#00845a','#006044',this)" title="그린"></div>
+          <div class="swatch" style="background:#7b3bb5" onclick="setAccent('#7b3bb5','#5c2a88',this)" title="퍼플"></div>
+        </div>
+      </div>
+
+      <div class="s-sec">
+        <div class="s-sec-title">🔤 글자 크기 · 화면</div>
+        <div class="s-row">
+          <label>글자 크기</label>
+          <div class="fsz-btns">
+            <button class="fsz-btn" onclick="setFS(0.9,this)">소</button>
+            <button class="fsz-btn active" onclick="setFS(1.0,this)">중</button>
+            <button class="fsz-btn" onclick="setFS(1.12,this)">대</button>
+          </div>
+        </div>
+        <div class="s-row">
+          <label>차트 높이</label>
+          <select class="s-sel" onchange="setChartH(this.value)">
+            <option value="130">낮음</option>
+            <option value="160" selected>기본</option>
+            <option value="200">높음</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="s-sec">
+        <div class="s-sec-title">👁 표시 항목</div>
+        <div class="s-row"><label>KPI 요약 카드</label><label class="toggle"><input type="checkbox" checked onchange="toggleDisp('kpi',this.checked)"><span class="toggle-sl"></span></label></div>
+        <div class="s-row"><label>하단 뉴스 패널</label><label class="toggle"><input type="checkbox" checked onchange="toggleDisp('news',this.checked)"><span class="toggle-sl"></span></label></div>
+        <div class="s-row"><label>공시 원문 근거</label><label class="toggle"><input type="checkbox" checked onchange="toggleDisp('src',this.checked)"><span class="toggle-sl"></span></label></div>
+        <div class="s-row"><label>AI 비서 채팅창</label><label class="toggle"><input type="checkbox" checked onchange="toggleDisp('chat',this.checked)"><span class="toggle-sl"></span></label></div>
+      </div>
+
+      <div class="s-sec">
+        <div class="s-sec-title">🔐 비밀번호 변경</div>
+        <div class="pw-form">
+          <div class="pw-field"><label>현재 비밀번호</label><input type="password" id="pw-cur" placeholder="현재 비밀번호"></div>
+          <div class="pw-field"><label>새 비밀번호</label><input type="password" id="pw-new" placeholder="새 비밀번호 (6자 이상)"></div>
+          <div class="pw-field"><label>새 비밀번호 확인</label><input type="password" id="pw-new2" placeholder="재입력"></div>
+          <div class="pw-msg" id="pw-msg"></div>
+          <button class="pw-submit" onclick="changePw()">비밀번호 변경</button>
+        </div>
+      </div>
+
+      <div class="s-sec" id="admin-sec" style="display:none">
+        <div class="s-sec-title">
+          👑 사용자 권한 관리
+          <span style="background:var(--red-light);color:var(--red);font-size:9px;padding:2px 7px;border-radius:3px;border:1px solid rgba(230,51,17,.25)">관리자 전용</span>
+        </div>
+        <table class="utbl"><thead><tr><th>이름</th><th>ID</th><th>권한</th><th>상태</th><th>관리</th></tr></thead>
+          <tbody id="utbody"></tbody>
+        </table>
+        <button class="add-user-btn" onclick="addUser()">+ 신규 사용자 등록</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ══ 사용자 DB ═══════════════════════════════════════════════ */
+let USERS=[
+  {id:'admin',  pw:'1234',name:'김정근',role:'admin', active:true},
+  {id:'user1',  pw:'1234',name:'이수진',role:'user',  active:true},
+  {id:'user2',  pw:'1234',name:'박민호',role:'user',  active:true},
+  {id:'viewer1',pw:'1234',name:'최예은',role:'viewer',active:true},
+  {id:'viewer2',pw:'1234',name:'정태양',role:'viewer',active:false},
+];
+const RNMAP={admin:'관리자',user:'일반사용자',viewer:'열람전용'};
+let curUser=null;
+
+function doLogin(){
+  const id=document.getElementById('login-id').value.trim();
+  const pw=document.getElementById('login-pw').value;
+  const u=USERS.find(u=>u.id===id&&u.pw===pw&&u.active);
+  if(!u){document.getElementById('login-error').style.display='block';return;}
+  curUser=u;
+  document.getElementById('login-screen').style.display='none';
+  const app=document.getElementById('main-app');
+  app.style.display='flex';app.style.flexDirection='column';
+  document.getElementById('uavatar').textContent=u.name[0];
+  document.getElementById('uname').textContent=u.name+(u.role==='admin'?' 리더':'');
+  const rb=document.getElementById('urole');
+  rb.textContent=RNMAP[u.role];
+  rb.className='user-role '+(u.role==='admin'?'role-admin':u.role==='user'?'role-user':'role-view');
+  document.getElementById('admin-sec').style.display=u.role==='admin'?'block':'none';
+  tick();renderAll();renderNews();renderUT();
+  showToast(`${u.name}님 로그인되었습니다.`);
+}
+function doLogout(){
+  curUser=null;
+  document.getElementById('main-app').style.display='none';
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('login-error').style.display='none';
+  document.getElementById('login-pw').value='';
+  Object.values(charts).forEach(c=>c.destroy());
+  Object.keys(charts).forEach(k=>delete charts[k]);
+  showToast('로그아웃되었습니다.');
+}
+function changePw(){
+  const cur=document.getElementById('pw-cur').value;
+  const nw=document.getElementById('pw-new').value;
+  const nw2=document.getElementById('pw-new2').value;
+  const msg=document.getElementById('pw-msg');
+  msg.className='pw-msg';
+  if(cur!==curUser.pw){msg.className='pw-msg err';msg.textContent='현재 비밀번호가 올바르지 않습니다.';return;}
+  if(nw.length<6){msg.className='pw-msg err';msg.textContent='새 비밀번호는 6자 이상이어야 합니다.';return;}
+  if(nw!==nw2){msg.className='pw-msg err';msg.textContent='새 비밀번호가 일치하지 않습니다.';return;}
+  curUser.pw=nw;USERS.find(u=>u.id===curUser.id).pw=nw;
+  msg.className='pw-msg ok';msg.textContent='비밀번호가 성공적으로 변경되었습니다.';
+  ['pw-cur','pw-new','pw-new2'].forEach(id=>document.getElementById(id).value='');
+  showToast('비밀번호가 변경되었습니다.');
+}
+
+/* ── 유저 관리 ─────────────────────────────────────────────── */
+function renderUT(){
+  if(!curUser||curUser.role!=='admin')return;
+  document.getElementById('utbody').innerHTML=USERS.map((u,i)=>`
+    <tr>
+      <td><strong>${u.name}</strong></td>
+      <td style="font-family:var(--mono);font-size:10px;color:var(--text-hint)">${u.id}</td>
+      <td>
+        <select class="s-sel" style="padding:2px 5px;min-width:80px;font-size:10px" onchange="chRole(${i},this.value)">
+          ${['admin','user','viewer'].map(r=>`<option value="${r}" ${u.role===r?'selected':''}>${RNMAP[r]}</option>`).join('')}
+        </select>
+      </td>
+      <td><span class="pill ${u.active?'p-green':'p-gray'}">${u.active?'활성':'비활성'}</span></td>
+      <td>
+        <button class="ua-btn" onclick="togActive(${i})">${u.active?'비활성':'활성화'}</button>
+        ${u.id!=='admin'?`<button class="ua-btn ua-del" onclick="delUser(${i})">삭제</button>`:''}
+      </td>
+    </tr>`).join('');
+}
+function chRole(i,r){USERS[i].role=r;renderUT();showToast(`${USERS[i].name}님 권한 변경됨`);}
+function togActive(i){USERS[i].active=!USERS[i].active;renderUT();showToast(`${USERS[i].name}님 계정 ${USERS[i].active?'활성화':'비활성화'}`);}
+function delUser(i){if(!confirm(`${USERS[i].name}님을 삭제하시겠습니까?`))return;USERS.splice(i,1);renderUT();showToast('삭제되었습니다.');}
+function addUser(){
+  const n=prompt('이름:');if(!n)return;
+  const id=prompt('ID:');if(!id)return;
+  const pw=prompt('초기 비밀번호:');if(!pw)return;
+  USERS.push({id,pw,name:n,role:'viewer',active:true});renderUT();showToast(`${n}님이 등록되었습니다.`);
+}
+
+/* ── 홈 버튼 ───────────────────────────────────────────────── */
+function goHome(){
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',i===0));
+  currentTab='asset';
+  document.querySelectorAll('.chip[onclick*="toggleGrp"]').forEach(c=>{c.classList.add('on');AG.add(c.textContent);});
+  document.getElementById('sel-period').selectedIndex=0;
+  document.getElementById('chat-body').innerHTML='<div class="msg msg-ai"><div class="msg-from">● AI 비서</div><div class="bubble">안녕하세요! 금융복합기업집단 공시 AI 비서입니다.<br><br>7개 그룹의 최신 공시 보고서를 실시간으로 검색하여 근거 기반 답변을 제공합니다. 아래 예시 질문을 클릭해보세요.</div></div>';
+  document.getElementById('src-count').textContent='대기';
+  document.getElementById('src-list').innerHTML='<div style="padding:10px 6px;font-size:11px;color:var(--text-hint)">AI 답변 후 관련 문서가 표시됩니다.</div>';
+  document.getElementById('src-excerpt').innerHTML='<div style="padding:18px 0;text-align:center;color:var(--text-hint);font-size:12px">질문을 입력하면 근거 원문이 하이라이트되어 표시됩니다.</div>';
+  document.getElementById('news-filter').value='all';
+  renderNews();renderAll();showToast('초기 화면으로 이동했습니다.');
+}
+
+/* ── 설정 ──────────────────────────────────────────────────── */
+function openSettings(){document.getElementById('ov-bg').classList.add('open');}
+function closeSettings(){document.getElementById('ov-bg').classList.remove('open');}
+function setTheme(t){
+  const r=document.documentElement.style;
+  if(t==='dark'){
+    r.setProperty('--bg-white','#121C2E');r.setProperty('--bg-section','#0A1422');
+    r.setProperty('--bg-input','#162236');r.setProperty('--border','#253A56');
+    r.setProperty('--border-mid','#304B6A');r.setProperty('--text-dark','#F0F6FF');
+    r.setProperty('--text-body','#C8DAF0');r.setProperty('--text-sub','#8BAAC8');
+    r.setProperty('--text-hint','#4E6E8E');r.setProperty('--hc-blue-light','#0D2948');
+    r.setProperty('--hc-blue-pale','#0A1F38');r.setProperty('--red-light','rgba(230,51,17,0.12)');
+    r.setProperty('--green-light','rgba(0,132,90,0.12)');r.setProperty('--amber-light','rgba(192,120,0,0.12)');
+    r.setProperty('--shadow-xs','0 1px 3px rgba(0,0,0,0.4)');r.setProperty('--shadow-sm','0 2px 8px rgba(0,0,0,0.4)');
+    document.body.style.background='#0A1422';
+  }else{
+    r.setProperty('--bg-white','#ffffff');r.setProperty('--bg-section','#f7f8fa');
+    r.setProperty('--bg-input','#f9fafb');r.setProperty('--border','#e0e4e9');
+    r.setProperty('--border-mid','#cdd3db');r.setProperty('--text-dark','#1a1a1a');
+    r.setProperty('--text-body','#333333');r.setProperty('--text-sub','#666666');
+    r.setProperty('--text-hint','#999999');r.setProperty('--hc-blue-light','#e8f7fb');
+    r.setProperty('--hc-blue-pale','#f0fafd');r.setProperty('--red-light','#fff2ef');
+    r.setProperty('--green-light','#eaf6f2');r.setProperty('--amber-light','#fef8ec');
+    r.setProperty('--shadow-xs','0 1px 3px rgba(13,43,110,0.07)');r.setProperty('--shadow-sm','0 2px 8px rgba(13,43,110,0.09)');
+    document.body.style.background='#f7f8fa';
+  }
+  renderAll();
+}
+function setAccent(c,cd,el){
+  document.querySelectorAll('.swatch').forEach(s=>s.classList.remove('active'));el.classList.add('active');
+  document.documentElement.style.setProperty('--hc-blue',c);
+  document.documentElement.style.setProperty('--hc-blue-dark',cd);
+  renderAll();
+}
+function setFS(s,el){document.querySelectorAll('.fsz-btn').forEach(b=>b.classList.remove('active'));el.classList.add('active');document.documentElement.style.setProperty('--font-scale',s);}
+function setChartH(h){document.documentElement.style.setProperty('--chart-h',h+'px');renderAll();}
+function toggleDisp(k,on){
+  const m={kpi:'.kpi-row',news:'#news-pane-el',src:'#src-pane-el',chat:'#panel-chat-el'};
+  const el=document.querySelector(m[k]);if(!el)return;
+  el.style.display=on?(k==='news'||k==='src'||k==='chat'?'flex':''):'none';
+}
+
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
+
+/* ══ DATA ════════════════════════════════════════════════════ */
+const GROUPS=['현대차','삼성','한화','롯데','교보','미래에셋','DB'];
+const AG=new Set(GROUPS);
+const QT=['2024Q1','2024Q2','2024Q3','2024Q4'];
+/* 현대캐피탈 색상 계열 차트 팔레트 */
+const C=['#0d2b6e','#00aad2','#e63311','#c07800','#00845a','#7b3bb5','#0077b6'];
+
+const DATA={
+  asset:{
+    total:[291,524,287,143,118,204,76],
+    trend:{'현대차':[270,275,281,291],'삼성':[498,508,514,524],'한화':[265,272,280,287],'롯데':[131,136,140,143],'교보':[110,113,116,118],'미래에셋':[190,196,200,204],'DB':[70,72,74,76]},
+    subs:[18,24,22,15,12,16,9],diffs:['+2.1%','+1.9%','+2.5%','+2.2%','+1.8%','+2.0%','+2.7%']
+  },
+  capital:{
+    ratio:[146.8,198.3,164.2,131.0,155.6,142.1,128.4],equity:[26,47,31,14,18,22,8],
+    trend:{'현대차':[143.2,144.9,145.5,146.8],'삼성':[194.1,195.8,197.2,198.3],'한화':[160.5,161.8,162.9,164.2],'롯데':[128.4,129.1,130.0,131.0],'교보':[152.1,153.4,154.8,155.6],'미래에셋':[139.5,140.2,141.3,142.1],'DB':[125.8,126.4,127.2,128.4]}
+  },
+  intra:{pct:[12.4,8.7,15.3,11.2,9.8,6.4,10.5],amt:[36.1,45.6,43.9,16.0,11.6,13.1,7.9]},
+  litigation:{
+    cnt:[11,7,9,4,6,5,3],max:[420,680,315,180,240,195,90],
+    rows:[
+      {g:'현대차',co:'현대차증권',type:'부당이득반환',stage:'3심',amt:'420억',st:'계류'},
+      {g:'현대차',co:'현대카드',  type:'불공정거래',  stage:'1심',amt:'210억',st:'계류'},
+      {g:'현대차',co:'현대캐피탈',type:'손해배상',    stage:'2심',amt:'185억',st:'계류'},
+      {g:'삼성',  co:'삼성생명', type:'보험금청구',   stage:'1심',amt:'680억',st:'계류'},
+      {g:'삼성',  co:'삼성화재', type:'구상권청구',   stage:'2심',amt:'340억',st:'계류'},
+      {g:'한화',  co:'한화생명', type:'계약무효확인', stage:'3심',amt:'315억',st:'계류'},
+      {g:'롯데',  co:'롯데카드', type:'부당이득반환', stage:'1심',amt:'180억',st:'계류'},
+      {g:'교보',  co:'교보생명', type:'약관해석',     stage:'2심',amt:'240억',st:'계류'},
+    ]
+  }
+};
+
+const NEWS=[
+  {g:'현대차',c:'',  d:'2025-03-31',h:'현대캐피탈, 2024년 연간 순익 8,200억원…전년比 12% 증가',s:'한국경제'},
+  {g:'현대차',c:'r', d:'2025-03-30',h:'현대차증권, 3심 부당이득 소송 최종 변론기일 4월 확정',s:'조선일보'},
+  {g:'현대차',c:'',  d:'2025-03-28',h:'현대카드, PLCC 결제 AI 분석 서비스 론칭',s:'매일경제'},
+  {g:'삼성',  c:'',  d:'2025-03-31',h:'삼성생명, 자본비율 198.3%…7개 그룹 중 최고',s:'연합뉴스'},
+  {g:'삼성',  c:'a', d:'2025-03-29',h:'삼성화재, 구상권 소송 2심 판결 4월 선고 예정',s:'한국경제'},
+  {g:'삼성',  c:'',  d:'2025-03-27',h:'삼성증권, 1분기 AUM 380조 돌파…리테일 역대 최대',s:'이데일리'},
+  {g:'한화',  c:'r', d:'2025-03-30',h:'한화생명, 내부거래 비중 15.3% 금감원 집중 점검 예정',s:'머니투데이'},
+  {g:'한화',  c:'',  d:'2025-03-28',h:'한화금융그룹 총자산 287조…5년간 연평균 8% 성장',s:'한겨레'},
+  {g:'롯데',  c:'',  d:'2025-03-29',h:'롯데카드, 2024년 4분기 연체율 1.12%…전분기比 개선',s:'서울경제'},
+  {g:'롯데',  c:'a', d:'2025-03-27',h:'롯데손보, 자본적정성 강화 후순위채 발행 검토',s:'비즈워치'},
+  {g:'교보',  c:'g', d:'2025-03-31',h:'교보생명, 2024 당기순익 7,800억…역대 최대',s:'파이낸셜뉴스'},
+  {g:'교보',  c:'',  d:'2025-03-28',h:'교보증권, KCGS ESG 평가 A등급 획득',s:'중앙일보'},
+  {g:'미래에셋',c:'',d:'2025-03-30',h:'미래에셋증권, 글로벌 ETF 운용규모 80조 돌파',s:'한국경제'},
+  {g:'미래에셋',c:'',d:'2025-03-28',h:'미래에셋캐피탈, 동남아 현지법인 영업이익 35% 증가',s:'연합뉴스'},
+  {g:'DB',    c:'a', d:'2025-03-29',h:'DB손해보험, 자본적정성 128.4%…7그룹 중 최저',s:'뉴스1'},
+  {g:'DB',    c:'',  d:'2025-03-27',h:'DB금융투자, IB 수수료 전년比 42% 성장',s:'이데일리'},
+];
+function renderNews(){
+  const f=document.getElementById('news-filter').value;
+  const list=f==='all'?NEWS:NEWS.filter(n=>n.g===f);
+  document.getElementById('news-count').textContent=list.length+'건';
+  document.getElementById('news-list').innerHTML=list.map(n=>`
+    <div class="news-item">
+      <div class="news-item-top">
+        <span class="ng-badge ${n.c}">${n.g}</span>
+        <span class="news-date">${n.d}</span>
+      </div>
+      <div class="news-title">${n.h}</div>
+      <div class="news-source">${n.s}</div>
+    </div>`).join('');
+}
+
+/* ══ CHARTS ══════════════════════════════════════════════════ */
+const charts={};
+function dk(id){if(charts[id]){charts[id].destroy();delete charts[id];}}
+function getAG(){return GROUPS.filter(g=>AG.has(g));}
+function getIdx(ag){return ag.map(g=>GROUPS.indexOf(g));}
+
+const XT={color:'#999999',font:{size:10}};
+const YG={color:'rgba(13,43,110,0.06)'};
+const YT={color:'#999999',font:{size:10}};
+function mBar(cb){return{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:XT,grid:{display:false}},y:{ticks:{...YT,callback:cb},grid:YG}}};}
+function mLine(cb){return{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color:'#999',font:{size:10},boxWidth:10,padding:8}}},scales:{x:{ticks:XT,grid:{display:false}},y:{ticks:{...YT,callback:cb},grid:YG}}};}
+
+let currentTab='asset';
+function switchTab(el,tab){document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');currentTab=tab;renderAll();}
+function renderAll(){const ag=getAG(),idx=getIdx(ag);if(currentTab==='asset')rAsset(ag,idx);else if(currentTab==='capital')rCapital(ag,idx);else if(currentTab==='intra')rIntra(ag,idx);else rLitigation(ag,idx);}
+function toggleGrp(el,g){if(AG.has(g)){if(AG.size>1){AG.delete(g);el.classList.remove('on');}}else{AG.add(g);el.classList.add('on');}renderAll();}
+function selectAll(on){
+  document.querySelectorAll('.chip[onclick*="toggleGrp"]').forEach(el=>{
+    const g=el.textContent;
+    if(on){AG.add(g);el.classList.add('on');}else{AG.delete(g);el.classList.remove('on');}
+  });
+  if(!on){AG.add(GROUPS[0]);document.querySelector('.chip[onclick*="현대차"]').classList.add('on');}
+  renderAll();
+}
+
+/* ASSET */
+function rAsset(ag,idx){
+  const v=idx.map(i=>DATA.asset.total[i]),t=v.reduce((a,b)=>a+b,0);
+  document.getElementById('dash-body').innerHTML=`
+    <div class="kpi-row">
+      <div class="kpi"><div class="kpi-label">총 합산 자산</div><div class="kpi-val">${t}<span class="kpi-unit">조원</span></div><div class="kpi-delta delta-up">▲ 전분기比 +2.1%</div></div>
+      <div class="kpi"><div class="kpi-label">최대 그룹 자산</div><div class="kpi-val">524<span class="kpi-unit">조원</span></div><div class="kpi-delta delta-neu">삼성금융그룹</div></div>
+      <div class="kpi"><div class="kpi-label">그룹 평균 자산</div><div class="kpi-val">${Math.round(t/ag.length)}<span class="kpi-unit">조원</span></div><div class="kpi-delta delta-neu">${ag.length}개 그룹 기준</div></div>
+      <div class="kpi kpi-red"><div class="kpi-label">최근 공시 갱신</div><div class="kpi-val" style="font-size:16px">2025-03-31</div><div class="kpi-delta delta-neu">2024Q4 결산</div></div>
+    </div>
+    <div class="section-hdr">그룹별 총자산 비교</div>
+    <div class="chart-row">
+      <div class="chart-card"><div class="chart-title">총자산 규모 (조원)</div><div class="chart-wrap"><canvas id="ch1" role="img" aria-label="총자산 차트"></canvas></div></div>
+      <div class="chart-card"><div class="chart-title">분기별 추이 (상위 4그룹)</div><div class="chart-wrap"><canvas id="ch2" role="img" aria-label="총자산 추이"></canvas></div></div>
+    </div>
+    <div class="section-hdr">그룹 세부 현황</div>
+    <div class="chart-card-wide"><table class="dtable">
+      <thead><tr><th>금융그룹</th><th>총자산</th><th>전분기比</th><th>계열사 수</th><th>공시 상태</th></tr></thead>
+      <tbody>${ag.map(g=>{const i=GROUPS.indexOf(g);return`<tr><td><strong>${g}금융그룹</strong></td><td class="mono">${DATA.asset.total[i]}조원</td><td class="vup">${DATA.asset.diffs[i]}</td><td class="mono">${DATA.asset.subs[i]}개사</td><td><span class="pill p-green">공시완료</span></td></tr>`;}).join('')}</tbody>
+    </table></div>`;
+  dk('ch1');dk('ch2');
+  charts['ch1']=new Chart(document.getElementById('ch1'),{type:'bar',data:{labels:ag,datasets:[{data:v,backgroundColor:ag.map((_,i)=>C[i]+'CC'),borderRadius:4}]},options:mBar(v=>`${v}조`)});
+  charts['ch2']=new Chart(document.getElementById('ch2'),{type:'line',data:{labels:QT,datasets:ag.slice(0,4).map((g,i)=>({label:g,data:DATA.asset.trend[g],borderColor:C[i],backgroundColor:'transparent',borderWidth:2,pointRadius:3,tension:.35}))},options:mLine(v=>`${v}조`)});
+}
+/* CAPITAL */
+function rCapital(ag,idx){
+  const v=idx.map(i=>DATA.capital.ratio[i]),e=idx.map(i=>DATA.capital.equity[i]);
+  document.getElementById('dash-body').innerHTML=`
+    <div class="kpi-row">
+      <div class="kpi"><div class="kpi-label">평균 자본적정성비율</div><div class="kpi-val">${(v.reduce((a,b)=>a+b,0)/v.length).toFixed(1)}<span class="kpi-unit">%</span></div><div class="kpi-delta delta-up">▲ +1.2%p</div></div>
+      <div class="kpi"><div class="kpi-label">금감원 기준</div><div class="kpi-val">100<span class="kpi-unit">%</span></div><div class="kpi-delta delta-neu">규제 최저선</div></div>
+      <div class="kpi kpi-red"><div class="kpi-label">최저 비율 그룹</div><div class="kpi-val" style="font-size:16px">DB금융</div><div class="kpi-delta delta-down">128.4% — 주의</div></div>
+      <div class="kpi"><div class="kpi-label">합산 통합자기자본</div><div class="kpi-val">${e.reduce((a,b)=>a+b,0)}<span class="kpi-unit">조원</span></div><div class="kpi-delta delta-up">▲ +1.8%</div></div>
+    </div>
+    <div class="section-hdr">자본적정성 현황</div>
+    <div class="chart-row">
+      <div class="chart-card"><div class="chart-title">통합자본비율 (%)</div><div class="chart-wrap"><canvas id="ch1" role="img" aria-label="자본비율 차트"></canvas></div></div>
+      <div class="chart-card"><div class="chart-title">분기별 추이</div><div class="chart-wrap"><canvas id="ch2" role="img" aria-label="자본비율 추이"></canvas></div></div>
+    </div>
+    <div class="section-hdr">자본 상세</div>
+    <div class="chart-card-wide"><table class="dtable">
+      <thead><tr><th>금융그룹</th><th>자본적정성비율</th><th>통합자기자본</th><th>필요자본</th><th>잉여분</th><th>등급</th></tr></thead>
+      <tbody>${ag.map(g=>{const i=GROUPS.indexOf(g),r=DATA.capital.ratio[i],c=DATA.capital.equity[i],req=(c/(r/100)).toFixed(1),sur=(c-Number(req)).toFixed(1);const[pc,lbl]=r>=150?['p-green','양호']:r>=130?['p-blue','정상']:['p-amber','주의'];return`<tr><td><strong>${g}</strong></td><td class="vup" style="font-weight:700">${r}%</td><td class="mono">${c}조</td><td class="mono">${req}조</td><td class="vup mono">${sur}조</td><td><span class="pill ${pc}">${lbl}</span></td></tr>`;}).join('')}</tbody>
+    </table></div>`;
+  dk('ch1');dk('ch2');
+  charts['ch1']=new Chart(document.getElementById('ch1'),{type:'bar',data:{labels:ag,datasets:[{data:v,backgroundColor:v.map(x=>x>=150?'#00845aCC':x>=130?'#0d2b6eCC':'#c07800CC'),borderRadius:4}]},options:mBar(v=>`${v}%`)});
+  charts['ch2']=new Chart(document.getElementById('ch2'),{type:'line',data:{labels:QT,datasets:ag.slice(0,4).map((g,i)=>({label:g,data:DATA.capital.trend[g],borderColor:C[i],backgroundColor:'transparent',borderWidth:2,pointRadius:3,tension:.35}))},options:mLine(v=>`${v}%`)});
+}
+/* INTRA */
+function rIntra(ag,idx){
+  const p=idx.map(i=>DATA.intra.pct[i]),a=idx.map(i=>DATA.intra.amt[i]);
+  document.getElementById('dash-body').innerHTML=`
+    <div class="kpi-row">
+      <div class="kpi"><div class="kpi-label">평균 내부거래 비중</div><div class="kpi-val">${(p.reduce((a,b)=>a+b,0)/p.length).toFixed(1)}<span class="kpi-unit">%</span></div><div class="kpi-delta delta-up">▲ +0.3%p</div></div>
+      <div class="kpi kpi-red"><div class="kpi-label">최대 비중 그룹</div><div class="kpi-val" style="font-size:16px">한화</div><div class="kpi-delta delta-down">15.3% — 모니터링</div></div>
+      <div class="kpi"><div class="kpi-label">총 내부거래 금액</div><div class="kpi-val">${a.reduce((a,b)=>a+b,0).toFixed(1)}<span class="kpi-unit">조원</span></div><div class="kpi-delta delta-neu">합산 기준</div></div>
+      <div class="kpi"><div class="kpi-label">금감원 가이드라인</div><div class="kpi-val">20<span class="kpi-unit">%</span></div><div class="kpi-delta delta-neu">규제 상한선</div></div>
+    </div>
+    <div class="section-hdr">내부거래 비중 현황</div>
+    <div class="chart-row">
+      <div class="chart-card"><div class="chart-title">그룹별 내부거래 비중 (%)</div><div class="chart-wrap"><canvas id="ch1" role="img" aria-label="내부거래 비중"></canvas></div></div>
+      <div class="chart-card"><div class="chart-title">현대차그룹 내부거래 유형별</div><div class="chart-wrap"><canvas id="ch2" role="img" aria-label="내부거래 유형"></canvas></div></div>
+    </div>
+    <div class="section-hdr">내부거래 상세</div>
+    <div class="chart-card-wide"><table class="dtable">
+      <thead><tr><th>금융그룹</th><th>내부거래 비중</th><th>내부거래 금액</th><th>대출·보증</th><th>투자</th><th>상태</th></tr></thead>
+      <tbody>${ag.map(g=>{const i=GROUPS.indexOf(g),pv=DATA.intra.pct[i],av=DATA.intra.amt[i];const[pc,lbl]=pv>=15?['p-amber','주의']:['p-green','정상'];return`<tr><td><strong>${g}</strong></td><td class="${pv>=15?'vdown':'vup'}" style="font-weight:700">${pv}%</td><td class="mono">${av}조</td><td class="mono">${(av*.5).toFixed(1)}조</td><td class="mono">${(av*.2).toFixed(1)}조</td><td><span class="pill ${pc}">${lbl}</span></td></tr>`;}).join('')}</tbody>
+    </table></div>`;
+  dk('ch1');dk('ch2');
+  charts['ch1']=new Chart(document.getElementById('ch1'),{type:'bar',data:{labels:ag,datasets:[{data:p,backgroundColor:p.map(x=>x>=15?'#e63311CC':'#0d2b6eCC'),borderRadius:4}]},options:mBar(v=>`${v}%`)});
+  charts['ch2']=new Chart(document.getElementById('ch2'),{type:'doughnut',data:{labels:['대출·보증','투자','용역거래','임대차','자금이동'],datasets:[{data:[18.2,7.4,4.8,2.1,3.6],backgroundColor:['#0d2b6eCC','#00aad2CC','#00845aCC','#7b3bb5CC','#e63311CC'],borderWidth:2,borderColor:'#fff',hoverOffset:8}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{color:'#999',font:{size:10},boxWidth:10,padding:8}}}}});
+}
+/* LITIGATION */
+function rLitigation(ag,idx){
+  const cn=idx.map(i=>DATA.litigation.cnt[i]),mx=idx.map(i=>DATA.litigation.max[i]);
+  const rows=DATA.litigation.rows.filter(r=>ag.includes(r.g));
+  document.getElementById('dash-body').innerHTML=`
+    <div class="kpi-row">
+      <div class="kpi kpi-red"><div class="kpi-label">총 소송 건수</div><div class="kpi-val">${cn.reduce((a,b)=>a+b,0)}<span class="kpi-unit">건</span></div><div class="kpi-delta delta-down">▲ 전분기比 +3건</div></div>
+      <div class="kpi"><div class="kpi-label">최대 청구금액</div><div class="kpi-val">680<span class="kpi-unit">억원</span></div><div class="kpi-delta delta-down">삼성생명 보험금청구</div></div>
+      <div class="kpi"><div class="kpi-label">3심 계류</div><div class="kpi-val">6<span class="kpi-unit">건</span></div><div class="kpi-delta" style="color:var(--amber)">▲ 고위험 모니터링</div></div>
+      <div class="kpi"><div class="kpi-label">총 청구금액 추정</div><div class="kpi-val">2,860<span class="kpi-unit">억원</span></div><div class="kpi-delta delta-down">▲ +420억</div></div>
+    </div>
+    <div class="section-hdr">소송 리스크 현황</div>
+    <div class="chart-row">
+      <div class="chart-card"><div class="chart-title">그룹별 소송 건수</div><div class="chart-wrap"><canvas id="ch1" role="img" aria-label="소송 건수 차트"></canvas></div></div>
+      <div class="chart-card"><div class="chart-title">최대 청구금액 (억원)</div><div class="chart-wrap"><canvas id="ch2" role="img" aria-label="청구금액 차트"></canvas></div></div>
+    </div>
+    <div class="section-hdr">주요 소송 목록</div>
+    <div class="chart-card-wide"><table class="dtable">
+      <thead><tr><th>그룹</th><th>계열사</th><th>소송 유형</th><th>심급</th><th>청구금액</th><th>진행 상태</th></tr></thead>
+      <tbody>${rows.map(r=>{const sp=r.stage==='3심'?'p-red':r.stage==='2심'?'p-amber':'p-blue';return`<tr><td>${r.g}</td><td><strong>${r.co}</strong></td><td>${r.type}</td><td><span class="pill ${sp}">${r.stage}</span></td><td class="vdown mono" style="font-weight:700">${r.amt}</td><td><span class="pill p-amber">${r.st}</span></td></tr>`;}).join('')}</tbody>
+    </table></div>`;
+  dk('ch1');dk('ch2');
+  charts['ch1']=new Chart(document.getElementById('ch1'),{type:'bar',data:{labels:ag,datasets:[{data:cn,backgroundColor:'#e63311CC',borderRadius:4}]},options:mBar(v=>v)});
+  charts['ch2']=new Chart(document.getElementById('ch2'),{type:'bar',data:{labels:ag,datasets:[{data:mx,backgroundColor:'#c07800CC',borderRadius:4}]},options:mBar(v=>`${v}억`)});
+}
+
+/* ══ CHAT ════════════════════════════════════════════════════ */
+const ANS={
+  '현대차증권 소송':{
+    text:'현대차증권의 현재 주요 소송은 총 <strong>11건</strong>이 계류 중입니다.\n\n3심 <strong>부당이득반환 청구(420억원)</strong>이 최대이며, 2심 손해배상(185억), 1심 불공정거래(210억)가 포함됩니다.\n\n전분기 대비 신규 소송 2건 증가로 지속 모니터링이 필요합니다.',
+    sources:[{name:'현대차금융그룹_2024Q4_공시보고서.pdf',page:'p.87',label:'소송현황표'},{name:'현대차증권_사업보고서_2024.pdf',page:'p.34',label:'주요소송'}],
+    excerpt:'...현대차증권(주)의 경우 2024년 12월 31일 기준 <span class="hl">총 11건의 주요 소송이 계류 중</span>이며, <span class="hl">3심 단계 부당이득반환 청구(420억원)</span>이 가장 큰 소송입니다. <span class="hl-r">중요한 우발채무로 인식하여 외부감사인에게 공시</span>하였으며, 전분기 대비 1심 신규 2건 추가됨.',ng:'현대차'
+  },
+  '삼성생명 자본적정성':{
+    text:'삼성생명 2024년 자본적정성(통합자본비율) 추이:\n\n• 2024Q1: <strong>194.1%</strong>\n• 2024Q2: <strong>195.8%</strong>\n• 2024Q3: <strong>197.2%</strong>\n• 2024Q4: <strong>198.3%</strong>\n\n4분기 연속 상승, 금감원 기준(100%) 대비 <strong>98.3%p 상회</strong>하여 7개 그룹 중 최고입니다.',
+    sources:[{name:'삼성금융그룹_2024Q4_공시보고서.pdf',page:'p.42',label:'자본적정성'},{name:'삼성생명_감사보고서_2024.pdf',page:'p.18',label:'자기자본'}],
+    excerpt:'...삼성금융그룹의 <span class="hl">2024년말 통합자본비율 198.3%</span>로 직전 분기 대비 1.1%p 상승. 삼성생명·삼성화재·삼성증권의 <span class="hl">자기자본 합계 47조원 초과</span>로 자본 충실도 지속 개선. <span class="hl">양호 등급 분류</span>.',ng:'삼성'
+  },
+  '한화그룹 내부거래':{
+    text:'한화금융그룹 내부거래 비중은 <strong>15.3%</strong>로 7개 그룹 중 최고.\n\n내부거래 총액 <strong>43.9조원</strong> — 대출·보증(21.9조), 투자(8.8조), 용역거래(6.1조) 순.\n\n금감원 가이드라인(20%) 이하이나 전분기比 0.5%p 증가 추세 모니터링 권고.',
+    sources:[{name:'한화금융그룹_2024Q4_공시보고서.pdf',page:'p.63',label:'내부거래현황'},{name:'금감원_금융복합기업집단_감독가이드.pdf',page:'p.12',label:'규제기준'}],
+    excerpt:'...한화금융그룹의 <span class="hl">내부거래 비중 15.3%</span> 집계. 직전 분기(14.8%) 대비 <span class="hl-r">0.5%p 증가</span>. 대출·보증(21.9조)·투자(8.8조)가 주요 항목. <span class="hl">감독당국 모니터링 강도 상향 예상</span>.',ng:'한화'
+  },
+  '그룹별 총자산 순위':{
+    text:'2024년 4분기 기준 7개 금융복합기업집단 총자산 순위:\n\n1위 <strong>삼성</strong>: 524조원\n2위 <strong>현대차</strong>: 291조원\n3위 <strong>한화</strong>: 287조원\n4위 <strong>미래에셋</strong>: 204조원\n5위 <strong>롯데</strong>: 143조원\n6위 <strong>교보</strong>: 118조원\n7위 <strong>DB</strong>: 76조원\n\n합산 <strong>1,643조원</strong> — 전분기比 평균 +2.1%',
+    sources:[{name:'금감원_금융복합기업집단_2024Q4_통합현황.pdf',page:'p.5',label:'총자산현황'}],
+    excerpt:'...2024년 12월 31일 현재 7개 금융복합기업집단 총자산 합계 <span class="hl">1,643조원</span>. 삼성금융그룹이 <span class="hl">524조원으로 1위</span> 유지. 현대차(291조), 한화(287조) 뒤를 이음. <span class="hl">DB금융그룹 증가율(2.7%) 가장 높음</span>.',ng:'all'
+  }
+};
+function matchAns(q){
+  if(q.includes('현대차증권')||q.includes('소송'))return ANS['현대차증권 소송'];
+  if(q.includes('삼성생명')||q.includes('자본적정성'))return ANS['삼성생명 자본적정성'];
+  if(q.includes('한화')||q.includes('내부거래'))return ANS['한화그룹 내부거래'];
+  if(q.includes('총자산')||q.includes('순위'))return ANS['그룹별 총자산 순위'];
+  return null;
+}
+function askQ(q){document.getElementById('chat-input').value=q;sendChat();}
+function sendChat(){
+  const inp=document.getElementById('chat-input'),q=inp.value.trim();if(!q)return;
+  inp.value='';
+  const body=document.getElementById('chat-body');
+  const um=document.createElement('div');um.className='msg msg-user';
+  um.innerHTML=`<div class="bubble">${q}</div>`;body.appendChild(um);body.scrollTop=body.scrollHeight;
+  const tm=document.createElement('div');tm.className='msg msg-ai';
+  tm.innerHTML=`<div class="msg-from">● AI 비서</div><div class="bubble"><div class="typing"><div class="tdot"></div><div class="tdot"></div><div class="tdot"></div></div></div>`;
+  body.appendChild(tm);body.scrollTop=body.scrollHeight;
+  const ans=matchAns(q);
+  setTimeout(()=>{
+    body.removeChild(tm);
+    const am=document.createElement('div');am.className='msg msg-ai';
+    if(ans){
+      const tags=ans.sources.map(s=>`<span class="src-tag" onclick='showSrc(${JSON.stringify(ans).replace(/'/g,"&#39;")})'>📄 ${s.name.substring(0,20)}… ${s.page}</span>`).join('');
+      am.innerHTML=`<div class="msg-from">● AI 비서</div><div class="bubble">${ans.text.replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')}<br><br>${tags}</div>`;
+      showSrc(ans);
+      if(ans.ng&&ans.ng!=='all'){document.getElementById('news-filter').value=ans.ng;renderNews();}
+    }else{
+      am.innerHTML=`<div class="msg-from">● AI 비서</div><div class="bubble">PoC 버전에서는 아래 예시 질문에 답변 가능합니다:<br>• 현대차증권 소송 현황<br>• 삼성생명 자본적정성<br>• 한화그룹 내부거래<br>• 그룹별 총자산 순위</div>`;
+    }
+    body.appendChild(am);body.scrollTop=body.scrollHeight;
+  },1400);
+}
+function showSrc(ans){
+  document.getElementById('src-count').textContent=`근거 ${ans.sources.length}건`;
+  document.getElementById('src-list').innerHTML=ans.sources.map((s,i)=>`
+    <div class="src-item ${i===0?'active':''}" onclick="selSrc(this,${i},'${btoa(unescape(encodeURIComponent(JSON.stringify(ans))))}')">
+      <span style="font-size:14px;flex-shrink:0">📄</span>
+      <div><div class="src-nm">${s.name.length>22?s.name.substring(0,22)+'…':s.name}</div><div class="src-pg">${s.page} · ${s.label}</div></div>
+    </div>`).join('');
+  showExc(ans,0);
+}
+function showExc(ans,i){
+  const s=ans.sources[i];
+  document.getElementById('src-excerpt').innerHTML=`<div class="src-pgref">📄 ${s.name} &nbsp;|&nbsp; <span class="pg-tag">${s.page}</span> &nbsp;|&nbsp; ${s.label}</div><p>${ans.excerpt}</p>`;
+}
+function selSrc(el,i,enc){
+  document.querySelectorAll('.src-item').forEach(e=>e.classList.remove('active'));el.classList.add('active');
+  try{const ans=JSON.parse(decodeURIComponent(escape(atob(enc))));showExc(ans,i);}catch(e){}
+}
+
+/* CLOCK */
+function tick(){
+  const n=new Date(),p=v=>String(v).padStart(2,'0');
+  const el=document.getElementById('clock');
+  if(el)el.textContent=`${n.getFullYear()}-${p(n.getMonth()+1)}-${p(n.getDate())} ${p(n.getHours())}:${p(n.getMinutes())}:${p(n.getSeconds())}`;
+}
+setInterval(tick,1000);tick();
+</script>
+</body>
+</html>

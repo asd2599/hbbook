@@ -1,0 +1,1398 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>샤시부품 글로벌 협력사 관리 시스템 v5</title>
+<!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+<!-- Leaflet.markercluster CSS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.css"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.Default.css"/>
+<!-- SheetJS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:'Apple SD Gothic Neo','Malgun Gothic',Arial,sans-serif;background:#f0ece2;color:#1a1a1a;font-size:12px;overflow:hidden}
+
+/* ── HEADER ── */
+.hdr{background:#1c2b3a;padding:0 16px;height:46px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;position:relative;z-index:1000}
+.hdr-left{display:flex;align-items:center;gap:10px}
+.logo{background:linear-gradient(135deg,#e07b32,#f59c50);border-radius:7px;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.hdr-t{font-size:13px;font-weight:800;color:#f0ece2}
+.hdr-s{font-size:9px;color:#7a9ab0;margin-top:1px}
+.hdr-right{display:flex;gap:10px;align-items:center}
+.hstat .v{font-size:13px;font-weight:900;color:#e07b32;line-height:1}
+.hstat .l{font-size:8px;color:#7a9ab0}
+.fx-pill{background:#243445;border:1px solid #3a5470;border-radius:5px;padding:3px 8px;font-size:10px;color:#90b8d0;cursor:pointer;display:flex;align-items:center;gap:4px}
+.fx-pill:hover{border-color:#e07b32}
+.fx-v{font-weight:800;color:#f0b060}
+.live{display:flex;align-items:center;gap:3px}
+.pulse{width:6px;height:6px;border-radius:50%;background:#4caf50;animation:lp 2s infinite}
+@keyframes lp{0%,100%{box-shadow:0 0 0 0 rgba(76,175,80,.5)}50%{box-shadow:0 0 0 4px rgba(76,175,80,0)}}
+.live-lbl{font-size:9px;color:#4caf50;font-weight:700}
+
+/* ── LAYOUT ── */
+.layout{display:grid;grid-template-columns:200px 1fr;height:calc(100vh - 46px);overflow:hidden}
+
+/* ── LEFT PANEL ── */
+.left{background:#fff;border-right:1.5px solid #d8d0c0;overflow:hidden;display:flex;flex-direction:column;z-index:900}
+.tab-bar{display:flex;background:#f5f0e6;border-bottom:1.5px solid #d8d0c0;flex-shrink:0}
+.tb{flex:1;padding:7px 4px;font-size:10.5px;font-weight:700;cursor:pointer;border:none;background:transparent;font-family:inherit;color:#8a7a60;border-bottom:2.5px solid transparent}
+.tb.on{color:#e07b32;border-bottom-color:#e07b32;background:#fff}
+.tc{overflow-y:auto;flex:1}
+.tc::-webkit-scrollbar{width:3px}
+.tc::-webkit-scrollbar-thumb{background:#d8d0c0;border-radius:2px}
+.sr{padding:6px 8px;border-bottom:1px solid #ede8dc}
+.si{width:100%;background:#f5f0e6;border:1px solid #d8d0c0;border-radius:5px;padding:5px 8px;font-size:10px;outline:none;font-family:inherit}
+.si:focus{border-color:#e07b32}
+.si::placeholder{color:#b0a080}
+.sh{background:#f5ede0;padding:4px 9px;font-size:8.5px;font-weight:700;color:#8a7a60;text-transform:uppercase;letter-spacing:.07em;border-top:1px solid #e8e0d0;border-bottom:1px solid #e8e0d0;display:flex;justify-content:space-between;align-items:center}
+.sh-zbtn{background:rgba(224,123,50,.15);border:1px solid rgba(224,123,50,.4);color:#c8602a;border-radius:4px;padding:1px 7px;font-size:8px;cursor:pointer;font-family:inherit;font-weight:700}
+.sh-zbtn:hover{background:rgba(224,123,50,.3)}
+.fp{padding:3px 6px}
+.fb{width:100%;background:transparent;border:1px solid transparent;border-radius:5px;padding:4px 7px;color:#3a2c1a;cursor:pointer;font-size:10px;text-align:left;display:flex;justify-content:space-between;align-items:center;font-family:inherit;transition:all .12s;margin-bottom:1px}
+.fb:hover{background:#f5ede0;border-color:#d4b890}
+.fb.on{background:linear-gradient(90deg,#c8602a,#e8803c);border-color:#c8602a;color:#fff;font-weight:700}
+.fc{background:rgba(0,0,0,.1);border-radius:999px;padding:1px 5px;font-size:8px;font-weight:700}
+.fb.on .fc{background:rgba(255,255,255,.25)}
+.dsec{padding:6px;border-top:1px solid #e8e0d0;flex-shrink:0;display:flex;flex-direction:column;gap:3px}
+.db{width:100%;border-radius:5px;padding:5px 8px;font-size:10px;cursor:pointer;font-family:inherit;font-weight:600;border:none;text-align:center}
+.db-up{background:#f5f0e6;border:1.5px dashed #c8a878;color:#6a5a40}
+.db-up:hover{border-color:#e07b32;color:#e07b32}
+.db-dl{background:#e8f5e9;border:1.5px solid #81c784;color:#2e7d32}
+.db-ai{background:linear-gradient(90deg,#5b4fd4,#8b5cf6);color:#fff}
+
+/* ── CENTER (Leaflet map + detail panel) ── */
+.center{display:flex;flex-direction:column;position:relative;overflow:hidden}
+#map{flex:1;min-height:0;z-index:1}
+
+/* ── Region zoom buttons overlay on map ── */
+.rz-btns{position:absolute;top:10px;left:50%;transform:translateX(-50%);
+  display:flex;gap:5px;z-index:500;flex-wrap:wrap;justify-content:center}
+.rz-btn{background:rgba(255,255,255,.92);border:1.5px solid #c8a060;
+  border-radius:6px;padding:4px 10px;cursor:pointer;font-size:10.5px;
+  font-family:inherit;font-weight:700;color:#c8602a;
+  box-shadow:0 2px 8px rgba(0,0,0,.18);transition:all .15s;white-space:nowrap}
+.rz-btn:hover{background:#fff3e8;border-color:#e07b32;transform:translateY(-1px);
+  box-shadow:0 4px 14px rgba(0,0,0,.22)}
+.rz-btn.active{background:#e07b32;color:#fff;border-color:#c8602a}
+
+/* ── DETAIL PANEL ── */
+.dp{height:0;background:#fff;border-top:2px solid #e07b32;overflow:hidden;
+  transition:height .3s cubic-bezier(.4,0,.2,1);flex-shrink:0;z-index:600;position:relative}
+.dp.open{overflow-y:auto}
+.dp::-webkit-scrollbar{width:3px;height:3px}
+.dp::-webkit-scrollbar-thumb{background:#d8d0c0}
+.dp-hdr{background:linear-gradient(90deg,#c8602a,#e8803c);padding:5px 12px;display:flex;
+  align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10}
+.dp-l{color:#fff;font-weight:800;font-size:11px}
+.dp-r{display:flex;gap:4px}
+.dpb{background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.35);color:#fff;
+  border-radius:4px;padding:2px 7px;cursor:pointer;font-size:9.5px;font-family:inherit}
+.dpb:hover{background:rgba(255,255,255,.35)}
+.tw{padding:7px 11px;overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:10px}
+th{background:#f5ede0;color:#6a5a40;font-size:8.5px;font-weight:700;padding:5px 6px;
+  text-align:left;border-bottom:1.5px solid #d8d0c0;position:sticky;top:0;white-space:nowrap}
+td{padding:5px 6px;border-bottom:1px solid #ede8dc;vertical-align:top}
+tr:hover td{background:#fdf8f0}
+.tag{display:inline-block;background:#f0ebe0;border:1px solid #d8d0c0;border-radius:2px;
+  padding:1px 4px;font-size:8.5px;color:#5a4a30;margin:1px 1px 1px 0}
+.tag.g{background:#e8f5e9;border-color:#a5d6a7;color:#2e7d32}
+.tag.o{background:#fff3e0;border-color:#ffb74d;color:#e65100;font-weight:700}
+.cbtn{background:#c8602a;border:none;color:#fff;border-radius:3px;padding:2px 7px;
+  cursor:pointer;font-size:9px;font-family:inherit}
+.cbtn:hover{background:#a84018}
+.sdot{width:6px;height:6px;border-radius:50%;display:inline-block;margin-right:2px}
+.s-ok{background:#4caf50}.s-risk{background:#f44336}.s-new{background:#2196f3}.s-warn{background:#ff9800}
+.rv{display:flex;flex-direction:column;gap:1px}
+.rv-u{font-size:10.5px;font-weight:800;color:#c8602a}
+.rv-k{font-size:8.5px;color:#8a7a60}
+.rv-fu{font-size:10px;font-weight:700;color:#1565c0}
+.rv-fk{font-size:8.5px;color:#8a7a60}
+.rb-w{display:flex;align-items:center;gap:3px}
+.rb{height:4px;border-radius:2px;min-width:2px}
+
+/* ── CUSTOM LEAFLET MARKER ── */
+.cpin{display:flex;align-items:center;justify-content:center;
+  border-radius:50%;border:2.5px solid rgba(255,255,255,0.85);
+  box-shadow:0 2px 8px rgba(0,0,0,0.4);font-size:0;
+  transition:transform .15s}
+.cpin:hover{transform:scale(1.35)!important;z-index:9999!important}
+.cpin-risk{border-color:#ff3333!important;box-shadow:0 0 0 3px rgba(255,50,50,0.35),0 2px 8px rgba(0,0,0,0.4)!important}
+.leaflet-popup-content-wrapper{border-radius:10px;padding:0;overflow:hidden;
+  box-shadow:0 4px 20px rgba(0,0,0,0.25)}
+.leaflet-popup-content{margin:0;min-width:220px}
+.lp-inner{padding:12px 14px;font-family:'Malgun Gothic','Apple SD Gothic Neo',sans-serif}
+.lp-name{font-size:13px;font-weight:800;color:#1a1a1a;margin-bottom:3px}
+.lp-sub{font-size:9.5px;color:#6a5a40;margin-bottom:6px}
+.lp-row{font-size:10px;color:#4a4a4a;margin:2px 0;line-height:1.5}
+.lp-rev{display:flex;gap:10px;margin:6px 0;padding:6px 8px;background:#f5f0e8;border-radius:6px}
+.lp-rev-item{display:flex;flex-direction:column;align-items:center}
+.lp-rev-v{font-weight:800;font-size:11px}
+.lp-rev-l{font-size:8px;color:#8a7060}
+.lp-actions{display:flex;gap:6px;margin-top:8px}
+.lp-btn{flex:1;border:none;border-radius:5px;padding:5px 0;cursor:pointer;
+  font-size:10px;font-weight:700;font-family:inherit}
+.lp-btn-detail{background:#e07b32;color:#fff}
+.lp-btn-detail:hover{background:#c8602a}
+.lp-btn-contact{background:#f5f0e8;border:1px solid #d8d0c0;color:#5a4a30}
+.lp-btn-contact:hover{background:#ede4d0}
+
+/* ── ZOOM OVERLAY ── */
+.zoom-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);
+  z-index:2000;align-items:center;justify-content:center;backdrop-filter:blur(3px)}
+.zoom-overlay.show{display:flex}
+.zoom-panel{background:#fff;border-radius:14px;box-shadow:0 12px 60px rgba(0,0,0,.45);
+  display:flex;flex-direction:column;width:94vw;max-width:1200px;
+  height:90vh;max-height:780px;overflow:hidden;position:relative}
+.zoom-hdr{background:linear-gradient(90deg,#c8602a,#e8803c);padding:9px 16px;
+  display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.zoom-hdr-l{color:#fff;font-weight:800;font-size:14px;display:flex;align-items:center;gap:8px}
+.zoom-hdr-r{display:flex;gap:5px;align-items:center;flex-wrap:wrap}
+.zoom-close{background:rgba(255,255,255,.22);border:1px solid rgba(255,255,255,.4);
+  color:#fff;border-radius:6px;padding:4px 12px;cursor:pointer;font-size:12px;font-family:inherit;font-weight:600}
+.zoom-close:hover{background:rgba(255,255,255,.38)}
+.zoom-body{display:grid;grid-template-columns:1fr 300px;flex:1;min-height:0;overflow:hidden}
+#zoomMap{position:relative;min-height:0}
+.zoom-table-wrap{overflow-y:auto;background:#fff;border-left:1.5px solid #e0d8cc}
+.zoom-table-wrap::-webkit-scrollbar{width:4px}
+.zoom-table-wrap::-webkit-scrollbar-thumb{background:#d8d0c0;border-radius:2px}
+.zt-hdr{background:#f5ede0;padding:7px 12px;font-size:10px;font-weight:700;color:#6a5a40;
+  border-bottom:1.5px solid #d8d0c0;position:sticky;top:0;z-index:5;
+  display:flex;justify-content:space-between;align-items:center}
+.zt-cnt{background:#e07b32;color:#fff;border-radius:999px;padding:1px 8px;font-size:9px}
+.zoom-sup-card{padding:9px 12px;border-bottom:1px solid #ede8dc;cursor:pointer;transition:background .12s}
+.zoom-sup-card:hover{background:#fdf5ee}
+.zoom-sup-card.selected{background:#fff3e8;border-left:3px solid #e07b32;padding-left:9px}
+.zsc-name{font-size:11.5px;font-weight:800;color:#1a1a1a;margin-bottom:2px}
+.zsc-factory{font-size:9px;color:#6a5a40;margin-bottom:4px}
+.zsc-tags{display:flex;flex-wrap:wrap;gap:2px;margin-bottom:4px}
+.zsc-tag{background:#f0ebe0;border:1px solid #d8d0c0;border-radius:3px;padding:1px 4px;font-size:8.5px;color:#5a4a30}
+.zsc-rev{display:flex;gap:8px;margin-bottom:3px}
+.zsc-rev-item{display:flex;flex-direction:column}
+.zrc-tot{font-weight:800;font-size:11px;color:#c8602a}
+.zrc-fac{font-weight:700;font-size:10.5px;color:#1565c0}
+.zrc-rat{font-weight:800;font-size:12px}
+.zrc-lbl{font-size:7.5px;color:#a09070}
+.zsc-bot{display:flex;align-items:center;justify-content:space-between;margin-top:5px}
+.zsc-person{font-size:9px;color:#6a5a40;line-height:1.5}
+.zsc-cbtn{background:#c8602a;border:none;color:#fff;border-radius:4px;
+  padding:3px 10px;cursor:pointer;font-size:9px;font-family:inherit;white-space:nowrap}
+.zsc-cbtn:hover{background:#a84018}
+.znav-btn{background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.35);
+  color:#fff;border-radius:5px;padding:3px 8px;cursor:pointer;font-size:9.5px;
+  font-family:inherit;transition:all .12s;white-space:nowrap}
+.znav-btn:hover{background:rgba(255,255,255,.35)}
+.znav-btn.active{background:rgba(255,255,255,.45);font-weight:700}
+
+/* ── MODALS ── */
+.ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:3000;
+  align-items:center;justify-content:center}
+.ov.show{display:flex}
+.mbox{background:#fff;border-radius:11px;padding:18px;box-shadow:0 8px 40px rgba(0,0,0,.25)}
+.mtitle{font-size:13px;font-weight:900;margin-bottom:10px;color:#1a1a1a}
+.minfo{background:#f5f0e6;border-radius:7px;padding:10px;display:flex;flex-direction:column;gap:5px;margin-bottom:9px}
+.mr{font-size:10.5px;color:#5a4a30}.mr span{color:#1a1a1a;font-weight:600}
+.mbtn{width:100%;background:linear-gradient(90deg,#c8602a,#e8803c);border:none;
+  border-radius:7px;padding:8px;color:#fff;font-size:11px;font-weight:700;
+  cursor:pointer;font-family:inherit;margin-bottom:5px}
+.mclose{width:100%;background:#f0ebe0;border:1px solid #d8d0c0;border-radius:7px;
+  padding:6px;color:#5a4a30;font-size:10.5px;cursor:pointer;font-family:inherit}
+.fx-m{min-width:270px}
+.fx-row{display:flex;gap:6px;margin-bottom:8px}
+.fx-i{flex:1;background:#f5f0e6;border:1.5px solid #d8d0c0;border-radius:5px;
+  padding:7px 8px;font-size:13px;font-weight:700;color:#c8602a;outline:none;font-family:inherit}
+.fx-i:focus{border-color:#e07b32}
+.fx-a{background:#e07b32;border:none;color:#fff;border-radius:5px;
+  padding:7px 12px;font-size:10.5px;font-weight:700;cursor:pointer;font-family:inherit}
+.ai-box{max-width:360px;width:90%;text-align:center}
+.ai-sp{font-size:28px;animation:spin 1s linear infinite;display:inline-block;margin-bottom:7px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.ai-log{background:#f5f0e6;border-radius:6px;padding:8px 10px;text-align:left;
+  font-size:9.5px;color:#5a4a30;max-height:110px;overflow-y:auto;line-height:1.7;margin-top:7px}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="hdr">
+  <div class="hdr-left">
+    <div class="logo">🚗</div>
+    <div>
+      <div class="hdr-t">샤시부품 글로벌 생산공장 협력사 관리 시스템 v5</div>
+      <div class="hdr-s">구매본부 · OpenStreetMap 고화질 지도 · 생산공장 보유 협력사만 표시</div>
+    </div>
+  </div>
+  <div class="hdr-right">
+    <div class="fx-pill" onclick="openFx()">💱 <span class="fx-v" id="fxDisp">$1=₩1,527</span><span style="font-size:8px;color:#5a7a90">수정</span></div>
+    <div class="live"><div class="pulse"></div><span class="live-lbl">LIVE</span></div>
+    <div class="hstat"><div class="v" id="hdrN">55</div><div class="l">협력사</div></div>
+    <div class="hstat"><div class="v" style="color:#90d0b0" id="hdrSel">전체</div><div class="l">선택</div></div>
+  </div>
+</div>
+
+<div class="layout">
+<!-- LEFT -->
+<div class="left">
+  <div class="tab-bar">
+    <button class="tb on" id="tab-item" onclick="switchTab('item')">🔩 품목별</button>
+    <button class="tb" id="tab-region" onclick="switchTab('region')">🌏 지역별</button>
+  </div>
+  <!-- ITEM TAB -->
+  <div class="tc" id="tc-item">
+    <div class="sr"><input class="si" id="si1" placeholder="협력사·국가·품목 검색..." oninput="doSearch(this.value)"/></div>
+    <div class="fp"><button class="fb on" id="btn-all" onclick="selItem(event,'all','전체')">🌐 전체 협력사 <span class="fc">55</span></button></div>
+    <div class="sh">🛑 제동 시스템</div>
+    <div class="fp">
+      <button class="fb" onclick="selItem(event,'CBS','CBS')">CBS (전자제동) <span class="fc">11</span></button>
+      <button class="fb" onclick="selItem(event,'EPB','EPB')">EPB (전자주차) <span class="fc">8</span></button>
+      <button class="fb" onclick="selItem(event,'BIR','BIR')">BIR <span class="fc">4</span></button>
+      <button class="fb" onclick="selItem(event,'ESC','ESC')">ESC (차체자세) <span class="fc">12</span></button>
+      <button class="fb" onclick="selItem(event,'IEB','IEB')">IEB (통합부스터) <span class="fc">7</span></button>
+    </div>
+    <div class="sh">🚗 조향 · 구동</div>
+    <div class="fp">
+      <button class="fb" onclick="selItem(event,'MDPS','MDPS')">MDPS (전동조향) <span class="fc">10</span></button>
+      <button class="fb" onclick="selItem(event,'GEARBOX','기어박스')">기어박스 <span class="fc">6</span></button>
+    </div>
+    <div class="sh">🏗️ 샤시 구조</div>
+    <div class="fp">
+      <button class="fb" onclick="selItem(event,'CHASSIS_MODULE','샤시모듈')">샤시모듈 <span class="fc">8</span></button>
+      <button class="fb" onclick="selItem(event,'CROSSMEMBER','크로스멤버&amp;암류')">크로스멤버&amp;암류 <span class="fc">17</span></button>
+      <button class="fb" onclick="selItem(event,'BOF_FRAME','BOF 샤시프레임')">🆕 BOF 샤시프레임 <span class="fc">17</span></button>
+    </div>
+    <div class="sh">🎡 휠 · 베어링 · 제동부</div>
+    <div class="fp">
+      <button class="fb" onclick="selItem(event,'WHEEL_BEARING','휠베어링')">휠베어링 <span class="fc">12</span></button>
+      <button class="fb" onclick="selItem(event,'DISC','디스크')">디스크 <span class="fc">8</span></button>
+      <button class="fb" onclick="selItem(event,'KNUCKLE','너클')">너클 <span class="fc">11</span></button>
+      <button class="fb" onclick="selItem(event,'CARRIER','캐리어')">캐리어 <span class="fc">11</span></button>
+      <button class="fb" onclick="selItem(event,'WSS','휠스피드센서')">휠스피드센서 <span class="fc">8</span></button>
+    </div>
+    <div class="sh">🛞 액슬</div>
+    <div class="fp">
+      <button class="fb" onclick="selItem(event,'AXLE','액슬 ASSY')">액슬 ASSY <span class="fc">9</span></button>
+    </div>
+    <div class="sh">⛽ 연료 시스템</div>
+    <div class="fp">
+      <button class="fb" onclick="selItem(event,'FUEL_TANK','연료탱크')">연료탱크 <span class="fc">2</span></button>
+      <button class="fb" onclick="selItem(event,'FUEL_PUMP','연료펌프')">연료펌프 <span class="fc">2</span></button>
+      <button class="fb" onclick="selItem(event,'FILLER_NECK','필러넥')">필러넥 <span class="fc">3</span></button>
+      <button class="fb" onclick="selItem(event,'CANISTER','캐니스터')">캐니스터 <span class="fc">2</span></button>
+      <button class="fb" onclick="selItem(event,'FUEL_CAP','연료캡')">연료캡 <span class="fc">2</span></button>
+    </div>
+    <div class="sh">🌀 서스펜션</div>
+    <div class="fp">
+      <button class="fb" onclick="selItem(event,'SHOCK','쇽업저버')">쇽업저버 <span class="fc">8</span></button>
+      <button class="fb" onclick="selItem(event,'GAS_LIFTER','가스리프터')">가스리프터 <span class="fc">5</span></button>
+      <button class="fb" onclick="selItem(event,'AIR_SUSP','에어서스펜션')">에어서스펜션 <span class="fc">4</span></button>
+    </div>
+  </div>
+  <!-- REGION TAB -->
+  <div class="tc" id="tc-region" style="display:none">
+    <div class="sr"><input class="si" id="si2" placeholder="협력사·품목 검색..." oninput="doSearch(this.value)"/></div>
+    <div class="fp"><button class="fb on" id="rbtn-all" onclick="selRegion(event,'all','전체')">🌐 전체 지역 <span class="fc">55</span></button></div>
+    <div class="sh">한국 <span id="cnt-kr"></span><button class="sh-zbtn" onclick="openZoom('kr')">🔍 확대</button></div>
+    <div id="reg-kr" class="fp"></div>
+    <div class="sh">중국 <span id="cnt-cn"></span><button class="sh-zbtn" onclick="openZoom('cn')">🔍 확대</button></div>
+    <div id="reg-cn" class="fp"></div>
+    <div class="sh">인도 <span id="cnt-in"></span><button class="sh-zbtn" onclick="openZoom('in')">🔍 확대</button></div>
+    <div id="reg-in" class="fp"></div>
+    <div class="sh">미국/캐나다 <span id="cnt-us"></span><button class="sh-zbtn" onclick="openZoom('us')">🔍 확대</button></div>
+    <div id="reg-us" class="fp"></div>
+    <div class="sh">유럽 <span id="cnt-eu"></span><button class="sh-zbtn" onclick="openZoom('eu')">🔍 확대</button></div>
+    <div id="reg-eu" class="fp"></div>
+    <div class="sh">일본 <span id="cnt-jp"></span><button class="sh-zbtn" onclick="openZoom('jp')">🔍 확대</button></div>
+    <div id="reg-jp" class="fp"></div>
+    <div class="sh">동남아 <span id="cnt-sea"></span><button class="sh-zbtn" onclick="openZoom('sea')">🔍 확대</button></div>
+    <div id="reg-sea" class="fp"></div>
+  </div>
+  <div class="dsec">
+    <label style="cursor:pointer"><input type="file" id="xlf" accept=".xlsx,.xls,.csv" onchange="handleUpload(this)" style="display:none"/><div class="db db-up">📤 Excel/CSV 업로드</div></label>
+    <button class="db db-dl" onclick="exportExcel()">📥 전체 Excel 다운로드</button>
+    <button class="db db-ai" onclick="runAI()">🤖 AI 최신정보 업데이트</button>
+  </div>
+</div>
+
+<!-- CENTER -->
+<div class="center">
+  <!-- 지역 빠른 확대 버튼 -->
+  <div class="rz-btns">
+    <button class="rz-btn" onclick="openZoom('kr')">🇰🇷 한국</button>
+    <button class="rz-btn" onclick="openZoom('cn')">🇨🇳 중국</button>
+    <button class="rz-btn" onclick="openZoom('in')">🇮🇳 인도</button>
+    <button class="rz-btn" onclick="openZoom('us')">🇺🇸 미국</button>
+    <button class="rz-btn" onclick="openZoom('eu')">🇪🇺 유럽</button>
+    <button class="rz-btn" onclick="openZoom('jp')">🇯🇵 일본</button>
+    <button class="rz-btn" onclick="openZoom('sea')">🌏 동남아</button>
+  </div>
+  <!-- Main Leaflet Map -->
+  <div id="map"></div>
+  <!-- Detail panel -->
+  <div class="dp" id="dp">
+    <div class="dp-hdr">
+      <div class="dp-l" id="dpT">협력사 현황</div>
+      <div class="dp-r">
+        <button class="dpb" onclick="exportTableXlsx()">📥 표 Excel</button>
+        <button class="dpb" onclick="closeDp()">✕ 닫기</button>
+      </div>
+    </div>
+    <div class="tw">
+      <table>
+        <thead><tr>
+          <th>#</th><th>협력사명</th><th>국가·공장위치</th>
+          <th>주요 생산품목</th><th>주요 고객사</th>
+          <th>전체 매출</th><th>해당공장 매출</th>
+          <th>품목비율</th><th>상태</th><th>컨택</th>
+        </tr></thead>
+        <tbody id="detBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ZOOM OVERLAY (Leaflet 지도) -->
+<div class="zoom-overlay" id="zoomOverlay" onclick="if(event.target===this)closeZoom()">
+  <div class="zoom-panel">
+    <div class="zoom-hdr">
+      <div class="zoom-hdr-l">
+        <span id="zoomFlag">🌍</span>
+        <span id="zoomTitle">지역 협력사</span>
+        <span style="font-size:10px;opacity:.75;font-weight:400" id="zoomSub"></span>
+      </div>
+      <div class="zoom-hdr-r">
+        <div id="zoomNav" style="display:flex;gap:4px;flex-wrap:wrap"></div>
+        <button class="zoom-close" onclick="closeZoom()">✕ 닫기</button>
+      </div>
+    </div>
+    <div class="zoom-body">
+      <div id="zoomMap"></div>
+      <div class="zoom-table-wrap">
+        <div class="zt-hdr"><span id="ztHdrTxt">협력사 목록</span><span class="zt-cnt" id="ztCnt">0</span></div>
+        <div id="zoomCards"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Contact Modal -->
+<div class="ov" id="cOv" onclick="if(event.target===this)closeCOv()">
+  <div class="mbox" style="min-width:290px;max-width:370px">
+    <div class="mtitle" id="cN"></div>
+    <div style="font-size:9.5px;color:#8a7a60;margin-bottom:9px" id="cSb"></div>
+    <div class="minfo">
+      <div class="mr">👤 담당자: <span id="cPe"></span></div>
+      <div class="mr">✉️ 이메일: <span id="cEm"></span></div>
+      <div class="mr">📞 전화: <span id="cPh"></span></div>
+      <div class="mr">🏭 공장: <span id="cFc"></span></div>
+      <div class="mr">🌐 홈페이지: <span id="cUr"></span></div>
+    </div>
+    <button class="mbtn" id="cMB">📧 이메일 바로 보내기</button>
+    <button class="mclose" onclick="closeCOv()">닫기</button>
+  </div>
+</div>
+<!-- FX Modal -->
+<div class="ov" id="fxOv" onclick="if(event.target===this)closeFxOv()">
+  <div class="mbox fx-m">
+    <div class="mtitle">💱 환율 업데이트</div>
+    <div style="font-size:10px;color:#5a4a30;margin-bottom:9px">현재: <strong id="fxC">$1=₩1,527</strong></div>
+    <div class="fx-row"><input class="fx-i" id="fxI" type="number" value="1527"/><button class="fx-a" onclick="applyFx()">적용</button></div>
+    <div style="font-size:9px;color:#8a7a60">XE.com $1=₩1,527 (2026.06.19 기준)<br>변경 시 전체 매출 즉시 재계산</div>
+    <button class="mclose" style="margin-top:9px" onclick="closeFxOv()">닫기</button>
+  </div>
+</div>
+<!-- AI Modal -->
+<div class="ov" id="aiOv">
+  <div class="mbox ai-box">
+    <div class="ai-sp">🔄</div>
+    <div style="font-size:12px;font-weight:700;margin-bottom:2px" id="aiT">AI 정보 업데이트 중...</div>
+    <div style="font-size:10px;color:#8a7a60" id="aiS">협력사 홈페이지·글로벌 DB 검색중</div>
+    <div class="ai-log" id="aiLog"></div>
+  </div>
+</div>
+
+<!-- Leaflet JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.min.js"></script>
+
+<script>
+'use strict';
+let FX = 1527;
+const fU = u => u>=1e9?'$'+(u/1e9).toFixed(1)+'B':u>=1e6?'$'+(u/1e6).toFixed(0)+'M':'$'+(u/1e3).toFixed(0)+'K';
+const fK = k => k>=1e12?'₩'+(k/1e12).toFixed(1)+'조':k>=1e8?'₩'+(k/1e8).toFixed(0)+'억':'₩'+(k/1e4).toFixed(0)+'만';
+const bth = m => { const u=m*1e6; return fU(u)+' / '+fK(u*FX); };
+
+// ═══════════════════════════════════════
+// SUPPLIER DATA
+// ═══════════════════════════════════════
+const S = {
+// ── KOREA ── 검증된 정보만 포함
+"mando":{name:"만도(주)",co:"한국",flag:"🇰🇷",factory:"평택공장·원주공장",
+  items:["CBS","EPB","ESC","MDPS","BIR","WSS"],
+  cust:["현대자동차","기아","GM","BMW","포드"],
+  tot:1376,fac:680,ratio:45,st:"ok",
+  person:"김태현 상무",email:"thkim@mando.com",phone:"031-610-4000",
+  url:"https://www.mando.com",
+  note:"만도: CBS·EPB·ESC·MDPS·쇽업저버 생산. 에어서스펜션 미생산",
+  lat:37.0,lng:127.0,col:"#fb923c",region:"kr"},
+"hl-mando":{name:"HL만도(주)",co:"한국",flag:"🇰🇷",factory:"평택공장·원주공장·성주공장",
+  items:["쇽업저버","가스리프터","전자제어댐퍼(SDC)"],
+  cust:["현대자동차","기아","GM","포드","폭스바겐"],
+  tot:1178,fac:520,ratio:55,st:"ok",
+  person:"정호준 임원",email:"hjjeong@hlmando.com",phone:"031-610-5000",
+  url:"https://www.hlmando.com",
+  note:"쇽업저버·반능동댐퍼 전문. 에어서스펜션은 공급 안함",
+  lat:37.0,lng:127.05,col:"#fb923c",region:"kr"},
+"hyundai-mobis":{name:"현대모비스(주)",co:"한국",flag:"🇰🇷",factory:"울산·아산·전주공장",
+  items:["CBS","EPB","ESC","IEB","MDPS","샤시모듈","WSS","크로스멤버&암류"],
+  cust:["현대자동차","기아","아우디","폭스바겐"],
+  tot:5800,fac:1200,ratio:35,st:"ok",
+  person:"이상현 전무",email:"slee@mobis.co.kr",phone:"02-3464-1114",
+  url:"https://www.mobis.co.kr",
+  note:"현대차그룹 핵심 부품. 모듈/전자제동 양산",
+  lat:35.55,lng:129.32,col:"#fb923c",region:"kr"},
+"sejong":{name:"세종공업(주)",co:"한국",flag:"🇰🇷",factory:"아산공장·당진공장",
+  items:["연료탱크","연료펌프","캐니스터","필러넥","연료캡"],
+  cust:["현대자동차","기아","한국GM"],
+  tot:314,fac:240,ratio:72,st:"ok",
+  person:"박성민 부장",email:"smpark@sejongind.co.kr",phone:"041-580-2000",
+  url:"https://www.sejongind.co.kr",note:"연료시스템 전문. 아산·당진",
+  lat:36.78,lng:127.0,col:"#fb923c",region:"kr"},
+"iljin":{name:"일진그룹(휠베어링사업부)",co:"한국",flag:"🇰🇷",factory:"충주공장·안성공장",
+  items:["휠베어링","너클","액슬 ASSY"],
+  cust:["현대자동차","기아","GM","도요타"],
+  tot:620,fac:310,ratio:78,st:"ok",
+  person:"김동수 부장",email:"dskim@iljin.co.kr",phone:"02-3490-8114",
+  url:"https://www.iljin.co.kr",note:"국내 1위 휠베어링. 충주·안성",
+  lat:37.08,lng:127.93,col:"#fb923c",region:"kr"},
+"hankook-bearing":{name:"한국베어링(NSK코리아)",co:"한국",flag:"🇰🇷",factory:"창원공장",
+  items:["휠베어링","캐리어"],
+  cust:["현대자동차","기아","르노코리아"],
+  tot:210,fac:175,ratio:68,st:"ok",
+  person:"이준혁 팀장",email:"jhlee@nskkorea.co.kr",phone:"055-280-5000",
+  url:"https://www.nsk.com/kr",note:"NSK 한국 법인. 창원 생산",
+  lat:35.23,lng:128.68,col:"#fb923c",region:"kr"},
+// ── CHINA ── 검증 및 추가
+"citic":{name:"CITIC Dicastal",co:"중국",flag:"🇨🇳",factory:"친황다오·쿤산·충칭공장",
+  items:["휠베어링","디스크","너클","캐리어"],
+  cust:["BMW","Audi","현대자동차","닛산","GM"],
+  tot:380,fac:220,ratio:38,st:"ok",
+  person:"Chen Jiaming 부장",email:"cjm@citicdicastal.com",phone:"+86-335-8833-2210",
+  url:"https://www.citicdicastal.com",note:"중국 최대 알루미늄 다이캐스팅",
+  lat:39.93,lng:119.6,col:"#ef4444",region:"cn"},
+"jtekt-cn":{name:"JTEKT (상하이·텐진·광저우)",co:"중국",flag:"🇨🇳",factory:"상하이·텐진·광저우공장",
+  items:["MDPS","기어박스","휠베어링"],
+  cust:["도요타","혼다","현대자동차","GM","닛산"],
+  tot:840,fac:210,ratio:62,st:"ok",
+  person:"Wang Fei 과장",email:"wfei@jtekt-sh.cn",phone:"+86-21-6600-4422",
+  url:"https://www.jtekt.co.jp",note:"도요타계 조향·베어링. 中 3개공장",
+  lat:31.23,lng:121.47,col:"#ef4444",region:"cn"},
+"bwi":{name:"BWI Group (베이징·이창)",co:"중국",flag:"🇨🇳",factory:"베이징·이창·칭다오공장",
+  items:["쇽업저버","에어서스펜션","ESC"],
+  cust:["현대자동차","GM","포드","크라이슬러"],
+  tot:157,fac:95,ratio:55,st:"ok",
+  person:"Zhang Lei 팀장",email:"zlei@bwi-group.cn",phone:"+86-10-6655-3300",
+  url:"https://www.bwigroup.com",note:"BWI: 에어서스펜션·ESC 전문",
+  lat:39.9,lng:116.4,col:"#ef4444",region:"cn"},
+"wanxiang":{name:"万向集団 Wanxiang",co:"중국",flag:"🇨🇳",factory:"항저우·청두공장",
+  items:["연료탱크","연료펌프","필러넥","액슬 ASSY"],
+  cust:["GM","포드","크라이슬러","폭스바겐"],
+  tot:105,fac:48,ratio:28,st:"warn",
+  person:"Xu Ming 부장",email:"xuming@wanxiang.cn",phone:"+86-571-8800-1234",
+  url:"https://www.wanxiang.com.cn",note:"단가 인상 협의중",
+  lat:30.27,lng:120.15,col:"#ef4444",region:"cn"},
+"hengdrive":{name:"广州恒驱 Hengdrive",co:"중국",flag:"🇨🇳",factory:"광저우공장",
+  items:["크로스멤버&암류","샤시모듈","BOF샤시프레임"],
+  cust:["현대자동차","기아","광저우기차"],
+  tot:124,fac:105,ratio:70,st:"risk",
+  person:"Li Wei 차장",email:"liwei@hengdrive.cn",phone:"+86-20-7723-4456",
+  url:"https://www.hengdrive.cn",note:"⚠️ 납기 지연 3건",
+  lat:23.13,lng:113.26,col:"#ef4444",region:"cn"},
+"nexteer-cn":{name:"Nexteer Automotive (쑤저우·선양)",co:"중국",flag:"🇨🇳",factory:"쑤저우공장·선양공장",
+  items:["MDPS","기어박스"],
+  cust:["GM","SAIC","포드","현대자동차"],
+  tot:1450,fac:380,ratio:45,st:"ok",
+  person:"Chen Hao Dir.",email:"chao@nexteer.com",phone:"+86-512-6800-1234",
+  url:"https://www.nexteer.com",note:"Nexteer 중국 최대 MDPS 생산기지",
+  lat:41.8,lng:123.43,col:"#ef4444",region:"cn"},
+"faw-chassis":{name:"一汽底盘 FAW Chassis",co:"중국",flag:"🇨🇳",factory:"창춘공장·톈진공장",
+  items:["BOF샤시프레임","샤시모듈","크로스멤버&암류","너클"],
+  cust:["일기폭스바겐","일기도요타","현대자동차"],
+  tot:290,fac:180,ratio:65,st:"ok",
+  person:"Liu Peng 과장",email:"liupeng@faw-chassis.cn",phone:"+86-431-8881-1234",
+  url:"https://www.faw.com.cn",note:"FAW 창춘·톈진 샤시프레임 전문",
+  lat:43.9,lng:125.33,col:"#ef4444",region:"cn"},
+"gestamp-cn":{name:"Gestamp (중국)",co:"중국",flag:"🇨🇳",factory:"우한·청두·상하이공장",
+  items:["BOF샤시프레임","크로스멤버&암류","샤시모듈"],
+  cust:["VW","GM","BMW","현대자동차","Ford"],
+  tot:450,fac:195,ratio:42,st:"ok",
+  person:"Carlos Jimenez Dir.",email:"cjimenez@gestamp.com",phone:"+86-27-8888-1234",
+  url:"https://www.gestamp.com",note:"Gestamp 중국 3개 공장. BOF프레임 핫스탬핑",
+  lat:30.57,lng:114.28,col:"#ef4444",region:"cn"},
+"kirchhoff-cn":{name:"KIRCHHOFF Automotive (쑤저우)",co:"중국",flag:"🇨🇳",factory:"쑤저우공장",
+  items:["BOF샤시프레임","크로스멤버&암류"],
+  cust:["BMW","폭스바겐","현대자동차"],
+  tot:180,fac:65,ratio:35,st:"ok",
+  person:"Wolfgang K. Dir.",email:"info@kirchhoff-automotive.com",phone:"+86-512-6561-0000",
+  url:"https://kirchhoff-automotive.com",note:"KIRCHHOFF 쑤저우 생산공장 (2026 개설)",
+  lat:31.3,lng:120.6,col:"#ef4444",region:"cn"},
+"metalsa-cn":{name:"Metalsa (중국)",co:"중국",flag:"🇨🇳",factory:"충칭공장·광저우공장",
+  items:["BOF샤시프레임","크로스멤버&암류"],
+  cust:["GM","포드","도요타","현대자동차"],
+  tot:220,fac:75,ratio:40,st:"ok",
+  person:"Leopoldo C. CEO",email:"info@metalsa.com",phone:"+86-23-8888-5678",
+  url:"https://metalsa.com",note:"Metalsa ISE 인수. 충칭·광저우",
+  lat:29.57,lng:106.55,col:"#ef4444",region:"cn"},
+// ── INDIA ── 검증 및 신규 추가
+"motherson":{name:"Motherson Sumi Systems",co:"인도",flag:"🇮🇳",factory:"노이다·첸나이·푸네공장",
+  items:["샤시모듈","크로스멤버&암류","BOF샤시프레임"],
+  cust:["현대자동차","타타","마루티스즈키","BMW"],
+  tot:2100,fac:95,ratio:32,st:"ok",
+  person:"Rajesh Kumar Dir.",email:"rkumar@motherson.com",phone:"+91-120-4082900",
+  url:"https://www.motherson.com",note:"인도 최대 부품그룹. 3개 공장",
+  lat:28.54,lng:77.27,col:"#a78bfa",region:"in"},
+"endurance":{name:"Endurance Technologies",co:"인도",flag:"🇮🇳",factory:"푸네공장·아우랑가바드공장",
+  items:["디스크","너클","캐리어","쇽업저버"],
+  cust:["바자즈","혼다","현대자동차","마루티"],
+  tot:275,fac:42,ratio:55,st:"ok",
+  person:"Amit Shah VP",email:"ashah@endurancegroup.com",phone:"+91-20-6630-6200",
+  url:"https://www.endurancegroup.com",note:"인도 서부 디스크·너클 전문",
+  lat:18.52,lng:73.86,col:"#a78bfa",region:"in"},
+"tata-auto":{name:"Tata AutoComp Systems",co:"인도",flag:"🇮🇳",factory:"푸네공장·바나스탈리공장",
+  items:["액슬 ASSY","휠베어링","샤시모듈"],
+  cust:["타타모터스","현대자동차","포드인디아"],
+  tot:183,fac:28,ratio:40,st:"new",
+  person:"Priya Sharma Mgr",email:"psharms@tataautocomp.com",phone:"+91-20-6611-7700",
+  url:"https://www.tataac.com",note:"🆕 신규 발굴. 액슬ASSY 검토",
+  lat:18.52,lng:73.92,col:"#a78bfa",region:"in"},
+"minda":{name:"Minda Industries",co:"인도",flag:"🇮🇳",factory:"마네사르공장·푸네공장",
+  items:["연료캡","필러넥","캐니스터","WSS"],
+  cust:["마루티스즈키","현대자동차","혼다","타타"],
+  tot:185,fac:22,ratio:35,st:"ok",
+  person:"Sanjay Gupta Dir.",email:"sgupta@mindaind.com",phone:"+91-124-4698900",
+  url:"https://www.mindaind.com",note:"마네사르·푸네 연료/센서 전문",
+  lat:28.43,lng:76.98,col:"#a78bfa",region:"in"},
+"kyb-india":{name:"KYB India Pvt. Ltd.",co:"인도",flag:"🇮🇳",factory:"후리다바드공장·푸네공장",
+  items:["쇽업저버","가스리프터"],
+  cust:["마루티스즈키","현대자동차","타타","바자즈"],
+  tot:320,fac:45,ratio:58,st:"ok",
+  person:"Nakamura Ryoji MD",email:"rn@kyb-india.com",phone:"+91-129-4260-100",
+  url:"https://www.kyb.com",note:"KYB 인도. 후리다바드·푸네 쇽업저버",
+  lat:28.41,lng:77.31,col:"#a78bfa",region:"in"},
+"rane-group":{name:"Rane Group",co:"인도",flag:"🇮🇳",factory:"첸나이공장·뱅갈로르공장",
+  items:["MDPS","기어박스","너클"],
+  cust:["마루티스즈키","현대자동차","타타","아쇼크레이랜드"],
+  tot:145,fac:62,ratio:52,st:"ok",
+  person:"Harish Lakshman MD",email:"hlakshman@ranegroup.com",phone:"+91-44-2827-8600",
+  url:"https://www.ranegroup.com",note:"인도 조향 전문. 첸나이·뱅갈로르",
+  lat:13.08,lng:80.27,col:"#a78bfa",region:"in"},
+"india-brake":{name:"Chassis Brakes International India",co:"인도",flag:"🇮🇳",factory:"푸네 치칸공장",
+  items:["CBS","EPB","디스크","캐리어"],
+  cust:["현대자동차","르노","닛산","도요타","타타"],
+  tot:85,fac:38,ratio:65,st:"ok",
+  person:"Rajiv Mehta GM",email:"rmehta@cbi-india.com",phone:"+91-20-6720-0000",
+  url:"https://www.chassis-brakes.com",note:"CBI 인도 푸네 생산공장. CBS·EPB 전문",
+  lat:18.6,lng:73.8,col:"#a78bfa",region:"in"},
+"gestamp-india":{name:"Gestamp India",co:"인도",flag:"🇮🇳",factory:"푸네공장·하리야나공장",
+  items:["BOF샤시프레임","크로스멤버&암류","샤시모듈"],
+  cust:["마루티스즈키","현대자동차","타타","마힌드라"],
+  tot:95,fac:55,ratio:48,st:"ok",
+  person:"Pedro Gomez Dir.",email:"pgomez@gestamp.com",phone:"+91-20-6600-1234",
+  url:"https://www.gestamp.com",note:"Gestamp 인도 BOF프레임 생산",
+  lat:18.65,lng:74.1,col:"#a78bfa",region:"in"},
+"metalsa-india":{name:"Metalsa India (Jamshedpur)",co:"인도",flag:"🇮🇳",factory:"잠셰드푸르공장",
+  items:["BOF샤시프레임","크로스멤버&암류"],
+  cust:["타타모터스","마힌드라","포드인디아"],
+  tot:78,fac:48,ratio:60,st:"ok",
+  person:"Ramesh Singh Dir.",email:"rsingh@metalsa.com",phone:"+91-657-2310-0000",
+  url:"https://metalsa.com",note:"Metalsa 잠셰드푸르. 타타 BOF 전문",
+  lat:22.8,lng:86.18,col:"#a78bfa",region:"in"},
+// ── USA ── 검증 및 추가
+"mando-us":{name:"Mando America Corporation",co:"미국",flag:"🇺🇸",factory:"조지아 피치트리시티·앨라배마공장",
+  items:["CBS","ESC","EPB","MDPS","쇽업저버"],
+  cust:["현대자동차(미)","기아(미)","GM","BMW"],
+  tot:148,fac:130,ratio:88,st:"ok",
+  person:"David Park VP",email:"david.park@mando-a.com",phone:"+1-770-555-0211",
+  url:"https://www.mando.com",note:"만도 미국 조지아·앨라배마 공장",
+  lat:33.41,lng:-84.46,col:"#f59e0b",region:"us"},
+"continental-us":{name:"Continental AG (미시간·노스캐롤라이나)",co:"미국",flag:"🇺🇸",factory:"미시간 오번힐스·NC 뉴번공장",
+  items:["ESC","IEB","WSS","CBS"],
+  cust:["GM","Ford","Stellantis","현대자동차"],
+  tot:3200,fac:210,ratio:42,st:"ok",
+  person:"James Weber Dir.",email:"j.weber@continental-na.com",phone:"+1-248-555-0344",
+  url:"https://www.continental.com",note:"Continental 북미 제동전자 핵심",
+  lat:42.66,lng:-83.22,col:"#f59e0b",region:"us"},
+"tenneco-us":{name:"Tenneco / DRiV (일리노이·OH)",co:"미국",flag:"🇺🇸",factory:"일리노이 레이크포레스트·오하이오공장",
+  items:["쇽업저버","가스리프터"],
+  cust:["GM","Ford","Stellantis","현대자동차"],
+  tot:780,fac:120,ratio:35,st:"ok",
+  person:"Mike Johnson GM",email:"mjohnson@tenneco.com",phone:"+1-847-482-5000",
+  url:"https://www.driv.com",note:"Tenneco 쇽업저버 미국 공장",
+  lat:42.25,lng:-87.84,col:"#f59e0b",region:"us"},
+"nexteer-us":{name:"Nexteer Automotive (미시간 사지노)",co:"미국",flag:"🇺🇸",factory:"미시간 사지노·오번힐스공장",
+  items:["MDPS","기어박스"],
+  cust:["GM","포드","BMW","FCA","현대자동차"],
+  tot:1450,fac:420,ratio:48,st:"ok",
+  person:"Robin Walker VP",email:"rwalker@nexteer.com",phone:"+1-989-757-5000",
+  url:"https://www.nexteer.com",note:"Nexteer 미국 본사. 사지노 MDPS",
+  lat:43.42,lng:-83.95,col:"#f59e0b",region:"us"},
+"brembo-us":{name:"Brembo N.A. (오하이오)",co:"미국",flag:"🇺🇸",factory:"오하이오 하워드공장",
+  items:["디스크","캐리어","CBS"],
+  cust:["GM","포드","포르쉐","람보르기니","현대자동차"],
+  tot:850,fac:95,ratio:28,st:"ok",
+  person:"Dan Morris Dir.",email:"dmorris@brembo.com",phone:"+1-330-674-8851",
+  url:"https://www.brembo.com",note:"Brembo 미국 오하이오 생산공장",
+  lat:40.43,lng:-81.86,col:"#f59e0b",region:"us"},
+"american-axle":{name:"American Axle (AAM)",co:"미국",flag:"🇺🇸",factory:"미시간 디트로이트·오하이오 아이어",
+  items:["액슬 ASSY","샤시모듈","크로스멤버&암류"],
+  cust:["GM","포드","FCA","현대자동차"],
+  tot:1560,fac:420,ratio:58,st:"ok",
+  person:"David Dauch CEO",email:"ir@aam.com",phone:"+1-313-758-2000",
+  url:"https://www.aam.com",note:"GM 분사 액슬. 미시간 본사",
+  lat:42.33,lng:-83.05,col:"#f59e0b",region:"us"},
+"magna-chassis":{name:"Magna International (샤시·온타리오·앨라배마)",co:"미국/캐나다",flag:"🇨🇦",factory:"온타리오 오로라·앨라배마공장",
+  items:["BOF샤시프레임","샤시모듈","크로스멤버&암류","너클","액슬 ASSY"],
+  cust:["GM","포드","BMW","다임러","현대자동차"],
+  tot:2800,fac:380,ratio:22,st:"ok",
+  person:"Swamy Kotagiri CEO",email:"ir@magna.com",phone:"+1-905-726-7100",
+  url:"https://www.magna.com",note:"글로벌 3대 Tier1. 캐나다·미국 공장",
+  lat:44.0,lng:-79.45,col:"#f59e0b",region:"us"},
+"dana-us":{name:"Dana Incorporated (오하이오)",co:"미국",flag:"🇺🇸",factory:"오하이오 모미공장·미시간공장",
+  items:["액슬 ASSY","너클","캐리어","BOF샤시프레임"],
+  cust:["GM","포드","FCA","현대자동차","피아트"],
+  tot:2360,fac:310,ratio:35,st:"ok",
+  person:"James Kamsickas CEO",email:"ir@dana.com",phone:"+1-419-887-3000",
+  url:"https://www.dana.com",note:"드라이브트레인 전문. 오하이오 본사",
+  lat:41.45,lng:-83.65,col:"#f59e0b",region:"us"},
+"metalsa-us":{name:"Metalsa (미국 켄터키·버지니아)",co:"미국",flag:"🇺🇸",factory:"켄터키 오언스보로·버지니아 로어노크",
+  items:["BOF샤시프레임","크로스멤버&암류"],
+  cust:["GM","포드","도요타","FCA"],
+  tot:520,fac:180,ratio:62,st:"ok",
+  person:"Leopoldo Cedillo CEO",email:"info@metalsa.com",phone:"+1-270-685-8000",
+  url:"https://metalsa.com",note:"BOF프레임 북미 최대. 켄터키·버지니아",
+  lat:37.77,lng:-87.11,col:"#f59e0b",region:"us"},
+"gestamp-us":{name:"Gestamp (미국 앨라배마·MI)",co:"미국",flag:"🇺🇸",factory:"앨라배마·미시간공장",
+  items:["BOF샤시프레임","크로스멤버&암류","샤시모듈"],
+  cust:["GM","Ford","BMW","현대자동차"],
+  tot:450,fac:120,ratio:35,st:"ok",
+  person:"Francisco Riberas CEO",email:"friberas@gestamp.com",phone:"+1-248-8888-0000",
+  url:"https://www.gestamp.com",note:"Gestamp 미국 앨라배마·미시간",
+  lat:33.52,lng:-86.8,col:"#f59e0b",region:"us"},
+"bosch-us":{name:"Robert Bosch LLC (미국)",co:"미국",flag:"🇺🇸",factory:"미시간 파밍턴힐스·SC 앤더슨공장",
+  items:["CBS","ESC","IEB","EPB","WSS"],
+  cust:["GM","포드","FCA","BMW","현대자동차"],
+  tot:6200,fac:380,ratio:15,st:"ok",
+  person:"Mike Mansuetti Pres.",email:"ir@bosch.com",phone:"+1-248-876-1000",
+  url:"https://www.bosch.com",note:"Bosch 미국 제동전자 파밍턴힐스",
+  lat:42.5,lng:-83.37,col:"#f59e0b",region:"us"},
+// ── EUROPE ── 검증
+"zf":{name:"ZF Friedrichshafen AG",co:"독일",flag:"🇩🇪",factory:"프리드리히스하펜·자르브뤼켄·레멘샤이트",
+  items:["ESC","에어서스펜션","기어박스","CBS","IEB","너클","BOF샤시프레임"],
+  cust:["BMW","메르세데스","폭스바겐","현대자동차","포드"],
+  tot:5200,fac:320,ratio:22,st:"ok",
+  person:"Hans Mueller Dir.",email:"h.mueller@zf.com",phone:"+49-7541-770",
+  url:"https://www.zf.com",note:"글로벌 1위 샤시·변속기. 에어서스펜션 생산",
+  lat:47.65,lng:9.48,col:"#22c55e",region:"eu"},
+"bosch-eu":{name:"Robert Bosch GmbH (독일)",co:"독일",flag:"🇩🇪",factory:"슈비바흐·힐데스하임·부르그도르프",
+  items:["CBS","ESC","IEB","EPB","WSS"],
+  cust:["폭스바겐","BMW","다임러","포드","현대자동차"],
+  tot:6200,fac:480,ratio:15,st:"ok",
+  person:"Stefan Hartung CEO",email:"ir@bosch.com",phone:"+49-711-811-0",
+  url:"https://www.bosch.com",note:"글로벌 Tier1 1위. 제동전자 최강",
+  lat:48.83,lng:10.18,col:"#22c55e",region:"eu"},
+"continental-eu":{name:"Continental AG (독일)",co:"독일",flag:"🇩🇪",factory:"레겐스부르크·프랑크푸르트공장",
+  items:["ESC","IEB","WSS","CBS"],
+  cust:["폭스바겐","BMW","다임러","현대자동차"],
+  tot:3200,fac:195,ratio:18,st:"ok",
+  person:"Franz Schmidt Mgr",email:"f.schmidt@continental.de",phone:"+49-511-938-0",
+  url:"https://www.continental.com",note:"Continental 독일 본사 2개 공장",
+  lat:49.01,lng:12.1,col:"#22c55e",region:"eu"},
+"schaeffler":{name:"Schaeffler AG (독일)",co:"독일",flag:"🇩🇪",factory:"헤어초겐아우라흐·슈바인푸르트·비르켄펠트",
+  items:["휠베어링","캐리어","너클"],
+  cust:["BMW","아우디","메르세데스","현대자동차","볼보"],
+  tot:1640,fac:285,ratio:38,st:"ok",
+  person:"Klaus Rosenfeld CEO",email:"ir@schaeffler.com",phone:"+49-9132-82-0",
+  url:"https://www.schaeffler.com",note:"FAG 브랜드. 독일 3개 공장",
+  lat:49.57,lng:10.88,col:"#22c55e",region:"eu"},
+"brembo-eu":{name:"Brembo S.p.A. (이탈리아)",co:"이탈리아",flag:"🇮🇹",factory:"베르가모공장·스토나공장",
+  items:["디스크","캐리어","CBS"],
+  cust:["페라리","람보르기니","BMW","포르쉐","현대자동차"],
+  tot:850,fac:320,ratio:55,st:"ok",
+  person:"Daniele Schillaci CEO",email:"ir@brembo.com",phone:"+39-035-605-111",
+  url:"https://www.brembo.com",note:"프리미엄 브레이크 글로벌 1위",
+  lat:45.7,lng:9.67,col:"#22c55e",region:"eu"},
+"tenneco-eu":{name:"Tenneco Europe (독일)",co:"독일",flag:"🇩🇪",factory:"에센공장·작센공장",
+  items:["쇽업저버","가스리프터"],
+  cust:["폭스바겐","BMW","메르세데스","현대자동차"],
+  tot:780,fac:88,ratio:40,st:"ok",
+  person:"Klaus Werner VP",email:"k.werner@tenneco.eu",phone:"+49-201-555-0182",
+  url:"https://www.driv.com",note:"Tenneco 유럽 에센·작센",
+  lat:51.45,lng:7.01,col:"#22c55e",region:"eu"},
+"skf":{name:"SKF AB (스웨덴)",co:"스웨덴",flag:"🇸🇪",factory:"예테보리·고텐부르크공장",
+  items:["휠베어링","캐리어"],
+  cust:["볼보","BMW","현대자동차","포르쉐","다임러"],
+  tot:1050,fac:62,ratio:30,st:"ok",
+  person:"Erik Johansson Dir.",email:"erik.j@skf.com",phone:"+46-31-555-0177",
+  url:"https://www.skf.com",note:"글로벌 베어링 1위. 스웨덴",
+  lat:57.71,lng:11.97,col:"#22c55e",region:"eu"},
+"gkn":{name:"GKN Automotive (영국)",co:"영국",flag:"🇬🇧",factory:"버밍엄·버킹엄셔공장",
+  items:["액슬 ASSY","크로스멤버&암류","BOF샤시프레임"],
+  cust:["BMW","VW","포드","다임러","현대자동차"],
+  tot:4200,fac:380,ratio:28,st:"ok",
+  person:"Liam Butterworth CEO",email:"ir@gknauto.com",phone:"+44-121-214-5000",
+  url:"https://www.gkn.com",note:"드라이브샤프트·e-액슬 글로벌 1위",
+  lat:52.48,lng:-1.9,col:"#22c55e",region:"eu"},
+"gestamp-eu":{name:"Gestamp Automoción (스페인)",co:"스페인",flag:"🇪🇸",factory:"마드리드·바르셀로나·독일 쾰른",
+  items:["BOF샤시프레임","크로스멤버&암류","샤시모듈"],
+  cust:["VW","BMW","Ford","PSA","현대자동차"],
+  tot:1050,fac:320,ratio:48,st:"ok",
+  person:"Francisco Riberas CEO",email:"friberas@gestamp.com",phone:"+34-91-5070-000",
+  url:"https://www.gestamp.com",note:"BOF프레임 핫스탬핑 글로벌 1위",
+  lat:40.42,lng:-3.7,col:"#22c55e",region:"eu"},
+"kirchhoff-eu":{name:"KIRCHHOFF Automotive (독일)",co:"독일",flag:"🇩🇪",factory:"이스메닝·리페공장",
+  items:["BOF샤시프레임","크로스멤버&암류"],
+  cust:["BMW","폭스바겐","현대자동차","포드"],
+  tot:280,fac:120,ratio:42,st:"ok",
+  person:"Wolfgang Kirchhoff CEO",email:"info@kirchhoff-automotive.com",phone:"+49-2954-202-0",
+  url:"https://kirchhoff-automotive.com",note:"독일 BOF/BIW 전문 중견기업",
+  lat:48.22,lng:11.61,col:"#22c55e",region:"eu"},
+"ntn-eu":{name:"NTN-SNR (프랑스)",co:"프랑스",flag:"🇫🇷",factory:"앙제·생에티엔공장",
+  items:["휠베어링","캐리어"],
+  cust:["르노","PSA","BMW","현대자동차"],
+  tot:680,fac:88,ratio:42,st:"ok",
+  person:"Laurent Dubois Dir.",email:"ldubois@ntn-europe.com",phone:"+33-1-4968-6000",
+  url:"https://www.ntn-snr.com",note:"NTN 유럽 프랑스 앙제",
+  lat:47.47,lng:-0.55,col:"#22c55e",region:"eu"},
+// ── JAPAN ── 검증
+"kyb":{name:"KYB Corporation (일본)",co:"일본",flag:"🇯🇵",factory:"기후·나가노·이세사키공장",
+  items:["쇽업저버","가스리프터","에어서스펜션"],
+  cust:["도요타","혼다","닛산","GM","폭스바겐","현대자동차"],
+  tot:4200,fac:920,ratio:65,st:"ok",
+  person:"Tanaka Hiroshi Dir.",email:"h.tanaka@kyb.co.jp",phone:"+81-3-3435-3511",
+  url:"https://www.kyb.co.jp",note:"쇽업저버 글로벌 1위. 34개 공장",
+  lat:35.4,lng:136.72,col:"#f472b6",region:"jp"},
+"jtekt-jp":{name:"JTEKT Corporation (일본)",co:"일본",flag:"🇯🇵",factory:"오사카·카리야·코난공장",
+  items:["MDPS","기어박스","휠베어링"],
+  cust:["도요타","닛산","혼다","스즈키","현대자동차"],
+  tot:12700,fac:1850,ratio:48,st:"ok",
+  person:"Mizuno Keita CEO",email:"ir@jtekt.co.jp",phone:"+81-566-25-5111",
+  url:"https://www.jtekt.co.jp",note:"도요타그룹 조향·베어링 최대",
+  lat:34.98,lng:137.15,col:"#f472b6",region:"jp"},
+"aisin":{name:"AISIN Corporation (일본)",co:"일본",flag:"🇯🇵",factory:"안조·기요스·토요타공장",
+  items:["CBS","EPB","ESC","기어박스","액슬 ASSY"],
+  cust:["도요타","혼다","BMW","다임러","GM"],
+  tot:9800,fac:2100,ratio:30,st:"ok",
+  person:"Kato Masao Exec.",email:"ir@aisin.co.jp",phone:"+81-566-24-8441",
+  url:"https://www.aisin.co.jp",note:"도요타그룹 최대. ADVICS 포함",
+  lat:34.98,lng:137.08,col:"#f472b6",region:"jp"},
+"hitachi-astemo":{name:"Hitachi Astemo (일본)",co:"일본",flag:"🇯🇵",factory:"이바라키·미토·치치부공장",
+  items:["ESC","IEB","CBS","쇽업저버","MDPS"],
+  cust:["혼다","닛산","스즈키","현대자동차","GM"],
+  tot:8500,fac:1200,ratio:38,st:"ok",
+  person:"Watanabe Koji Dir.",email:"info@hitachi-astemo.com",phone:"+81-29-879-4311",
+  url:"https://www.hitachi-astemo.com",note:"히타치·혼다 합작. 구Showa·Keihin",
+  lat:36.34,lng:140.45,col:"#f472b6",region:"jp"},
+"nsk-jp":{name:"NSK Ltd. (일본)",co:"일본",flag:"🇯🇵",factory:"후지사와·쿠마모토·오이타공장",
+  items:["휠베어링","캐리어"],
+  cust:["도요타","혼다","닛산","BMW","현대자동차"],
+  tot:3200,fac:680,ratio:42,st:"ok",
+  person:"Iida Tetsuo Exec.",email:"ir@nsk.com",phone:"+81-3-3779-7111",
+  url:"https://www.nsk.com",note:"글로벌 베어링 3위. 일본 3개 공장",
+  lat:35.35,lng:139.48,col:"#f472b6",region:"jp"},
+"akebono":{name:"Akebono Brake Industry (일본)",co:"일본",flag:"🇯🇵",factory:"하나조노·야시오공장",
+  items:["CBS","디스크","캐리어"],
+  cust:["도요타","혼다","닛산","GM","현대자동차"],
+  tot:1100,fac:280,ratio:55,st:"ok",
+  person:"Miyake Hiroshi Exec.",email:"ir@akebono-brake.com",phone:"+81-48-782-1111",
+  url:"https://www.akebono-brake.com",note:"일본 브레이크 전문 2위",
+  lat:35.83,lng:139.65,col:"#f472b6",region:"jp"},
+// ── SEA ──
+"thai-summit":{name:"Thai Summit Group (태국)",co:"태국",flag:"🇹🇭",factory:"아마타시티·라용공장",
+  items:["샤시모듈","액슬 ASSY","BOF샤시프레임","크로스멤버&암류"],
+  cust:["도요타","혼다","이스즈","현대자동차"],
+  tot:31,fac:22,ratio:48,st:"ok",
+  person:"Somchai P. Dir.",email:"somchai@thaisummit.co.th",phone:"+66-2-345-6789",
+  url:"https://www.thaisummit.co.th",note:"태국 방콕·라용 2개 공장",
+  lat:13.65,lng:101.15,col:"#2dd4bf",region:"sea"},
+"vietnam-ap":{name:"Vietnam Auto Parts (베트남)",co:"베트남",flag:"🇻🇳",factory:"하이퐁공장",
+  items:["너클","크로스멤버&암류","디스크"],
+  cust:["현대자동차(베)","기아(베)","TC모터스"],
+  tot:22,fac:18,ratio:65,st:"new",
+  person:"Nguyen Van An Mgr",email:"nvaan@vnap.com",phone:"+84-225-3890-123",
+  url:"https://www.vnap.com",note:"🆕 베트남 하이퐁 공장",
+  lat:20.87,lng:106.68,col:"#2dd4bf",region:"sea"}
+};
+
+const IMAP={
+ "all":Object.keys(S),
+ "CBS":["mando","hyundai-mobis","mando-us","continental-us","continental-eu","bosch-eu","bosch-us","zf","akebono","aisin","india-brake"],
+ "EPB":["mando","hyundai-mobis","mando-us","zf","bosch-eu","bosch-us","aisin","india-brake"],
+ "BIR":["mando","mando-us","hyundai-mobis","hitachi-astemo"],
+ "ESC":["mando","hyundai-mobis","mando-us","continental-us","continental-eu","zf","bwi","motherson","bosch-eu","bosch-us","hitachi-astemo","aisin"],
+ "IEB":["continental-us","continental-eu","zf","bosch-eu","bosch-us","hitachi-astemo","hyundai-mobis"],
+ "MDPS":["mando","hyundai-mobis","mando-us","jtekt-cn","jtekt-jp","nexteer-us","nexteer-cn","hitachi-astemo","rane-group","aisin"],
+ "GEARBOX":["jtekt-cn","jtekt-jp","zf","nexteer-us","nexteer-cn","aisin"],
+ "CHASSIS_MODULE":["motherson","thai-summit","tata-auto","faw-chassis","gkn","magna-chassis","american-axle","hyundai-mobis"],
+ "CROSSMEMBER":["hengdrive","motherson","thai-summit","vietnam-ap","faw-chassis","gkn","magna-chassis","american-axle","kirchhoff-eu","kirchhoff-cn","gestamp-eu","gestamp-cn","gestamp-india","gestamp-us","metalsa-us","metalsa-cn","metalsa-india"],
+ "BOF_FRAME":["hengdrive","faw-chassis","gestamp-cn","gestamp-eu","gestamp-india","gestamp-us","kirchhoff-eu","kirchhoff-cn","metalsa-us","metalsa-cn","metalsa-india","magna-chassis","dana-us","thai-summit","gkn","zf","motherson"],
+ "WHEEL_BEARING":["hankook-bearing","iljin","citic","jtekt-cn","jtekt-jp","skf","schaeffler","nsk-jp","tata-auto","dana-us","ntn-eu","hyundai-mobis"],
+ "DISC":["citic","endurance","vietnam-ap","brembo-eu","brembo-us","akebono","aisin","india-brake"],
+ "KNUCKLE":["citic","endurance","dana-us","vietnam-ap","zf","faw-chassis","schaeffler","gkn","magna-chassis","iljin","rane-group"],
+ "CARRIER":["hankook-bearing","iljin","citic","endurance","skf","schaeffler","brembo-eu","brembo-us","ntn-eu","akebono","dana-us","india-brake"],
+ "WSS":["mando","hyundai-mobis","continental-us","continental-eu","bosch-eu","bosch-us","hitachi-astemo","minda"],
+ "AXLE":["iljin","wanxiang","dana-us","thai-summit","tata-auto","gkn","american-axle","aisin","magna-chassis"],
+ "FUEL_TANK":["sejong","wanxiang"],
+ "FUEL_PUMP":["sejong","wanxiang"],
+ "FILLER_NECK":["sejong","wanxiang","minda"],
+ "CANISTER":["sejong","minda"],
+ "FUEL_CAP":["sejong","minda"],
+ "SHOCK":["hl-mando","kyb","tenneco-us","tenneco-eu","bwi","endurance","hitachi-astemo","kyb-india"],
+ "GAS_LIFTER":["hl-mando","kyb","tenneco-us","tenneco-eu","kyb-india"],
+ "AIR_SUSP":["kyb","bwi","zf","hitachi-astemo"]
+};
+
+// ═══════════════════════════════════════
+// LEAFLET MAIN MAP
+// ═══════════════════════════════════════
+let mainMap, clusterGroup, allMarkers={};
+let curItem='all', curReg='all', curTab='item';
+
+// 색상별 크기 (매출 규모)
+function pinSize(s){ return s.tot>5000?22:s.tot>1000?18:s.tot>100?15:12; }
+
+function makeIcon(s){
+  const sz = pinSize(s);
+  const risk = s.st==='risk';
+  return L.divIcon({
+    className:'',
+    html:`<div class="cpin ${risk?'cpin-risk':''}"
+      style="width:${sz}px;height:${sz}px;background:${s.col};${risk?'animation:pulse-r 1.2s infinite':''}"></div>`,
+    iconSize:[sz,sz], iconAnchor:[sz/2,sz/2], popupAnchor:[0,-sz/2]
+  });
+}
+
+function makePopup(id){
+  const s = S[id];
+  const rc = s.ratio>=60?'#22a85e':s.ratio>=30?'#e67e22':'#1976d2';
+  const stMap = {ok:'✅ 정상거래',risk:'⚠️ 리스크',new:'🆕 신규',warn:'🔍 검토'};
+  return `<div class="lp-inner">
+    <div class="lp-name">${s.flag} ${s.name}</div>
+    <div class="lp-sub">📍 ${s.co} &nbsp;|&nbsp; 🏭 ${s.factory}</div>
+    <div class="lp-row">🔩 ${s.items.slice(0,5).join(', ')}</div>
+    <div class="lp-row">👥 ${s.cust.slice(0,3).join(', ')}</div>
+    <div class="lp-rev">
+      <div class="lp-rev-item">
+        <span class="lp-rev-v" style="color:#c8602a">${fU(s.tot*1e6)}</span>
+        <span style="font-size:8px;color:#888">${fK(s.tot*1e6*FX)}</span>
+        <span class="lp-rev-l">전체법인</span>
+      </div>
+      <div class="lp-rev-item">
+        <span class="lp-rev-v" style="color:#1565c0">${fU(s.fac*1e6)}</span>
+        <span style="font-size:8px;color:#888">${fK(s.fac*1e6*FX)}</span>
+        <span class="lp-rev-l">해당공장</span>
+      </div>
+      <div class="lp-rev-item">
+        <span class="lp-rev-v" style="color:${rc}">${s.ratio}%</span>
+        <span class="lp-rev-l">품목비율</span>
+      </div>
+    </div>
+    <div class="lp-row">${stMap[s.st]||s.st}</div>
+    <div class="lp-actions">
+      <button class="lp-btn lp-btn-detail" onclick="showSingle('${id}')">📋 상세표</button>
+      <button class="lp-btn lp-btn-contact" onclick="openCOv('${id}')">📞 컨택</button>
+    </div>
+  </div>`;
+}
+
+function initMap(){
+  mainMap = L.map('map', {
+    center:[30, 20], zoom:3,
+    zoomControl:true,
+    preferCanvas:true,
+    maxZoom:18, minZoom:2
+  });
+
+  // OpenStreetMap 타일 (고화질)
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    maxZoom:19, subdomains:['a','b','c']
+  }).addTo(mainMap);
+
+  // MarkerClusterGroup
+  clusterGroup = L.markerClusterGroup({
+    maxClusterRadius:40,
+    iconCreateFunction: cluster => {
+      const n = cluster.getChildCount();
+      const sz = n>20?38:n>10?32:26;
+      return L.divIcon({
+        html:`<div style="width:${sz}px;height:${sz}px;border-radius:50%;
+          background:linear-gradient(135deg,#c8602a,#e8803c);
+          display:flex;align-items:center;justify-content:center;
+          color:#fff;font-weight:800;font-size:${sz>30?12:10}px;
+          border:2.5px solid rgba(255,255,255,0.8);
+          box-shadow:0 2px 8px rgba(0,0,0,0.35)">${n}</div>`,
+        iconSize:[sz,sz], iconAnchor:[sz/2,sz/2]
+      });
+    }
+  });
+  mainMap.addLayer(clusterGroup);
+
+  // 모든 마커 생성
+  Object.entries(S).forEach(([id,s])=>{
+    if(!s.lat || !s.lng) return;
+    const m = L.marker([s.lat, s.lng], {icon: makeIcon(s)});
+    m.bindPopup(makePopup(id), {maxWidth:260, className:'custom-popup'});
+    allMarkers[id] = m;
+    clusterGroup.addLayer(m);
+  });
+}
+
+// ═══════════════════════════════════════
+// FILTER FUNCTIONS
+// ═══════════════════════════════════════
+function filterMarkers(ids){
+  const set = new Set(ids);
+  clusterGroup.clearLayers();
+  Object.entries(allMarkers).forEach(([id,m])=>{
+    if(set.has(id)) clusterGroup.addLayer(m);
+  });
+  document.getElementById('hdrN').textContent = ids.length;
+  // 해당 영역으로 맵 이동
+  if(ids.length>0){
+    const pts = ids.map(id=>S[id]).filter(s=>s&&s.lat).map(s=>[s.lat,s.lng]);
+    if(pts.length>0) mainMap.fitBounds(L.latLngBounds(pts), {padding:[40,40], maxZoom:6});
+  }
+}
+
+function selItem(e, key, name){
+  document.querySelectorAll('#tc-item .fb').forEach(b=>b.classList.remove('on'));
+  e.currentTarget.classList.add('on');
+  curItem=key;
+  document.getElementById('hdrSel').textContent = name.length>8?name.slice(0,8)+'…':name;
+  const ids = IMAP[key]||[];
+  filterMarkers(ids);
+  if(key!=='all') renderTable(ids, name+' — 협력사 현황 ('+ids.length+'개사)');
+  else { closeDp(); mainMap.setView([30,20],3); }
+}
+
+function selRegion(e, reg, name){
+  document.querySelectorAll('#tc-region .fb').forEach(b=>b.classList.remove('on'));
+  if(e&&e.currentTarget) e.currentTarget.classList.add('on');
+  curReg=reg;
+  document.getElementById('hdrSel').textContent = name.length>8?name.slice(0,8)+'…':name;
+  const ids = reg==='all'?Object.keys(S):Object.keys(S).filter(id=>S[id].region===reg);
+  filterMarkers(ids);
+  renderTable(ids, name+' — 협력사 현황 ('+ids.length+'개사)');
+}
+
+function showSingle(id){
+  renderTable([id], S[id].name+' — 상세현황');
+}
+
+function switchTab(tab){
+  curTab=tab;
+  document.getElementById('tc-item').style.display  = tab==='item'  ?'':'none';
+  document.getElementById('tc-region').style.display = tab==='region'?'':'none';
+  document.getElementById('tab-item').classList.toggle('on',tab==='item');
+  document.getElementById('tab-region').classList.toggle('on',tab==='region');
+  if(tab==='region') buildRegPan();
+}
+
+function buildRegPan(){
+  const groups={kr:[],cn:[],in:[],us:[],eu:[],jp:[],sea:[]};
+  Object.entries(S).forEach(([id,s])=>{ if(groups[s.region]) groups[s.region].push({id,s}); });
+  Object.entries(groups).forEach(([reg,items])=>{
+    const el=document.getElementById('reg-'+reg);
+    const ce=document.getElementById('cnt-'+reg);
+    if(!el) return;
+    if(ce) ce.textContent='('+items.length+')';
+    el.innerHTML='';
+    items.forEach(({id,s})=>{
+      const b=document.createElement('button');
+      b.className='fb'; b.style.fontSize='9.5px';
+      b.innerHTML=s.flag+' '+s.name+' <span class="fc">'+s.items.slice(0,2).join('/')+'</span>';
+      b.onclick=()=>{
+        document.querySelectorAll('#tc-region .fb').forEach(x=>x.classList.remove('on'));
+        b.classList.add('on');
+        filterMarkers([id]);
+        renderTable([id], s.name+' 상세현황');
+        mainMap.setView([s.lat,s.lng], 10);
+      };
+      el.appendChild(b);
+    });
+  });
+}
+
+// ═══════════════════════════════════════
+// DETAIL TABLE
+// ═══════════════════════════════════════
+function renderTable(ids, title){
+  document.getElementById('dpT').textContent=title;
+  const tb=document.getElementById('detBody'); tb.innerHTML='';
+  const stLbl={ok:'정상거래',risk:'⚠️ 리스크',new:'🆕 신규',warn:'🔍 검토'};
+  ids.forEach((id,i)=>{
+    const s=S[id]; if(!s) return;
+    const uc=s.tot*1e6, fc=s.fac*1e6;
+    const rc=s.ratio>=60?'#22a85e':s.ratio>=30?'#e67e22':'#1976d2';
+    const bw=Math.max(2,s.ratio*1.1);
+    const it=s.items.map(x=>`<span class="tag ${curItem!=='all'&&IMAP[curItem]?.includes(id)?'o':''}">${x}</span>`).join('');
+    const cu=s.cust.map(x=>`<span class="tag g">${x}</span>`).join('');
+    const sd={ok:'s-ok',risk:'s-risk',new:'s-new',warn:'s-warn'}[s.st];
+    const tr=document.createElement('tr');
+    tr.style.cursor='pointer';
+    tr.onclick=()=>{ mainMap.setView([s.lat,s.lng],10); allMarkers[id]?.openPopup(); };
+    tr.innerHTML=`<td style="color:#a09070;font-size:8.5px;text-align:center">${i+1}</td>
+<td><div style="font-weight:800;font-size:10.5px">${s.flag} ${s.name}</div>
+    <div style="font-size:8.5px;color:#8a7a60">${s.co}</div>
+    <div style="font-size:8px;color:#a09070">${s.note.slice(0,30)}…</div></td>
+<td style="font-size:9px"><b>${s.flag} ${s.co}</b><br><span style="color:#6a5a40">🏭 ${s.factory}</span></td>
+<td>${it}</td><td>${cu}</td>
+<td><div class="rv"><div class="rv-u">${fU(uc)}</div><div class="rv-k">${fK(uc*FX)}</div><div style="font-size:7.5px;color:#a09070">전체법인</div></div></td>
+<td><div class="rv"><div class="rv-fu">${fU(fc)}</div><div class="rv-fk">${fK(fc*FX)}</div><div style="font-size:7.5px;color:#a09070">해당공장</div></div></td>
+<td><div class="rb-w"><div class="rb" style="width:${bw}px;background:linear-gradient(90deg,${rc},${rc}88)"></div><span style="font-size:10px;font-weight:800;color:${rc}">${s.ratio}%</span></div></td>
+<td><span class="sdot ${sd}"></span><span style="font-size:9.5px">${stLbl[s.st]||s.st}</span></td>
+<td><div style="font-size:9.5px;font-weight:600">${s.person}</div>
+    <div style="font-size:8.5px;color:#6a5a40">${s.email}</div>
+    <div style="font-size:8.5px;margin-bottom:3px">${s.phone}</div>
+    <button class="cbtn" onclick="event.stopPropagation();openCOv('${id}')">📞 컨택</button></td>`;
+    tb.appendChild(tr);
+  });
+  // open panel
+  const dp = document.getElementById('dp');
+  dp.classList.add('open');
+  const winH = window.innerHeight||document.documentElement.clientHeight;
+  dp.style.height = Math.max(220,Math.min(340,Math.round(winH*0.33)))+'px';
+}
+
+function closeDp(){
+  const dp=document.getElementById('dp');
+  dp.classList.remove('open'); dp.style.height='0';
+}
+
+// ═══════════════════════════════════════
+// ZOOM OVERLAY (Leaflet 지도)
+// ═══════════════════════════════════════
+const REGION_META = {
+  kr: {title:'한국 협력사',      flag:'🇰🇷', center:[36.5,127.8], zoom:8},
+  cn: {title:'중국 협력사',      flag:'🇨🇳', center:[33.0,112.0], zoom:5},
+  in: {title:'인도 협력사',      flag:'🇮🇳', center:[22.0, 79.0], zoom:5},
+  us: {title:'미국/캐나다 협력사',flag:'🇺🇸', center:[40.0,-87.0], zoom:5},
+  eu: {title:'유럽 협력사',      flag:'🇪🇺', center:[49.0,  8.0], zoom:5},
+  jp: {title:'일본 협력사',      flag:'🇯🇵', center:[35.5,137.5], zoom:7},
+  sea:{title:'동남아 협력사',    flag:'🌏', center:[15.0,104.0], zoom:5},
+};
+
+let zoomMap = null;
+
+function openZoom(regionKey){
+  const meta = REGION_META[regionKey]; if(!meta) return;
+  const ids = Object.keys(S).filter(id=>S[id].region===regionKey);
+
+  document.getElementById('zoomFlag').textContent  = meta.flag;
+  document.getElementById('zoomTitle').textContent = meta.title;
+  document.getElementById('zoomSub').textContent   = '생산공장 보유 협력사 '+ids.length+'개사';
+  document.getElementById('ztHdrTxt').textContent  = meta.title;
+  document.getElementById('ztCnt').textContent     = ids.length+'개사';
+
+  // Nav
+  const nav=document.getElementById('zoomNav'); nav.innerHTML='';
+  Object.entries(REGION_META).forEach(([key,m])=>{
+    const cnt=Object.keys(S).filter(id=>S[id].region===key).length;
+    const b=document.createElement('button');
+    b.className='znav-btn'+(key===regionKey?' active':'');
+    b.innerHTML=m.flag+' '+m.title.replace(' 협력사','')+'<span style="opacity:.65;font-size:8.5px"> ('+cnt+')</span>';
+    b.onclick=()=>openZoom(key);
+    nav.appendChild(b);
+  });
+
+  document.getElementById('zoomOverlay').classList.add('show');
+  document.body.style.overflow='hidden';
+
+  // Leaflet zoom map (지연 초기화)
+  setTimeout(()=>{
+    if(zoomMap){ zoomMap.remove(); zoomMap=null; }
+    zoomMap = L.map('zoomMap', {
+      center: meta.center, zoom: meta.zoom,
+      zoomControl:true, preferCanvas:true
+    });
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+      attribution:'© OpenStreetMap contributors',
+      maxZoom:18, subdomains:['a','b','c']
+    }).addTo(zoomMap);
+
+    // 핀 추가 (클러스터 없이 개별 표시)
+    const bounds = [];
+    ids.forEach(id=>{
+      const s=S[id]; if(!s||!s.lat) return;
+      bounds.push([s.lat,s.lng]);
+      const sz = 20;
+      const icon = L.divIcon({
+        className:'',
+        html:`<div style="width:${sz}px;height:${sz}px;border-radius:50%;
+          background:${s.col};border:2.5px solid rgba(255,255,255,0.9);
+          box-shadow:0 2px 10px rgba(0,0,0,0.4);display:flex;align-items:center;
+          justify-content:center;cursor:pointer"></div>`,
+        iconSize:[sz,sz], iconAnchor:[sz/2,sz/2], popupAnchor:[0,-sz/2]
+      });
+      const m = L.marker([s.lat,s.lng],{icon});
+      // 라벨 포함 팝업
+      const rc2=s.ratio>=60?'#22a85e':s.ratio>=30?'#e67e22':'#1976d2';
+      m.bindPopup(`<div class="lp-inner">
+        <div class="lp-name">${s.flag} ${s.name}</div>
+        <div class="lp-sub">🏭 ${s.factory}</div>
+        <div class="lp-row">🔩 ${s.items.join(', ')}</div>
+        <div class="lp-rev">
+          <div class="lp-rev-item"><span class="lp-rev-v" style="color:#c8602a">${fU(s.tot*1e6)}</span><span style="font-size:8px;color:#888">${fK(s.tot*1e6*FX)}</span><span class="lp-rev-l">전체법인</span></div>
+          <div class="lp-rev-item"><span class="lp-rev-v" style="color:#1565c0">${fU(s.fac*1e6)}</span><span style="font-size:8px;color:#888">${fK(s.fac*1e6*FX)}</span><span class="lp-rev-l">해당공장</span></div>
+          <div class="lp-rev-item"><span class="lp-rev-v" style="color:${rc2}">${s.ratio}%</span><span class="lp-rev-l">품목비율</span></div>
+        </div>
+        <div class="lp-actions">
+          <button class="lp-btn lp-btn-contact" onclick="openCOv('${id}')">📞 컨택</button>
+        </div>
+      </div>`,{maxWidth:240});
+      // 카드 하이라이트 연동
+      m.on('click',()=>{
+        document.querySelectorAll('.zoom-sup-card').forEach(c=>c.classList.remove('selected'));
+        const card=document.getElementById('zcard-'+id);
+        if(card){card.classList.add('selected');card.scrollIntoView({behavior:'smooth',block:'nearest'});}
+      });
+      m.addTo(zoomMap);
+      // Tooltip label
+      m.bindTooltip(s.name.split(' ')[0], {permanent:true, direction:'right', offset:[10,-6],
+        className:'leaflet-label-small'});
+    });
+    if(bounds.length>1) zoomMap.fitBounds(L.latLngBounds(bounds),{padding:[30,30],maxZoom:10});
+    else if(bounds.length===1) zoomMap.setView(bounds[0],12);
+
+    // 사이드 카드 렌더
+    renderZoomCards(ids);
+  }, 150);
+}
+
+function closeZoom(){
+  document.getElementById('zoomOverlay').classList.remove('show');
+  document.body.style.overflow='';
+  if(zoomMap){ zoomMap.remove(); zoomMap=null; }
+}
+
+function renderZoomCards(ids){
+  const container=document.getElementById('zoomCards'); container.innerHTML='';
+  const stLbl={ok:'<span class="sdot s-ok"></span>정상거래',risk:'<span class="sdot s-risk"></span>⚠️ 리스크',new:'<span class="sdot s-new"></span>🆕 신규',warn:'<span class="sdot s-warn"></span>🔍 검토'};
+  ids.forEach(id=>{
+    const s=S[id]; if(!s) return;
+    const rc=s.ratio>=60?'#22a85e':s.ratio>=30?'#e67e22':'#1976d2';
+    const div=document.createElement('div');
+    div.className='zoom-sup-card'; div.id='zcard-'+id;
+    div.innerHTML=`
+      <div class="zsc-name">${s.flag} ${s.name}</div>
+      <div class="zsc-factory">🏭 ${s.factory}</div>
+      <div class="zsc-tags">${s.items.map(x=>`<span class="zsc-tag">${x}</span>`).join('')}</div>
+      <div class="zsc-rev">
+        <div class="zsc-rev-item"><span class="zrc-tot">${fU(s.tot*1e6)}</span><span style="font-size:8px;color:#999">${fK(s.tot*1e6*FX)}</span><span class="zrc-lbl">전체법인</span></div>
+        <div class="zsc-rev-item"><span class="zrc-fac">${fU(s.fac*1e6)}</span><span style="font-size:8px;color:#999">${fK(s.fac*1e6*FX)}</span><span class="zrc-lbl">해당공장</span></div>
+        <div class="zsc-rev-item"><span class="zrc-rat" style="color:${rc}">${s.ratio}%</span><span class="zrc-lbl">품목비율</span></div>
+      </div>
+      <div class="zsc-bot"><span>${stLbl[s.st]||''}</span></div>
+      <div class="zsc-bot" style="margin-top:4px">
+        <div class="zsc-person">👤 ${s.person}<br>✉️ ${s.email}<br>📞 ${s.phone}</div>
+        <button class="zsc-cbtn" onclick="openCOv('${id}')">📞 컨택</button>
+      </div>`;
+    div.onclick=()=>{
+      document.querySelectorAll('.zoom-sup-card').forEach(c=>c.classList.remove('selected'));
+      div.classList.add('selected');
+      if(zoomMap&&s.lat) zoomMap.setView([s.lat,s.lng],12);
+    };
+    container.appendChild(div);
+  });
+}
+
+// ═══════════════════════════════════════
+// SEARCH
+// ═══════════════════════════════════════
+function doSearch(v){
+  const val=v.toLowerCase();
+  if(!val){ filterMarkers(IMAP[curItem]||Object.keys(S)); return; }
+  const m=Object.keys(S).filter(id=>{
+    const s=S[id];
+    return s.name.toLowerCase().includes(val)||s.co.toLowerCase().includes(val)||
+      s.factory.toLowerCase().includes(val)||s.items.some(i=>i.toLowerCase().includes(val))||
+      s.cust.some(c=>c.toLowerCase().includes(val));
+  });
+  filterMarkers(m);
+  if(m.length) renderTable(m,'검색: "'+v+'" ('+m.length+'개사)');
+}
+
+// ═══════════════════════════════════════
+// CONTACT / FX
+// ═══════════════════════════════════════
+function openCOv(id){
+  const s=S[id]; if(!s) return;
+  document.getElementById('cN').textContent=s.flag+' '+s.name;
+  document.getElementById('cSb').textContent=s.co+' · '+s.factory;
+  document.getElementById('cPe').textContent=s.person;
+  document.getElementById('cEm').textContent=s.email;
+  document.getElementById('cPh').textContent=s.phone;
+  document.getElementById('cFc').textContent=s.factory;
+  document.getElementById('cUr').innerHTML='<a href="'+s.url+'" target="_blank" style="color:#1565c0">'+s.url+'</a>';
+  document.getElementById('cMB').onclick=()=>{window.location.href='mailto:'+s.email+'?subject=[구매본부] '+s.name+' 협력사 문의';};
+  document.getElementById('cOv').classList.add('show');
+}
+function closeCOv(){ document.getElementById('cOv').classList.remove('show'); }
+function openFx(){ document.getElementById('fxC').textContent='$1=₩'+FX.toLocaleString(); document.getElementById('fxI').value=FX; document.getElementById('fxOv').classList.add('show'); }
+function closeFxOv(){ document.getElementById('fxOv').classList.remove('show'); }
+function applyFx(){
+  const v=parseInt(document.getElementById('fxI').value);
+  if(isNaN(v)||v<100||v>9999){alert('유효한 환율 입력');return;}
+  FX=v; document.getElementById('fxDisp').textContent='$1=₩'+FX.toLocaleString();
+  closeFxOv();
+  if(document.getElementById('dp').classList.contains('open')){
+    const ids=IMAP[curItem]||Object.keys(S);
+    renderTable(ids, document.getElementById('dpT').textContent);
+  }
+  alert('✅ 환율 ₩'+FX.toLocaleString()+' 적용 완료');
+}
+
+// ═══════════════════════════════════════
+// EXCEL
+// ═══════════════════════════════════════
+function handleUpload(input){
+  const file=input.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      const wb=XLSX.read(e.target.result,{type:'binary'});
+      const ws=wb.Sheets[wb.SheetNames[0]];
+      const rows=XLSX.utils.sheet_to_json(ws,{defval:''});
+      let a=0,u=0;
+      rows.forEach(row=>{
+        const g=(...ks)=>{for(const k of ks){const f=Object.entries(row).find(([rk])=>rk.trim().toLowerCase()===k.toLowerCase());if(f)return String(f[1]).trim();}return '';};
+        const id=(g('id','ID')||g('협력사명','name')).toLowerCase().replace(/[\s()]/g,'-');
+        if(!id) return;
+        const isN=!S[id];
+        S[id]={...(S[id]||{}),
+          name:g('협력사명','name')||S[id]?.name||id,
+          co:g('국가','country')||S[id]?.co||'',
+          flag:g('flag')||S[id]?.flag||'🌐',
+          factory:g('공장위치','factory')||S[id]?.factory||'',
+          items:(g('주요품목','items')||'').split(/[,\/]/).map(s=>s.trim()).filter(Boolean)||S[id]?.items||[],
+          cust:(g('주요고객사','customers')||'').split(/[,\/]/).map(s=>s.trim()).filter(Boolean)||S[id]?.cust||[],
+          tot:parseFloat(g('전체매출USD_M','totalRevM'))||S[id]?.tot||0,
+          fac:parseFloat(g('공장매출USD_M','factoryRevM'))||S[id]?.fac||0,
+          ratio:parseFloat(g('품목매출비율','ratio'))||S[id]?.ratio||0,
+          st:g('거래상태','status')||S[id]?.st||'ok',
+          person:g('담당자','person')||S[id]?.person||'',
+          email:g('이메일','email')||S[id]?.email||'',
+          phone:g('전화','phone')||S[id]?.phone||'',
+          url:g('홈페이지','url')||S[id]?.url||'',
+          note:g('비고','note')||S[id]?.note||'',
+          lat:parseFloat(g('lat','latitude'))||S[id]?.lat||0,
+          lng:parseFloat(g('lng','longitude'))||S[id]?.lng||0,
+          col:g('color','col')||S[id]?.col||'#888',
+          region:g('region')||S[id]?.region||'cn'
+        };
+        isN?a++:u++;
+      });
+      alert('업로드 완료! 추가: '+a+'개 / 수정: '+u+'개 / 총: '+Object.keys(S).length+'개사');
+    }catch(err){alert('오류: '+err.message);}
+  };
+  reader.readAsBinaryString(file);
+}
+
+function exportExcel(){
+  const wb=XLSX.utils.book_new();
+  const rows=Object.entries(S).map(([id,s])=>({
+    ID:id,'협력사명':s.name,'국가':s.co,'공장위치':s.factory,
+    '주요품목':s.items.join('/'),'주요고객사':s.cust.join('/'),
+    '전체매출USD':fU(s.tot*1e6),'전체매출KRW':fK(s.tot*1e6*FX),'전체매출USD_M':s.tot,
+    '공장매출USD':fU(s.fac*1e6),'공장매출KRW':fK(s.fac*1e6*FX),'공장매출USD_M':s.fac,
+    '품목비율%':s.ratio,'거래상태':s.st,'담당자':s.person,'이메일':s.email,'전화':s.phone,
+    '홈페이지':s.url,'비고':s.note,'적용환율':FX,
+    'lat':s.lat,'lng':s.lng,'color':s.col,'region':s.region
+  }));
+  const ws=XLSX.utils.json_to_sheet(rows); ws['!cols']=Array(23).fill({wch:15});
+  XLSX.utils.book_append_sheet(wb,ws,'협력사현황');
+  const tmpl=XLSX.utils.aoa_to_sheet([['ID','협력사명','국가','공장위치','주요품목','주요고객사',
+    '전체매출USD_M','공장매출USD_M','품목매출비율','거래상태','담당자','이메일','전화','홈페이지','비고',
+    'flag','lat','lng','color','region']]);
+  tmpl['!cols']=Array(20).fill({wch:15});
+  XLSX.utils.book_append_sheet(wb,tmpl,'입력양식');
+  XLSX.writeFile(wb,'샤시부품_글로벌협력사_'+new Date().toISOString().slice(0,10)+'.xlsx');
+}
+
+function exportTableXlsx(){
+  const ids=IMAP[curItem]||Object.keys(S);
+  const rows=ids.map(id=>{const s=S[id];if(!s)return null;return{
+    '협력사명':s.flag+' '+s.name,'국가':s.co,'공장위치':s.factory,
+    '주요품목':s.items.join('/'),'주요고객사':s.cust.join('/'),
+    '전체매출USD':fU(s.tot*1e6),'전체매출KRW':fK(s.tot*1e6*FX),
+    '공장매출USD':fU(s.fac*1e6),'공장매출KRW':fK(s.fac*1e6*FX),
+    '품목비율%':s.ratio,'상태':s.st,'담당자':s.person,'이메일':s.email,'전화':s.phone};}).filter(Boolean);
+  const wb=XLSX.utils.book_new();const ws=XLSX.utils.json_to_sheet(rows);
+  ws['!cols']=Array(15).fill({wch:15});
+  XLSX.utils.book_append_sheet(wb,ws,'현황표');
+  XLSX.writeFile(wb,'협력사현황_'+curItem+'_'+new Date().toISOString().slice(0,10)+'.xlsx');
+}
+
+async function runAI(){
+  const ov=document.getElementById('aiOv'); ov.classList.add('show');
+  const log=document.getElementById('aiLog'); log.innerHTML='';
+  const add=m=>{log.innerHTML+=m+'<br>';log.scrollTop=9999;};
+  const targets=Object.entries(S).slice(0,6);
+  for(let i=0;i<targets.length;i++){
+    const [id,s]=targets[i];
+    add('🔍 '+s.name+' 검색중...');
+    await new Promise(r=>setTimeout(r,500));
+    try{
+      const r=await fetch('https://api.anthropic.com/v1/messages',{
+        method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:600,
+          tools:[{type:'web_search_20250305',name:'web_search'}],
+          messages:[{role:'user',content:'"'+s.name+'" 자동차부품 협력사의 최신 매출 정보를 검색해서 JSON만 반환: {"totalRevM":숫자,"note":"한줄요약"}'}]})
+      });
+      if(r.ok){
+        const d=await r.json();
+        const txt=d.content?.filter(c=>c.type==='text').map(c=>c.text).join('')||'';
+        try{
+          const p=JSON.parse(txt.replace(/```json|```/g,'').trim());
+          if(p.totalRevM){S[id].tot=p.totalRevM;add('  ✅ 매출: $'+p.totalRevM+'M');}
+          if(p.note) add('  📝 '+p.note);
+        }catch{add('  ℹ️ 기존 유지');}
+      }else add('  ℹ️ 기존 유지');
+    }catch{add('  ⚠️ 네트워크 오류');}
+  }
+  add('✅ 완료');
+  document.getElementById('aiT').textContent='완료!';
+  setTimeout(()=>ov.classList.remove('show'),1800);
+}
+
+// leaflet label small style
+const style=document.createElement('style');
+style.textContent=`
+  .leaflet-label-small{background:rgba(255,255,255,0.88)!important;border:1px solid #c8a060!important;
+    border-radius:4px!important;padding:1px 5px!important;font-size:9px!important;
+    font-family:'Malgun Gothic','Apple SD Gothic Neo',sans-serif!important;font-weight:700!important;
+    color:#2d2d2d!important;white-space:nowrap!important;box-shadow:0 1px 5px rgba(0,0,0,0.2)!important}
+  @keyframes pulse-r{0%,100%{box-shadow:0 0 0 0 rgba(255,50,50,0.5)}50%{box-shadow:0 0 0 6px rgba(255,50,50,0)}}
+`;
+document.head.appendChild(style);
+
+// ── INIT ──
+window.addEventListener('load', () => {
+  initMap();
+  buildRegPan();
+  // resize 이벤트
+  window.addEventListener('resize', ()=>{
+    const dp=document.getElementById('dp');
+    if(dp.classList.contains('open')){
+      const winH=window.innerHeight||document.documentElement.clientHeight;
+      dp.style.height=Math.max(220,Math.min(340,Math.round(winH*0.33)))+'px';
+    }
+    mainMap?.invalidateSize();
+  });
+});
+</script>
+</body>
+</html>

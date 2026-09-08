@@ -1,0 +1,2941 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>현대모비스 실시간 일정 관리 AI Agent</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e1a;
+    --bg2: #0f1525;
+    --bg3: #151d35;
+    --panel: #111827;
+    --panel2: #1a2238;
+    --border: #1e2d4a;
+    --accent: #0ea5e9;
+    --accent2: #6366f1;
+    --accent3: #10b981;
+    --warn: #f59e0b;
+    --danger: #ef4444;
+    --text: #e2e8f0;
+    --text2: #94a3b8;
+    --text3: #475569;
+    --team-bu: #6366f1;
+    --team-sil: #0ea5e9;
+    --team-team: #10b981;
+
+    /* Meeting type colors */
+    --meet-bu: rgba(251,146,60,0.15);
+    --meet-sil: rgba(56,189,248,0.15);
+    --meet-team: rgba(250,204,21,0.15);
+    --meet-bu-border: #f97316;
+    --meet-sil-border: #38bdf8;
+    --meet-team-border: #facc15;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Background grid effect */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(14,165,233,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(14,165,233,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── Layout ── */
+  .app { display: flex; height: 100vh; position: relative; z-index: 1; }
+
+  /* ── Sidebar ── */
+  .sidebar {
+    width: 240px;
+    background: var(--bg2);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+  }
+
+  .logo {
+    padding: 20px 20px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .logo-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, var(--accent2), var(--accent));
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: white;
+    margin-bottom: 8px;
+  }
+
+  .logo h2 {
+    font-size: 13px;
+    color: var(--text2);
+    font-weight: 400;
+    line-height: 1.4;
+  }
+
+  .user-info {
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #6366f1, #0ea5e9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .user-detail { flex: 1; min-width: 0; }
+  .user-name { font-size: 13px; font-weight: 600; }
+  .user-dept { font-size: 11px; color: var(--text3); margin-top: 1px; }
+
+  .status-dot {
+    width: 8px; height: 8px;
+    background: var(--accent3);
+    border-radius: 50%;
+    box-shadow: 0 0 6px var(--accent3);
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%,100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  .nav {
+    flex: 1;
+    padding: 12px 0;
+    overflow-y: auto;
+  }
+
+  .nav-section {
+    padding: 6px 20px 2px;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    color: var(--text3);
+    text-transform: uppercase;
+    margin-top: 8px;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 20px;
+    font-size: 13px;
+    color: var(--text2);
+    cursor: pointer;
+    transition: all 0.15s;
+    border-left: 2px solid transparent;
+  }
+
+  .nav-item:hover { background: var(--bg3); color: var(--text); }
+
+  .nav-item.active {
+    background: rgba(14,165,233,0.08);
+    color: var(--accent);
+    border-left-color: var(--accent);
+    font-weight: 500;
+  }
+
+  .nav-badge {
+    margin-left: auto;
+    background: var(--danger);
+    color: white;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 10px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .nav-badge.warn { background: var(--warn); color: #000; }
+  .nav-badge.ok { background: var(--accent3); color: #000; }
+
+  .sidebar-footer {
+    padding: 14px 20px;
+    border-top: 1px solid var(--border);
+  }
+
+  .ai-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    color: var(--text3);
+  }
+
+  .ai-dot {
+    width: 6px; height: 6px;
+    background: var(--accent3);
+    border-radius: 50%;
+    animation: pulse 1.5s infinite;
+    flex-shrink: 0;
+  }
+
+  /* ── Main ── */
+  .main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .topbar {
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    height: 56px;
+    flex-shrink: 0;
+  }
+
+  .topbar-title { font-size: 16px; font-weight: 700; }
+  .topbar-sub { font-size: 12px; color: var(--text3); }
+
+  .topbar-right {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .btn {
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    font-family: 'Noto Sans KR', sans-serif;
+    transition: all 0.15s;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: white;
+  }
+
+  .btn-primary:hover { background: #0284c7; }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--text2);
+    border: 1px solid var(--border);
+  }
+
+  .btn-ghost:hover { background: var(--bg3); color: var(--text); }
+
+  .time-badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    background: rgba(14,165,233,0.08);
+    padding: 4px 10px;
+    border-radius: 4px;
+    border: 1px solid rgba(14,165,233,0.2);
+  }
+
+  /* ── Content ── */
+  .content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  /* ── Morning Brief Banner ── */
+  .brief-banner {
+    background: linear-gradient(135deg, rgba(99,102,241,0.15) 0%, rgba(14,165,233,0.1) 100%);
+    border: 1px solid rgba(99,102,241,0.3);
+    border-radius: 12px;
+    padding: 16px 20px;
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    animation: slideDown 0.4s ease;
+  }
+
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .brief-icon {
+    width: 36px; height: 36px;
+    background: linear-gradient(135deg, #6366f1, #0ea5e9);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+
+  .brief-content { flex: 1; }
+
+  .brief-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--accent2);
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .brief-title span {
+    font-size: 11px;
+    background: rgba(99,102,241,0.2);
+    padding: 1px 7px;
+    border-radius: 10px;
+    font-weight: 500;
+    color: #a5b4fc;
+  }
+
+  .brief-text {
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.6;
+  }
+
+  .brief-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+  }
+
+  .brief-chip {
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 500;
+    border: 1px solid;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .chip-danger { color: var(--danger); border-color: rgba(239,68,68,0.3); background: rgba(239,68,68,0.06); }
+  .chip-warn { color: var(--warn); border-color: rgba(245,158,11,0.3); background: rgba(245,158,11,0.06); }
+  .chip-ok { color: var(--accent3); border-color: rgba(16,185,129,0.3); background: rgba(16,185,129,0.06); }
+
+  /* ── Stats Row ── */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+  }
+
+  .stat-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    transition: border-color 0.2s;
+    cursor: default;
+  }
+
+  .stat-card:hover { border-color: rgba(14,165,233,0.3); }
+
+  .stat-label {
+    font-size: 11px;
+    color: var(--text3);
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .stat-value {
+    font-size: 26px;
+    font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .stat-sub { font-size: 11px; color: var(--text3); }
+
+  .stat-trend {
+    font-size: 11px;
+    margin-top: 4px;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+  }
+
+  .trend-up { color: var(--danger); }
+  .trend-down { color: var(--accent3); }
+
+  /* ── Grid Layout ── */
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .grid-3 {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr 1fr;
+    gap: 16px;
+  }
+
+  /* ── Panel ── */
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .panel-header {
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .panel-title {
+    font-size: 13px;
+    font-weight: 700;
+    flex: 1;
+  }
+
+  .panel-badge {
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .badge-accent { background: rgba(14,165,233,0.15); color: var(--accent); }
+  .badge-danger { background: rgba(239,68,68,0.15); color: var(--danger); }
+  .badge-warn { background: rgba(245,158,11,0.15); color: var(--warn); }
+  .badge-ok { background: rgba(16,185,129,0.15); color: var(--accent3); }
+  .badge-purple { background: rgba(99,102,241,0.15); color: #a5b4fc; }
+
+  .panel-body { padding: 14px 18px; }
+
+  /* ── Timeline ── */
+  .timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .tl-hour {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    position: relative;
+    min-height: 50px;
+  }
+
+  .tl-time {
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--text3);
+    width: 36px;
+    padding-top: 6px;
+    flex-shrink: 0;
+    text-align: right;
+  }
+
+  .tl-line {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-shrink: 0;
+    width: 12px;
+  }
+
+  .tl-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    margin-top: 8px;
+    flex-shrink: 0;
+  }
+
+  .tl-vline {
+    width: 1px;
+    flex: 1;
+    background: var(--border);
+    margin-top: 2px;
+    min-height: 20px;
+  }
+
+  .tl-content { flex: 1; padding: 2px 0 12px; }
+
+  .meet-card {
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin-bottom: 4px;
+    border-left: 3px solid;
+    transition: transform 0.15s, box-shadow 0.15s;
+    cursor: pointer;
+    position: relative;
+  }
+
+  .meet-card:hover {
+    transform: translateX(3px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  }
+
+  .meet-card.bu { background: var(--meet-bu); border-left-color: var(--meet-bu-border); }
+  .meet-card.sil { background: var(--meet-sil); border-left-color: var(--meet-sil-border); }
+  .meet-card.team { background: var(--meet-team); border-left-color: var(--meet-team-border); }
+
+  .meet-title { font-size: 12px; font-weight: 600; margin-bottom: 3px; }
+
+  .meet-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .meet-tag {
+    font-size: 10px;
+    padding: 1px 7px;
+    border-radius: 10px;
+    font-weight: 600;
+  }
+
+  .tag-bu { background: rgba(249,115,22,0.2); color: #fdba74; }
+  .tag-sil { background: rgba(56,189,248,0.2); color: #7dd3fc; }
+  .tag-team { background: rgba(250,204,21,0.2); color: #fef08a; }
+
+  .meet-time { font-size: 11px; color: var(--text3); font-family: 'JetBrains Mono', monospace; }
+
+  .meet-location { font-size: 11px; color: var(--text2); }
+
+  .meet-alert {
+    position: absolute;
+    top: 6px; right: 8px;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--warn);
+    background: rgba(245,158,11,0.1);
+    padding: 1px 6px;
+    border-radius: 4px;
+    border: 1px solid rgba(245,158,11,0.2);
+  }
+
+  /* Now indicator */
+  .now-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 4px 0;
+  }
+
+  .now-label {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--danger);
+    font-family: 'JetBrains Mono', monospace;
+    background: rgba(239,68,68,0.1);
+    padding: 1px 7px;
+    border-radius: 3px;
+    flex-shrink: 0;
+  }
+
+  .now-line {
+    flex: 1;
+    height: 1px;
+    background: var(--danger);
+    opacity: 0.5;
+  }
+
+  /* ── Task List ── */
+  .task-list { display: flex; flex-direction: column; gap: 8px; }
+
+  .task-item {
+    background: var(--panel2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    cursor: pointer;
+    transition: all 0.15s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .task-item::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+  }
+
+  .task-item.urgent::before { background: var(--danger); }
+  .task-item.normal::before { background: var(--warn); }
+  .task-item.info::before { background: var(--text3); }
+
+  .task-item:hover { border-color: rgba(14,165,233,0.25); background: rgba(14,165,233,0.04); }
+
+  .task-check {
+    width: 16px; height: 16px;
+    border: 1.5px solid var(--border);
+    border-radius: 4px;
+    flex-shrink: 0;
+    margin-top: 1px;
+    transition: all 0.15s;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .task-check.done {
+    background: var(--accent3);
+    border-color: var(--accent3);
+    color: white;
+    font-size: 10px;
+  }
+
+  .task-main { flex: 1; min-width: 0; }
+  .task-title { font-size: 12px; font-weight: 600; margin-bottom: 3px; }
+  .task-title.done { text-decoration: line-through; color: var(--text3); }
+
+  .task-meta-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .task-source { font-size: 10px; color: var(--text3); }
+  .task-from { font-size: 10px; color: var(--text2); }
+
+  .priority-chip {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 1px 7px;
+    border-radius: 10px;
+  }
+
+  .p-urgent { background: rgba(239,68,68,0.15); color: var(--danger); }
+  .p-normal { background: rgba(245,158,11,0.15); color: var(--warn); }
+  .p-info { background: rgba(71,85,105,0.3); color: var(--text2); }
+
+  .task-due {
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    flex-shrink: 0;
+  }
+
+  .due-today { color: var(--danger); font-weight: 700; }
+  .due-tomorrow { color: var(--warn); }
+  .due-later { color: var(--text3); }
+
+  /* ── Inbox ── */
+  .inbox-list { display: flex; flex-direction: column; gap: 0; }
+
+  .inbox-item {
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+
+  .inbox-item:last-child { border-bottom: none; }
+  .inbox-item:hover { background: rgba(14,165,233,0.03); margin: 0 -18px; padding: 10px 18px; }
+
+  .inbox-source {
+    width: 28px; height: 28px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    flex-shrink: 0;
+  }
+
+  .src-email { background: rgba(99,102,241,0.15); }
+  .src-teams { background: rgba(14,165,233,0.15); }
+
+  .inbox-content { flex: 1; min-width: 0; }
+
+  .inbox-header {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    margin-bottom: 2px;
+  }
+
+  .inbox-sender { font-size: 12px; font-weight: 600; }
+  .inbox-time { font-size: 10px; color: var(--text3); font-family: 'JetBrains Mono', monospace; margin-left: auto; }
+
+  .inbox-subject {
+    font-size: 12px;
+    color: var(--text);
+    margin-bottom: 3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .inbox-preview {
+    font-size: 11px;
+    color: var(--text3);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .inbox-tags {
+    display: flex;
+    gap: 4px;
+    margin-top: 4px;
+    flex-wrap: wrap;
+  }
+
+  .itag {
+    font-size: 10px;
+    padding: 1px 7px;
+    border-radius: 10px;
+    font-weight: 500;
+  }
+
+  .itag-meet { background: rgba(16,185,129,0.15); color: #6ee7b7; }
+  .itag-task { background: rgba(245,158,11,0.15); color: var(--warn); }
+  .itag-spam { background: rgba(71,85,105,0.2); color: var(--text3); text-decoration: line-through; }
+  .itag-info { background: rgba(14,165,233,0.1); color: var(--accent); }
+  .itag-urgent { background: rgba(239,68,68,0.15); color: var(--danger); }
+
+  .unread-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--accent);
+    flex-shrink: 0;
+    margin-top: 10px;
+    box-shadow: 0 0 5px var(--accent);
+  }
+
+  .read-spacer { width: 7px; flex-shrink: 0; }
+
+  /* ── Summary Panel ── */
+  .summary-box {
+    background: rgba(99,102,241,0.06);
+    border: 1px solid rgba(99,102,241,0.2);
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+  }
+
+  .summary-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #a5b4fc;
+    margin-bottom: 7px;
+  }
+
+  .summary-text {
+    font-size: 12px;
+    color: var(--text);
+    line-height: 1.6;
+  }
+
+  .summary-items { display: flex; flex-direction: column; gap: 5px; margin-top: 6px; }
+
+  .summary-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--text2);
+  }
+
+  .summary-bullet {
+    color: var(--accent2);
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .draft-box {
+    background: rgba(16,185,129,0.05);
+    border: 1px solid rgba(16,185,129,0.2);
+    border-radius: 8px;
+    padding: 12px 14px;
+  }
+
+  .draft-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #6ee7b7;
+    margin-bottom: 7px;
+  }
+
+  .draft-text {
+    font-size: 12px;
+    color: var(--text2);
+    line-height: 1.6;
+    font-style: italic;
+  }
+
+  .draft-actions {
+    display: flex;
+    gap: 6px;
+    margin-top: 8px;
+  }
+
+  /* ── Legend ── */
+  .legend {
+    display: flex;
+    gap: 12px;
+    padding: 8px 0;
+    flex-wrap: wrap;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    color: var(--text2);
+  }
+
+  .legend-dot {
+    width: 8px; height: 8px;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  /* ── Conflict Alert ── */
+  .conflict-alert {
+    background: rgba(239,68,68,0.08);
+    border: 1px solid rgba(239,68,68,0.25);
+    border-radius: 8px;
+    padding: 10px 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+
+  .conflict-icon { font-size: 14px; flex-shrink: 0; }
+  .conflict-text { font-size: 12px; color: var(--text); }
+  .conflict-text strong { color: var(--danger); }
+
+  /* ── Notification toast ── */
+  .toasts {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    pointer-events: none;
+  }
+
+  .toast {
+    background: var(--panel2);
+    border: 1px solid;
+    border-radius: 10px;
+    padding: 12px 16px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    width: 300px;
+    animation: toastIn 0.3s ease;
+    pointer-events: all;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  }
+
+  .toast.meet { border-color: rgba(16,185,129,0.3); }
+  .toast.task { border-color: rgba(245,158,11,0.3); }
+  .toast.alert { border-color: rgba(239,68,68,0.3); }
+
+  @keyframes toastIn {
+    from { opacity: 0; transform: translateX(20px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  @keyframes toastOut {
+    from { opacity: 1; transform: translateX(0); }
+    to { opacity: 0; transform: translateX(20px); }
+  }
+
+  .toast-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+  .toast-body { flex: 1; }
+  .toast-title { font-size: 12px; font-weight: 700; margin-bottom: 3px; }
+  .toast-text { font-size: 11px; color: var(--text2); line-height: 1.4; }
+  .toast-time { font-size: 10px; color: var(--text3); margin-top: 4px; font-family: 'JetBrains Mono', monospace; }
+  .toast-close {
+    font-size: 14px;
+    color: var(--text3);
+    cursor: pointer;
+    flex-shrink: 0;
+    background: none; border: none;
+    color: var(--text3);
+    line-height: 1;
+  }
+
+  /* ── Scrollbar ── */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--text3); }
+
+  /* ── Mini chart bars ── */
+  .mini-bars {
+    display: flex;
+    align-items: flex-end;
+    gap: 3px;
+    height: 28px;
+  }
+
+  .mini-bar {
+    flex: 1;
+    border-radius: 2px 2px 0 0;
+    transition: all 0.3s;
+  }
+
+  /* ── Week nav ── */
+  .week-nav {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 12px;
+  }
+
+  .week-day {
+    flex: 1;
+    padding: 6px 4px;
+    border-radius: 6px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.15s;
+    border: 1px solid transparent;
+  }
+
+  .week-day:hover { background: var(--bg3); }
+
+  .week-day.today {
+    background: rgba(14,165,233,0.12);
+    border-color: rgba(14,165,233,0.3);
+  }
+
+  .week-day-label { font-size: 10px; color: var(--text3); margin-bottom: 2px; }
+  .week-day-num { font-size: 14px; font-weight: 700; }
+  .week-day.today .week-day-num { color: var(--accent); }
+  .week-day-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--accent3); margin: 3px auto 0; }
+
+  /* ── Process flow ── */
+  .process-flow {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    overflow-x: auto;
+    padding: 4px 0;
+  }
+
+  .process-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+    padding: 8px 12px;
+    border-radius: 8px;
+    background: var(--panel2);
+    border: 1px solid var(--border);
+    min-width: 80px;
+  }
+
+  .process-step.active { border-color: var(--accent); background: rgba(14,165,233,0.06); }
+
+  .process-step-icon { font-size: 18px; }
+  .process-step-label { font-size: 10px; color: var(--text2); text-align: center; line-height: 1.3; }
+  .process-step.active .process-step-label { color: var(--accent); font-weight: 600; }
+
+  .process-arrow { color: var(--text3); font-size: 16px; padding: 0 4px; flex-shrink: 0; }
+
+  /* Tab system */
+  .tabs {
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 0;
+  }
+
+  .tab {
+    padding: 10px 16px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text3);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.15s;
+  }
+
+  .tab:hover { color: var(--text2); }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* highlight animation for new items */
+  @keyframes newItem {
+    0% { background: rgba(14,165,233,0.15); }
+    100% { background: transparent; }
+  }
+  .new-item { animation: newItem 2s ease forwards; }
+
+  /* ── Single content area + page views ── */
+  .main-content-area {
+    flex: 1;
+    overflow-y: auto;
+    position: relative;
+  }
+
+  .page-view {
+    display: none;
+    flex-direction: column;
+    min-height: 100%;
+  }
+  .page-view.active {
+    display: flex;
+    animation: pageIn 0.18s ease;
+  }
+
+  /* dashboard page has its own .content padding */
+  #page-dashboard .content { padding: 20px 24px; display: flex; flex-direction: column; gap: 20px; }
+
+  /* other pages wrap their content in .content too */
+  .page-view .content { padding: 0 24px 24px; display: flex; flex-direction: column; gap: 16px; }
+
+  .detail-header {
+    display: flex; align-items: center; gap: 14px;
+    padding: 20px 24px 12px; flex-shrink: 0;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 8px;
+  }
+  .back-btn {
+    background: var(--panel2); border: 1px solid var(--border);
+    color: var(--text2); padding: 6px 14px; border-radius: 6px;
+    font-size: 12px; font-weight: 600; cursor: pointer;
+    font-family: 'Noto Sans KR', sans-serif; transition: all 0.15s; white-space: nowrap; flex-shrink: 0;
+  }
+  .back-btn:hover { background: var(--bg3); color: var(--text); border-color: var(--accent); }
+
+  .task-detail-row {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 10px; border-radius: 6px; cursor: pointer;
+    transition: background 0.15s; border: 1px solid transparent;
+  }
+  .task-detail-row:hover { background: var(--bg3); }
+  .task-detail-row.active { background: rgba(14,165,233,0.08); border-color: rgba(14,165,233,0.2); }
+
+  .email-row {
+    display: flex; align-items: flex-start;
+    border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.15s;
+  }
+  .email-row:hover { background: rgba(14,165,233,0.04); }
+  .email-row.active { background: rgba(14,165,233,0.08); border-left: 2px solid var(--accent); }
+
+  .chat-room-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 12px 14px; border-bottom: 1px solid var(--border);
+    cursor: pointer; transition: background 0.15s;
+  }
+  .chat-room-row:hover { background: var(--bg3); }
+  .chat-room-row.active { background: rgba(14,165,233,0.08); border-left: 2px solid var(--accent); }
+
+  .chat-bubble { display: flex; gap: 8px; align-items: flex-start; }
+  .chat-bubble.mine { flex-direction: row-reverse; }
+  .bubble-avatar { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0; }
+  .bubble-body { max-width: 72%; }
+  .bubble-name { font-size: 10px; color: var(--text3); margin-bottom: 3px; }
+  .chat-bubble.mine .bubble-name { text-align: right; }
+  .bubble-text { background: var(--panel2); border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; font-size: 12px; line-height: 1.55; color: var(--text); }
+  .chat-bubble.mine .bubble-text { background: rgba(14,165,233,0.12); border-color: rgba(14,165,233,0.2); }
+  .bubble-time { font-size: 10px; color: var(--text3); margin-top: 3px; font-family: monospace; }
+  .chat-bubble.mine .bubble-time { text-align: right; }
+
+  .toggle { width: 40px; height: 22px; background: var(--border); border-radius: 11px; position: relative; cursor: pointer; transition: background 0.2s; flex-shrink: 0; }
+  .toggle::after { content: ''; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; background: white; border-radius: 50%; transition: transform 0.2s; }
+  .toggle.active { background: var(--accent3); }
+  .toggle.active::after { transform: translateX(18px); }
+
+  @keyframes pageIn { from { opacity:0; transform: translateY(8px); } to { opacity:1; transform:none; } }
+  .page-content.active { animation: pageIn 0.2s ease; }
+
+  @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+  /* ── 일정 추가 모달 ── */
+  @keyframes modalIn {
+    from { opacity:0; transform:translate(-50%,-48%) scale(0.96); }
+    to   { opacity:1; transform:translate(-50%,-50%) scale(1); }
+  }
+  #addEventModal { animation: modalIn 0.22s cubic-bezier(0.34,1.56,0.64,1); }
+
+  .form-group { display:flex; flex-direction:column; gap:5px; }
+  .form-label { font-size:11px; font-weight:600; color:var(--text3); letter-spacing:.4px; }
+  .form-input {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    padding: 9px 12px;
+    color: var(--text);
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 12px;
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    width: 100%;
+  }
+  .form-input:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(14,165,233,0.12); }
+  .form-input::placeholder { color: var(--text3); }
+
+  .type-chip {
+    display: flex; align-items: center; gap: 6px;
+    padding: 7px 14px; border-radius: 8px;
+    border: 1.5px solid var(--border);
+    background: var(--bg3);
+    cursor: pointer; font-size: 12px; font-weight: 500;
+    color: var(--text2); transition: all 0.15s; user-select: none;
+  }
+  .type-chip:hover { border-color: rgba(14,165,233,0.35); background: rgba(14,165,233,0.05); }
+  .type-chip.selected { border-color: var(--accent); background: rgba(14,165,233,0.1); color: var(--text); }
+  .type-chip[data-type="bu"].selected  { border-color:#f97316; background:rgba(249,115,22,0.1); }
+  .type-chip[data-type="sil"].selected { border-color:#38bdf8; background:rgba(56,189,248,0.1); }
+  .type-chip[data-type="team"].selected{ border-color:#facc15; background:rgba(250,204,21,0.1); }
+
+  .alarm-chip {
+    display: inline-flex; align-items: center;
+    padding: 5px 12px; border-radius: 20px;
+    border: 1.5px solid var(--border);
+    background: var(--bg3); cursor: pointer;
+    font-size: 11px; font-weight: 500; color: var(--text2);
+    transition: all 0.15s; user-select: none;
+  }
+  .alarm-chip:hover { border-color: rgba(14,165,233,0.35); }
+  .alarm-chip.checked { border-color: var(--accent); background: rgba(14,165,233,0.12); color: var(--accent); font-weight:700; }
+
+  /* 주 캘린더에 추가된 이벤트 카드 */
+  .meet-card.personal { background: rgba(148,163,184,0.12); border-left-color: #94a3b8; }
+</style>
+</head>
+<body>
+
+<div class="toasts" id="toasts"></div>
+
+<div class="app">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="logo" style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;">
+      <div>
+        <div class="logo-badge">🤖 AI AGENT</div>
+        <h2>실시간 일정 관리<br>현대모비스</h2>
+      </div>
+      <button id="refreshBtn" onclick="refreshData()" title="새 정보 업데이트" style="width:30px;height:30px;border-radius:8px;background:rgba(14,165,233,0.12);border:1px solid rgba(14,165,233,0.25);color:var(--accent);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;margin-top:2px;transition:all 0.2s;" onmouseover="this.style.background='rgba(14,165,233,0.22)'" onmouseout="this.style.background='rgba(14,165,233,0.12)'">↻</button>
+    </div>
+
+    <div class="user-info">
+      <div class="avatar">희</div>
+      <div class="user-detail">
+        <div class="user-name">김희진</div>
+        <div class="user-dept">조향시스템설계2팀</div>
+      </div>
+      <div class="status-dot"></div>
+    </div>
+
+    <nav class="nav">
+      <div class="nav-section">메인</div>
+      <div class="nav-item active" data-page="dashboard" onclick="navTo('dashboard',this)">
+        <span>📊</span> 통합 대시보드
+      </div>
+      <div class="nav-item" data-page="calendar" onclick="navTo('calendar',this)">
+        <span>📅</span> 일정 관리
+        <span class="nav-badge warn">3</span>
+      </div>
+      <div class="nav-item" data-page="tasks" onclick="navTo('tasks',this)">
+        <span>✅</span> 업무 요청
+        <span class="nav-badge">5</span>
+      </div>
+
+      <div class="nav-section">커뮤니케이션</div>
+      <div class="nav-item" data-page="email" onclick="navTo('email',this)">
+        <span>📧</span> 이메일 분석
+        <span class="nav-badge">12</span>
+      </div>
+      <div class="nav-item" data-page="teams" onclick="navTo('teams',this)">
+        <span>💬</span> Teams 채팅
+        <span class="nav-badge">8</span>
+      </div>
+
+      <div class="nav-section">AI 기능</div>
+      <div class="nav-item" data-page="drafts" onclick="navTo('drafts',this)">
+        <span>✍️</span> 답변 초안
+        <span class="nav-badge ok">2</span>
+      </div>
+      <div class="nav-item" data-page="stats" onclick="navTo('stats',this)">
+        <span>📈</span> 처리 현황
+      </div>
+      <div class="nav-item" data-page="settings" onclick="navTo('settings',this)">
+        <span>⚙️</span> 설정
+      </div>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="ai-status">
+        <div class="ai-dot"></div>
+        AI Agent 실시간 모니터링 중<br>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:10px;" id="lastScan">방금 전 스캔</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main">
+    <!-- Topbar -->
+    <div class="topbar" id="topbar">
+      <div id="topbar-left">
+        <div class="topbar-title" id="topbar-title">통합 대시보드</div>
+        <div class="topbar-sub" id="topbar-sub">오늘의 일정 및 미처리 요청 현황</div>
+      </div>
+      <div class="topbar-right">
+        <div class="time-badge" id="currentTime">--:--</div>
+        <button class="btn btn-ghost" onclick="simulateNewMessage()">📨 메시지 수신 시뮬레이션</button>
+        <button class="btn btn-primary" onclick="showBriefing()">🌅 오늘의 브리핑</button>
+      </div>
+    </div>
+
+    <!-- Single scrollable content area — pages swap here -->
+    <div class="main-content-area" id="mainContentArea">
+
+      <!-- PAGE: dashboard -->
+      <div class="page-view active" id="page-dashboard">
+<div class="content">
+<!-- Morning Brief -->
+      <div class="brief-banner" id="briefBanner">
+        <div class="brief-icon">🌅</div>
+        <div class="brief-content">
+          <div class="brief-title">
+            오늘의 AI 브리핑
+            <span>2025년 6월 18일 수요일</span>
+          </div>
+          <div class="brief-text">
+            오늘 회의 <strong>4건</strong> (BU 1건, 실 1건, 팀 2건), 미처리 업무 요청 <strong>5건</strong>이 있습니다. 
+            <span style="color:var(--danger);font-weight:600;">긴급 요청 2건</span>을 우선 처리하세요. 
+            14:00 EPS 개발 방향성 회의와 15:30 조향시스템 주간 회의가 <strong>충돌 가능성</strong>이 있습니다.
+          </div>
+          <div class="brief-actions">
+            <span class="brief-chip chip-danger">🚨 긴급 요청 2건</span>
+            <span class="brief-chip chip-warn">⚠️ 일정 충돌 주의</span>
+            <span class="brief-chip chip-ok">✅ 완료 3건</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-label">📅 오늘 회의</div>
+          <div class="stat-value" style="color:var(--accent)">4</div>
+          <div class="stat-sub">BU 1 · 실 1 · 팀 2</div>
+          <div class="stat-trend trend-up">▲ 전주 대비 +1건</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">📋 미처리 요청</div>
+          <div class="stat-value" style="color:var(--danger)">5</div>
+          <div class="stat-sub">긴급 2 · 일반 3</div>
+          <div class="stat-trend trend-down">▼ 어제 대비 -2건</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">✅ 오늘 완료</div>
+          <div class="stat-value" style="color:var(--accent3)">3</div>
+          <div class="stat-sub">처리율 37.5%</div>
+          <div class="stat-trend trend-up" style="color:var(--accent3)">↑ 우상향 추세</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">📧 신규 메시지</div>
+          <div class="stat-value" style="color:var(--warn)">20</div>
+          <div class="stat-sub">이메일 12 · Teams 8</div>
+          <div class="mini-bars" style="margin-top:4px;">
+            <div class="mini-bar" style="height:40%;background:rgba(14,165,233,0.3)"></div>
+            <div class="mini-bar" style="height:60%;background:rgba(14,165,233,0.4)"></div>
+            <div class="mini-bar" style="height:80%;background:rgba(14,165,233,0.5)"></div>
+            <div class="mini-bar" style="height:50%;background:rgba(14,165,233,0.4)"></div>
+            <div class="mini-bar" style="height:100%;background:var(--accent)"></div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">🤖 AI 처리</div>
+          <div class="stat-value" style="color:#a5b4fc">18</div>
+          <div class="stat-sub">자동 분류·요약</div>
+          <div class="stat-trend" style="color:#a5b4fc">스팸 4건 필터링</div>
+        </div>
+      </div>
+
+            <!-- 오늘의 일정 (전체 너비) -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">📅 오늘의 일정</div>
+          <div style="display:flex;align-items:center;gap:8px;margin-left:auto;">
+            <div class="legend" style="padding:0;margin:0;">
+              <div class="legend-item"><div class="legend-dot" style="background:#f97316"></div>BU 회의</div>
+              <div class="legend-item"><div class="legend-dot" style="background:#38bdf8"></div>실 회의</div>
+              <div class="legend-item"><div class="legend-dot" style="background:#facc15"></div>팀 회의</div>
+            </div>
+            <span class="panel-badge badge-accent">오늘 4건</span>
+          </div>
+        </div>
+        <div class="panel-body">
+
+          <!-- Week nav -->
+          <div class="week-nav" style="margin-bottom:14px;">
+            <div class="week-day"><div class="week-day-label">월</div><div class="week-day-num">16</div></div>
+            <div class="week-day"><div class="week-day-label">화</div><div class="week-day-num">17</div><div class="week-day-dot"></div></div>
+            <div class="week-day today"><div class="week-day-label">수</div><div class="week-day-num">18</div><div class="week-day-dot"></div></div>
+            <div class="week-day"><div class="week-day-label">목</div><div class="week-day-num">19</div><div class="week-day-dot"></div></div>
+            <div class="week-day"><div class="week-day-label">금</div><div class="week-day-num">20</div></div>
+          </div>
+
+          <!-- Conflict alert -->
+          <div class="conflict-alert" style="margin-bottom:16px;">
+            <span class="conflict-icon">⚠️</span>
+            <span class="conflict-text"><strong>일정 충돌 경고:</strong> 14:00–15:00 EPS 개발 회의와 14:30 팀 정기 미팅이 겹칩니다</span>
+          </div>
+
+          <!-- 세로 타임라인 (원래 방식) -->
+          <div class="timeline">
+
+            <div class="tl-hour">
+              <div class="tl-time">09:30</div>
+              <div class="tl-line">
+                <div class="tl-dot" style="background:#facc15;box-shadow:0 0 5px #facc15"></div>
+                <div class="tl-vline"></div>
+              </div>
+              <div class="tl-content">
+                <div class="meet-card team">
+                  <div class="meet-title">조향시스템설계2팀 아침 스탠드업</div>
+                  <div class="meet-meta">
+                    <span class="meet-tag tag-team">팀 회의</span>
+                    <span class="meet-time">09:30–10:00</span>
+                    <span class="meet-location">📍 Teams</span>
+                  </div>
+                  <span class="meet-alert" style="color:var(--accent3);background:rgba(16,185,129,0.1);border-color:rgba(16,185,129,0.2)">완료 ✓</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="tl-hour">
+              <div class="tl-time">10:30</div>
+              <div class="tl-line">
+                <div class="tl-dot" style="background:#38bdf8;box-shadow:0 0 5px #38bdf8"></div>
+                <div class="tl-vline"></div>
+              </div>
+              <div class="tl-content">
+                <div class="meet-card sil">
+                  <div class="meet-title">조향시스템설계실 월례 기술 세미나</div>
+                  <div class="meet-meta">
+                    <span class="meet-tag tag-sil">실 회의</span>
+                    <span class="meet-time">10:30–12:00</span>
+                    <span class="meet-location">📍 3동 304호</span>
+                  </div>
+                  <span class="meet-alert" style="color:var(--accent3);background:rgba(16,185,129,0.1);border-color:rgba(16,185,129,0.2)">완료 ✓</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="now-bar">
+              <span class="now-label" id="nowLabel">NOW 13:42</span>
+              <div class="now-line"></div>
+            </div>
+
+            <div class="tl-hour">
+              <div class="tl-time">14:00</div>
+              <div class="tl-line">
+                <div class="tl-dot" style="background:#f97316;box-shadow:0 0 5px #f97316"></div>
+                <div class="tl-vline"></div>
+              </div>
+              <div class="tl-content">
+                <div class="meet-card bu">
+                  <div class="meet-title">EPS 시스템 개발 방향성 검토 (BU장 참석)</div>
+                  <div class="meet-meta">
+                    <span class="meet-tag tag-bu">BU 회의</span>
+                    <span class="meet-time">14:00–15:00</span>
+                    <span class="meet-location">📍 2동 컨퍼런스룸 A</span>
+                  </div>
+                  <span class="meet-alert">⚠️ 예정</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="tl-hour">
+              <div class="tl-time">15:30</div>
+              <div class="tl-line">
+                <div class="tl-dot" style="background:#facc15"></div>
+                <div class="tl-vline"></div>
+              </div>
+              <div class="tl-content">
+                <div class="meet-card team">
+                  <div class="meet-title">조향시스템설계2팀 주간 업무 현황 공유</div>
+                  <div class="meet-meta">
+                    <span class="meet-tag tag-team">팀 회의</span>
+                    <span class="meet-time">15:30–16:30</span>
+                    <span class="meet-location">📍 Teams</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div><!-- /timeline -->
+        </div>
+      </div>
+
+      <!-- 업무 요청 현황 (전체 너비) -->
+      <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">✅ 업무 요청 현황</div>
+            <span class="panel-badge badge-danger">미처리 5</span>
+          </div>
+          <div class="panel-body">
+            <div class="tabs">
+              <div class="tab active" onclick="switchTab(this, 'tasks-pending')">미처리</div>
+              <div class="tab" onclick="switchTab(this, 'tasks-done')">완료</div>
+            </div>
+
+            <div class="tab-content active" id="tasks-pending" style="margin-top:10px;">
+              <div class="task-list" id="taskList" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+
+                <div class="task-item urgent">
+                  <div class="task-check" onclick="toggleTask(this)"></div>
+                  <div class="task-main">
+                    <div class="task-title">MDPS 제어로직 수정 결과 보고서 제출</div>
+                    <div class="task-meta-row">
+                      <span class="priority-chip p-urgent">🚨 긴급</span>
+                      <span class="task-from">📧 박민준 수석 (선행연구팀)</span>
+                    </div>
+                    <div class="task-meta-row" style="margin-top:3px;">
+                      <span class="task-source">AI 요약: 검증 완료된 수정 로직과 시뮬레이션 결과 포함 요청</span>
+                    </div>
+                  </div>
+                  <div class="task-due due-today">D-day</div>
+                </div>
+
+                <div class="task-item urgent">
+                  <div class="task-check" onclick="toggleTask(this)"></div>
+                  <div class="task-main">
+                    <div class="task-title">EPS 전류 제어 이상 원인 분석 회신</div>
+                    <div class="task-meta-row">
+                      <span class="priority-chip p-urgent">🚨 긴급</span>
+                      <span class="task-from">💬 이강민 차장 (품질관리팀)</span>
+                    </div>
+                    <div class="task-meta-row" style="margin-top:3px;">
+                      <span class="task-source">AI 요약: 지난 3주 발생한 전류 피크 현상 원인 규명 요청</span>
+                    </div>
+                  </div>
+                  <div class="task-due due-today">D-day</div>
+                </div>
+
+                <div class="task-item normal">
+                  <div class="task-check" onclick="toggleTask(this)"></div>
+                  <div class="task-main">
+                    <div class="task-title">2025 하반기 연구과제 계획서 작성 및 제출</div>
+                    <div class="task-meta-row">
+                      <span class="priority-chip p-normal">⚡ 일반</span>
+                      <span class="task-from">📧 팀장 최영수 부장</span>
+                    </div>
+                    <div class="task-meta-row" style="margin-top:3px;">
+                      <span class="task-source">AI 요약: 기술 목표, 일정, 예산 포함하여 A4 3장 이내</span>
+                    </div>
+                  </div>
+                  <div class="task-due due-tomorrow">D-1</div>
+                </div>
+
+                <div class="task-item normal">
+                  <div class="task-check" onclick="toggleTask(this)"></div>
+                  <div class="task-main">
+                    <div class="task-title">협력사 JTEKT 기술 미팅 자료 준비</div>
+                    <div class="task-meta-row">
+                      <span class="priority-chip p-normal">⚡ 일반</span>
+                      <span class="task-from">💬 김도현 책임 (구매팀)</span>
+                    </div>
+                    <div class="task-meta-row" style="margin-top:3px;">
+                      <span class="task-source">AI 요약: 6/20 방문 전 현재 이슈사항 정리 PPT 필요</span>
+                    </div>
+                  </div>
+                  <div class="task-due due-later">D-2</div>
+                </div>
+
+                <div class="task-item info">
+                  <div class="task-check" onclick="toggleTask(this)"></div>
+                  <div class="task-main">
+                    <div class="task-title">조향감 개선 관련 특허 검토 의견 회신</div>
+                    <div class="task-meta-row">
+                      <span class="priority-chip p-info">ℹ️ 참고</span>
+                      <span class="task-from">📧 정지영 연구원 (IP팀)</span>
+                    </div>
+                    <div class="task-meta-row" style="margin-top:3px;">
+                      <span class="task-source">AI 요약: 특허 3건 검토 후 기술적 유효성 의견 요청</span>
+                    </div>
+                  </div>
+                  <div class="task-due due-later">D-4</div>
+                </div>
+
+              </div>
+            </div>
+
+            <div class="tab-content" id="tasks-done" style="margin-top:10px;">
+              <div class="task-list" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                <div class="task-item info" style="opacity:0.6;">
+                  <div class="task-check done">✓</div>
+                  <div class="task-main">
+                    <div class="task-title done">R&D 월간 보고서 초안 검토 완료</div>
+                    <div class="task-meta-row">
+                      <span class="task-from">📧 팀장 최영수 부장</span>
+                    </div>
+                  </div>
+                  <div class="task-due" style="color:var(--text3)">완료</div>
+                </div>
+                <div class="task-item info" style="opacity:0.6;">
+                  <div class="task-check done">✓</div>
+                  <div class="task-main">
+                    <div class="task-title done">설계 검토 회의 참석 확인 회신</div>
+                    <div class="task-meta-row">
+                      <span class="task-from">💬 박민준 수석</span>
+                    </div>
+                  </div>
+                  <div class="task-due" style="color:var(--text3)">완료</div>
+                </div>
+                <div class="task-item info" style="opacity:0.6;">
+                  <div class="task-check done">✓</div>
+                  <div class="task-main">
+                    <div class="task-title done">신규 입사자 팀 소개 자료 공유</div>
+                    <div class="task-meta-row">
+                      <span class="task-from">📧 인사팀</span>
+                    </div>
+                  </div>
+                  <div class="task-due" style="color:var(--text3)">완료</div>
+                </div>
+              </div>
+            </div>
+          </div>
+      </div>
+
+
+
+    </div><!-- /content -->
+</div>
+      </div>
+
+      <!-- PAGE: calendar -->
+      <div class="page-view " id="page-calendar">
+<div class="content">
+        <div class="detail-header">
+          <button class="back-btn" onclick="navTo('dashboard')">← 대시보드</button>
+          <div>
+            <div class="topbar-title">📅 일정 관리 상세</div>
+            <div class="topbar-sub">회의 일정 전체 목록 및 상세 정보</div>
+          </div>
+          <button class="btn btn-primary" style="margin-left:auto;" onclick="openAddEventModal()">+ 일정 추가</button>
+        </div>
+
+        <!-- 이번 주 전체 일정 -->
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">📆 이번 주 전체 일정</div>
+            <div style="display:flex;gap:8px;margin-left:auto;">
+              <div class="legend" style="padding:0;"><div class="legend-item"><div class="legend-dot" style="background:#6366f1"></div>BU</div><div class="legend-item"><div class="legend-dot" style="background:#0ea5e9"></div>실</div><div class="legend-item"><div class="legend-dot" style="background:#facc15"></div>팀</div></div>
+            </div>
+          </div>
+          <div class="panel-body">
+            <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;">
+              <!-- 월 -->
+              <div style="background:var(--bg3);border-radius:8px;padding:12px;border:1px solid var(--border);">
+                <div style="font-size:12px;font-weight:700;color:var(--text3);margin-bottom:10px;text-align:center;">월 6/16</div>
+                <div style="font-size:11px;color:var(--text3);text-align:center;padding:8px 0;">일정 없음</div>
+              </div>
+              <!-- 화 -->
+              <div style="background:var(--bg3);border-radius:8px;padding:12px;border:1px solid var(--border);">
+                <div style="font-size:12px;font-weight:700;color:var(--text3);margin-bottom:10px;text-align:center;">화 6/17</div>
+                <div class="meet-card bu" style="margin-bottom:6px;cursor:pointer;" onclick="showMeetDetail('meet1')">
+                  <div class="meet-title" style="font-size:11px;">EPS 품질 이슈 대책 회의</div>
+                  <div style="font-size:10px;color:var(--text3);">10:00–11:30 · 품질관리팀</div>
+                  <span class="meet-tag tag-bu" style="margin-top:4px;display:inline-block;">BU</span>
+                </div>
+                <div class="meet-card team" style="cursor:pointer;" onclick="showMeetDetail('meet2')">
+                  <div class="meet-title" style="font-size:11px;">주간 업무 조율 미팅</div>
+                  <div style="font-size:10px;color:var(--text3);">16:00–16:30 · Teams</div>
+                  <span class="meet-tag tag-team" style="margin-top:4px;display:inline-block;">팀</span>
+                </div>
+              </div>
+              <!-- 수 (오늘) -->
+              <div style="background:rgba(14,165,233,0.05);border-radius:8px;padding:12px;border:1px solid rgba(14,165,233,0.25);">
+                <div style="font-size:12px;font-weight:700;color:var(--accent);margin-bottom:10px;text-align:center;">수 6/18 ← 오늘</div>
+                <div class="meet-card team" style="margin-bottom:6px;cursor:pointer;" onclick="showMeetDetail('meet3')">
+                  <div class="meet-title" style="font-size:11px;">아침 스탠드업</div>
+                  <div style="font-size:10px;color:var(--text3);">09:30–10:00 · Teams</div>
+                  <span class="meet-tag tag-team" style="margin-top:4px;display:inline-block;">팀</span>
+                </div>
+                <div class="meet-card sil" style="margin-bottom:6px;cursor:pointer;" onclick="showMeetDetail('meet4')">
+                  <div class="meet-title" style="font-size:11px;">월례 기술 세미나</div>
+                  <div style="font-size:10px;color:var(--text3);">10:30–12:00 · 3동 304호</div>
+                  <span class="meet-tag tag-sil" style="margin-top:4px;display:inline-block;">실</span>
+                </div>
+                <div class="meet-card bu" style="margin-bottom:6px;cursor:pointer;" onclick="showMeetDetail('meet5')">
+                  <div class="meet-title" style="font-size:11px;">EPS 개발 방향성 검토</div>
+                  <div style="font-size:10px;color:var(--text3);">14:00–15:00 · 컨퍼런스룸A</div>
+                  <span class="meet-tag tag-bu" style="margin-top:4px;display:inline-block;">BU</span>
+                </div>
+                <div class="meet-card team" style="cursor:pointer;" onclick="showMeetDetail('meet6')">
+                  <div class="meet-title" style="font-size:11px;">주간 현황 공유</div>
+                  <div style="font-size:10px;color:var(--text3);">15:30–16:30 · Teams</div>
+                  <span class="meet-tag tag-team" style="margin-top:4px;display:inline-block;">팀</span>
+                </div>
+              </div>
+              <!-- 목 -->
+              <div style="background:var(--bg3);border-radius:8px;padding:12px;border:1px solid var(--border);">
+                <div style="font-size:12px;font-weight:700;color:var(--text3);margin-bottom:10px;text-align:center;">목 6/19</div>
+                <div class="meet-card sil" style="margin-bottom:6px;cursor:pointer;" onclick="showMeetDetail('meet7')">
+                  <div class="meet-title" style="font-size:11px;">조향 설계실 기술 리뷰</div>
+                  <div style="font-size:10px;color:var(--text3);">10:00–11:00 · 2동 201호</div>
+                  <span class="meet-tag tag-sil" style="margin-top:4px;display:inline-block;">실</span>
+                </div>
+              </div>
+              <!-- 금 -->
+              <div style="background:var(--bg3);border-radius:8px;padding:12px;border:1px solid var(--border);">
+                <div style="font-size:12px;font-weight:700;color:var(--text3);margin-bottom:10px;text-align:center;">금 6/20</div>
+                <div class="meet-card bu" style="cursor:pointer;" onclick="showMeetDetail('meet8')">
+                  <div class="meet-title" style="font-size:11px;">JTEKT 협력사 기술 미팅</div>
+                  <div style="font-size:10px;color:var(--text3);">14:00–16:00 · 협력사 방문</div>
+                  <span class="meet-tag tag-bu" style="margin-top:4px;display:inline-block;">BU</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 회의 상세 패널 (클릭 시 표시) -->
+        <div class="panel" id="meetDetailPanel" style="display:none;">
+          <div class="panel-header">
+            <div class="panel-title" id="meetDetailTitle">회의 상세</div>
+            <button class="btn btn-ghost" style="margin-left:auto;font-size:11px;" onclick="document.getElementById('meetDetailPanel').style.display='none'">닫기 ✕</button>
+          </div>
+          <div class="panel-body" id="meetDetailBody"></div>
+        </div>
+      </div>
+      </div>
+
+      <!-- PAGE: tasks -->
+      <div class="page-view " id="page-tasks">
+<div class="content">
+        <div class="detail-header">
+          <button class="back-btn" onclick="navTo('dashboard')">← 대시보드</button>
+          <div>
+            <div class="topbar-title">✅ 업무 요청 상세</div>
+            <div class="topbar-sub">전체 업무 요청 목록 및 처리 현황</div>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1.6fr;gap:16px;align-items:start;">
+          <!-- 목록 -->
+          <div class="panel">
+            <div class="panel-header">
+              <div class="panel-title">업무 목록</div>
+              <span class="panel-badge badge-danger">미처리 5</span>
+            </div>
+            <div class="panel-body" style="padding:8px;">
+              <div id="taskDetailList" style="display:flex;flex-direction:column;gap:4px;">
+                <div class="task-detail-row active" onclick="showTaskDetail('task1',this)">
+                  <span class="priority-chip p-urgent">🚨 긴급</span>
+                  <span style="font-size:12px;flex:1;">MDPS 제어로직 수정 보고서</span>
+                  <span class="task-due due-today">D-day</span>
+                </div>
+                <div class="task-detail-row" onclick="showTaskDetail('task2',this)">
+                  <span class="priority-chip p-urgent">🚨 긴급</span>
+                  <span style="font-size:12px;flex:1;">EPS 전류 제어 이상 원인 분석</span>
+                  <span class="task-due due-today">D-day</span>
+                </div>
+                <div class="task-detail-row" onclick="showTaskDetail('task3',this)">
+                  <span class="priority-chip p-normal">⚡ 일반</span>
+                  <span style="font-size:12px;flex:1;">하반기 연구과제 계획서</span>
+                  <span class="task-due due-tomorrow">D-1</span>
+                </div>
+                <div class="task-detail-row" onclick="showTaskDetail('task4',this)">
+                  <span class="priority-chip p-normal">⚡ 일반</span>
+                  <span style="font-size:12px;flex:1;">JTEKT 기술 미팅 자료 준비</span>
+                  <span class="task-due due-later">D-2</span>
+                </div>
+                <div class="task-detail-row" onclick="showTaskDetail('task5',this)">
+                  <span class="priority-chip p-info">ℹ️ 참고</span>
+                  <span style="font-size:12px;flex:1;">특허 검토 의견 회신</span>
+                  <span class="task-due due-later">D-4</span>
+                </div>
+                <div style="border-top:1px solid var(--border);padding-top:8px;margin-top:4px;font-size:11px;color:var(--text3);font-weight:600;">완료됨</div>
+                <div class="task-detail-row" style="opacity:0.5;" onclick="showTaskDetail('task6',this)">
+                  <span class="priority-chip p-info" style="text-decoration:line-through;">완료</span>
+                  <span style="font-size:12px;flex:1;text-decoration:line-through;">R&D 월간 보고서 초안 검토</span>
+                </div>
+                <div class="task-detail-row" style="opacity:0.5;" onclick="showTaskDetail('task7',this)">
+                  <span class="priority-chip p-info" style="text-decoration:line-through;">완료</span>
+                  <span style="font-size:12px;flex:1;text-decoration:line-through;">설계 검토 회의 참석 확인</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 상세 -->
+          <div class="panel" id="taskDetailPanel">
+            <div class="panel-header">
+              <div class="panel-title" id="taskDetailTitle">업무 상세 정보</div>
+              <span class="panel-badge badge-danger" id="taskDetailBadge">긴급</span>
+            </div>
+            <div class="panel-body" id="taskDetailBody">
+              <div style="color:var(--text3);font-size:13px;text-align:center;padding:32px 0;">← 왼쪽 목록에서 업무를 선택하세요</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      </div>
+
+      <!-- PAGE: email -->
+      <div class="page-view " id="page-email">
+<div class="content">
+        <div class="detail-header">
+          <button class="back-btn" onclick="navTo('dashboard')">← 대시보드</button>
+          <div>
+            <div class="topbar-title">📧 이메일 분석</div>
+            <div class="topbar-sub">AI 자동 분류된 이메일 전체 목록</div>
+          </div>
+        </div>
+
+        <!-- 최근 수신함 (상단 전체 너비) -->
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">📬 최근 수신함</div>
+            <span class="panel-badge badge-purple">스팸 4건 필터링</span>
+          </div>
+          <div class="panel-body" style="padding:0 18px 8px;">
+            <div class="inbox-list" id="inboxList">
+
+              <div class="inbox-item">
+                <div class="unread-dot"></div>
+                <div class="inbox-source src-teams">💬</div>
+                <div class="inbox-content">
+                  <div class="inbox-header">
+                    <span class="inbox-sender">이강민 차장</span>
+                    <span class="inbox-time">13:28</span>
+                  </div>
+                  <div class="inbox-subject">EPS 전류 제어 이상 현상 분석 요청 (긴급)</div>
+                  <div class="inbox-preview">희진씨, 지난주 양산라인에서 계속 EPS 전류 피크...</div>
+                  <div class="inbox-tags">
+                    <span class="itag itag-urgent">🚨 긴급 요청</span>
+                    <span class="itag itag-task">태스크 등록됨</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="inbox-item">
+                <div class="unread-dot"></div>
+                <div class="inbox-source src-email">📧</div>
+                <div class="inbox-content">
+                  <div class="inbox-header">
+                    <span class="inbox-sender">박민준 수석</span>
+                    <span class="inbox-time">12:45</span>
+                  </div>
+                  <div class="inbox-subject">[마감 오늘] MDPS 수정 보고서 제출 요청</div>
+                  <div class="inbox-preview">안녕하세요, 오늘 EOD까지 보고서 제출 부탁드립니다...</div>
+                  <div class="inbox-tags">
+                    <span class="itag itag-urgent">🚨 D-day</span>
+                    <span class="itag itag-task">태스크 등록됨</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="inbox-item">
+                <div class="read-spacer"></div>
+                <div class="inbox-source src-email">📧</div>
+                <div class="inbox-content">
+                  <div class="inbox-header">
+                    <span class="inbox-sender">최영수 부장 (팀장)</span>
+                    <span class="inbox-time">11:10</span>
+                  </div>
+                  <div class="inbox-subject">EPS 개발 방향성 검토 회의 초청</div>
+                  <div class="inbox-preview">2025.06.18 14:00 2동 컨퍼런스룸A 회의 참석 요청...</div>
+                  <div class="inbox-tags">
+                    <span class="itag itag-meet">📅 캘린더 등록됨</span>
+                    <span class="itag itag-info">BU 회의</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="inbox-item">
+                <div class="read-spacer"></div>
+                <div class="inbox-source src-teams">💬</div>
+                <div class="inbox-content">
+                  <div class="inbox-header">
+                    <span class="inbox-sender">김도현 책임 (구매)</span>
+                    <span class="inbox-time">09:55</span>
+                  </div>
+                  <div class="inbox-subject">JTEKT 기술 미팅 자료 준비 요청</div>
+                  <div class="inbox-preview">6월 20일 방문 예정인데 현황 자료 부탁드려요...</div>
+                  <div class="inbox-tags">
+                    <span class="itag itag-task">⚡ 태스크 등록됨</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="inbox-item" style="opacity:0.4;">
+                <div class="read-spacer"></div>
+                <div class="inbox-source src-email">📧</div>
+                <div class="inbox-content">
+                  <div class="inbox-header">
+                    <span class="inbox-sender">no-reply@promo.co.kr</span>
+                    <span class="inbox-time">08:32</span>
+                  </div>
+                  <div class="inbox-subject">특별 할인 이벤트 안내 [광고]</div>
+                  <div class="inbox-tags">
+                    <span class="itag itag-spam">🚫 스팸 필터링됨</span>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <!-- 이메일 상세 분석 (목록 + 상세) -->
+        <div style="display:grid;grid-template-columns:1fr 1.6fr;gap:16px;align-items:start;">
+          <div class="panel">
+            <div class="panel-header">
+              <div class="panel-title">받은 편지함</div>
+              <span class="panel-badge badge-accent">12건</span>
+            </div>
+            <div class="panel-body" style="padding:0;">
+              <div id="emailList">
+                <div class="email-row unread" onclick="showEmailDetail('email1',this)">
+                  <div class="unread-dot" style="flex-shrink:0;margin-top:14px;"></div>
+                  <div style="flex:1;padding:10px 14px 10px 8px;">
+                    <div style="display:flex;justify-content:space-between;margin-bottom:2px;"><span style="font-size:12px;font-weight:700;">박민준 수석</span><span style="font-size:10px;color:var(--text3);font-family:monospace;">12:45</span></div>
+                    <div style="font-size:12px;margin-bottom:2px;">[마감 오늘] MDPS 수정 보고서 제출 요청</div>
+                    <div style="display:flex;gap:4px;"><span class="itag itag-urgent">🚨 D-day</span><span class="itag itag-task">태스크 등록됨</span></div>
+                  </div>
+                </div>
+                <div class="email-row unread" onclick="showEmailDetail('email2',this)">
+                  <div class="unread-dot" style="flex-shrink:0;margin-top:14px;"></div>
+                  <div style="flex:1;padding:10px 14px 10px 8px;">
+                    <div style="display:flex;justify-content:space-between;margin-bottom:2px;"><span style="font-size:12px;font-weight:700;">최영수 부장 (팀장)</span><span style="font-size:10px;color:var(--text3);font-family:monospace;">11:10</span></div>
+                    <div style="font-size:12px;margin-bottom:2px;">EPS 개발 방향성 검토 회의 초청</div>
+                    <div style="display:flex;gap:4px;"><span class="itag itag-meet">📅 캘린더 등록됨</span><span class="itag itag-info">BU 회의</span></div>
+                  </div>
+                </div>
+                <div class="email-row" onclick="showEmailDetail('email3',this)">
+                  <div class="read-spacer"></div>
+                  <div style="flex:1;padding:10px 14px 10px 8px;">
+                    <div style="display:flex;justify-content:space-between;margin-bottom:2px;"><span style="font-size:12px;font-weight:600;color:var(--text2);">정지영 연구원 (IP팀)</span><span style="font-size:10px;color:var(--text3);font-family:monospace;">어제</span></div>
+                    <div style="font-size:12px;color:var(--text2);margin-bottom:2px;">특허 검토 의견 요청 건</div>
+                    <div style="display:flex;gap:4px;"><span class="itag itag-task">⚡ 태스크 등록됨</span></div>
+                  </div>
+                </div>
+                <div class="email-row" onclick="showEmailDetail('email4',this)">
+                  <div class="read-spacer"></div>
+                  <div style="flex:1;padding:10px 14px 10px 8px;">
+                    <div style="display:flex;justify-content:space-between;margin-bottom:2px;"><span style="font-size:12px;font-weight:600;color:var(--text2);">인사팀 (김상현)</span><span style="font-size:10px;color:var(--text3);font-family:monospace;">어제</span></div>
+                    <div style="font-size:12px;color:var(--text2);margin-bottom:2px;">[공지] 2025 하반기 성과평가 기준 안내</div>
+                    <div style="display:flex;gap:4px;"><span class="itag itag-info">ℹ️ 참고</span></div>
+                  </div>
+                </div>
+                <div style="border-top:1px solid var(--border);padding:8px 14px;font-size:11px;color:var(--text3);font-weight:600;">🚫 스팸 필터링됨 (4건)</div>
+                <div class="email-row" style="opacity:0.35;pointer-events:none;">
+                  <div class="read-spacer"></div>
+                  <div style="flex:1;padding:8px 14px 8px 8px;">
+                    <div style="font-size:11px;color:var(--text3);">no-reply@promo.co.kr — 특별 할인 이벤트 안내 [광고]</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- 이메일 상세 -->
+          <div class="panel" id="emailDetailPanel">
+            <div class="panel-header">
+              <div class="panel-title" id="emailDetailTitle">이메일 상세</div>
+            </div>
+            <div class="panel-body" id="emailDetailBody">
+              <div style="color:var(--text3);font-size:13px;text-align:center;padding:32px 0;">← 왼쪽에서 이메일을 선택하세요</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      </div>
+
+      <!-- PAGE: teams -->
+      <div class="page-view " id="page-teams">
+<div class="content">
+        <div class="detail-header">
+          <button class="back-btn" onclick="navTo('dashboard')">← 대시보드</button>
+          <div>
+            <div class="topbar-title">💬 Teams 채팅</div>
+            <div class="topbar-sub">AI 분석된 Teams 메시지 목록</div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:260px 1fr;gap:16px;align-items:start;">
+          <!-- 채팅 목록 -->
+          <div class="panel" style="position:sticky;top:0;">
+            <div class="panel-header"><div class="panel-title">채팅 목록</div><span class="panel-badge badge-accent">8건</span></div>
+            <div style="display:flex;flex-direction:column;gap:0;">
+              <div class="chat-room-row active" onclick="showChatDetail('chat1',this)">
+                <div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#ef4444,#f97316);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;">강</div>
+                <div style="flex:1;min-width:0;">
+                  <div style="display:flex;justify-content:space-between;"><span style="font-size:12px;font-weight:700;">이강민 차장</span><span style="font-size:10px;color:var(--text3);font-family:monospace;">13:28</span></div>
+                  <div style="font-size:11px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">EPS 전류 제어 이상 현상 분석 요청...</div>
+                  <div style="display:flex;gap:4px;margin-top:3px;"><span class="itag itag-urgent" style="font-size:9px;">🚨 긴급</span></div>
+                </div>
+                <div style="width:8px;height:8px;border-radius:50%;background:var(--danger);box-shadow:0 0 4px var(--danger);flex-shrink:0;"></div>
+              </div>
+              <div class="chat-room-row" onclick="showChatDetail('chat2',this)">
+                <div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#0ea5e9);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;">도</div>
+                <div style="flex:1;min-width:0;">
+                  <div style="display:flex;justify-content:space-between;"><span style="font-size:12px;font-weight:700;">김도현 책임</span><span style="font-size:10px;color:var(--text3);font-family:monospace;">09:55</span></div>
+                  <div style="font-size:11px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">JTEKT 기술 미팅 자료 준비 요청</div>
+                  <div style="display:flex;gap:4px;margin-top:3px;"><span class="itag itag-task" style="font-size:9px;">⚡ 요청</span></div>
+                </div>
+                <div style="width:8px;height:8px;border-radius:50%;background:var(--warn);box-shadow:0 0 4px var(--warn);flex-shrink:0;"></div>
+              </div>
+              <div class="chat-room-row" onclick="showChatDetail('chat3',this)">
+                <div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#10b981,#0ea5e9);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;">팀</div>
+                <div style="flex:1;min-width:0;">
+                  <div style="display:flex;justify-content:space-between;"><span style="font-size:12px;font-weight:700;">조향설계2팀 채널</span><span style="font-size:10px;color:var(--text3);font-family:monospace;">09:30</span></div>
+                  <div style="font-size:11px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">오늘 스탠드업 미팅 링크 공유</div>
+                </div>
+              </div>
+              <div class="chat-room-row" onclick="showChatDetail('chat4',this)">
+                <div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#f59e0b,#ef4444);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;">민</div>
+                <div style="flex:1;min-width:0;">
+                  <div style="display:flex;justify-content:space-between;"><span style="font-size:12px;font-weight:700;">박민준 수석</span><span style="font-size:10px;color:var(--text3);font-family:monospace;">어제</span></div>
+                  <div style="font-size:11px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">MDPS 보고서 관련 추가 요청사항</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 채팅 상세 -->
+          <div class="panel" id="chatDetailPanel" style="min-height:400px;">
+            <div class="panel-header" id="chatDetailHeader">
+              <div class="panel-title">이강민 차장</div>
+              <span class="panel-badge badge-danger">긴급 요청</span>
+            </div>
+            <div id="chatDetailBody" style="display:flex;flex-direction:column;height:420px;">
+              <!-- 채팅 메시지 영역 -->
+              <div id="chatMessages" style="flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px;"></div>
+              <!-- 입력창 -->
+              <div style="padding:12px 16px;border-top:1px solid var(--border);display:flex;gap:8px;align-items:center;">
+                <input id="chatInput" type="text" placeholder="답변 입력... (AI 초안 자동 생성됨)" style="flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:8px 12px;color:var(--text);font-family:'Noto Sans KR',sans-serif;font-size:12px;outline:none;">
+                <button class="btn btn-ghost" style="font-size:11px;" onclick="fillDraftReply()">🤖 AI 초안</button>
+                <button class="btn btn-primary" style="font-size:11px;" onclick="sendChatReply()">전송 ↗</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      </div>
+
+      <!-- PAGE: drafts -->
+      <div class="page-view " id="page-drafts">
+<div class="content">
+        <div class="detail-header">
+          <button class="back-btn" onclick="navTo('dashboard')">← 대시보드</button>
+          <div><div class="topbar-title">✍️ 답변 초안</div><div class="topbar-sub">AI 자동 생성 답변 초안 관리</div></div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <div class="panel">
+            <div class="panel-header"><div class="panel-title">이강민 차장 → EPS 전류 제어 이상 원인 분석 회신</div><span class="panel-badge badge-danger">D-day</span></div>
+            <div class="panel-body">
+              <div class="summary-box" style="margin-bottom:12px;">
+                <div class="summary-header">📋 원문 요약</div>
+                <div class="summary-items">
+                  <div class="summary-item"><span class="summary-bullet">▸</span><span>핵심: 양산라인 EPS 전류 피크 현상 3회 발생 (6/10, 6/14, 6/17)</span></div>
+                  <div class="summary-item"><span class="summary-bullet">▸</span><span>요청: 원인 분석 및 대응 방안 금일 EOD까지 회신</span></div>
+                </div>
+              </div>
+              <div class="draft-box">
+                <div class="draft-header" style="display:flex;align-items:center;justify-content:space-between;">
+                  <span>✍️ AI 생성 초안</span>
+                  <button id="editBtn1" class="btn btn-ghost" style="font-size:10px;padding:3px 10px;" onclick="toggleDraftEdit('draft1','editBtn1')">✏️ 편집</button>
+                </div>
+                <textarea id="draft1" readonly style="width:100%;background:transparent;border:none;color:var(--text2);font-family:'Noto Sans KR',sans-serif;font-size:12px;line-height:1.7;resize:none;outline:none;min-height:80px;cursor:default;">이강민 차장님, 확인하였습니다. EPS 전류 피크 현상에 대해 분석 중이며, 오늘 오후 5시까지 원인 분석 결과와 단기 대응 방안을 포함한 보고서를 회신 드리겠습니다. 추가 정보가 필요하신 경우 연락 주시기 바랍니다.</textarea>
+                <div class="draft-actions"><button class="btn btn-primary" style="font-size:11px;" onclick="showToast('send','📧 전송 완료','이강민 차장에게 Teams로 발송')">📨 Teams 전송</button><button class="btn btn-ghost" style="font-size:11px;" onclick="showToast('send','📧 이메일 전송','이강민 차장에게 이메일 발송')">📧 이메일 전송</button></div>
+              </div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-header"><div class="panel-title">박민준 수석 → MDPS 제어로직 보고서 제출 확인</div><span class="panel-badge badge-danger">D-day</span></div>
+            <div class="panel-body">
+              <div class="summary-box" style="margin-bottom:12px;">
+                <div class="summary-header">📋 원문 요약</div>
+                <div class="summary-items">
+                  <div class="summary-item"><span class="summary-bullet">▸</span><span>요청: 검증 완료된 수정 로직과 시뮬레이션 결과 포함 오늘 EOD까지 제출</span></div>
+                </div>
+              </div>
+              <div class="draft-box">
+                <div class="draft-header" style="display:flex;align-items:center;justify-content:space-between;">
+                  <span>✍️ AI 생성 초안</span>
+                  <button id="editBtn2" class="btn btn-ghost" style="font-size:10px;padding:3px 10px;" onclick="toggleDraftEdit('draft2','editBtn2')">✏️ 편집</button>
+                </div>
+                <textarea id="draft2" readonly style="width:100%;background:transparent;border:none;color:var(--text2);font-family:'Noto Sans KR',sans-serif;font-size:12px;line-height:1.7;resize:none;outline:none;min-height:80px;cursor:default;">박민준 수석님, 안녕하세요. MDPS 제어로직 수정 결과 보고서를 오늘 오후 6시까지 제출하겠습니다. 검증 완료된 수정 로직과 Simulink 시뮬레이션 결과를 포함하여 작성 중입니다. 검토 부탁드립니다.</textarea>
+                <div class="draft-actions"><button class="btn btn-primary" style="font-size:11px;" onclick="showToast('send','📧 전송 완료','박민준 수석에게 이메일 발송')">📧 이메일 전송</button></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      </div>
+
+      <!-- PAGE: stats -->
+      <div class="page-view " id="page-stats">
+<div class="content">
+        <div class="detail-header">
+          <button class="back-btn" onclick="navTo('dashboard')">← 대시보드</button>
+          <div><div class="topbar-title">📈 처리 현황</div><div class="topbar-sub">주간 업무 처리 통계</div></div>
+        </div>
+        <div class="stats-row" style="margin-bottom:16px;">
+          <div class="stat-card"><div class="stat-label">이번 주 수신</div><div class="stat-value" style="color:var(--accent)">47</div><div class="stat-sub">이메일 28 · Teams 19</div></div>
+          <div class="stat-card"><div class="stat-label">처리 완료</div><div class="stat-value" style="color:var(--accent3)">39</div><div class="stat-sub">처리율 83%</div></div>
+          <div class="stat-card"><div class="stat-label">자동 분류</div><div class="stat-value" style="color:#a5b4fc">47</div><div class="stat-sub">정확도 96%</div></div>
+          <div class="stat-card"><div class="stat-label">스팸 차단</div><div class="stat-value" style="color:var(--warn)">12</div><div class="stat-sub">이번 주 누적</div></div>
+          <div class="stat-card"><div class="stat-label">절약 시간</div><div class="stat-value" style="color:var(--accent3)">2.4h</div><div class="stat-sub">AI 자동화 효과</div></div>
+        </div>
+        <div class="grid-2">
+          <div class="panel">
+            <div class="panel-header"><div class="panel-title">일별 요청 처리 현황</div></div>
+            <div class="panel-body">
+              <div style="display:flex;align-items:flex-end;gap:8px;height:120px;padding-top:16px;">
+                <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;">
+                  <div style="font-size:10px;color:var(--accent3);">9</div>
+                  <div style="flex:1;width:100%;background:rgba(16,185,129,0.3);border-radius:4px 4px 0 0;min-height:60%;display:flex;align-items:flex-end;justify-content:center;padding-bottom:2px;"><div style="background:var(--accent3);height:70%;width:60%;border-radius:2px;"></div></div>
+                  <div style="font-size:10px;color:var(--text3);">월</div>
+                </div>
+                <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;">
+                  <div style="font-size:10px;color:var(--accent3);">12</div>
+                  <div style="flex:1;width:100%;background:rgba(16,185,129,0.3);border-radius:4px 4px 0 0;min-height:80%;display:flex;align-items:flex-end;justify-content:center;padding-bottom:2px;"><div style="background:var(--accent3);height:85%;width:60%;border-radius:2px;"></div></div>
+                  <div style="font-size:10px;color:var(--text3);">화</div>
+                </div>
+                <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;">
+                  <div style="font-size:10px;color:var(--accent);">20</div>
+                  <div style="flex:1;width:100%;background:rgba(14,165,233,0.2);border-radius:4px 4px 0 0;min-height:100%;border:1px dashed var(--accent);display:flex;align-items:flex-end;justify-content:center;padding-bottom:2px;"><div style="background:var(--accent);height:40%;width:60%;border-radius:2px;"></div></div>
+                  <div style="font-size:10px;color:var(--accent);font-weight:700;">수(오늘)</div>
+                </div>
+                <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;">
+                  <div style="font-size:10px;color:var(--text3);">—</div>
+                  <div style="flex:1;width:100%;background:rgba(71,85,105,0.1);border-radius:4px 4px 0 0;border:1px dashed var(--border);"></div>
+                  <div style="font-size:10px;color:var(--text3);">목</div>
+                </div>
+                <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;">
+                  <div style="font-size:10px;color:var(--text3);">—</div>
+                  <div style="flex:1;width:100%;background:rgba(71,85,105,0.1);border-radius:4px 4px 0 0;border:1px dashed var(--border);"></div>
+                  <div style="font-size:10px;color:var(--text3);">금</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-header"><div class="panel-title">우선순위 분포</div></div>
+            <div class="panel-body">
+              <div style="display:flex;flex-direction:column;gap:10px;">
+                <div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;"><span style="color:var(--danger);">🚨 긴급</span><span>2건 (12%)</span></div><div style="height:8px;background:var(--bg3);border-radius:4px;overflow:hidden;"><div style="height:100%;width:12%;background:var(--danger);border-radius:4px;"></div></div></div>
+                <div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;"><span style="color:var(--warn);">⚡ 일반</span><span>8건 (47%)</span></div><div style="height:8px;background:var(--bg3);border-radius:4px;overflow:hidden;"><div style="height:100%;width:47%;background:var(--warn);border-radius:4px;"></div></div></div>
+                <div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;"><span style="color:var(--text3);">ℹ️ 참고</span><span>7건 (41%)</span></div><div style="height:8px;background:var(--bg3);border-radius:4px;overflow:hidden;"><div style="height:100%;width:41%;background:var(--text3);border-radius:4px;"></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      </div>
+
+      <!-- PAGE: settings -->
+      <div class="page-view " id="page-settings">
+<div class="content">
+        <div class="detail-header">
+          <button class="back-btn" onclick="navTo('dashboard')">← 대시보드</button>
+          <div><div class="topbar-title">⚙️ 설정</div><div class="topbar-sub">AI Agent 알림 및 분류 설정</div></div>
+        </div>
+        <div class="grid-2">
+          <div class="panel">
+            <div class="panel-header"><div class="panel-title">🔔 알림 설정</div></div>
+            <div class="panel-body" style="display:flex;flex-direction:column;gap:14px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <div><div style="font-size:13px;font-weight:600;">회의 1시간 전 알림</div><div style="font-size:11px;color:var(--text3);">회의 시작 1시간 전 자동 알림</div></div>
+                <div class="toggle active" onclick="this.classList.toggle('active')"></div>
+              </div>
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <div><div style="font-size:13px;font-weight:600;">회의 5분 전 알림</div><div style="font-size:11px;color:var(--text3);">회의 시작 5분 전 최종 알림</div></div>
+                <div class="toggle active" onclick="this.classList.toggle('active')"></div>
+              </div>
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <div><div style="font-size:13px;font-weight:600;">D-day 리마인더</div><div style="font-size:11px;color:var(--text3);">마감 당일 아침 8시 알림</div></div>
+                <div class="toggle active" onclick="this.classList.toggle('active')"></div>
+              </div>
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <div><div style="font-size:13px;font-weight:600;">아침 브리핑 자동 발송</div><div style="font-size:11px;color:var(--text3);">매일 오전 8:30 일정 요약</div></div>
+                <div class="toggle active" onclick="this.classList.toggle('active')"></div>
+              </div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-header"><div class="panel-title">🤖 AI 분류 설정</div></div>
+            <div class="panel-body" style="display:flex;flex-direction:column;gap:14px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <div><div style="font-size:13px;font-weight:600;">스팸 자동 필터링</div><div style="font-size:11px;color:var(--text3);">광고/스팸 메일 자동 분류</div></div>
+                <div class="toggle active" onclick="this.classList.toggle('active')"></div>
+              </div>
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <div><div style="font-size:13px;font-weight:600;">회의 자동 캘린더 등록</div><div style="font-size:11px;color:var(--text3);">회의 초청 수신 시 자동 등록</div></div>
+                <div class="toggle active" onclick="this.classList.toggle('active')"></div>
+              </div>
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <div><div style="font-size:13px;font-weight:600;">답변 초안 자동 생성</div><div style="font-size:11px;color:var(--text3);">업무 요청 수신 시 초안 생성</div></div>
+                <div class="toggle active" onclick="this.classList.toggle('active')"></div>
+              </div>
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <div><div style="font-size:13px;font-weight:600;">충돌 일정 경고</div><div style="font-size:11px;color:var(--text3);">겹치는 일정 자동 감지 및 경고</div></div>
+                <div class="toggle active" onclick="this.classList.toggle('active')"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      </div>
+
+    </div><!-- /main-content-area -->
+  </main>
+</div>
+
+<!-- ══════════════════════════════════════════
+     일정 추가 모달
+══════════════════════════════════════════ -->
+<div id="addEventOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:500;backdrop-filter:blur(4px);" onclick="closeAddEventModal(event)">
+  <div id="addEventModal" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:540px;max-width:95vw;background:var(--panel);border:1px solid var(--border);border-radius:16px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,0.5);">
+
+    <!-- 모달 헤더 -->
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:20px 24px 16px;border-bottom:1px solid var(--border);">
+      <div>
+        <div style="font-size:16px;font-weight:700;">📅 새 일정 추가</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:2px;">회의 또는 이벤트를 등록합니다</div>
+      </div>
+      <button onclick="closeAddEventModal()" style="width:28px;height:28px;border-radius:6px;background:var(--bg3);border:1px solid var(--border);color:var(--text2);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;">✕</button>
+    </div>
+
+    <!-- 모달 바디 -->
+    <div style="padding:20px 24px;display:flex;flex-direction:column;gap:14px;max-height:70vh;overflow-y:auto;">
+
+      <!-- 제목 -->
+      <div class="form-group">
+        <label class="form-label">📝 제목 <span style="color:var(--danger);">*</span></label>
+        <input id="ev-title" type="text" class="form-input" placeholder="예: EPS 설계 검토 회의">
+      </div>
+
+      <!-- 회의 유형 -->
+      <div class="form-group">
+        <label class="form-label">🏷️ 회의 유형 <span style="color:var(--danger);">*</span></label>
+        <div style="display:flex;gap:8px;">
+          <label class="type-chip" data-type="bu">
+            <input type="radio" name="evType" value="bu" style="display:none;">
+            <span>🟠 BU 회의</span>
+          </label>
+          <label class="type-chip" data-type="sil">
+            <input type="radio" name="evType" value="sil" style="display:none;">
+            <span>🔵 실 회의</span>
+          </label>
+          <label class="type-chip" data-type="team">
+            <input type="radio" name="evType" value="team" style="display:none;">
+            <span>🟡 팀 회의</span>
+          </label>
+          <label class="type-chip" data-type="personal">
+            <input type="radio" name="evType" value="personal" style="display:none;">
+            <span>⚪ 개인</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- 날짜 + 시간 한 행 -->
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
+        <div class="form-group">
+          <label class="form-label">📅 날짜 <span style="color:var(--danger);">*</span></label>
+          <input id="ev-date" type="date" class="form-input" value="2025-06-18">
+        </div>
+        <div class="form-group">
+          <label class="form-label">🕐 시작 시간</label>
+          <input id="ev-start" type="time" class="form-input" value="09:00">
+        </div>
+        <div class="form-group">
+          <label class="form-label">🕐 종료 시간</label>
+          <input id="ev-end" type="time" class="form-input" value="10:00">
+        </div>
+      </div>
+
+      <!-- 장소 -->
+      <div class="form-group">
+        <label class="form-label">📍 장소</label>
+        <input id="ev-location" type="text" class="form-input" placeholder="예: 2동 컨퍼런스룸 A 또는 Teams">
+      </div>
+
+      <!-- 주관자 + 참석자 -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div class="form-group">
+          <label class="form-label">👤 주관자</label>
+          <input id="ev-organizer" type="text" class="form-input" placeholder="예: 최영수 부장">
+        </div>
+        <div class="form-group">
+          <label class="form-label">👥 참석자</label>
+          <input id="ev-attendees" type="text" class="form-input" placeholder="예: 팀원 전원 (8명)">
+        </div>
+      </div>
+
+      <!-- 주요 안건 -->
+      <div class="form-group">
+        <label class="form-label">📋 주요 안건</label>
+        <textarea id="ev-agenda" class="form-input" rows="3" placeholder="안건을 쉼표(,)로 구분하여 입력하세요&#10;예: 진행 현황 공유, 이슈 논의, 다음 주 계획" style="resize:vertical;min-height:70px;"></textarea>
+      </div>
+
+      <!-- 알림 설정 -->
+      <div class="form-group">
+        <label class="form-label">🔔 알림</label>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <label class="alarm-chip" id="alarm-10">
+            <input type="checkbox" value="10" style="display:none;" checked>
+            <span>10분 전</span>
+          </label>
+          <label class="alarm-chip" id="alarm-30">
+            <input type="checkbox" value="30" style="display:none;">
+            <span>30분 전</span>
+          </label>
+          <label class="alarm-chip" id="alarm-60">
+            <input type="checkbox" value="60" style="display:none;">
+            <span>1시간 전</span>
+          </label>
+          <label class="alarm-chip" id="alarm-1440">
+            <input type="checkbox" value="1440" style="display:none;">
+            <span>1일 전</span>
+          </label>
+        </div>
+      </div>
+
+    </div><!-- /modal body -->
+
+    <!-- 모달 풋터 -->
+    <div style="display:flex;align-items:center;gap:10px;padding:16px 24px;border-top:1px solid var(--border);background:var(--bg2);">
+      <div id="evValidMsg" style="font-size:11px;color:var(--danger);flex:1;"></div>
+      <button class="btn btn-ghost" onclick="closeAddEventModal()">취소</button>
+      <button class="btn btn-primary" onclick="submitAddEvent()" style="padding:8px 20px;">📅 일정 등록</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Clock ──
+function updateClock() {
+  const now = new Date();
+  const h = String(now.getHours()).padStart(2,'0');
+  const m = String(now.getMinutes()).padStart(2,'0');
+  const s = String(now.getSeconds()).padStart(2,'0');
+  const el = document.getElementById('currentTime');
+  if (el) el.textContent = `${h}:${m}:${s}`;
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// ── Last scan ──
+let scanSec = 0;
+setInterval(() => {
+  scanSec++;
+  const el = document.getElementById('lastScan');
+  if (el) el.textContent = scanSec < 60 ? `${scanSec}초 전 스캔` : `${Math.floor(scanSec/60)}분 전 스캔`;
+}, 1000);
+setInterval(() => { scanSec = 0; }, 45000);
+
+// ── Page navigation ──
+const PAGE_TITLES = {
+  dashboard: ['통합 대시보드', '오늘의 일정 및 미처리 요청 현황'],
+  calendar:  ['📅 일정 관리', '회의 일정 전체 목록 및 상세 정보'],
+  tasks:     ['✅ 업무 요청', '전체 업무 요청 목록 및 처리 현황'],
+  email:     ['📧 이메일 분석', 'AI 자동 분류된 이메일 전체 목록'],
+  teams:     ['💬 Teams 채팅', 'AI 분석된 Teams 메시지 목록'],
+  drafts:    ['✍️ 답변 초안', 'AI 자동 생성 답변 초안 관리'],
+  stats:     ['📈 처리 현황', '주간 업무 처리 통계'],
+  settings:  ['⚙️ 설정', 'AI Agent 알림 및 분류 설정'],
+};
+
+function navTo(pageId, navEl) {
+  // hide all page-views
+  document.querySelectorAll('.page-view').forEach(p => p.classList.remove('active'));
+  // show target
+  const target = document.getElementById('page-' + pageId);
+  if (target) target.classList.add('active');
+
+  // scroll content area to top
+  const area = document.getElementById('mainContentArea');
+  if (area) area.scrollTop = 0;
+
+  // update nav highlight
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  if (navEl) {
+    navEl.classList.add('active');
+  } else {
+    const match = document.querySelector(`.nav-item[data-page="${pageId}"]`);
+    if (match) match.classList.add('active');
+  }
+
+  // update topbar
+  const titles = PAGE_TITLES[pageId] || ['대시보드', ''];
+  document.getElementById('topbar-title').textContent = titles[0];
+  document.getElementById('topbar-sub').textContent = titles[1];
+
+  // page-specific init
+  if (pageId === 'teams') initChat('chat1');
+  if (pageId === 'tasks') showTaskDetail('task1', document.querySelector('.task-detail-row'));
+  if (pageId === 'email') showEmailDetail('email1', document.querySelector('.email-row'));
+}
+
+// ── Tab switching ──
+function switchTab(tabEl, contentId) {
+  const panel = tabEl.closest('.panel-body');
+  panel.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  panel.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  tabEl.classList.add('active');
+  document.getElementById(contentId).classList.add('active');
+}
+
+// ── Task check toggle ──
+function toggleTask(el) {
+  el.classList.toggle('done');
+  const title = el.parentElement.querySelector('.task-title');
+  title.classList.toggle('done');
+  if (el.classList.contains('done')) {
+    el.textContent = '✓';
+    showToast('ok', '✅ 업무 완료 처리', title.textContent.trim().substring(0, 25) + '...');
+  } else { el.textContent = ''; }
+}
+
+// ── Toast system ──
+const toastTypes = {
+  meet:  { icon: '📅', borderClass: 'meet' },
+  task:  { icon: '📋', borderClass: 'task' },
+  alert: { icon: '⚠️', borderClass: 'alert' },
+  ok:    { icon: '✅', borderClass: 'meet' },
+  send:  { icon: '📨', borderClass: 'meet' },
+};
+function showToast(type, title, message) {
+  const container = document.getElementById('toasts');
+  const t = toastTypes[type] || toastTypes['task'];
+  const now = new Date();
+  const timeStr = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+  const toast = document.createElement('div');
+  toast.className = `toast ${t.borderClass}`;
+  toast.innerHTML = `<div class="toast-icon">${t.icon}</div><div class="toast-body"><div class="toast-title">${title}</div><div class="toast-text">${message}</div><div class="toast-time">${timeStr}</div></div><button class="toast-close" onclick="this.parentElement.remove()">✕</button>`;
+  container.appendChild(toast);
+  setTimeout(() => { toast.style.animation = 'toastOut 0.3s ease forwards'; setTimeout(() => toast.remove(), 300); }, 4500);
+}
+
+// ── Morning Briefing ──
+function showBriefing() {
+  navTo('dashboard');
+  setTimeout(() => {
+    const banner = document.getElementById('briefBanner');
+    if (!banner) return;
+    banner.style.animation = 'none'; banner.offsetHeight;
+    banner.style.animation = 'slideDown 0.4s ease';
+    const area = document.getElementById('mainContentArea');
+    if (area) area.scrollTop = 0;
+    showToast('ok', '🌅 오늘의 브리핑 확인', '2025년 6월 18일 수요일 AI 브리핑');
+  }, 30);
+}
+
+// ── Simulate new message ──
+const sampleMessages = [
+  { type: 'task', title: '🆕 새 Teams 메시지 수신', message: '정지영 연구원: 특허 검토 의견 언제쯤 가능하신가요?', inbox: { source: 'src-teams', icon: '💬', sender: '정지영 연구원 (IP팀)', subject: '특허 검토 의견 재요청', preview: '앞서 말씀드린 특허 3건 검토 의견이...', tags: '<span class="itag itag-task">⚡ 요청</span>' } },
+  { type: 'meet', title: '📅 새 회의 초청 수신', message: 'AI가 자동으로 캘린더에 등록했습니다: 내일 10:00 기술 리뷰', inbox: { source: 'src-email', icon: '📧', sender: '나석주 팀장 (설계1팀)', subject: '조향 기술 리뷰 회의 초청 (내일 10:00)', preview: '안녕하세요, 내일 오전 공동 기술 리뷰...', tags: '<span class="itag itag-meet">📅 캘린더 등록됨</span><span class="itag itag-info">팀 회의</span>' } },
+  { type: 'alert', title: '⏰ 회의 1시간 전 알림', message: 'EPS 개발 방향성 검토 회의 — 14:00 시작', inbox: null },
+  { type: 'task', title: '🆕 새 이메일 수신', message: '인사팀: 하반기 성과평가 기준 공지', inbox: { source: 'src-email', icon: '📧', sender: '인사팀 (김상현)', subject: '[공지] 2025 하반기 성과평가 기준 안내', preview: '안녕하세요, 하반기 성과평가 기준을 공지드립니다...', tags: '<span class="itag itag-info">ℹ️ 참고</span>' } },
+];
+let msgIdx = 0;
+function simulateNewMessage() {
+  const msg = sampleMessages[msgIdx % sampleMessages.length]; msgIdx++;
+  showToast(msg.type, msg.title, msg.message);
+  if (msg.inbox) {
+    const list = document.getElementById('inboxList');
+    if (!list) return;
+    const item = document.createElement('div');
+    item.className = 'inbox-item new-item';
+    item.innerHTML = `<div class="unread-dot"></div><div class="inbox-source ${msg.inbox.source}">${msg.inbox.icon}</div><div class="inbox-content"><div class="inbox-header"><span class="inbox-sender">${msg.inbox.sender}</span><span class="inbox-time">방금</span></div><div class="inbox-subject">${msg.inbox.subject}</div><div class="inbox-preview">${msg.inbox.preview}</div><div class="inbox-tags">${msg.inbox.tags}</div></div>`;
+    list.insertBefore(item, list.firstChild);
+  }
+}
+
+// ══════════════════════════════════════════
+// MEETING DETAIL DATA
+// ══════════════════════════════════════════
+const meetData = {
+  meet3: { title: '📅 조향시스템설계2팀 아침 스탠드업', type: 'team', typeName: '팀 회의', date: '2025.06.18 (수)', time: '09:30 – 10:00', location: 'Microsoft Teams', organizer: '김희진 (본인)', attendees: '조향시스템설계2팀 전원 (8명)', status: '완료', agenda: '전날 진행 사항 공유, 오늘 업무 계획, 블로커 이슈 논의', ai_summary: '이강민 차장 요청 건 우선 처리 필요 논의됨. EPS 보고서 마감 오늘.' },
+  meet4: { title: '📅 조향시스템설계실 월례 기술 세미나', type: 'sil', typeName: '실 회의', date: '2025.06.18 (수)', time: '10:30 – 12:00', location: '3동 304호 세미나실', organizer: '나석주 팀장 (설계1팀)', attendees: '조향시스템설계실 전체 (32명)', status: '완료', agenda: 'EPS 차세대 제어 알고리즘 소개, 협력사 기술 동향 발표, Q&A', ai_summary: '차세대 SbW(Steer-by-Wire) 기술 적용 일정 2026 Q1로 확정. 관련 선행연구 참여 검토 필요.' },
+  meet5: { title: '📅 EPS 시스템 개발 방향성 검토', type: 'bu', typeName: 'BU 회의', date: '2025.06.18 (수)', time: '14:00 – 15:00', location: '2동 컨퍼런스룸 A', organizer: '최영수 부장 (팀장)', attendees: 'BU장, 각 팀장, 핵심 개발자 12명', status: '예정 (⚠️ 59분 후)', agenda: '2026년 EPS 플랫폼 방향성 결정, 원가 절감 방안 논의, 주요 리스크 공유', ai_summary: '사전 자료: EPS 개발 로드맵 v3.2 (최영수 부장 이메일 첨부) 확인 후 참석 권장.' },
+  meet6: { title: '📅 조향시스템설계2팀 주간 업무 현황 공유', type: 'team', typeName: '팀 회의', date: '2025.06.18 (수)', time: '15:30 – 16:30', location: 'Microsoft Teams', organizer: '김희진 (본인)', attendees: '조향시스템설계2팀 전원 (8명)', status: '예정', agenda: '이번 주 업무 진행 현황, 미처리 요청 현황, 다음 주 계획 공유', ai_summary: 'MDPS 보고서 및 EPS 전류 이슈 처리 결과를 이번 회의에서 공유 예정.' },
+  meet1: { title: '📅 EPS 품질 이슈 대책 회의', type: 'bu', typeName: 'BU 회의', date: '2025.06.17 (화)', time: '10:00 – 11:30', location: '품질관리팀 회의실', organizer: '이강민 차장 (품질관리팀)', attendees: '품질팀, 설계팀 관계자 10명', status: '완료', agenda: 'EPS 전류 피크 현상 원인 분석, 단기 대응 방안, 재발 방지 계획', ai_summary: '전류 피크 원인 3가지 가설 도출. 추가 실험 데이터 필요. 조향설계2팀 분석 요청.' },
+  meet2: { title: '📅 주간 업무 조율 미팅', type: 'team', typeName: '팀 회의', date: '2025.06.17 (화)', time: '16:00 – 16:30', location: 'Microsoft Teams', organizer: '김희진 (본인)', attendees: '조향시스템설계2팀 전원', status: '완료', agenda: '주간 업무 조율 및 이슈 공유', ai_summary: '마감 건 2개 확인. 내일 BU 회의 참석자 확정.' },
+  meet7: { title: '📅 조향 설계실 기술 리뷰', type: 'sil', typeName: '실 회의', date: '2025.06.19 (목)', time: '10:00 – 11:00', location: '2동 201호', organizer: '나석주 팀장', attendees: '설계실 팀장급 이상 15명', status: '예정', agenda: '현재 진행 중인 프로젝트 기술 이슈 공유 및 상호 지원 방안 논의', ai_summary: '준비 필요 없음. 청취 위주 참석.' },
+  meet8: { title: '📅 JTEKT 협력사 기술 미팅', type: 'bu', typeName: 'BU 회의', date: '2025.06.20 (금)', time: '14:00 – 16:00', location: '협력사 현장 방문 (기흥)', organizer: '김도현 책임 (구매팀)', attendees: '구매팀 2명, 설계팀 2명, 협력사 5명', status: '예정 (D-2)', agenda: 'EPS 부품 공급 이슈 협의, 신규 부품 기술 검토, 2026년 공급 계획', ai_summary: '⚠️ 현황 자료 PPT 준비 필요 (D-2). 담당자: 김도현 책임 요청.' },
+};
+
+// ── 새로고침 (신규 정보 업데이트) ──
+let refreshing = false;
+function refreshData() {
+  if (refreshing) return;
+  refreshing = true;
+  const btn = document.getElementById('refreshBtn');
+  if (btn) {
+    btn.style.animation = 'spin 0.8s linear infinite';
+    btn.style.color = 'var(--accent3)';
+  }
+
+  // 스캔 카운터 리셋
+  scanSec = 0;
+
+  // 새 정보 시뮬레이션 (1.2초 후)
+  setTimeout(() => {
+    refreshing = false;
+    if (btn) {
+      btn.style.animation = '';
+      btn.style.color = 'var(--accent)';
+    }
+
+    // 랜덤 신규 정보 1건 표시
+    const updates = [
+      { type: 'meet',  title: '📅 새 회의 초청 수신', message: '나석주 팀장: 조향 기술 리뷰 (내일 10:00) — 캘린더 자동 등록됨' },
+      { type: 'task',  title: '🆕 새 업무 요청 수신', message: '정지영 연구원 (IP팀): 특허 검토 의견 회신 요청' },
+      { type: 'ok',    title: '✅ 업데이트 완료', message: `${new Date().toLocaleTimeString('ko-KR')} 기준 최신 정보로 동기화되었습니다` },
+    ];
+    const pick = updates[Math.floor(Math.random() * updates.length)];
+    showToast(pick.type, pick.title, pick.message);
+
+    // 수신함에도 추가
+    const list = document.getElementById('inboxList');
+    if (list && pick.type !== 'ok') {
+      const item = document.createElement('div');
+      item.className = 'inbox-item new-item';
+      const isTeam = pick.type === 'task';
+      item.innerHTML = `<div class="unread-dot"></div><div class="inbox-source ${isTeam ? 'src-teams' : 'src-email'}">${isTeam ? '💬' : '📧'}</div><div class="inbox-content"><div class="inbox-header"><span class="inbox-sender">${isTeam ? '정지영 연구원 (IP팀)' : '나석주 팀장 (설계1팀)'}</span><span class="inbox-time">방금</span></div><div class="inbox-subject">${pick.message.split(':')[1] ? pick.message.split(':')[1].trim() : pick.message}</div><div class="inbox-tags"><span class="itag ${isTeam ? 'itag-task' : 'itag-meet'}">${isTeam ? '⚡ 요청' : '📅 캘린더 등록됨'}</span></div></div>`;
+      list.insertBefore(item, list.firstChild);
+    }
+  }, 1200);
+}
+
+function showMeetDetail(id) {
+  const data = meetData[id];
+  if (!data) return;
+
+  const panel = document.getElementById('meetDetailPanel');
+  const title = document.getElementById('meetDetailTitle');
+  const body  = document.getElementById('meetDetailBody');
+  panel.style.display = 'block';
+  title.textContent = data.title;
+
+  const tagClass   = { bu: 'tag-bu', sil: 'tag-sil', team: 'tag-team' };
+  const statusColor = data.status.includes('완료') ? 'var(--accent3)' : data.status.includes('⚠️') ? 'var(--warn)' : 'var(--text2)';
+  const borderColor = { bu: '#f97316', sil: '#38bdf8', team: '#facc15' };
+
+  body.innerHTML = `
+    <!-- 단일 박스: 모든 정보 한눈에 -->
+    <div style="background:var(--bg3);border-radius:10px;border:1px solid var(--border);border-left:3px solid ${borderColor[data.type]};overflow:hidden;">
+
+      <!-- 헤더: 회의 구분 + 상태 -->
+      <div style="display:flex;align-items:center;gap:10px;padding:14px 18px 10px;border-bottom:1px solid var(--border);">
+        <span class="meet-tag ${tagClass[data.type]}">${data.typeName}</span>
+        <span style="font-size:12px;color:${statusColor};font-weight:600;">● ${data.status}</span>
+      </div>
+
+      <!-- 정보 행: 일시 → 장소 → 주관 → 참석자 -->
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);border-bottom:1px solid var(--border);">
+        <div style="padding:14px 18px;border-right:1px solid var(--border);">
+          <div style="font-size:10px;color:var(--text3);font-weight:600;letter-spacing:.5px;margin-bottom:5px;">📅 일시</div>
+          <div style="font-size:13px;font-weight:700;margin-bottom:2px;">${data.date}</div>
+          <div style="font-size:12px;color:var(--accent);font-family:monospace;">${data.time}</div>
+        </div>
+        <div style="padding:14px 18px;border-right:1px solid var(--border);">
+          <div style="font-size:10px;color:var(--text3);font-weight:600;letter-spacing:.5px;margin-bottom:5px;">📍 장소</div>
+          <div style="font-size:13px;font-weight:700;">${data.location}</div>
+        </div>
+        <div style="padding:14px 18px;border-right:1px solid var(--border);">
+          <div style="font-size:10px;color:var(--text3);font-weight:600;letter-spacing:.5px;margin-bottom:5px;">👤 주관</div>
+          <div style="font-size:13px;font-weight:700;">${data.organizer}</div>
+        </div>
+        <div style="padding:14px 18px;">
+          <div style="font-size:10px;color:var(--text3);font-weight:600;letter-spacing:.5px;margin-bottom:5px;">👥 참석자</div>
+          <div style="font-size:13px;font-weight:700;">${data.attendees}</div>
+        </div>
+      </div>
+
+      <!-- 주요 안건 -->
+      <div style="padding:14px 18px;">
+        <div style="font-size:10px;color:var(--text3);font-weight:600;letter-spacing:.5px;margin-bottom:10px;">📋 주요 안건</div>
+        <div style="display:flex;flex-direction:column;gap:7px;">
+          ${data.agenda.split(', ').map((item, i) => `
+          <div style="display:flex;align-items:flex-start;gap:10px;">
+            <div style="width:20px;height:20px;border-radius:50%;background:rgba(14,165,233,0.15);border:1px solid rgba(14,165,233,0.3);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--accent);flex-shrink:0;margin-top:1px;">${i+1}</div>
+            <div style="font-size:13px;color:var(--text);line-height:1.5;padding-top:1px;">${item}</div>
+          </div>`).join('')}
+        </div>
+      </div>
+
+      <!-- AI 메모 (하단 풋터) -->
+      <div style="padding:12px 18px;background:rgba(99,102,241,0.05);border-top:1px solid rgba(99,102,241,0.15);">
+        <span style="font-size:10px;color:#a5b4fc;font-weight:700;">🤖 AI 메모 &nbsp;</span>
+        <span style="font-size:12px;color:var(--text2);">${data.ai_summary}</span>
+      </div>
+    </div>
+  `;
+
+  // 스크롤하여 보이게
+  const area = document.getElementById('mainContentArea');
+  if (area) setTimeout(() => panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 50);
+}
+
+// ══════════════════════════════════════════
+// TASK DETAIL DATA
+// ══════════════════════════════════════════
+const taskData = {
+  task1: { title: 'MDPS 제어로직 수정 결과 보고서 제출', priority: '🚨 긴급', priorityClass: 'p-urgent', due: 'D-day (2025.06.18)', from: '박민준 수석 (선행연구팀)', channel: '📧 이메일', received: '2025.06.18 12:45', summary: '검증 완료된 MDPS 수정 제어 로직과 Simulink 시뮬레이션 결과를 포함한 보고서를 오늘 EOD까지 제출 요청. 첨부 형식: PDF + 원본 Simulink 파일.', action: '보고서 작성 완료 후 박민준 수석에게 이메일로 제출', draft: '박민준 수석님, 안녕하세요 김희진입니다. MDPS 제어로직 수정 결과 보고서를 오늘 오후 6시까지 제출 드리겠습니다. Simulink 시뮬레이션 결과 및 검증 데이터를 포함하여 작성 중입니다. 검토 부탁드립니다.' },
+  task2: { title: 'EPS 전류 제어 이상 원인 분석 회신', priority: '🚨 긴급', priorityClass: 'p-urgent', due: 'D-day (2025.06.18)', from: '이강민 차장 (품질관리팀)', channel: '💬 Teams', received: '2025.06.18 13:28', summary: '지난 3주간 양산라인에서 발생한 EPS 전류 피크 현상(6/10, 6/14, 6/17 각 1회)에 대한 원인 분석 및 단기 대응 방안을 오늘 EOD까지 회신 요청.', action: '원인 분석 보고서 작성 후 Teams로 회신', draft: '이강민 차장님, 확인하였습니다. EPS 전류 피크 현상에 대해 분석 중이며, 오늘 오후 5시까지 원인 분석 결과와 단기 대응 방안을 포함한 보고서를 회신 드리겠습니다.' },
+  task3: { title: '2025 하반기 연구과제 계획서 작성 및 제출', priority: '⚡ 일반', priorityClass: 'p-normal', due: 'D-1 (2025.06.19)', from: '팀장 최영수 부장', channel: '📧 이메일', received: '2025.06.17 09:00', summary: '2025년 하반기 연구과제 계획서를 기술 목표, 추진 일정, 소요 예산을 포함하여 A4 3장 이내로 작성하여 내일 오전까지 제출.', action: '계획서 초안 작성 후 최영수 부장님께 제출', draft: '부장님, 2025 하반기 연구과제 계획서를 내일 오전 9시까지 제출하겠습니다. 기술 목표 및 일정은 EPS 제어 알고리즘 개선 방향으로 작성 중입니다.' },
+  task4: { title: '협력사 JTEKT 기술 미팅 자료 준비', priority: '⚡ 일반', priorityClass: 'p-normal', due: 'D-2 (2025.06.20)', from: '김도현 책임 (구매팀)', channel: '💬 Teams', received: '2025.06.18 09:55', summary: '6월 20일(금) JTEKT 협력사 현장 방문 전, 현재 EPS 부품 관련 이슈 사항 및 기술 요구사항을 정리한 PPT 자료 준비 요청.', action: '이슈 현황 정리 PPT 작성 후 김도현 책임에게 공유', draft: '김도현 책임님, 확인하였습니다. JTEKT 미팅 전 현재 EPS 부품 이슈 현황 및 기술 요구사항 PPT를 6월 19일까지 공유 드리겠습니다.' },
+  task5: { title: '조향감 개선 관련 특허 검토 의견 회신', priority: 'ℹ️ 참고', priorityClass: 'p-info', due: 'D-4 (2025.06.22)', from: '정지영 연구원 (IP팀)', channel: '📧 이메일', received: '2025.06.14 15:30', summary: 'IP팀에서 출원 검토 중인 조향감 개선 관련 특허 3건에 대한 기술적 유효성 및 선행 특허 중복 여부 의견 요청.', action: '특허 3건 검토 후 의견서 작성, 정지영 연구원에게 이메일 회신', draft: '정지영 연구원님, 조향감 개선 관련 특허 3건 검토하여 6월 22일까지 의견서 보내드리겠습니다.' },
+  task6: { title: 'R&D 월간 보고서 초안 검토 완료', priority: '완료', priorityClass: 'p-info', due: '완료 (2025.06.17)', from: '팀장 최영수 부장', channel: '📧 이메일', received: '2025.06.16 10:00', summary: '6월 R&D 월간 보고서 초안 검토 및 수정 의견 제출 완료.', action: '완료', draft: '' },
+  task7: { title: '설계 검토 회의 참석 확인 회신', priority: '완료', priorityClass: 'p-info', due: '완료 (2025.06.17)', from: '박민준 수석', channel: '💬 Teams', received: '2025.06.16 14:00', summary: '6월 18일 EPS 개발 방향성 회의 참석 여부 확인 요청. 참석 확인 완료.', action: '완료', draft: '' },
+};
+
+function showTaskDetail(id, rowEl) {
+  const data = taskData[id];
+  if (!data) return;
+  document.querySelectorAll('.task-detail-row').forEach(r => r.classList.remove('active'));
+  if (rowEl) rowEl.classList.add('active');
+
+  document.getElementById('taskDetailTitle').textContent = data.title;
+  const badge = document.getElementById('taskDetailBadge');
+  badge.textContent = data.priority;
+  badge.className = 'panel-badge ' + (data.priorityClass === 'p-urgent' ? 'badge-danger' : data.priorityClass === 'p-normal' ? 'badge-warn' : 'badge-ok');
+
+  const isDone = data.due.includes('완료');
+  document.getElementById('taskDetailBody').innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px;">
+      <div style="background:var(--bg3);border-radius:8px;padding:10px;border:1px solid var(--border);"><div style="font-size:10px;color:var(--text3);margin-bottom:3px;">⏰ 마감</div><div style="font-size:12px;font-weight:600;color:${isDone ? 'var(--accent3)' : data.due.includes('D-day') ? 'var(--danger)' : data.due.includes('D-1') ? 'var(--warn)' : 'var(--text)'};">${data.due}</div></div>
+      <div style="background:var(--bg3);border-radius:8px;padding:10px;border:1px solid var(--border);"><div style="font-size:10px;color:var(--text3);margin-bottom:3px;">👤 요청자</div><div style="font-size:12px;font-weight:600;">${data.from}</div></div>
+      <div style="background:var(--bg3);border-radius:8px;padding:10px;border:1px solid var(--border);"><div style="font-size:10px;color:var(--text3);margin-bottom:3px;">📩 채널</div><div style="font-size:12px;font-weight:600;">${data.channel}</div></div>
+    </div>
+    <div style="margin-bottom:12px;"><div style="font-size:11px;color:var(--text3);font-weight:600;margin-bottom:6px;">📋 요청 내용 요약 (AI)</div><div style="background:var(--bg3);border-radius:8px;padding:12px;border:1px solid var(--border);font-size:13px;line-height:1.6;color:var(--text2);">${data.summary}</div></div>
+    <div style="margin-bottom:12px;"><div style="font-size:11px;color:var(--text3);font-weight:600;margin-bottom:6px;">✅ 액션 아이템</div><div style="font-size:13px;color:var(--text);background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.2);border-radius:8px;padding:10px 12px;">${data.action}</div></div>
+    ${data.draft ? `<div><div style="font-size:11px;color:var(--text3);font-weight:600;margin-bottom:6px;">✍️ AI 답변 초안</div><div class="draft-box"><textarea style="width:100%;background:transparent;border:none;color:var(--text2);font-family:'Noto Sans KR',sans-serif;font-size:12px;line-height:1.6;resize:vertical;outline:none;min-height:70px;">${data.draft}</textarea><div class="draft-actions"><button class="btn btn-primary" style="font-size:11px;" onclick="showToast('send','📧 전송 완료','${data.from}에게 발송 완료')">📨 전송</button><button class="btn btn-ghost" style="font-size:11px;" onclick="navTo('drafts')">초안 페이지 →</button></div></div></div>` : ''}
+  `;
+}
+
+// ══════════════════════════════════════════
+// EMAIL DETAIL DATA
+// ══════════════════════════════════════════
+const emailData = {
+  email1: { from: '박민준 수석 (선행연구팀)', email: 'mj.park@hyundai-mobis.com', subject: '[마감 오늘] MDPS 제어로직 수정 결과 보고서 제출 요청', date: '2025.06.18 (수) 12:45', ai_tags: ['🚨 긴급', '📋 태스크 등록됨'], body: '안녕하세요, 김희진 연구원님.\n\nMDPS 제어로직 수정 결과 보고서 제출 건으로 연락드립니다.\n\n지난 6월 10일 요청드린 수정 사항에 대해, 오늘(6월 18일) EOD까지 아래 내용을 포함한 보고서 제출 부탁드립니다.\n\n■ 포함 사항\n  1. 수정된 제어 로직 설명 및 변경 근거\n  2. Simulink 시뮬레이션 결과 (Before / After 비교)\n  3. 검증 테스트 결과 데이터\n\n■ 제출 형식\n  - PDF + 원본 Simulink 파일 (.slx)\n\n바쁘신 중에 감사드립니다.\n\n박민준 수석 드림', ai_summary: '오늘 마감 긴급 요청. 보고서 내 포함 필수: 수정 로직, 시뮬레이션 결과, 검증 데이터.' },
+  email2: { from: '최영수 부장 (팀장)', email: 'ys.choi@hyundai-mobis.com', subject: 'EPS 개발 방향성 검토 회의 초청', date: '2025.06.18 (수) 11:10', ai_tags: ['📅 캘린더 등록됨', 'BU 회의'], body: '안녕하세요 팀원 여러분.\n\n아래와 같이 BU 단위 EPS 개발 방향성 검토 회의를 진행하오니 참석 부탁드립니다.\n\n■ 일시: 2025년 6월 18일 (수) 14:00 ~ 15:00\n■ 장소: 2동 컨퍼런스룸 A\n■ 참석: BU장, 각 팀장, 핵심 개발자\n■ 안건: 2026년 EPS 플랫폼 방향성, 원가 절감 방안, 리스크 공유\n\n첨부 자료를 미리 검토하신 후 참석하시면 좋겠습니다.\n\n최영수 부장 드림', ai_summary: '캘린더 자동 등록 완료. 오늘 14:00 2동 컨퍼런스룸A. 첨부 자료 사전 검토 권장.' },
+  email3: { from: '정지영 연구원 (IP팀)', email: 'jy.jeong@hyundai-mobis.com', subject: '특허 검토 의견 요청 건', date: '2025.06.14 (토) 15:30', ai_tags: ['⚡ 태스크 등록됨'], body: '안녕하세요 김희진 연구원님,\n\nIP팀 정지영입니다. 현재 검토 중인 조향감 개선 관련 특허 3건에 대해 기술적 검토 의견을 부탁드리려 연락드립니다.\n\n■ 검토 특허\n  1. KR 10-2023-0087654 : 전동 조향 시스템의 토크 제어 방법\n  2. KR 10-2023-0091230 : 조향 반력 생성 장치 및 방법\n  3. KR 10-2024-0003421 : 차속 연동 조향감 가변 시스템\n\n■ 검토 내용\n  - 기술적 유효성 여부\n  - 선행 특허와의 중복 가능성\n  - 실제 개발 관련성\n\n■ 회신 기한: 2025년 6월 22일\n\n감사합니다. 정지영 드림', ai_summary: '특허 3건 검토 후 6/22까지 의견서 회신 필요. 우선순위: 참고.' },
+  email4: { from: '인사팀 (김상현)', email: 'sh.kim@hyundai-mobis.com', subject: '[공지] 2025 하반기 개발직 성과평가 기준 안내', date: '2025.06.17 (화) 16:00', ai_tags: ['ℹ️ 참고'], body: '안녕하세요 임직원 여러분,\n\n2025년 하반기 성과평가 기준을 아래와 같이 안내드립니다.\n\n■ 평가 기간: 2025년 7월 1일 ~ 12월 31일\n■ 평가 항목\n  - 업무 성과 (50%)\n  - 역량 개발 (30%)\n  - 조직 기여 (20%)\n\n■ 자기 평가 제출 기한: 2026년 1월 5일\n\n자세한 내용은 HR 포털에서 확인하시기 바랍니다.\n\n인사팀 드림', ai_summary: '참고 공지. 별도 액션 불필요. 하반기 자기평가 기한 2026.01.05 기억 권장.' },
+};
+
+function showEmailDetail(id, rowEl) {
+  const data = emailData[id];
+  if (!data) return;
+  document.querySelectorAll('.email-row').forEach(r => r.classList.remove('active'));
+  if (rowEl) rowEl.classList.add('active');
+
+  document.getElementById('emailDetailTitle').textContent = data.subject;
+  const tagsHtml = data.ai_tags.map(t => `<span class="itag ${t.includes('🚨') ? 'itag-urgent' : t.includes('📅') ? 'itag-meet' : t.includes('⚡') ? 'itag-task' : 'itag-info'}">${t}</span>`).join('');
+
+  document.getElementById('emailDetailBody').innerHTML = `
+    <div style="margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--border);">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
+        <div><div style="font-size:14px;font-weight:700;margin-bottom:3px;">${data.from}</div><div style="font-size:11px;color:var(--text3);">${data.email}</div></div>
+        <div style="font-size:11px;color:var(--text3);font-family:monospace;">${data.date}</div>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;">${tagsHtml}</div>
+    </div>
+    <div style="background:rgba(99,102,241,0.06);border:1px solid rgba(99,102,241,0.18);border-radius:8px;padding:10px 12px;margin-bottom:14px;">
+      <div style="font-size:10px;color:#a5b4fc;font-weight:700;margin-bottom:4px;">🤖 AI 요약</div>
+      <div style="font-size:12px;color:var(--text);">${data.ai_summary}</div>
+    </div>
+    <div style="font-size:13px;color:var(--text2);line-height:1.8;white-space:pre-wrap;background:var(--bg3);border-radius:8px;padding:14px;border:1px solid var(--border);">${data.body}</div>
+    <div style="margin-top:12px;display:flex;gap:8px;">
+      <button class="btn btn-primary" style="font-size:11px;" onclick="showToast('send','📧 답장 전송','${data.from}에게 이메일 발송')">↩ 답장</button>
+      <button class="btn btn-ghost" style="font-size:11px;" onclick="navTo('drafts')">✍️ 초안 생성</button>
+    </div>
+  `;
+}
+
+// ══════════════════════════════════════════
+// TEAMS CHAT DATA
+// ══════════════════════════════════════════
+const chatData = {
+  chat1: {
+    name: '이강민 차장', badge: '긴급 요청', badgeClass: 'badge-danger',
+    avatarColor: 'linear-gradient(135deg,#ef4444,#f97316)', avatarChar: '강',
+    messages: [
+      { mine: false, name: '이강민 차장', time: '13:10', text: '김희진 연구원님, 안녕하세요. 품질관리팀 이강민입니다.' },
+      { mine: false, name: '이강민 차장', time: '13:11', text: '지난주부터 양산라인에서 EPS 전류 피크 현상이 계속 발생하고 있어서요. 6/10, 6/14, 6/17 세 차례 발생했는데 패턴이 유사합니다.' },
+      { mine: false, name: '이강민 차장', time: '13:12', text: '현재 가장 유력한 가설은 저속 조향 시 발생하는 전류 스파이크인데, 혹시 설계 측면에서 원인 분석이 가능하실까요? 오늘 EOD까지 회신 주시면 정말 감사하겠습니다. 🙏', aiTag: '🤖 AI: 긴급 요청 분류 | 태스크 등록됨' },
+      { mine: true, name: '김희진 (나)', time: '13:35', text: '이강민 차장님 안녕하세요. 확인했습니다. 지금 바로 분석 시작하겠습니다. 오늘 오후 5시까지 원인 분석 결과와 단기 대응 방안 드리겠습니다.' },
+    ]
+  },
+  chat2: {
+    name: '김도현 책임 (구매팀)', badge: '일반 요청', badgeClass: 'badge-warn',
+    avatarColor: 'linear-gradient(135deg,#6366f1,#0ea5e9)', avatarChar: '도',
+    messages: [
+      { mine: false, name: '김도현 책임', time: '09:50', text: '희진씨 안녕하세요! 구매팀 김도현입니다.' },
+      { mine: false, name: '김도현 책임', time: '09:52', text: '이번 주 금요일(6/20)에 JTEKT 협력사 현장 방문이 잡혀 있는데요, 방문 전에 현재 EPS 부품 관련 이슈 사항이랑 기술 요구사항 정리한 PPT 자료 미리 공유해 주실 수 있을까요?', aiTag: '🤖 AI: 업무 요청 분류 | 태스크 등록됨' },
+      { mine: true, name: '김희진 (나)', time: '10:05', text: '네, 안녕하세요! 6월 19일 오후까지 현황 정리해서 공유해 드리겠습니다.' },
+    ]
+  },
+  chat3: {
+    name: '조향시스템설계2팀 채널', badge: '팀 채널', badgeClass: 'badge-ok',
+    avatarColor: 'linear-gradient(135deg,#10b981,#0ea5e9)', avatarChar: '팀',
+    messages: [
+      { mine: false, name: '최영수 부장', time: '09:20', text: '안녕하세요 팀원 여러분. 오늘 09:30 스탠드업 미팅 링크 공유드립니다. https://teams.microsoft.com/meet/xxx' },
+      { mine: false, name: '이수현 선임', time: '09:25', text: '감사합니다 부장님. 참석하겠습니다!' },
+      { mine: true, name: '김희진 (나)', time: '09:27', text: '참석합니다 👍' },
+      { mine: false, name: '박지훈 책임', time: '09:28', text: '저도 참석합니다. 오늘 MDPS 관련 공유사항 있습니다.' },
+    ]
+  },
+  chat4: {
+    name: '박민준 수석 (선행연구팀)', badge: 'D-day', badgeClass: 'badge-danger',
+    avatarColor: 'linear-gradient(135deg,#f59e0b,#ef4444)', avatarChar: '민',
+    messages: [
+      { mine: false, name: '박민준 수석', time: '어제 16:30', text: '김희진 연구원님, 내일 마감인 MDPS 보고서 관련해서, 혹시 시뮬레이션 파일도 같이 첨부해 주실 수 있나요? .slx 원본으로요.' },
+      { mine: true, name: '김희진 (나)', time: '어제 17:00', text: '네, 알겠습니다! Simulink 원본 파일(.slx)도 함께 첨부해서 제출하겠습니다.' },
+      { mine: false, name: '박민준 수석', time: '어제 17:02', text: '감사합니다! 그리고 혹시 Before/After 시뮬레이션 결과 비교 그래프도 포함해 주시면 더욱 좋겠습니다 🙂', aiTag: '🤖 AI: 추가 요청 사항 | 기존 태스크에 업데이트됨' },
+    ]
+  },
+};
+
+let currentChatId = 'chat1';
+
+function initChat(id) {
+  currentChatId = id;
+  showChatDetail(id, document.querySelector(`.chat-room-row`));
+}
+
+function showChatDetail(id, rowEl) {
+  const data = chatData[id];
+  if (!data) return;
+  currentChatId = id;
+  document.querySelectorAll('.chat-room-row').forEach(r => r.classList.remove('active'));
+  if (rowEl) rowEl.classList.add('active');
+
+  document.querySelector('#chatDetailHeader .panel-title').textContent = data.name;
+  const badge = document.querySelector('#chatDetailHeader .panel-badge');
+  badge.textContent = data.badge;
+  badge.className = 'panel-badge ' + data.badgeClass;
+
+  const msgArea = document.getElementById('chatMessages');
+  msgArea.innerHTML = data.messages.map(m => `
+    <div class="chat-bubble ${m.mine ? 'mine' : ''}">
+      <div class="bubble-avatar" style="background:${m.mine ? 'linear-gradient(135deg,#0ea5e9,#6366f1)' : data.avatarColor};">${m.mine ? '희' : data.avatarChar}</div>
+      <div class="bubble-body">
+        <div class="bubble-name">${m.name} · ${m.time}</div>
+        <div class="bubble-text">${m.text}</div>
+        ${m.aiTag ? `<div style="display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:600;color:#a5b4fc;background:rgba(99,102,241,0.12);padding:2px 8px;border-radius:10px;margin-top:4px;">${m.aiTag}</div>` : ''}
+      </div>
+    </div>
+  `).join('');
+  msgArea.scrollTop = msgArea.scrollHeight;
+}
+
+function fillDraftReply() {
+  const data = chatData[currentChatId];
+  const drafts = {
+    chat1: '이강민 차장님, 확인하였습니다. EPS 전류 피크 현상에 대해 분석 중이며, 오늘 오후 5시까지 원인 분석 결과와 단기 대응 방안을 포함한 보고서를 회신 드리겠습니다.',
+    chat2: '김도현 책임님, 6월 19일 오후까지 JTEKT 미팅 자료 공유해 드리겠습니다.',
+    chat3: '확인했습니다! 감사합니다 😊',
+    chat4: '네, Before/After 비교 그래프도 포함해서 제출하겠습니다.',
+  };
+  document.getElementById('chatInput').value = drafts[currentChatId] || '';
+}
+
+function toggleDraftEdit(textareaId, btnId) {
+  const ta = document.getElementById(textareaId);
+  const btn = document.getElementById(btnId);
+  if (!ta || !btn) return;
+  const isEditing = !ta.readOnly;
+  if (isEditing) {
+    // 저장
+    ta.readOnly = true;
+    ta.style.resize = 'none';
+    ta.style.cursor = 'default';
+    ta.style.background = 'transparent';
+    ta.style.borderBottom = 'none';
+    btn.textContent = '✏️ 편집';
+    btn.className = 'btn btn-ghost';
+    showToast('ok', '✅ 초안 저장', '수정된 내용이 저장되었습니다');
+  } else {
+    // 편집 모드
+    ta.readOnly = false;
+    ta.style.resize = 'vertical';
+    ta.style.cursor = 'text';
+    ta.style.background = 'rgba(14,165,233,0.04)';
+    ta.style.borderBottom = '1px solid rgba(14,165,233,0.3)';
+    ta.focus();
+    btn.textContent = '💾 저장';
+    btn.className = 'btn btn-primary';
+  }
+}
+
+function sendChatReply() {
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if (!text) return;
+  const data = chatData[currentChatId];
+  data.messages.push({ mine: true, name: '김희진 (나)', time: '방금', text });
+  input.value = '';
+  showChatDetail(currentChatId, null);
+  showToast('send', '💬 메시지 전송', `${data.name}에게 메시지 전송 완료`);
+}
+
+// ══════════════════════════════════════════
+// 일정 추가 모달
+// ══════════════════════════════════════════
+let userEvents = [];
+
+const TYPE_COLORS = {
+  bu:       { border:'#f97316', tag:'tag-bu',   label:'BU 회의',  dot:'#f97316' },
+  sil:      { border:'#38bdf8', tag:'tag-sil',  label:'실 회의',  dot:'#38bdf8' },
+  team:     { border:'#facc15', tag:'tag-team', label:'팀 회의',  dot:'#facc15' },
+  personal: { border:'#94a3b8', tag:'',         label:'개인',     dot:'#94a3b8' },
+};
+
+const DAY_COL_MAP = { '6/16':'col-mon','6/17':'col-tue','6/18':'col-wed','6/19':'col-thu','6/20':'col-fri' };
+
+function openAddEventModal() {
+  document.getElementById('addEventOverlay').style.display = 'block';
+  document.querySelectorAll('.type-chip').forEach(c => c.classList.remove('selected'));
+  document.querySelector('.type-chip[data-type="team"]').classList.add('selected');
+  document.querySelector('input[name="evType"][value="team"]').checked = true;
+  document.querySelectorAll('.alarm-chip').forEach(c => {
+    const cb = c.querySelector('input');
+    const isDefault = cb.value === '10';
+    cb.checked = isDefault;
+    c.classList.toggle('checked', isDefault);
+  });
+  document.getElementById('evValidMsg').textContent = '';
+  setTimeout(() => document.getElementById('ev-title').focus(), 50);
+}
+
+function closeAddEventModal(e) {
+  if (e && e.target !== document.getElementById('addEventOverlay')) return;
+  document.getElementById('addEventOverlay').style.display = 'none';
+}
+
+function submitAddEvent() {
+  const title     = document.getElementById('ev-title').value.trim();
+  const type      = document.querySelector('input[name="evType"]:checked')?.value || 'team';
+  const date      = document.getElementById('ev-date').value;
+  const startTime = document.getElementById('ev-start').value;
+  const endTime   = document.getElementById('ev-end').value;
+  const location  = document.getElementById('ev-location').value.trim();
+  const organizer = document.getElementById('ev-organizer').value.trim();
+  const attendees = document.getElementById('ev-attendees').value.trim();
+  const agendaRaw = document.getElementById('ev-agenda').value.trim();
+  const msgEl     = document.getElementById('evValidMsg');
+
+  if (!title)              { msgEl.textContent = '⚠️ 제목을 입력하세요'; return; }
+  if (!date)               { msgEl.textContent = '⚠️ 날짜를 선택하세요'; return; }
+  if (!startTime||!endTime){ msgEl.textContent = '⚠️ 시간을 입력하세요'; return; }
+  if (startTime >= endTime){ msgEl.textContent = '⚠️ 종료 시간이 시작 시간보다 늦어야 합니다'; return; }
+  msgEl.textContent = '';
+
+  const d = new Date(date);
+  const weekdays = ['일','월','화','수','목','금','토'];
+  const dateStr  = `2025.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')} (${weekdays[d.getDay()]})`;
+  const timeStr  = `${startTime} – ${endTime}`;
+  const monthDay = `${d.getMonth()+1}/${d.getDate()}`;
+  const evId     = 'ev_' + Date.now();
+  const col      = TYPE_COLORS[type];
+
+  // meetData 등록 (상세 보기 연결)
+  meetData[evId] = {
+    id: evId, title, type, typeName: col.label,
+    date: dateStr, time: timeStr,
+    location: location || '-',
+    organizer: organizer || '김희진 (본인)',
+    attendees: attendees || '-',
+    agenda: agendaRaw || '안건 없음',
+    ai_summary: 'AI: 직접 등록한 일정입니다.',
+    status: '예정',
+  };
+  userEvents.push(meetData[evId]);
+
+  // ── 주간 캘린더 칸에 카드 추가 ──
+  const colId = DAY_COL_MAP[monthDay];
+  if (colId) {
+    const colEl = document.getElementById(colId);
+    if (colEl) {
+      const card = document.createElement('div');
+      card.className = `meet-card ${type}`;
+      card.style.cssText = 'margin-bottom:6px;cursor:pointer;animation:newItem 1s ease;';
+      card.setAttribute('onclick', `showMeetDetail('${evId}')`);
+      card.innerHTML = `
+        <div class="meet-title" style="font-size:11px;">${title}</div>
+        <div style="font-size:10px;color:var(--text3);">${timeStr}${location ? ' · '+location : ''}</div>
+        <span class="meet-tag ${col.tag}" style="margin-top:4px;display:inline-block;">${col.label}</span>
+      `;
+      colEl.appendChild(card);
+    }
+  }
+
+  // ── 오늘(6/18) 일정이면 대시보드 타임라인에도 추가 ──
+  if (monthDay === '6/18') {
+    const timeline = document.querySelector('#page-dashboard .timeline');
+    if (timeline) {
+      const tl = document.createElement('div');
+      tl.className = 'tl-hour';
+      tl.innerHTML = `
+        <div class="tl-time">${startTime}</div>
+        <div class="tl-line">
+          <div class="tl-dot" style="background:${col.dot};box-shadow:0 0 5px ${col.dot}"></div>
+          <div class="tl-vline"></div>
+        </div>
+        <div class="tl-content">
+          <div class="meet-card ${type}" style="animation:newItem 1s ease;">
+            <div class="meet-title">${title}</div>
+            <div class="meet-meta">
+              <span class="meet-tag ${col.tag}">${col.label}</span>
+              <span class="meet-time">${timeStr}</span>
+              ${location ? `<span class="meet-location">📍 ${location}</span>` : ''}
+            </div>
+          </div>
+        </div>
+      `;
+      timeline.appendChild(tl);
+    }
+  }
+
+  document.getElementById('addEventOverlay').style.display = 'none';
+  showToast('meet', '📅 일정이 등록되었습니다', `${title} · ${dateStr} ${timeStr}`);
+  navTo('calendar');
+}
+
+// 타입 칩 & 알림 칩 이벤트 바인딩
+document.addEventListener('DOMContentLoaded', () => {
+  // 타입 칩
+  document.querySelectorAll('.type-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      document.querySelectorAll('.type-chip').forEach(c => c.classList.remove('selected'));
+      chip.classList.add('selected');
+      chip.querySelector('input').checked = true;
+    });
+  });
+  // 알림 칩
+  document.querySelectorAll('.alarm-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      const cb = chip.querySelector('input');
+      cb.checked = !cb.checked;
+      chip.classList.toggle('checked', cb.checked);
+    });
+  });
+  // 주간 칼럼 id 부여 (5개 날짜 컬럼)
+  const calGrid = document.querySelector('#page-calendar .panel-body > div');
+  if (calGrid) {
+    const ids = ['col-mon','col-tue','col-wed','col-thu','col-fri'];
+    [...calGrid.children].forEach((col, i) => { if (ids[i]) col.id = ids[i]; });
+  }
+});
+
+// ── 알림 스케줄 ──
+// 규칙: 회의 10분 전 1회 / 이메일 회신 마감 2일 전 1회 + 당일 2회
+
+const notifications = [
+  // ── 회의 알림: 10분 전 1회 ──
+  {
+    delay: 4000,
+    type: 'alert',
+    title: '⏰ 회의 10분 전',
+    message: 'EPS 개발 방향성 검토 (BU 회의) — 14:00 시작 · 2동 컨퍼런스룸 A',
+    once: true  // 1회만
+  },
+  // ── 이메일 회신 마감: D-2 알림 ──
+  {
+    delay: 8000,
+    type: 'task',
+    title: '📋 회신 마감 D-2 알림',
+    message: '조향감 개선 특허 검토 의견 — 마감까지 2일 남았습니다 (6/22)',
+    once: true
+  },
+  // ── 이메일 회신 당일: 오전 알림 ──
+  {
+    delay: 12000,
+    type: 'task',
+    title: '🔔 회신 마감 당일 (오전)',
+    message: 'MDPS 제어로직 보고서 오늘 마감 — 아직 미제출 상태입니다',
+    once: false
+  },
+  // ── 이메일 회신 당일: 오후 알림 ──
+  {
+    delay: 16000,
+    type: 'task',
+    title: '🔔 회신 마감 당일 (오후)',
+    message: 'EPS 전류 분석 회신 오늘 마감 — 처리 현황을 확인하세요',
+    once: false
+  },
+];
+
+notifications.forEach(n => {
+  setTimeout(() => showToast(n.type, n.title, n.message), n.delay);
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,1832 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>차종개발팀 OneDrive 파일관리 AI 도우미</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;900&family=JetBrains+Mono:wght@400;600&display=swap');
+
+  :root {
+    --bg: #0b0f1a;
+    --bg2: #111827;
+    --bg3: #1a2235;
+    --card: #161f30;
+    --card2: #1e2a40;
+    --border: #263148;
+    --accent: #3b82f6;
+    --accent2: #60a5fa;
+    --accent3: #1d4ed8;
+    --green: #22c55e;
+    --red: #ef4444;
+    --yellow: #f59e0b;
+    --orange: #f97316;
+    --purple: #a855f7;
+    --text: #e2e8f0;
+    --text2: #94a3b8;
+    --text3: #64748b;
+    --mono: 'JetBrains Mono', monospace;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 14px;
+  }
+
+  /* ─── HEADER ─── */
+  .header {
+    background: linear-gradient(135deg, #0d1b2e 0%, #1a2744 50%, #0f1d30 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 0 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+  }
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .logo {
+    width: 36px;
+    height: 36px;
+    background: var(--accent);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    font-size: 16px;
+    color: white;
+    letter-spacing: -1px;
+  }
+
+  .header-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: white;
+    letter-spacing: -0.3px;
+  }
+
+  .header-sub {
+    font-size: 11px;
+    color: var(--text3);
+    margin-top: 2px;
+    font-weight: 400;
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .badge-ai {
+    background: linear-gradient(135deg, #1d4ed8, #7c3aed);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+
+  .user-info {
+    font-size: 12px;
+    color: var(--text2);
+    text-align: right;
+  }
+
+  /* ─── TABS ─── */
+  .tabs {
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    padding: 0 32px;
+    display: flex;
+    gap: 0;
+  }
+
+  .tab {
+    padding: 14px 20px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text3);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+
+  .tab:hover { color: var(--text2); }
+  .tab.active {
+    color: var(--accent2);
+    border-bottom-color: var(--accent);
+    font-weight: 600;
+  }
+
+  .tab-icon { font-size: 15px; }
+
+  /* ─── MAIN ─── */
+  .main {
+    padding: 28px 32px;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* ─── SECTION TITLE ─── */
+  .section-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: white;
+    margin-bottom: 4px;
+    letter-spacing: -0.3px;
+  }
+
+  .section-sub {
+    font-size: 12px;
+    color: var(--text3);
+    margin-bottom: 24px;
+  }
+
+  /* ─── GRID ─── */
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
+  .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 24px; }
+  .grid-12 { display: grid; grid-template-columns: 1fr 2fr; gap: 16px; margin-bottom: 24px; }
+  .grid-21 { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 24px; }
+
+  /* ─── CARD ─── */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+  }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+
+  .card-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text2);
+    letter-spacing: 0.3px;
+  }
+
+  /* ─── KPI CARD ─── */
+  .kpi-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .kpi-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+  }
+
+  .kpi-card.blue::before { background: var(--accent); }
+  .kpi-card.green::before { background: var(--green); }
+  .kpi-card.red::before { background: var(--red); }
+  .kpi-card.yellow::before { background: var(--yellow); }
+  .kpi-card.purple::before { background: var(--purple); }
+  .kpi-card.orange::before { background: var(--orange); }
+
+  .kpi-label { font-size: 11px; color: var(--text3); font-weight: 500; margin-bottom: 10px; letter-spacing: 0.5px; }
+  .kpi-value { font-size: 30px; font-weight: 900; color: white; letter-spacing: -1px; line-height: 1; }
+  .kpi-unit { font-size: 13px; font-weight: 400; color: var(--text2); margin-left: 2px; }
+  .kpi-change { font-size: 11px; margin-top: 8px; display: flex; align-items: center; gap: 4px; }
+  .kpi-change.up { color: var(--green); }
+  .kpi-change.down { color: var(--red); }
+  .kpi-change.neutral { color: var(--text3); }
+  .kpi-icon { position: absolute; right: 16px; top: 16px; font-size: 28px; opacity: 0.15; }
+
+  /* ─── STATUS DOT ─── */
+  .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+  .dot.green { background: var(--green); box-shadow: 0 0 6px var(--green); }
+  .dot.red { background: var(--red); }
+  .dot.yellow { background: var(--yellow); }
+  .dot.blue { background: var(--accent); }
+
+  /* ─── TABLE ─── */
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; }
+  th {
+    text-align: left;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text3);
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  td {
+    padding: 11px 12px;
+    font-size: 12px;
+    color: var(--text2);
+    border-bottom: 1px solid rgba(38,49,72,0.5);
+    vertical-align: middle;
+  }
+  tr:hover td { background: rgba(59,130,246,0.04); }
+  tr:last-child td { border-bottom: none; }
+
+  .tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 600;
+    font-family: var(--mono);
+  }
+  .tag.green { background: rgba(34,197,94,0.15); color: var(--green); }
+  .tag.red { background: rgba(239,68,68,0.15); color: var(--red); }
+  .tag.yellow { background: rgba(245,158,11,0.15); color: var(--yellow); }
+  .tag.blue { background: rgba(59,130,246,0.15); color: var(--accent2); }
+  .tag.purple { background: rgba(168,85,247,0.15); color: var(--purple); }
+  .tag.gray { background: rgba(100,116,139,0.15); color: var(--text3); }
+
+  /* ─── PROGRESS BAR ─── */
+  .progress-bar-wrap { background: var(--bg3); border-radius: 4px; height: 6px; overflow: hidden; }
+  .progress-bar { height: 100%; border-radius: 4px; transition: width 0.8s ease; }
+  .progress-bar.blue { background: var(--accent); }
+  .progress-bar.green { background: var(--green); }
+  .progress-bar.yellow { background: var(--yellow); }
+  .progress-bar.red { background: var(--red); }
+
+  /* ─── VALIDATOR ─── */
+  .validator-box {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+    margin-bottom: 20px;
+  }
+
+  .input-row {
+    display: flex;
+    gap: 12px;
+    align-items: stretch;
+    margin-bottom: 20px;
+  }
+
+  .input-field {
+    flex: 1;
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 18px;
+    font-size: 14px;
+    font-family: var(--mono);
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.2s;
+    letter-spacing: 0.3px;
+  }
+
+  .input-field:focus { border-color: var(--accent); }
+  .input-field::placeholder { color: var(--text3); font-family: 'Noto Sans KR', sans-serif; font-size: 13px; letter-spacing: 0; }
+
+  .btn {
+    padding: 14px 24px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: white;
+  }
+  .btn-primary:hover { background: #2563eb; transform: translateY(-1px); }
+
+  .btn-secondary {
+    background: var(--bg3);
+    color: var(--text2);
+    border: 1px solid var(--border);
+  }
+  .btn-secondary:hover { background: var(--card2); color: white; }
+
+  .result-box {
+    border-radius: 10px;
+    padding: 20px;
+    display: none;
+  }
+
+  .result-box.valid {
+    background: rgba(34,197,94,0.08);
+    border: 1.5px solid rgba(34,197,94,0.3);
+  }
+
+  .result-box.invalid {
+    background: rgba(239,68,68,0.08);
+    border: 1.5px solid rgba(239,68,68,0.3);
+  }
+
+  .result-status {
+    font-size: 15px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  .result-status.valid-text { color: var(--green); }
+  .result-status.invalid-text { color: var(--red); }
+
+  .result-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 16px; }
+
+  .result-part {
+    background: var(--bg);
+    border-radius: 8px;
+    padding: 10px;
+    text-align: center;
+  }
+
+  .result-part-label { font-size: 9px; color: var(--text3); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+  .result-part-value { font-size: 12px; font-family: var(--mono); font-weight: 600; }
+  .result-part-value.ok { color: var(--green); }
+  .result-part-value.err { color: var(--red); }
+  .result-part-value.na { color: var(--text3); }
+
+  .suggest-box {
+    background: rgba(59,130,246,0.08);
+    border: 1px solid rgba(59,130,246,0.25);
+    border-radius: 8px;
+    padding: 14px;
+    margin-top: 12px;
+  }
+
+  .suggest-label { font-size: 10px; color: var(--text3); font-weight: 600; letter-spacing: 0.5px; margin-bottom: 6px; }
+  .suggest-value { font-family: var(--mono); font-size: 14px; font-weight: 600; color: var(--accent2); letter-spacing: 0.5px; }
+
+  .error-list { list-style: none; }
+  .error-list li {
+    font-size: 12px;
+    color: var(--red);
+    padding: 3px 0;
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .rule-examples {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 16px;
+  }
+
+  .example-chip {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .example-chip:hover { border-color: var(--accent); background: rgba(59,130,246,0.06); }
+
+  .example-chip-label { font-size: 9px; color: var(--text3); font-weight: 600; text-transform: uppercase; margin-bottom: 4px; }
+  .example-chip-name { font-family: var(--mono); font-size: 11px; color: var(--accent2); }
+  .example-chip-desc { font-size: 10px; color: var(--text3); margin-top: 2px; }
+
+  /* ─── FOLDER TREE ─── */
+  .tree { font-family: var(--mono); font-size: 12px; }
+  .tree-item { padding: 4px 0; cursor: pointer; display: flex; align-items: center; gap: 8px; }
+  .tree-item:hover .tree-name { color: var(--accent2); }
+  .tree-indent { padding-left: 20px; border-left: 1px solid var(--border); margin-left: 8px; }
+  .tree-icon { font-size: 14px; }
+  .tree-name { color: var(--text2); transition: color 0.15s; }
+  .tree-name.folder { color: var(--yellow); font-weight: 500; }
+  .tree-name.file { color: var(--text2); }
+  .tree-badge { font-size: 9px; padding: 1px 5px; border-radius: 3px; margin-left: 6px; }
+  .tree-badge.warn { background: rgba(245,158,11,0.2); color: var(--yellow); }
+  .tree-badge.ok { background: rgba(34,197,94,0.15); color: var(--green); }
+  .tree-badge.err { background: rgba(239,68,68,0.15); color: var(--red); }
+
+  /* ─── MIGRATION ─── */
+  .phase-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 12px;
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+  }
+
+  .phase-num {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+
+  .phase-content { flex: 1; }
+  .phase-title { font-size: 14px; font-weight: 700; color: white; margin-bottom: 4px; }
+  .phase-date { font-size: 11px; color: var(--text3); margin-bottom: 10px; }
+
+  .phase-tasks { list-style: none; }
+  .phase-tasks li {
+    font-size: 12px;
+    color: var(--text2);
+    padding: 3px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .check-icon { font-size: 13px; }
+
+  /* ─── ALERT ─── */
+  .alert {
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    font-size: 12px;
+  }
+  .alert.warn { background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.25); }
+  .alert.err { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.25); }
+  .alert.info { background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.25); }
+  .alert.success { background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.25); }
+
+  .alert-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+  .alert-title { font-weight: 600; color: var(--text); margin-bottom: 2px; }
+  .alert-body { color: var(--text2); line-height: 1.5; }
+
+  /* ─── CHART BARS ─── */
+  .bar-chart { display: flex; flex-direction: column; gap: 10px; }
+  .bar-row { display: flex; align-items: center; gap: 10px; }
+  .bar-label { font-size: 11px; color: var(--text2); width: 100px; flex-shrink: 0; text-align: right; }
+  .bar-track { flex: 1; background: var(--bg3); border-radius: 4px; height: 20px; overflow: hidden; position: relative; }
+  .bar-fill { height: 100%; border-radius: 4px; display: flex; align-items: center; padding-left: 8px; }
+  .bar-fill span { font-size: 10px; font-weight: 600; color: white; white-space: nowrap; }
+  .bar-count { font-size: 11px; color: var(--text3); width: 40px; flex-shrink: 0; }
+
+  /* ─── RULE TABLE ─── */
+  .rule-block {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 12px;
+  }
+
+  .rule-block-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--accent2);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .rule-block p { font-size: 12px; color: var(--text2); line-height: 1.6; }
+  .rule-block code {
+    font-family: var(--mono);
+    background: var(--bg2);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 11px;
+    color: var(--accent2);
+  }
+
+  /* ─── MINI STATS ─── */
+  .mini-stat { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid rgba(38,49,72,0.5); }
+  .mini-stat:last-child { border-bottom: none; }
+  .mini-stat-label { font-size: 12px; color: var(--text2); }
+  .mini-stat-value { font-size: 13px; font-weight: 700; }
+
+  /* ─── VIOLATIONS ─── */
+  .violation-row {
+    background: var(--bg);
+    border: 1px solid rgba(239,68,68,0.2);
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .violation-file { font-family: var(--mono); font-size: 11px; color: var(--text2); }
+  .violation-reason { font-size: 11px; color: var(--red); }
+  .violation-owner { font-size: 10px; color: var(--text3); }
+
+  /* scroll */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-left">
+    <div class="logo">HX</div>
+    <div>
+      <div class="header-title">차종개발팀 OneDrive 파일관리 AI 도우미</div>
+      <div class="header-sub">인테리어부품개발팀 · v1.0 규정 기반 · 담당: 강태욱 리더</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="badge-ai">✦ AI POWERED</div>
+    <div class="user-info">
+      <div style="color:var(--text);font-weight:600">강태욱</div>
+      <div style="color:var(--text3);font-size:10px">마지막 동기화: 2026-05-13 09:41</div>
+    </div>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <div class="tab active" onclick="showPage('dashboard', this)">
+    <span class="tab-icon">📊</span> 대시보드
+  </div>
+  <div class="tab" onclick="showPage('validator', this)">
+    <span class="tab-icon">✅</span> 파일명 검증기
+  </div>
+  <div class="tab" onclick="showPage('folders', this)">
+    <span class="tab-icon">📁</span> 폴더 현황
+  </div>
+  <div class="tab" onclick="showPage('migration', this)">
+    <span class="tab-icon">🔄</span> 마이그레이션
+  </div>
+  <div class="tab" onclick="showPage('rules', this)">
+    <span class="tab-icon">📋</span> 규정 가이드
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- ============================== DASHBOARD ============================== -->
+  <div class="page active" id="page-dashboard">
+    <div class="section-title">팀 OneDrive 현황 대시보드</div>
+    <div class="section-sub">인테리어부품개발팀 25명 · 차종 RS4, MQ4 PE, BD4, HS6 · 2026년 5월 13일 기준</div>
+
+    <!-- KPI 4 -->
+    <div class="grid-4">
+      <div class="kpi-card blue">
+        <div class="kpi-icon">📁</div>
+        <div class="kpi-label">전체 관리 파일</div>
+        <div class="kpi-value">12,847<span class="kpi-unit">개</span></div>
+        <div class="kpi-change up">▲ 전월 대비 +342개</div>
+      </div>
+      <div class="kpi-card green">
+        <div class="kpi-icon">✅</div>
+        <div class="kpi-label">파일명 규칙 준수율</div>
+        <div class="kpi-value">68<span class="kpi-unit">%</span></div>
+        <div class="kpi-change up">▲ 지난달 41% → 68% (+27%p)</div>
+      </div>
+      <div class="kpi-card red">
+        <div class="kpi-icon">⚠️</div>
+        <div class="kpi-label">규칙 위반 파일</div>
+        <div class="kpi-value">4,111<span class="kpi-unit">개</span></div>
+        <div class="kpi-change down">▼ 우선 처리 필요 항목 1,203개</div>
+      </div>
+      <div class="kpi-card yellow">
+        <div class="kpi-icon">⏱️</div>
+        <div class="kpi-label">평균 파일 탐색 시간</div>
+        <div class="kpi-value">52<span class="kpi-unit">초</span></div>
+        <div class="kpi-change up">▲ 개선 중 (목표 30초 / 도입 전 5분+)</div>
+      </div>
+    </div>
+
+    <div class="grid-3">
+      <div class="kpi-card purple">
+        <div class="kpi-icon">🚗</div>
+        <div class="kpi-label">관리 차종 수</div>
+        <div class="kpi-value">4<span class="kpi-unit">종</span></div>
+        <div class="kpi-change neutral">RS4 / MQ4 PE / BD4 / HS6</div>
+      </div>
+      <div class="kpi-card orange">
+        <div class="kpi-icon">👥</div>
+        <div class="kpi-label">팀원 준수 현황</div>
+        <div class="kpi-value">17<span class="kpi-unit">/25명</span></div>
+        <div class="kpi-change neutral">8명 추가 교육 필요</div>
+      </div>
+      <div class="kpi-card green">
+        <div class="kpi-icon">📤</div>
+        <div class="kpi-label">마이그레이션 완료</div>
+        <div class="kpi-value">34<span class="kpi-unit">%</span></div>
+        <div class="kpi-change up">▲ Phase 1 완료, Phase 2 진행중</div>
+      </div>
+    </div>
+
+    <!-- CHARTS ROW -->
+    <div class="grid-2">
+
+      <!-- 차종별 파일 현황 -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">🚗 차종별 파일 현황</div>
+        </div>
+        <div class="bar-chart">
+          <div class="bar-row">
+            <div class="bar-label">RS4</div>
+            <div class="bar-track">
+              <div class="bar-fill" style="width:75%;background:linear-gradient(90deg,#3b82f6,#60a5fa)">
+                <span>4,213개</span>
+              </div>
+            </div>
+            <div class="bar-count" style="color:var(--green)">87%</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">MQ4 PE</div>
+            <div class="bar-track">
+              <div class="bar-fill" style="width:55%;background:linear-gradient(90deg,#a855f7,#c084fc)">
+                <span>3,104개</span>
+              </div>
+            </div>
+            <div class="bar-count" style="color:var(--yellow)">62%</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">BD4</div>
+            <div class="bar-track">
+              <div class="bar-fill" style="width:40%;background:linear-gradient(90deg,#22c55e,#4ade80)">
+                <span>2,874개</span>
+              </div>
+            </div>
+            <div class="bar-count" style="color:var(--yellow)">55%</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">HS6</div>
+            <div class="bar-track">
+              <div class="bar-fill" style="width:30%;background:linear-gradient(90deg,#f59e0b,#fbbf24)">
+                <span>2,656개</span>
+              </div>
+            </div>
+            <div class="bar-count" style="color:var(--red)">41%</div>
+          </div>
+        </div>
+        <div style="margin-top:14px;font-size:10px;color:var(--text3)">※ 막대 옆 % = 파일명 규칙 준수율</div>
+      </div>
+
+      <!-- 문서 종류별 분포 -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">📄 문서 유형별 분포</div>
+        </div>
+        <div class="bar-chart">
+          <div class="bar-row">
+            <div class="bar-label">DR 검토서</div>
+            <div class="bar-track">
+              <div class="bar-fill" style="width:82%;background:linear-gradient(90deg,#3b82f6,#60a5fa)">
+                <span>2,841개</span>
+              </div>
+            </div>
+            <div class="bar-count">22%</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">이슈리스트</div>
+            <div class="bar-track">
+              <div class="bar-fill" style="width:65%;background:linear-gradient(90deg,#ef4444,#f87171)">
+                <span>2,210개</span>
+              </div>
+            </div>
+            <div class="bar-count">17%</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">시험보고서</div>
+            <div class="bar-track">
+              <div class="bar-fill" style="width:55%;background:linear-gradient(90deg,#22c55e,#4ade80)">
+                <span>1,987개</span>
+              </div>
+            </div>
+            <div class="bar-count">15%</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">회의록</div>
+            <div class="bar-track">
+              <div class="bar-fill" style="width:45%;background:linear-gradient(90deg,#f59e0b,#fbbf24)">
+                <span>1,542개</span>
+              </div>
+            </div>
+            <div class="bar-count">12%</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">설계도면</div>
+            <div class="bar-track">
+              <div class="bar-fill" style="width:35%;background:linear-gradient(90deg,#a855f7,#c084fc)">
+                <span>1,203개</span>
+              </div>
+            </div>
+            <div class="bar-count">9%</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">기타</div>
+            <div class="bar-track">
+              <div class="bar-fill" style="width:28%;background:var(--text3)">
+                <span>3,064개</span>
+              </div>
+            </div>
+            <div class="bar-count">25%</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ALERTS + TABLE -->
+    <div class="grid-21">
+      <!-- ALERTS -->
+      <div>
+        <div class="card" style="margin-bottom:16px">
+          <div class="card-header">
+            <div class="card-title">⚠️ 이번 주 주요 알림</div>
+          </div>
+
+          <div class="alert err">
+            <div class="alert-icon">🚨</div>
+            <div>
+              <div class="alert-title">RS4 / 이슈리스트 10개 파일명 규칙 위반 감지</div>
+              <div class="alert-body">협력사명 누락 파일 다수 확인됨. 담당자: 김민준 · 발견: 2025-05-12</div>
+            </div>
+          </div>
+
+          <div class="alert warn">
+            <div class="alert-icon">📂</div>
+            <div>
+              <div class="alert-title">MQ4 PE / 폴더 깊이 6단계 초과 폴더 3개 발견</div>
+              <div class="alert-body">최대 허용 5단계 초과. 구조 개선 필요. 담당자: 박서연</div>
+            </div>
+          </div>
+
+          <div class="alert warn">
+            <div class="alert-icon">📁</div>
+            <div>
+              <div class="alert-title">BD4 / "새 폴더" 방치 폴더 2개 감지</div>
+              <div class="alert-body">30일 이상 내용 없는 임시 폴더 확인. 정리 권고</div>
+            </div>
+          </div>
+
+          <div class="alert info">
+            <div class="alert-icon">📅</div>
+            <div>
+              <div class="alert-title">분기 폴더 청소 데이 예정 — 2026년 6월 3일 (화)</div>
+              <div class="alert-body">전 팀원 참여 · 오후 2시~4시 · 온라인 동시 진행</div>
+            </div>
+          </div>
+
+          <div class="alert success">
+            <div class="alert-icon">✅</div>
+            <div>
+              <div class="alert-title">RS4 / P2 단계 파일 마이그레이션 완료</div>
+              <div class="alert-body">487개 파일 성공적으로 표준 폴더 구조로 이관 완료</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TEAM STATS -->
+      <div>
+        <div class="card" style="margin-bottom:16px">
+          <div class="card-header">
+            <div class="card-title">👥 팀원별 준수율 TOP 5</div>
+          </div>
+          <div class="mini-stat">
+            <div class="mini-stat-label">🥇 이지호</div>
+            <div class="mini-stat-value" style="color:var(--green)">98%</div>
+          </div>
+          <div class="mini-stat">
+            <div class="mini-stat-label">🥈 최수빈</div>
+            <div class="mini-stat-value" style="color:var(--green)">96%</div>
+          </div>
+          <div class="mini-stat">
+            <div class="mini-stat-label">🥉 정다은</div>
+            <div class="mini-stat-value" style="color:var(--green)">94%</div>
+          </div>
+          <div class="mini-stat">
+            <div class="mini-stat-label">4위 강태욱</div>
+            <div class="mini-stat-value" style="color:var(--accent2)">91%</div>
+          </div>
+          <div class="mini-stat">
+            <div class="mini-stat-label">5위 박지훈</div>
+            <div class="mini-stat-value" style="color:var(--accent2)">88%</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">📈 월간 준수율 추이</div>
+          </div>
+          <div class="mini-stat">
+            <div class="mini-stat-label">2026-02</div>
+            <div>
+              <div style="display:flex;align-items:center;gap:8px">
+                <div class="progress-bar-wrap" style="width:100px"><div class="progress-bar red" style="width:41%"></div></div>
+                <span style="font-size:12px;color:var(--red)">41%</span>
+              </div>
+            </div>
+          </div>
+          <div class="mini-stat">
+            <div class="mini-stat-label">2026-03</div>
+            <div>
+              <div style="display:flex;align-items:center;gap:8px">
+                <div class="progress-bar-wrap" style="width:100px"><div class="progress-bar yellow" style="width:53%"></div></div>
+                <span style="font-size:12px;color:var(--yellow)">53%</span>
+              </div>
+            </div>
+          </div>
+          <div class="mini-stat">
+            <div class="mini-stat-label">2026-04</div>
+            <div>
+              <div style="display:flex;align-items:center;gap:8px">
+                <div class="progress-bar-wrap" style="width:100px"><div class="progress-bar blue" style="width:62%"></div></div>
+                <span style="font-size:12px;color:var(--accent2)">62%</span>
+              </div>
+            </div>
+          </div>
+          <div class="mini-stat">
+            <div class="mini-stat-label">2026-05 (현재)</div>
+            <div>
+              <div style="display:flex;align-items:center;gap:8px">
+                <div class="progress-bar-wrap" style="width:100px"><div class="progress-bar green" style="width:68%"></div></div>
+                <span style="font-size:12px;color:var(--green)">68%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RECENT VIOLATIONS TABLE -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">🔴 최근 파일명 규칙 위반 목록</div>
+        <span style="font-size:11px;color:var(--text3)">최근 7일 · 총 38건</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>위반 파일명</th>
+              <th>차종</th>
+              <th>담당자</th>
+              <th>위반 유형</th>
+              <th>발견일</th>
+              <th>권장 파일명</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span style="font-family:var(--mono);color:var(--red)">최종_최종2_진짜최종.pptx</span></td>
+              <td><span class="tag blue">RS4</span></td>
+              <td>김민준</td>
+              <td><span class="tag red">차종코드·날짜·버전 누락</span></td>
+              <td>05-12</td>
+              <td><span style="font-family:var(--mono);font-size:10px;color:var(--green)">RS4_DR검토서_인스트루먼트패널-260512-v3.pptx</span></td>
+            </tr>
+            <tr>
+              <td><span style="font-family:var(--mono);color:var(--red)">이슈리스트(수정).xlsx</span></td>
+              <td><span class="tag purple">MQ4 PE</span></td>
+              <td>박서연</td>
+              <td><span class="tag red">날짜·협력사명·버전 누락</span></td>
+              <td>05-11</td>
+              <td><span style="font-family:var(--mono);font-size:10px;color:var(--green)">MQ4_이슈리스트_현대모비스콘솔-260511-v1.xlsx</span></td>
+            </tr>
+            <tr>
+              <td><span style="font-family:var(--mono);color:var(--red)">새 폴더 (3)/보고서.pdf</span></td>
+              <td><span class="tag yellow">BD4</span></td>
+              <td>이준혁</td>
+              <td><span class="tag yellow">임시폴더·모든 규칙 위반</span></td>
+              <td>05-10</td>
+              <td><span style="font-family:var(--mono);font-size:10px;color:var(--green)">BD4_시험보고서_정면충돌-260510-v1.pdf</span></td>
+            </tr>
+            <tr>
+              <td><span style="font-family:var(--mono);color:var(--red)">hs6 회의록 copy(2).docx</span></td>
+              <td><span class="tag orange" style="background:rgba(249,115,22,0.15);color:var(--orange)">HS6</span></td>
+              <td>신예림</td>
+              <td><span class="tag yellow">소문자·버전 누락·copy 접미사</span></td>
+              <td>05-10</td>
+              <td><span style="font-family:var(--mono);font-size:10px;color:var(--green)">HS6_회의록_주간품질-260510-v2.docx</span></td>
+            </tr>
+            <tr>
+              <td><span style="font-family:var(--mono);color:var(--red)">RS4 설계 v_final_최종.dwg</span></td>
+              <td><span class="tag blue">RS4</span></td>
+              <td>오동현</td>
+              <td><span class="tag red">날짜 누락·버전 형식 오류</span></td>
+              <td>05-09</td>
+              <td><span style="font-family:var(--mono);font-size:10px;color:var(--green)">RS4_설계도면_운전석크래시패드-260509-v5.dwg</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================== VALIDATOR ============================== -->
+  <div class="page" id="page-validator">
+    <div class="section-title">파일명 자동 검증기</div>
+    <div class="section-sub">파일명을 입력하면 v1.0 규정 준수 여부를 즉시 판별하고 올바른 파일명을 제안합니다</div>
+
+    <!-- VALIDATOR BOX -->
+    <div class="validator-box">
+      <div style="font-size:13px;font-weight:600;color:var(--text2);margin-bottom:12px">📝 파일명 입력</div>
+      <div class="input-row">
+        <input class="input-field" id="filename-input" type="text" placeholder="예: 최종_최종2_진짜최종.pptx  또는  RS4_시험보고서_정면충돌-260513-v2.pdf">
+        <button class="btn btn-primary" onclick="validateFilename()">검증하기 →</button>
+        <button class="btn btn-secondary" onclick="clearValidator()">초기화</button>
+      </div>
+
+      <div id="result-box" class="result-box">
+        <div class="result-status" id="result-status"></div>
+        <div class="result-grid" id="result-grid"></div>
+        <div id="error-section"></div>
+        <div id="suggest-section"></div>
+      </div>
+
+      <!-- RULE FORMAT BOX -->
+      <div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:16px;margin-top:16px">
+        <div style="font-size:11px;color:var(--text3);font-weight:600;letter-spacing:0.5px;margin-bottom:8px">📐 파일명 규칙 형식 (v1.0)</div>
+        <div style="font-family:var(--mono);font-size:13px;color:var(--accent2);letter-spacing:1px;margin-bottom:10px">
+          <span style="color:var(--accent)">차종코드</span>_<span style="color:var(--green)">문서종류</span>_<span style="color:var(--yellow)">세부설명</span>-<span style="color:var(--purple)">YYMMDD</span>-<span style="color:var(--orange)">버전</span>.<span style="color:var(--text3)">확장자</span>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px">
+          <span style="font-size:10px;background:rgba(59,130,246,0.15);color:var(--accent2);padding:3px 8px;border-radius:4px">차종: RS4 MQ4 BD4 HS6</span>
+          <span style="font-size:10px;background:rgba(34,197,94,0.15);color:var(--green);padding:3px 8px;border-radius:4px">문서: 시험보고서 DR검토서 이슈리스트 회의록 설계도면 발표자료</span>
+          <span style="font-size:10px;background:rgba(168,85,247,0.15);color:var(--purple);padding:3px 8px;border-radius:4px">날짜: 260513 형식 (YYMMDD)</span>
+          <span style="font-size:10px;background:rgba(249,115,22,0.15);color:var(--orange);padding:3px 8px;border-radius:4px">버전: v1 v2 v3 형식</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- EXAMPLES -->
+    <div class="card" style="margin-bottom:20px">
+      <div class="card-header">
+        <div class="card-title">💡 샘플 클릭 테스트 — 아래 예시를 클릭하면 자동 입력됩니다</div>
+      </div>
+      <div class="rule-examples">
+        <div class="example-chip" onclick="fillExample('최종_최종2_진짜최종.pptx')">
+          <div class="example-chip-label">❌ 위반 예시</div>
+          <div class="example-chip-name">최종_최종2_진짜최종.pptx</div>
+          <div class="example-chip-desc">차종코드·날짜·버전 모두 누락</div>
+        </div>
+        <div class="example-chip" onclick="fillExample('RS4_시험보고서_정면충돌-260513-v2.pdf')">
+          <div class="example-chip-label">✅ 올바른 예시</div>
+          <div class="example-chip-name">RS4_시험보고서_정면충돌-260513-v2.pdf</div>
+          <div class="example-chip-desc">규정 완전 준수</div>
+        </div>
+        <div class="example-chip" onclick="fillExample('이슈리스트(수정).xlsx')">
+          <div class="example-chip-label">❌ 위반 예시</div>
+          <div class="example-chip-name">이슈리스트(수정).xlsx</div>
+          <div class="example-chip-desc">차종·날짜·협력사명·버전 누락</div>
+        </div>
+        <div class="example-chip" onclick="fillExample('MQ4_이슈리스트_현대모비스콘솔-260511-v1.xlsx')">
+          <div class="example-chip-label">✅ 올바른 예시</div>
+          <div class="example-chip-name">MQ4_이슈리스트_현대모비스콘솔-260511-v1.xlsx</div>
+          <div class="example-chip-desc">협력사명 포함 완전 준수</div>
+        </div>
+        <div class="example-chip" onclick="fillExample('hs6 회의록 copy(2).docx')">
+          <div class="example-chip-label">❌ 위반 예시</div>
+          <div class="example-chip-name">hs6 회의록 copy(2).docx</div>
+          <div class="example-chip-desc">소문자·버전 오류·copy 접미사</div>
+        </div>
+        <div class="example-chip" onclick="fillExample('BD4_DR검토서_크래시패드조립성-260510-v3.docx')">
+          <div class="example-chip-label">✅ 올바른 예시</div>
+          <div class="example-chip-name">BD4_DR검토서_크래시패드조립성-260510-v3.docx</div>
+          <div class="example-chip-desc">DR 검토서 규정 준수</div>
+        </div>
+        <div class="example-chip" onclick="fillExample('RS4 설계 v_final_최종.dwg')">
+          <div class="example-chip-label">❌ 위반 예시</div>
+          <div class="example-chip-name">RS4 설계 v_final_최종.dwg</div>
+          <div class="example-chip-desc">날짜 누락·버전 형식 오류</div>
+        </div>
+        <div class="example-chip" onclick="fillExample('HS6_설계도면_운전석크래시패드-260507-v1.dwg')">
+          <div class="example-chip-label">✅ 올바른 예시</div>
+          <div class="example-chip-name">HS6_설계도면_운전석크래시패드-260507-v1.dwg</div>
+          <div class="example-chip-desc">설계도면 규정 준수</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RECENT VALIDATIONS -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">🕐 최근 검증 이력 (오늘)</div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>시간</th><th>파일명</th><th>결과</th><th>담당자</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="color:var(--text3)">09:38</td>
+              <td><span style="font-family:var(--mono);font-size:11px">RS4_시험보고서_측면충돌-260513-v1.pdf</span></td>
+              <td><span class="tag green">✅ 준수</span></td>
+              <td>이지호</td>
+            </tr>
+            <tr>
+              <td style="color:var(--text3)">09:21</td>
+              <td><span style="font-family:var(--mono);font-size:11px">최신버전최종.pptx</span></td>
+              <td><span class="tag red">❌ 위반</span></td>
+              <td>김민준</td>
+            </tr>
+            <tr>
+              <td style="color:var(--text3)">08:55</td>
+              <td><span style="font-family:var(--mono);font-size:11px">MQ4_이슈리스트_한온시스템-260513-v2.xlsx</span></td>
+              <td><span class="tag green">✅ 준수</span></td>
+              <td>최수빈</td>
+            </tr>
+            <tr>
+              <td style="color:var(--text3)">08:44</td>
+              <td><span style="font-family:var(--mono);font-size:11px">BD4 회의록(수정본).docx</span></td>
+              <td><span class="tag red">❌ 위반</span></td>
+              <td>박서연</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================== FOLDERS ============================== -->
+  <div class="page" id="page-folders">
+    <div class="section-title">폴더 현황 분석</div>
+    <div class="section-sub">팀 마스터 OneDrive 기준 · 폴더 깊이·구조·규정 위반 자동 탐지</div>
+
+    <div class="grid-4" style="margin-bottom:20px">
+      <div class="kpi-card blue">
+        <div class="kpi-icon">📂</div>
+        <div class="kpi-label">전체 폴더 수</div>
+        <div class="kpi-value">1,247<span class="kpi-unit">개</span></div>
+        <div class="kpi-change neutral">팀 마스터 + 개인 OneDrive 합산</div>
+      </div>
+      <div class="kpi-card red">
+        <div class="kpi-icon">🔴</div>
+        <div class="kpi-label">깊이 초과 폴더</div>
+        <div class="kpi-value">23<span class="kpi-unit">개</span></div>
+        <div class="kpi-change neutral">5단계 초과 (최대 7단계 발견)</div>
+      </div>
+      <div class="kpi-card yellow">
+        <div class="kpi-icon">📁</div>
+        <div class="kpi-label">임시폴더 방치</div>
+        <div class="kpi-value">8<span class="kpi-unit">개</span></div>
+        <div class="kpi-change neutral">"새 폴더" 이름 그대로 방치</div>
+      </div>
+      <div class="kpi-card green">
+        <div class="kpi-icon">✅</div>
+        <div class="kpi-label">규정 준수 폴더</div>
+        <div class="kpi-value">94<span class="kpi-unit">%</span></div>
+        <div class="kpi-change up">▲ 전월 대비 +12%p</div>
+      </div>
+    </div>
+
+    <div class="grid-12">
+      <!-- 폴더 구조 -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">📁 팀 마스터 폴더 구조 (표준)</div>
+          <span class="tag green">v1.0 표준</span>
+        </div>
+        <div class="tree">
+
+          <div class="tree-item">
+            <span class="tree-icon">📂</span>
+            <span class="tree-name folder">팀_마스터_OneDrive</span>
+            <span class="tree-badge ok">루트</span>
+          </div>
+
+          <!-- RS4 -->
+          <div class="tree-indent">
+            <div class="tree-item">
+              <span class="tree-icon">🚗</span>
+              <span class="tree-name folder">RS4</span>
+            </div>
+            <div class="tree-indent">
+              <div class="tree-item"><span class="tree-icon">📁</span><span class="tree-name folder">01_P1_선행기획</span></div>
+              <div class="tree-indent">
+                <div class="tree-item"><span class="tree-icon">📁</span><span class="tree-name folder">DR검토서</span></div>
+                <div class="tree-indent">
+                  <div class="tree-item"><span class="tree-icon">📄</span><span class="tree-name file">RS4_DR검토서_선행기획킥오프-250803-v1.pptx</span><span class="tree-badge ok">✓</span></div>
+                  <div class="tree-item"><span class="tree-icon">📄</span><span class="tree-name file">RS4_DR검토서_컨셉확정-251120-v2.pptx</span><span class="tree-badge ok">✓</span></div>
+                </div>
+                <div class="tree-item"><span class="tree-icon">📁</span><span class="tree-name folder">회의록</span></div>
+                <div class="tree-item"><span class="tree-icon">📁</span><span class="tree-name folder">이슈리스트</span></div>
+              </div>
+
+              <div class="tree-item"><span class="tree-icon">📁</span><span class="tree-name folder">02_P2_상세설계</span></div>
+              <div class="tree-indent">
+                <div class="tree-item"><span class="tree-icon">📁</span><span class="tree-name folder">시험보고서</span></div>
+                <div class="tree-indent">
+                  <div class="tree-item"><span class="tree-icon">📄</span><span class="tree-name file">RS4_시험보고서_정면충돌-260310-v1.pdf</span><span class="tree-badge ok">✓</span></div>
+                  <div class="tree-item"><span class="tree-icon">📄</span><span class="tree-name file">RS4_시험보고서_측면충돌-260513-v2.pdf</span><span class="tree-badge ok">✓</span></div>
+                </div>
+                <div class="tree-item"><span class="tree-icon">📁</span><span class="tree-name folder">설계도면</span></div>
+                <div class="tree-item"><span class="tree-icon">📁</span><span class="tree-name folder">이슈리스트_현대모비스</span></div>
+                <div class="tree-indent">
+                  <div class="tree-item"><span class="tree-icon">📄</span><span class="tree-name file" style="color:var(--red)">이슈리스트(수정).xlsx</span><span class="tree-badge err">위반</span></div>
+                </div>
+              </div>
+
+              <div class="tree-item"><span class="tree-icon">📁</span><span class="tree-name folder">03_M_시작차</span></div>
+              <div class="tree-item"><span class="tree-icon">📁</span><span class="tree-name folder">04_양산</span></div>
+              <div class="tree-item"><span class="tree-icon">📁</span><span class="tree-name folder">_OLD</span><span class="tree-badge warn">임시병행</span></div>
+            </div>
+          </div>
+
+          <!-- MQ4 PE -->
+          <div class="tree-indent">
+            <div class="tree-item"><span class="tree-icon">🚗</span><span class="tree-name folder">MQ4_PE</span></div>
+            <div class="tree-indent">
+              <div class="tree-item"><span class="tree-icon">📁</span><span class="tree-name folder">01_P1_선행기획</span></div>
+              <div class="tree-item"><span class="tree-icon">📁</span><span class="tree-name folder">02_P2_상세설계</span></div>
+              <div class="tree-indent">
+                <div class="tree-item"><span class="tree-icon">📁</span><span class="tree-name folder">새 폴더 (2)</span><span class="tree-badge err">정리필요</span></div>
+              </div>
+              <div class="tree-item"><span class="tree-icon">📁</span><span class="tree-name folder">03_M_시작차</span></div>
+              <div class="tree-item"><span class="tree-icon">📁</span><span class="tree-name folder">04_양산</span></div>
+            </div>
+          </div>
+
+          <!-- BD4 / HS6 -->
+          <div class="tree-indent">
+            <div class="tree-item"><span class="tree-icon">🚗</span><span class="tree-name folder">BD4</span></div>
+          </div>
+          <div class="tree-indent">
+            <div class="tree-item"><span class="tree-icon">🚗</span><span class="tree-name folder">HS6</span></div>
+          </div>
+          <div class="tree-indent">
+            <div class="tree-item"><span class="tree-icon">📦</span><span class="tree-name folder">_Archive</span><span class="tree-badge gray">양산3년+</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 우측 패널 -->
+      <div>
+        <!-- VIOLATIONS -->
+        <div class="card" style="margin-bottom:16px">
+          <div class="card-header">
+            <div class="card-title">🔴 폴더 구조 위반 목록</div>
+          </div>
+
+          <div class="violation-row">
+            <div>
+              <div class="violation-file">MQ4_PE / 02_P2 / 새 폴더 (2)</div>
+              <div class="violation-owner">담당: 박서연 · 30일 방치</div>
+            </div>
+            <div class="violation-reason">임시폴더 방치</div>
+          </div>
+
+          <div class="violation-row">
+            <div>
+              <div class="violation-file">RS4 / 02_P2 / 보고서 / 기타 / 참고 / 2026 / 1월</div>
+              <div class="violation-owner">담당: 오동현 · 7단계 깊이</div>
+            </div>
+            <div class="violation-reason">깊이 5단계 초과</div>
+          </div>
+
+          <div class="violation-row">
+            <div>
+              <div class="violation-file">BD4 / 01_P1 / 하위폴더 6개</div>
+              <div class="violation-owner">담당: 이준혁 · 하위 폴더 6개</div>
+            </div>
+            <div class="violation-reason">하위폴더 4개 초과</div>
+          </div>
+
+          <div class="violation-row">
+            <div>
+              <div class="violation-file">HS6 / 개인임시 / 개인임시2</div>
+              <div class="violation-owner">담당: 신예림 · 개인 폴더 공유</div>
+            </div>
+            <div class="violation-reason">개인폴더 마스터 혼입</div>
+          </div>
+        </div>
+
+        <!-- DEPTH CHART -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">📊 폴더 깊이 분포</div>
+          </div>
+          <div class="bar-chart">
+            <div class="bar-row">
+              <div class="bar-label" style="width:80px">1단계</div>
+              <div class="bar-track">
+                <div class="bar-fill" style="width:20%;background:var(--green)"><span>4개</span></div>
+              </div>
+            </div>
+            <div class="bar-row">
+              <div class="bar-label" style="width:80px">2단계</div>
+              <div class="bar-track">
+                <div class="bar-fill" style="width:55%;background:var(--green)"><span>87개</span></div>
+              </div>
+            </div>
+            <div class="bar-row">
+              <div class="bar-label" style="width:80px">3단계</div>
+              <div class="bar-track">
+                <div class="bar-fill" style="width:80%;background:var(--green)"><span>312개</span></div>
+              </div>
+            </div>
+            <div class="bar-row">
+              <div class="bar-label" style="width:80px">4단계</div>
+              <div class="bar-track">
+                <div class="bar-fill" style="width:70%;background:var(--accent)"><span>248개</span></div>
+              </div>
+            </div>
+            <div class="bar-row">
+              <div class="bar-label" style="width:80px">5단계</div>
+              <div class="bar-track">
+                <div class="bar-fill" style="width:40%;background:var(--yellow)"><span>143개</span></div>
+              </div>
+            </div>
+            <div class="bar-row">
+              <div class="bar-label" style="width:80px" style="color:var(--red)">6단계+</div>
+              <div class="bar-track">
+                <div class="bar-fill" style="width:10%;background:var(--red)"><span>23개 ⚠️</span></div>
+              </div>
+            </div>
+          </div>
+          <div style="margin-top:10px;font-size:10px;color:var(--text3)">※ 6단계 이상은 v1.0 규정 위반 (최대 5단계)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================== MIGRATION ============================== -->
+  <div class="page" id="page-migration">
+    <div class="section-title">마이그레이션 현황</div>
+    <div class="section-sub">기존 자료 단계적 이관 계획 · 총 4개 Phase · 현재 Phase 2 진행중</div>
+
+    <!-- 전체 진행률 -->
+    <div class="card" style="margin-bottom:20px">
+      <div class="card-header">
+        <div class="card-title">📈 전체 마이그레이션 진행률</div>
+        <span style="font-size:13px;font-weight:700;color:var(--accent2)">34%</span>
+      </div>
+      <div class="progress-bar-wrap" style="height:12px;margin-bottom:8px">
+        <div class="progress-bar blue" style="width:34%"></div>
+      </div>
+      <div style="display:flex;gap:24px;font-size:11px;color:var(--text3)">
+        <span>완료: 4,368개</span>
+        <span>진행중: 1,203개</span>
+        <span>미착수: 7,276개</span>
+        <span>총: 12,847개</span>
+      </div>
+    </div>
+
+    <!-- PHASES -->
+    <div class="phase-card">
+      <div class="phase-num" style="background:rgba(34,197,94,0.15);color:var(--green)">1</div>
+      <div class="phase-content">
+        <div class="phase-title">Phase 1 — 문제 정의 및 규정 초안 작성</div>
+        <div class="phase-date">✅ 완료 · 2026년 3월~4월</div>
+        <ul class="phase-tasks">
+          <li><span class="check-icon">✅</span>팀 내 폴더/파일 관리 현황 파악 완료</li>
+          <li><span class="check-icon">✅</span>문제점 5가지 도출 완료</li>
+          <li><span class="check-icon">✅</span>Claude AI 활용 규정 초안(v1.0) 작성 완료</li>
+          <li><span class="check-icon">✅</span>팀 피드백 수렴 후 v1.1 확정</li>
+          <li><span class="check-icon">✅</span>RS4 P1/P2 단계 파일 마이그레이션 완료 (487개)</li>
+        </ul>
+      </div>
+      <div>
+        <div style="text-align:center;margin-bottom:6px">
+          <div style="font-size:22px;font-weight:900;color:var(--green)">100%</div>
+          <div style="font-size:10px;color:var(--text3)">완료</div>
+        </div>
+        <div class="progress-bar-wrap" style="width:80px">
+          <div class="progress-bar green" style="width:100%"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="phase-card" style="border-color:rgba(59,130,246,0.3)">
+      <div class="phase-num" style="background:rgba(59,130,246,0.15);color:var(--accent2)">2</div>
+      <div class="phase-content">
+        <div class="phase-title">Phase 2 — 팀 전파 및 신규 자료 즉시 적용</div>
+        <div class="phase-date">🔵 진행중 · 2026년 6월 1일 시작</div>
+        <ul class="phase-tasks">
+          <li><span class="check-icon">✅</span>전체 팀 공유 및 온보딩 가이드 배포 완료</li>
+          <li><span class="check-icon">✅</span>팀 마스터 OneDrive 폴더 구조 생성 완료</li>
+          <li><span class="check-icon">⏳</span>현재 진행 중 차종(P1/P2/M) 우선 적용 — RS4 완료, MQ4 PE 진행중</li>
+          <li><span class="check-icon">⏳</span>신입사원 온보딩 체크리스트 운영 — 초안 작성 완료, 적용 예정</li>
+          <li><span class="check-icon">🔲</span>BD4 / HS6 적용 — 미착수</li>
+        </ul>
+      </div>
+      <div>
+        <div style="text-align:center;margin-bottom:6px">
+          <div style="font-size:22px;font-weight:900;color:var(--accent2)">58%</div>
+          <div style="font-size:10px;color:var(--text3)">진행중</div>
+        </div>
+        <div class="progress-bar-wrap" style="width:80px">
+          <div class="progress-bar blue" style="width:58%"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="phase-card">
+      <div class="phase-num" style="background:rgba(245,158,11,0.15);color:var(--yellow)">3</div>
+      <div class="phase-content">
+        <div class="phase-title">Phase 3 — 기존 자료 단계적 마이그레이션</div>
+        <div class="phase-date">⏳ 예정 · 3~6개월 내 (2026년 7월~10월)</div>
+        <ul class="phase-tasks">
+          <li><span class="check-icon">🔲</span>양산 1년 미만 차종 우선 이관 (RS4 04_양산 폴더)</li>
+          <li><span class="check-icon">🔲</span>양산 1~3년 차종 이관 (MQ4 PE)</li>
+          <li><span class="check-icon">🔲</span>차종별 담당자 책임 하에 정리</li>
+          <li><span class="check-icon">🔲</span>_OLD 폴더 임시 병행 운영 후 Archive 이동</li>
+        </ul>
+      </div>
+      <div>
+        <div style="text-align:center;margin-bottom:6px">
+          <div style="font-size:22px;font-weight:900;color:var(--yellow)">0%</div>
+          <div style="font-size:10px;color:var(--text3)">예정</div>
+        </div>
+        <div class="progress-bar-wrap" style="width:80px">
+          <div class="progress-bar yellow" style="width:0%"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="phase-card">
+      <div class="phase-num" style="background:rgba(100,116,139,0.15);color:var(--text3)">4</div>
+      <div class="phase-content">
+        <div class="phase-title">Phase 4 — 월간/분기/연간 점검 및 규정 유지보수</div>
+        <div class="phase-date">🔲 지속 운영 예정</div>
+        <ul class="phase-tasks">
+          <li><span class="check-icon">🔲</span>월간: 담당자별 파일명 규칙 위반 자체 점검</li>
+          <li><span class="check-icon">🔲</span>분기: 폴더 청소 데이 운영 (전원 동시·2시간) — 1차: 2026-09-03 예정</li>
+          <li><span class="check-icon">🔲</span>연간: 규정 재검토 및 필요 시 버전 업</li>
+          <li><span class="check-icon">🔲</span>팀장 깊이/개수 점검 리포트 자동 발송 구현</li>
+        </ul>
+      </div>
+      <div>
+        <div style="text-align:center;margin-bottom:6px">
+          <div style="font-size:22px;font-weight:900;color:var(--text3)">-</div>
+          <div style="font-size:10px;color:var(--text3)">예정</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 차종별 마이그레이션 현황 -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">🚗 차종별 마이그레이션 현황</div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>차종</th><th>개발단계</th><th>총 파일수</th><th>완료</th><th>진행중</th><th>미착수</th><th>담당자</th><th>진행률</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="tag blue">RS4</span></td>
+              <td>P2 상세설계</td>
+              <td>4,213</td>
+              <td><span style="color:var(--green)">3,680</span></td>
+              <td><span style="color:var(--yellow)">401</span></td>
+              <td><span style="color:var(--text3)">132</span></td>
+              <td>이지호</td>
+              <td>
+                <div style="display:flex;align-items:center;gap:8px">
+                  <div class="progress-bar-wrap" style="width:80px"><div class="progress-bar green" style="width:87%"></div></div>
+                  <span style="font-size:11px;color:var(--green)">87%</span>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td><span class="tag purple">MQ4 PE</span></td>
+              <td>P1 선행기획</td>
+              <td>3,104</td>
+              <td><span style="color:var(--green)">688</span></td>
+              <td><span style="color:var(--yellow)">802</span></td>
+              <td><span style="color:var(--text3)">1,614</span></td>
+              <td>최수빈</td>
+              <td>
+                <div style="display:flex;align-items:center;gap:8px">
+                  <div class="progress-bar-wrap" style="width:80px"><div class="progress-bar blue" style="width:22%"></div></div>
+                  <span style="font-size:11px;color:var(--accent2)">22%</span>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td><span class="tag yellow">BD4</span></td>
+              <td>P1 선행기획</td>
+              <td>2,874</td>
+              <td><span style="color:var(--text3)">0</span></td>
+              <td><span style="color:var(--text3)">0</span></td>
+              <td><span style="color:var(--text3)">2,874</span></td>
+              <td>정다은</td>
+              <td>
+                <div style="display:flex;align-items:center;gap:8px">
+                  <div class="progress-bar-wrap" style="width:80px"><div class="progress-bar red" style="width:0%"></div></div>
+                  <span style="font-size:11px;color:var(--text3)">0%</span>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td><span class="tag orange" style="background:rgba(249,115,22,0.15);color:var(--orange)">HS6</span></td>
+              <td>양산</td>
+              <td>2,656</td>
+              <td><span style="color:var(--text3)">0</span></td>
+              <td><span style="color:var(--text3)">0</span></td>
+              <td><span style="color:var(--text3)">2,656</span></td>
+              <td>박지훈</td>
+              <td>
+                <div style="display:flex;align-items:center;gap:8px">
+                  <div class="progress-bar-wrap" style="width:80px"><div class="progress-bar red" style="width:0%"></div></div>
+                  <span style="font-size:11px;color:var(--text3)">0%</span>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================== RULES ============================== -->
+  <div class="page" id="page-rules">
+    <div class="section-title">규정 가이드 — v1.0</div>
+    <div class="section-sub">차종개발팀 OneDrive 폴더 & 파일 관리 규정 · 제정일: 2026-04-01 · 담당: 강태욱</div>
+
+    <div class="grid-2">
+      <div>
+
+        <div class="rule-block">
+          <div class="rule-block-title">📐 핵심 파일명 규칙</div>
+          <p>
+            <strong style="color:white">형식:</strong><br>
+            <code>차종코드_문서종류_세부설명-YYMMDD-버전.확장자</code><br><br>
+            <strong style="color:white">예시:</strong><br>
+            <code>RS4_시험보고서_정면충돌-260513-v2.pdf</code><br>
+            <code>MQ4_이슈리스트_현대모비스콘솔-260511-v1.xlsx</code><br><br>
+            <strong style="color:white">이슈/품질 자료:</strong> 협력사명 필수 포함<br>
+            <code>RS4_이슈리스트_현대모비스단차-260513-v1.xlsx</code>
+          </p>
+        </div>
+
+        <div class="rule-block">
+          <div class="rule-block-title">🚗 차종 코드 목록</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px">
+            <div style="background:var(--bg2);padding:8px;border-radius:6px;font-family:var(--mono);font-size:12px;color:var(--accent2)">RS4<div style="font-family:'Noto Sans KR';color:var(--text3);font-size:10px;margin-top:2px">전기 SUV (P2 단계)</div></div>
+            <div style="background:var(--bg2);padding:8px;border-radius:6px;font-family:var(--mono);font-size:12px;color:var(--purple)">MQ4_PE<div style="font-family:'Noto Sans KR';color:var(--text3);font-size:10px;margin-top:2px">하이브리드 세단 (P1 단계)</div></div>
+            <div style="background:var(--bg2);padding:8px;border-radius:6px;font-family:var(--mono);font-size:12px;color:var(--yellow)">BD4<div style="font-family:'Noto Sans KR';color:var(--text3);font-size:10px;margin-top:2px">소형 SUV (P1 단계)</div></div>
+            <div style="background:var(--bg2);padding:8px;border-radius:6px;font-family:var(--mono);font-size:12px;color:var(--orange)">HS6<div style="font-family:'Noto Sans KR';color:var(--text3);font-size:10px;margin-top:2px">대형 세단 (양산 중)</div></div>
+          </div>
+        </div>
+
+        <div class="rule-block">
+          <div class="rule-block-title">📅 날짜 형식</div>
+          <p>
+            <code>YYMMDD</code> 형식 사용 (6자리 숫자)<br><br>
+            ✅ 올바른 예: <code>260513</code> → 2026년 5월 13일<br>
+            ❌ 잘못된 예: <code>2026-05-13</code> / <code>20260513</code> / <code>5월13일</code>
+          </p>
+        </div>
+
+        <div class="rule-block">
+          <div class="rule-block-title">🔢 버전 형식</div>
+          <p>
+            <code>v숫자</code> 형식 사용<br><br>
+            ✅ 올바른 예: <code>v1</code> / <code>v2</code> / <code>v10</code><br>
+            ❌ 잘못된 예: <code>final</code> / <code>최종</code> / <code>V1</code> / <code>v_final</code> / <code>v1.0</code>
+          </p>
+        </div>
+
+      </div>
+
+      <div>
+
+        <div class="rule-block">
+          <div class="rule-block-title">📂 폴더 구조 규칙</div>
+          <p>
+            <strong style="color:white">최대 5단계 / 한 폴더 내 하위 폴더 최대 4개</strong><br><br>
+            표준 구조:<br>
+            <code>차종 → 개발단계 → 업무영역 → 파일</code><br><br>
+            개발단계 폴더명:<br>
+            <code>01_P1_선행기획</code><br>
+            <code>02_P2_상세설계</code><br>
+            <code>03_M_시작차</code><br>
+            <code>04_양산</code><br>
+            <code>_OLD</code> (마이그레이션 임시)<br>
+            <code>_Archive</code> (양산 3년+)
+          </p>
+        </div>
+
+        <div class="rule-block">
+          <div class="rule-block-title">📋 문서 종류 코드</div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px">
+            <span class="tag blue">시험보고서</span>
+            <span class="tag green">DR검토서</span>
+            <span class="tag red">이슈리스트</span>
+            <span class="tag yellow">회의록</span>
+            <span class="tag purple">설계도면</span>
+            <span class="tag gray">발표자료</span>
+            <span class="tag gray">온보딩자료</span>
+            <span class="tag gray">협력사자료</span>
+          </div>
+        </div>
+
+        <div class="rule-block">
+          <div class="rule-block-title">🔗 공유 원칙</div>
+          <p>
+            ✅ OneDrive 링크 공유 원칙<br>
+            ❌ 파일 첨부 이메일 발송 금지<br>
+            ❌ USB/외장하드 저장 금지<br>
+            ❌ 개인 클라우드(구글 드라이브 등) 저장 금지<br><br>
+            링크 공유 시 <strong style="color:white">편집자</strong> 또는 <strong style="color:white">뷰어</strong> 권한 명시 필수
+          </p>
+        </div>
+
+        <div class="rule-block">
+          <div class="rule-block-title">📅 정기 점검 일정</div>
+          <p>
+            <strong style="color:white">월간:</strong> 담당자별 자체 점검 (매월 마지막 금요일)<br>
+            <strong style="color:white">분기:</strong> 폴더 청소 데이 (팀 전원·2시간)<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;1차: 2026-06-03 / 2차: 2026-09-02<br>
+            <strong style="color:white">연간:</strong> 규정 개정 검토 (매년 1월)
+          </p>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- 빠른 참조 카드 -->
+    <div class="card" style="background:linear-gradient(135deg,#111827,#1a2744);border-color:rgba(59,130,246,0.3)">
+      <div class="card-header">
+        <div class="card-title" style="color:var(--accent2)">⚡ 빠른 참조 카드 — 저장 전 5초 체크리스트</div>
+        <span class="tag blue">v1.0</span>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px">
+        <div style="text-align:center;padding:12px;background:rgba(59,130,246,0.1);border-radius:8px;border:1px solid rgba(59,130,246,0.2)">
+          <div style="font-size:22px;margin-bottom:6px">🚗</div>
+          <div style="font-size:10px;color:var(--text3);margin-bottom:4px">차종코드</div>
+          <div style="font-family:var(--mono);font-size:11px;color:var(--accent2)">RS4 / MQ4 / BD4 / HS6</div>
+        </div>
+        <div style="text-align:center;padding:12px;background:rgba(34,197,94,0.1);border-radius:8px;border:1px solid rgba(34,197,94,0.2)">
+          <div style="font-size:22px;margin-bottom:6px">📄</div>
+          <div style="font-size:10px;color:var(--text3);margin-bottom:4px">문서종류</div>
+          <div style="font-family:var(--mono);font-size:11px;color:var(--green)">시험보고서 등</div>
+        </div>
+        <div style="text-align:center;padding:12px;background:rgba(245,158,11,0.1);border-radius:8px;border:1px solid rgba(245,158,11,0.2)">
+          <div style="font-size:22px;margin-bottom:6px">📝</div>
+          <div style="font-size:10px;color:var(--text3);margin-bottom:4px">세부설명</div>
+          <div style="font-family:var(--mono);font-size:11px;color:var(--yellow)">정면충돌 등</div>
+        </div>
+        <div style="text-align:center;padding:12px;background:rgba(168,85,247,0.1);border-radius:8px;border:1px solid rgba(168,85,247,0.2)">
+          <div style="font-size:22px;margin-bottom:6px">📅</div>
+          <div style="font-size:10px;color:var(--text3);margin-bottom:4px">날짜 (YYMMDD)</div>
+          <div style="font-family:var(--mono);font-size:11px;color:var(--purple)">260513</div>
+        </div>
+        <div style="text-align:center;padding:12px;background:rgba(249,115,22,0.1);border-radius:8px;border:1px solid rgba(249,115,22,0.2)">
+          <div style="font-size:22px;margin-bottom:6px">🔢</div>
+          <div style="font-size:10px;color:var(--text3);margin-bottom:4px">버전</div>
+          <div style="font-family:var(--mono);font-size:11px;color:var(--orange)">v1 / v2 / v3</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<script>
+function showPage(id, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  el.classList.add('active');
+}
+
+function fillExample(name) {
+  document.getElementById('filename-input').value = name;
+  validateFilename();
+}
+
+function clearValidator() {
+  document.getElementById('filename-input').value = '';
+  document.getElementById('result-box').style.display = 'none';
+}
+
+// ── 파일명 검증 로직 ──────────────────────────────────
+const VALID_CAR_CODES = ['RS4', 'MQ4', 'MQ4_PE', 'BD4', 'HS6'];
+const VALID_DOC_TYPES = ['시험보고서','DR검토서','이슈리스트','회의록','설계도면','발표자료','온보딩자료','협력사자료'];
+const ISSUE_DOC_TYPES = ['이슈리스트','협력사자료'];
+const KNOWN_SUPPLIERS = ['현대모비스','한온시스템','현대트랜시스','에스엘','대동','서진','일진','보쉬','콘티넨탈','이엘에스','서울라이팅'];
+
+function validateFilename() {
+  const raw = document.getElementById('filename-input').value.trim();
+  if (!raw) return;
+
+  const resultBox = document.getElementById('result-box');
+  const resultStatus = document.getElementById('result-status');
+  const resultGrid = document.getElementById('result-grid');
+  const errorSection = document.getElementById('error-section');
+  const suggestSection = document.getElementById('suggest-section');
+
+  resultBox.style.display = 'block';
+
+  const errors = [];
+  const parts = { car: null, doc: null, detail: null, date: null, ver: null, ext: null };
+
+  // ① 확장자
+  const dotIdx = raw.lastIndexOf('.');
+  if (dotIdx === -1 || dotIdx === raw.length - 1) {
+    errors.push('확장자가 없습니다 (.pdf, .xlsx, .pptx, .docx 등 필요)');
+  } else {
+    parts.ext = raw.slice(dotIdx + 1).toLowerCase();
+  }
+
+  const name = dotIdx !== -1 ? raw.slice(0, dotIdx) : raw;
+
+  // ② 문제적 패턴 감지
+  if (/최종|final|copy|수정|임시|temp|new\s*폴더|새\s*폴더/i.test(name)) {
+    errors.push('"최종", "final", "copy", "수정" 등의 금지 키워드가 포함되어 있습니다');
+  }
+  if (/\(|\)/.test(name)) {
+    errors.push('괄호()는 파일명에 사용할 수 없습니다');
+  }
+  if (/\s/.test(name)) {
+    errors.push('파일명에 공백이 포함되어 있습니다 (언더스코어 _ 또는 하이픈 - 사용)');
+  }
+  if (/[가-힣A-Za-z][0-9]{8,}/.test(name)) {
+    errors.push('날짜 형식이 YYMMDD(6자리)가 아닙니다');
+  }
+
+  // ③ 구조 파싱 (차종_문서종류_세부설명-날짜-버전)
+  // 형식: {CAR}_{DOCTYPE}_{DETAIL}-{DATE}-{VER}
+  const structMatch = name.match(/^([^_]+)_([^_]+)_([^-]+)-(\d{6})-([vV]\d+)$/);
+
+  if (structMatch) {
+    const [, car, doc, detail, date, ver] = structMatch;
+    parts.car = car; parts.doc = doc; parts.detail = detail; parts.date = date; parts.ver = ver;
+
+    // 차종 검증
+    if (!VALID_CAR_CODES.includes(car.toUpperCase())) {
+      errors.push(`차종 코드 "${car}" 이 올바르지 않습니다 (허용: ${VALID_CAR_CODES.join(', ')})`);
+    }
+    // 문서종류 검증
+    if (!VALID_DOC_TYPES.includes(doc)) {
+      errors.push(`문서 종류 "${doc}" 이 올바르지 않습니다 (허용: ${VALID_DOC_TYPES.join(', ')})`);
+    }
+    // 날짜 검증
+    const y = parseInt(date.slice(0,2)), m = parseInt(date.slice(2,4)), d = parseInt(date.slice(4,6));
+    if (m < 1 || m > 12 || d < 1 || d > 31) {
+      errors.push(`날짜 "${date}" 이 유효하지 않습니다 (YYMMDD 형식 · 예: 260513)`);
+    }
+    // 버전 검증
+    if (!/^v\d+$/i.test(ver)) {
+      errors.push(`버전 "${ver}" 형식이 올바르지 않습니다 (예: v1, v2, v10)`);
+    } else if (ver[0] === 'V') {
+      errors.push(`버전은 소문자 v를 사용하세요 (${ver} → ${ver.toLowerCase()})`);
+    }
+    // 이슈 자료 협력사명 검증
+    if (ISSUE_DOC_TYPES.includes(doc)) {
+      const hasSupplier = KNOWN_SUPPLIERS.some(s => detail.includes(s));
+      if (!hasSupplier) {
+        errors.push(`이슈리스트/협력사자료는 세부설명에 협력사명이 포함되어야 합니다 (예: 현대모비스, 한온시스템)`);
+      }
+    }
+  } else {
+    // 개별 요소 감지
+    const hasCar = VALID_CAR_CODES.some(c => name.toUpperCase().includes(c));
+    const hasDoc = VALID_DOC_TYPES.some(d => name.includes(d));
+    const hasDate = /\d{6}/.test(name);
+    const hasVer = /v\d+/i.test(name);
+
+    if (!hasCar) errors.push('차종 코드가 없습니다 (예: RS4, MQ4, BD4, HS6)');
+    if (!hasDoc) errors.push('문서 종류가 없습니다 (예: 시험보고서, DR검토서, 이슈리스트)');
+    if (!hasDate) errors.push('날짜가 없거나 형식이 올바르지 않습니다 (YYMMDD 6자리 · 예: 260513)');
+    if (!hasVer) errors.push('버전이 없거나 형식이 올바르지 않습니다 (예: v1, v2)');
+    if (errors.length === 0 && !structMatch) {
+      errors.push('파일명 구조가 올바르지 않습니다. 형식: 차종_문서종류_세부설명-YYMMDD-버전.확장자');
+    }
+
+    if (hasCar) parts.car = VALID_CAR_CODES.find(c => name.toUpperCase().includes(c));
+    if (hasDoc) parts.doc = VALID_DOC_TYPES.find(d => name.includes(d));
+    if (hasDate) parts.date = (name.match(/\d{6}/) || [])[0];
+    if (hasVer) parts.ver = (name.match(/v\d+/i) || [])[0]?.toLowerCase();
+  }
+
+  const isValid = errors.length === 0;
+
+  // ── RENDER ──────────────────────────────────────────
+  resultBox.className = 'result-box ' + (isValid ? 'valid' : 'invalid');
+
+  resultStatus.className = 'result-status ' + (isValid ? 'valid-text' : 'invalid-text');
+  resultStatus.innerHTML = isValid
+    ? '✅ 규정 준수 — 이 파일명은 v1.0 규정을 완전히 준수합니다'
+    : `❌ 규정 위반 — ${errors.length}개의 오류가 발견되었습니다`;
+
+  const partLabel = (val, required) => {
+    if (!val) return `<div class="result-part-value ${required ? 'err' : 'na'}">—</div>`;
+    return `<div class="result-part-value ok">${val}</div>`;
+  };
+
+  resultGrid.innerHTML = `
+    <div class="result-part">
+      <div class="result-part-label">차종 코드</div>
+      ${parts.car ? `<div class="result-part-value ok">${parts.car}</div>` : '<div class="result-part-value err">누락</div>'}
+    </div>
+    <div class="result-part">
+      <div class="result-part-label">문서 종류</div>
+      ${parts.doc ? `<div class="result-part-value ok">${parts.doc}</div>` : '<div class="result-part-value err">누락</div>'}
+    </div>
+    <div class="result-part">
+      <div class="result-part-label">세부 설명</div>
+      ${parts.detail ? `<div class="result-part-value ok">${parts.detail}</div>` : '<div class="result-part-value na">—</div>'}
+    </div>
+    <div class="result-part">
+      <div class="result-part-label">날짜 (YYMMDD)</div>
+      ${parts.date ? `<div class="result-part-value ok">${parts.date}</div>` : '<div class="result-part-value err">누락</div>'}
+    </div>
+    <div class="result-part">
+      <div class="result-part-label">버전</div>
+      ${parts.ver ? `<div class="result-part-value ok">${parts.ver.toLowerCase()}</div>` : '<div class="result-part-value err">누락</div>'}
+    </div>
+  `;
+
+  if (!isValid) {
+    errorSection.innerHTML = `
+      <div style="margin-top:12px;font-size:11px;font-weight:600;color:var(--red);margin-bottom:6px">발견된 오류:</div>
+      <ul class="error-list">
+        ${errors.map(e => `<li><span>⚠</span> ${e}</li>`).join('')}
+      </ul>
+    `;
+
+    // 자동 제안
+    const today = new Date();
+    const yy = String(today.getFullYear()).slice(-2);
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const dd = String(today.getDate()).padStart(2, '0');
+    const todayStr = yy + mm + dd;
+
+    const suggestedCar = parts.car || 'RS4';
+    const suggestedDoc = parts.doc || '시험보고서';
+    const suggestedDetail = parts.detail || '세부내용입력';
+    const suggestedDate = parts.date || todayStr;
+    const suggestedVer = parts.ver ? parts.ver.toLowerCase() : 'v1';
+    const suggestedExt = parts.ext || 'pdf';
+    const suggested = `${suggestedCar}_${suggestedDoc}_${suggestedDetail}-${suggestedDate}-${suggestedVer}.${suggestedExt}`;
+
+    suggestSection.innerHTML = `
+      <div class="suggest-box">
+        <div class="suggest-label">💡 AI 권장 파일명 (자동 생성)</div>
+        <div class="suggest-value">${suggested}</div>
+        <div style="font-size:10px;color:var(--text3);margin-top:6px">※ 세부설명은 실제 내용에 맞게 수정하세요</div>
+      </div>
+    `;
+  } else {
+    errorSection.innerHTML = '';
+    suggestSection.innerHTML = `
+      <div style="margin-top:12px;background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.2);border-radius:8px;padding:12px;font-size:12px;color:var(--green)">
+        ✅ 이 파일명으로 저장하세요. 규정을 완전히 준수합니다.
+      </div>
+    `;
+  }
+}
+
+// Enter key
+document.getElementById('filename-input').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') validateFilename();
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,3883 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>반도체 가격 전망 TOOL | 현대모비스 전자부품구매실</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #0a0e1a;
+    --surface: #111827;
+    --surface2: #1a2235;
+    --border: #1e2d45;
+    --accent: #00d4ff;
+    --accent2: #0095b3;
+    --green: #00e676;
+    --red: #ff4444;
+    --yellow: #ffcc00;
+    --text: #e8f4f8;
+    --muted: #7a9ab0;
+    --font: 'Noto Sans KR', sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* TOP HEADER */
+  .top-header {
+    background: linear-gradient(135deg, #0d1929 0%, #0a1520 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .logo-area { display: flex; align-items: center; gap: 14px; }
+  .logo-badge {
+    background: var(--accent);
+    color: #000;
+    font-weight: 900;
+    font-size: 11px;
+    padding: 4px 10px;
+    letter-spacing: 2px;
+    clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 50%, calc(100% - 8px) 100%, 0 100%);
+  }
+  .logo-text { font-size: 15px; font-weight: 700; color: var(--text); }
+  .logo-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .header-right { display: flex; align-items: center; gap: 20px; }
+  .live-badge {
+    display: flex; align-items: center; gap: 6px;
+    background: rgba(0,230,118,0.1); border: 1px solid rgba(0,230,118,0.3);
+    border-radius: 20px; padding: 4px 12px; font-size: 11px; color: var(--green);
+  }
+  .live-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: pulse 1.5s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+  .header-time { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+
+  /* TABS */
+  .tab-bar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    padding: 0 24px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .tab-bar::-webkit-scrollbar { display: none; }
+  .tab-btn {
+    background: none; border: none; color: var(--muted);
+    font-family: var(--font); font-size: 13px; font-weight: 500;
+    padding: 14px 20px; cursor: pointer; white-space: nowrap;
+    border-bottom: 2px solid transparent; transition: all 0.2s;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .tab-btn:hover { color: var(--text); }
+  .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .tab-icon { font-size: 15px; }
+  .tab-badge {
+    background: var(--red); color: #fff; font-size: 9px;
+    font-weight: 700; padding: 1px 5px; border-radius: 8px;
+  }
+
+  /* MAIN CONTENT */
+  .main { padding: 24px; max-width: 1600px; margin: 0 auto; }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+
+  /* KPI CARDS */
+  .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+  .kpi-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 20px;
+    position: relative; overflow: hidden;
+  }
+  .kpi-card::before {
+    content: ''; position: absolute; top: 0; left: 0;
+    width: 3px; height: 100%; background: var(--accent);
+  }
+  .kpi-card.green::before { background: var(--green); }
+  .kpi-card.red::before { background: var(--red); }
+  .kpi-card.yellow::before { background: var(--yellow); }
+  .kpi-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+  .kpi-value { font-family: var(--mono); font-size: 28px; font-weight: 700; margin: 8px 0 4px; color: var(--text); }
+  .kpi-change { font-size: 12px; }
+  .kpi-change.up { color: var(--red); }
+  .kpi-change.down { color: var(--green); }
+  .kpi-change.flat { color: var(--muted); }
+
+  /* PANELS */
+  .panel {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; overflow: hidden; margin-bottom: 20px;
+  }
+  .panel-header {
+    padding: 16px 20px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .panel-title { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--accent); }
+  .panel-body { padding: 20px; }
+
+  /* GRID LAYOUTS */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+  .grid-65 { display: grid; grid-template-columns: 1.8fr 1fr; gap: 20px; }
+
+  /* TABLES */
+  .data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .data-table th {
+    background: var(--surface2); color: var(--muted);
+    font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;
+    padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--border);
+  }
+  .data-table td { padding: 11px 14px; border-bottom: 1px solid rgba(30,45,69,0.5); }
+  .data-table tr:hover td { background: rgba(0,212,255,0.03); }
+  .data-table tr:last-child td { border-bottom: none; }
+  .mono { font-family: var(--mono); }
+  .price-up { color: var(--red); }
+  .price-down { color: var(--green); }
+  .price-flat { color: var(--muted); }
+
+  /* BADGES */
+  .badge {
+    display: inline-block; font-size: 10px; font-weight: 700;
+    padding: 2px 8px; border-radius: 10px; text-transform: uppercase;
+  }
+  .badge-buy { background: rgba(0,230,118,0.15); color: var(--green); border: 1px solid rgba(0,230,118,0.3); }
+  .badge-hold { background: rgba(255,204,0,0.15); color: var(--yellow); border: 1px solid rgba(255,204,0,0.3); }
+  .badge-wait { background: rgba(255,68,68,0.15); color: var(--red); border: 1px solid rgba(255,68,68,0.3); }
+  .badge-high { background: rgba(255,68,68,0.15); color: var(--red); border: 1px solid rgba(255,68,68,0.3); }
+  .badge-mid { background: rgba(255,204,0,0.15); color: var(--yellow); border: 1px solid rgba(255,204,0,0.3); }
+  .badge-low { background: rgba(0,230,118,0.15); color: var(--green); border: 1px solid rgba(0,230,118,0.3); }
+
+  /* SEARCH BOX */
+  .search-box {
+    display: flex; gap: 10px; margin-bottom: 20px; align-items: center;
+  }
+  .search-input {
+    flex: 1; background: var(--surface2); border: 1px solid var(--border);
+    color: var(--text); font-family: var(--font); font-size: 14px;
+    padding: 10px 16px; border-radius: 8px; outline: none;
+    transition: border-color 0.2s;
+  }
+  .search-input:focus { border-color: var(--accent); }
+  .search-input::placeholder { color: var(--muted); }
+  .btn {
+    background: var(--accent); color: #000; font-family: var(--font);
+    font-weight: 700; font-size: 13px; padding: 10px 20px;
+    border: none; border-radius: 8px; cursor: pointer; transition: opacity 0.2s;
+  }
+  .btn:hover { opacity: 0.85; }
+  .btn-outline {
+    background: transparent; color: var(--accent);
+    border: 1px solid var(--accent); font-family: var(--font);
+    font-weight: 600; font-size: 13px; padding: 10px 20px;
+    border-radius: 8px; cursor: pointer; transition: all 0.2s;
+  }
+  .btn-outline:hover { background: rgba(0,212,255,0.1); }
+
+  /* CHART CONTAINER */
+  .chart-wrap { position: relative; height: 300px; }
+  .chart-wrap-tall { position: relative; height: 380px; }
+
+  /* FORM ELEMENTS */
+  .form-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  .form-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
+  .form-input {
+    background: var(--surface2); border: 1px solid var(--border);
+    color: var(--text); font-family: var(--mono); font-size: 14px;
+    padding: 10px 14px; border-radius: 8px; outline: none;
+  }
+  .form-input:focus { border-color: var(--accent); }
+  .form-select {
+    background: var(--surface2); border: 1px solid var(--border);
+    color: var(--text); font-family: var(--font); font-size: 14px;
+    padding: 10px 14px; border-radius: 8px; outline: none; cursor: pointer;
+  }
+  .form-select:focus { border-color: var(--accent); }
+
+  /* RESULT BOX */
+  .result-box {
+    background: linear-gradient(135deg, rgba(0,212,255,0.05), rgba(0,149,179,0.05));
+    border: 1px solid rgba(0,212,255,0.2); border-radius: 12px;
+    padding: 24px; text-align: center; margin-top: 20px;
+  }
+  .result-price { font-family: var(--mono); font-size: 48px; font-weight: 700; color: var(--accent); }
+  .result-range { color: var(--muted); font-size: 14px; margin-top: 8px; }
+  .result-meta { display: flex; justify-content: center; gap: 40px; margin-top: 20px; }
+  .result-meta-item { text-align: center; }
+  .result-meta-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .result-meta-value { font-family: var(--mono); font-size: 18px; font-weight: 700; }
+
+  /* RISK ALERTS */
+  .risk-alert {
+    border-radius: 10px; padding: 16px 20px; margin-bottom: 12px;
+    display: flex; align-items: flex-start; gap: 14px;
+    border-left: 4px solid;
+  }
+  .risk-alert.high { background: rgba(255,68,68,0.08); border-color: var(--red); }
+  .risk-alert.mid { background: rgba(255,204,0,0.08); border-color: var(--yellow); }
+  .risk-alert.low { background: rgba(0,230,118,0.08); border-color: var(--green); }
+  .risk-icon { font-size: 20px; flex-shrink: 0; margin-top: 2px; }
+  .risk-title { font-weight: 700; font-size: 14px; }
+  .risk-desc { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+  .risk-val { font-family: var(--mono); font-size: 13px; margin-top: 6px; }
+  .risk-val.red { color: var(--red); }
+  .risk-val.yellow { color: var(--yellow); }
+  .risk-val.green { color: var(--green); }
+
+  /* MINI SPARKLINE */
+  .sparkline-wrap { display: flex; align-items: center; gap: 8px; }
+  .sparkline { width: 60px; height: 24px; }
+
+  /* DISTRIBUTOR COMPARE TABLE */
+  .compare-header { display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+  .dist-tag {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 6px; padding: 6px 14px; font-size: 12px; font-weight: 600;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .dist-tag.active { background: var(--accent); color: #000; border-color: var(--accent); }
+
+  /* SECTION TITLE */
+  .section-title {
+    font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px;
+    color: var(--muted); font-weight: 700; margin-bottom: 14px;
+    padding-bottom: 8px; border-bottom: 1px solid var(--border);
+  }
+
+  /* PROGRESS BAR */
+  .prog-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; font-size: 12px; }
+  .prog-label { width: 120px; color: var(--muted); flex-shrink: 0; }
+  .prog-bar-bg { flex: 1; height: 6px; background: var(--surface2); border-radius: 3px; overflow: hidden; }
+  .prog-bar-fill { height: 100%; border-radius: 3px; transition: width 1s ease; }
+  .prog-val { width: 50px; text-align: right; font-family: var(--mono); font-size: 12px; }
+
+  /* SCROLLABLE TABLE */
+  .table-scroll { overflow-x: auto; }
+
+  /* TOOLTIP STYLE */
+  .chip {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 6px; padding: 3px 10px; font-size: 12px;
+  }
+  .chip-dot { width: 6px; height: 6px; border-radius: 50%; }
+
+  /* EMPTY LINE */
+  .divider { height: 1px; background: var(--border); margin: 20px 0; }
+
+  /* SPEC SECTION TABS */
+  .spec-tab {
+    background: none; border: none; color: var(--muted);
+    font-family: var(--font); font-size: 13px; font-weight: 600;
+    padding: 12px 20px; cursor: pointer; white-space: nowrap;
+    border-bottom: 2px solid transparent; transition: all 0.2s;
+  }
+  .spec-tab:hover { color: var(--text); }
+  .spec-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .spec-section { animation: fadeIn 0.2s ease; }
+
+  /* FOOTER BAR */
+  .footer-bar {
+    text-align: center; padding: 20px;
+    font-size: 11px; color: var(--muted);
+    border-top: 1px solid var(--border); margin-top: 40px;
+  }
+
+  /* ============================
+     MODAL — 가격 산출 상세
+  ============================= */
+  .modal-overlay {
+    position: fixed; inset: 0; z-index: 999;
+    background: rgba(5, 9, 20, 0.88);
+    backdrop-filter: blur(6px);
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none; transition: opacity 0.25s ease;
+  }
+  .modal-overlay.open { opacity: 1; pointer-events: all; }
+
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    width: min(1100px, 95vw);
+    max-height: 90vh;
+    overflow-y: auto;
+    transform: translateY(24px) scale(0.98);
+    transition: transform 0.28s cubic-bezier(.22,.68,0,1.2);
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+  .modal-overlay.open .modal { transform: translateY(0) scale(1); }
+
+  .modal-header {
+    position: sticky; top: 0; z-index: 10;
+    background: linear-gradient(135deg, #0d1929, #111827);
+    border-bottom: 1px solid var(--border);
+    padding: 20px 28px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .modal-header-left { display: flex; align-items: center; gap: 14px; }
+  .modal-header-icon {
+    width: 40px; height: 40px; border-radius: 10px;
+    background: rgba(0,212,255,0.12); border: 1px solid rgba(0,212,255,0.25);
+    display: flex; align-items: center; justify-content: center; font-size: 20px;
+  }
+  .modal-title { font-size: 16px; font-weight: 700; }
+  .modal-subtitle { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .modal-close {
+    width: 34px; height: 34px; border-radius: 8px;
+    background: var(--surface2); border: 1px solid var(--border);
+    color: var(--muted); font-size: 18px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s;
+  }
+  .modal-close:hover { background: var(--red); color: #fff; border-color: var(--red); }
+
+  .modal-body { padding: 28px; }
+
+  /* 상단 요약 바 */
+  .modal-summary-bar {
+    display: grid; grid-template-columns: repeat(5, 1fr);
+    gap: 12px; margin-bottom: 28px;
+  }
+  .msb-card {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 10px; padding: 14px 16px; text-align: center;
+    position: relative; overflow: hidden;
+  }
+  .msb-card::after {
+    content: ''; position: absolute; bottom: 0; left: 0;
+    width: 100%; height: 2px;
+  }
+  .msb-card.c1::after { background: var(--accent); }
+  .msb-card.c2::after { background: var(--yellow); }
+  .msb-card.c3::after { background: #9c6dff; }
+  .msb-card.c4::after { background: var(--green); }
+  .msb-card.c5::after { background: var(--red); }
+  .msb-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; }
+  .msb-value { font-family: var(--mono); font-size: 20px; font-weight: 700; margin: 6px 0 4px; }
+  .msb-sub { font-size: 11px; color: var(--muted); }
+
+  /* 섹션 구분 */
+  .detail-section { margin-bottom: 28px; }
+  .detail-section-title {
+    font-size: 11px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 1.5px; color: var(--accent);
+    padding-bottom: 10px; border-bottom: 1px solid var(--border);
+    margin-bottom: 16px; display: flex; align-items: center; gap: 8px;
+  }
+
+  /* 원가 분해 트리 테이블 */
+  .breakdown-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .breakdown-table th {
+    background: var(--surface2); color: var(--muted);
+    font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px;
+    padding: 9px 14px; text-align: left; border-bottom: 1px solid var(--border);
+  }
+  .breakdown-table th.right { text-align: right; }
+  .breakdown-table td { padding: 10px 14px; border-bottom: 1px solid rgba(30,45,69,0.4); vertical-align: middle; }
+  .breakdown-table td.right { text-align: right; font-family: var(--mono); }
+  .breakdown-table tr:last-child td { border-bottom: none; }
+  .breakdown-table tr.sub-row td { background: rgba(0,0,0,0.12); }
+  .breakdown-table tr.sub-row td:first-child { padding-left: 32px; color: var(--muted); font-size: 12px; }
+  .breakdown-table tr.total-row td {
+    background: rgba(0,212,255,0.06); border-top: 1px solid rgba(0,212,255,0.2);
+    font-weight: 700; border-bottom: none;
+  }
+  .breakdown-table tr.grand-total td {
+    background: rgba(0,212,255,0.12); border-top: 2px solid rgba(0,212,255,0.4);
+    font-weight: 900; font-size: 15px; color: var(--accent);
+  }
+
+  /* 인라인 바 */
+  .inline-bar { display: flex; align-items: center; gap: 10px; }
+  .ibar-bg { width: 120px; height: 5px; background: var(--surface2); border-radius: 3px; flex-shrink: 0; }
+  .ibar-fill { height: 100%; border-radius: 3px; transition: width 0.8s ease; }
+  .pct-text { font-family: var(--mono); font-size: 11px; color: var(--muted); width: 38px; }
+
+  /* 시나리오 탭 */
+  .scenario-tabs { display: flex; gap: 8px; margin-bottom: 16px; }
+  .sc-tab {
+    background: var(--surface2); border: 1px solid var(--border);
+    color: var(--muted); font-family: var(--font); font-size: 12px; font-weight: 600;
+    padding: 7px 16px; border-radius: 8px; cursor: pointer; transition: all 0.2s;
+  }
+  .sc-tab.active { background: rgba(0,212,255,0.12); border-color: var(--accent); color: var(--accent); }
+
+  /* 협상 전략 박스 */
+  .strategy-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  .strategy-card {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 10px; padding: 16px;
+  }
+  .strategy-card.best { border-color: rgba(0,230,118,0.4); background: rgba(0,230,118,0.04); }
+  .strategy-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px; }
+  .strategy-price { font-family: var(--mono); font-size: 22px; font-weight: 700; }
+  .strategy-desc { font-size: 12px; color: var(--muted); margin-top: 6px; line-height: 1.5; }
+  .strategy-badge { display: inline-block; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 6px; margin-top: 8px; }
+
+  /* 워터폴 차트 컨테이너 */
+  .waterfall-wrap { height: 240px; position: relative; }
+
+  /* 민감도 슬라이더 영역 */
+  .sensitivity-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .sens-row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+  .sens-label { width: 110px; font-size: 12px; color: var(--muted); flex-shrink: 0; }
+  .sens-slider { flex: 1; accent-color: var(--accent); cursor: pointer; }
+  .sens-val { font-family: var(--mono); font-size: 12px; width: 50px; text-align: right; }
+  .sens-impact { font-size: 11px; padding: 2px 8px; border-radius: 4px; width: 60px; text-align: center; }
+  .sens-impact.pos { background: rgba(255,68,68,0.15); color: var(--red); }
+  .sens-impact.neg { background: rgba(0,230,118,0.15); color: var(--green); }
+
+  /* 하단 액션 바 */
+  .modal-action-bar {
+    position: sticky; bottom: 0;
+    background: var(--surface); border-top: 1px solid var(--border);
+    padding: 16px 28px; display: flex; align-items: center; justify-content: space-between;
+    gap: 12px;
+  }
+  .action-bar-price {
+    display: flex; align-items: baseline; gap: 10px;
+  }
+  .abp-label { font-size: 12px; color: var(--muted); }
+  .abp-value { font-family: var(--mono); font-size: 28px; font-weight: 700; color: var(--accent); }
+  .abp-unit { font-size: 12px; color: var(--muted); }
+  .action-bar-btns { display: flex; gap: 10px; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="top-header">
+  <div class="logo-area">
+    <div>
+      <div class="logo-badge">HYUNDAI MOBIS</div>
+    </div>
+    <div>
+      <div class="logo-text">반도체 가격 전망 TOOL</div>
+      <div class="logo-sub">전자부품구매실 · 구매 인텔리전스 플랫폼</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="live-badge"><div class="live-dot"></div> LIVE DATA</div>
+    <div class="header-time" id="headerTime"></div>
+  </div>
+</div>
+
+<!-- TAB BAR -->
+<div class="tab-bar">
+  <button class="tab-btn active" onclick="switchTab('calc')">
+    <span class="tab-icon">🧮</span> 가격 산출
+  </button>
+  <button class="tab-btn" onclick="switchTab('api')">
+    <span class="tab-icon">🔌</span> 유통사 API
+  </button>
+  <button class="tab-btn" onclick="switchTab('search')">
+    <span class="tab-icon">🔍</span> 품번 조회
+  </button>
+  <button class="tab-btn" onclick="switchTab('compare')">
+    <span class="tab-icon">📊</span> 가격 비교
+  </button>
+  <button class="tab-btn" onclick="switchTab('trend')">
+    <span class="tab-icon">📈</span> 12개월 트렌드
+  </button>
+  <button class="tab-btn" onclick="switchTab('risk')">
+    <span class="tab-icon">⚠️</span> 리스크 알림
+    <span class="tab-badge">3</span>
+  </button>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+<!-- ============================
+     TAB 1: 가격 산출 & 차이 분석
+============================= -->
+<div id="tab-calc" class="tab-content active">
+
+  <!-- ── STEP 1: 소자 상세 정보 입력 ── -->
+  <div class="panel" style="margin-bottom:20px">
+    <div class="panel-header">
+      <span class="panel-title">🧮 소자 상세 정보 입력</span>
+      <div style="display:flex;align-items:center;gap:12px">
+        <span style="font-size:12px;color:var(--muted)">AI 기반 BOM 원가 추정 · 구매원가 차이 분석</span>
+        <button class="btn-outline" onclick="loadPresetSpec()" style="font-size:11px;padding:5px 12px">📋 샘플 로드</button>
+        <button class="btn-outline" onclick="clearAllSpec()" style="font-size:11px;padding:5px 12px">🗑 전체 초기화</button>
+      </div>
+    </div>
+    <div class="panel-body" style="padding:0">
+
+      <!-- ── 섹션 탭 ── -->
+      <div style="display:flex;border-bottom:1px solid var(--border);padding:0 20px;overflow-x:auto;scrollbar-width:none;background:var(--surface2)">
+        <button class="spec-tab active" onclick="switchSpecTab('basic',this)">① 기본 정보</button>
+        <button class="spec-tab" onclick="switchSpecTab('wafer',this)">② 웨이퍼 / 공정</button>
+        <button class="spec-tab" onclick="switchSpecTab('pkg',this)">③ 패키지 / 테스트</button>
+        <button class="spec-tab" onclick="switchSpecTab('func',this)">④ 기능 사양</button>
+        <button class="spec-tab" onclick="switchSpecTab('order',this)">⑤ 구매 조건</button>
+      </div>
+
+      <!-- ① 기본 정보 -->
+      <div id="spec-basic" class="spec-section" style="padding:20px">
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:16px">
+          <div class="form-group">
+            <label class="form-label">소자 분류 <span style="color:var(--red)">*</span></label>
+            <select class="form-select" id="partCategory" onchange="updatePart()">
+              <option value="mcu">MCU (마이크로컨트롤러)</option>
+              <option value="mosfet">MOSFET (전력 스위칭)</option>
+              <option value="sensor">이미지센서 (CMOS)</option>
+              <option value="power">PMIC (전원관리IC)</option>
+              <option value="memory">NAND/NOR 플래시</option>
+              <option value="sbc">SBC 프로세서</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">품번 (Part No.) <span style="color:var(--red)">*</span></label>
+            <input class="form-input" type="text" id="partNum" value="STM32F407VGT6" placeholder="예: STM32F407VGT6">
+          </div>
+          <div class="form-group">
+            <label class="form-label">제조사 <span style="color:var(--red)">*</span></label>
+            <select class="form-select" id="maker">
+              <option>STMicroelectronics</option>
+              <option>NXP Semiconductors</option>
+              <option>Infineon Technologies</option>
+              <option>Renesas Electronics</option>
+              <option>Texas Instruments</option>
+              <option>Microchip Technology</option>
+              <option>Qualcomm</option>
+              <option>MediaTek</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">원산지 / 파운드리</label>
+            <select class="form-select" id="foundry">
+              <option value="tsmc">TSMC (대만)</option>
+              <option value="samsung">삼성 파운드리 (한국)</option>
+              <option value="umc">UMC (대만)</option>
+              <option value="smic">SMIC (중국)</option>
+              <option value="globalfoundries">GlobalFoundries (미국)</option>
+              <option value="internal">자체 공장 (IDM)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">적용 차종/시스템</label>
+            <select class="form-select" id="carSystem">
+              <option value="adas">ADAS / 자율주행</option>
+              <option value="body">바디 제어 (BCM)</option>
+              <option value="power">파워트레인</option>
+              <option value="chassis">샤시 / 안전계</option>
+              <option value="infotainment">인포테인먼트</option>
+              <option value="ev">EV 배터리 관리</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">AEC-Q 인증 등급</label>
+            <select class="form-select" id="aecq">
+              <option value="q100">AEC-Q100 (IC 차량용)</option>
+              <option value="q101">AEC-Q101 (이산소자)</option>
+              <option value="q102">AEC-Q102 (LED)</option>
+              <option value="q200">AEC-Q200 (수동부품)</option>
+              <option value="none">미인증</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">동작 온도 범위</label>
+            <select class="form-select" id="tempRange">
+              <option value="auto">차량용 -40 ~ 125°C</option>
+              <option value="industrial">산업용 -40 ~ 85°C</option>
+              <option value="commercial">상용 0 ~ 70°C</option>
+              <option value="military">군용 -55 ~ 150°C</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">공급 전압</label>
+            <select class="form-select" id="voltage">
+              <option value="1.8">1.8V</option>
+              <option value="3.3" selected>3.3V</option>
+              <option value="5.0">5.0V</option>
+              <option value="12">12V</option>
+              <option value="48">48V</option>
+            </select>
+          </div>
+        </div>
+        <div style="background:rgba(0,212,255,0.05);border:1px solid rgba(0,212,255,0.15);border-radius:8px;padding:12px 16px;font-size:12px;color:var(--muted)" id="basicSummary">
+          ⓘ &nbsp;소자 분류와 품번 입력 후 각 탭에서 세부 사양을 선택하세요. ⑤ 구매 조건 탭에서 분석을 실행할 수 있습니다.
+        </div>
+      </div>
+
+      <!-- ② 웨이퍼 / 공정 -->
+      <div id="spec-wafer" class="spec-section" style="padding:20px;display:none">
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:16px">
+          <div class="form-group">
+            <label class="form-label">공정 노드 <span style="color:var(--red)">*</span></label>
+            <select class="form-select" id="process" onchange="updateWaferCalc()">
+              <option value="5">5nm (최선단)</option>
+              <option value="7">7nm</option>
+              <option value="10">10nm</option>
+              <option value="14">14nm</option>
+              <option value="16">16nm</option>
+              <option value="28" selected>28nm</option>
+              <option value="40">40nm</option>
+              <option value="65">65nm</option>
+              <option value="90">90nm</option>
+              <option value="130">130nm</option>
+              <option value="180">180nm (성숙)</option>
+              <option value="350">350nm (레거시)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">웨이퍼 크기</label>
+            <select class="form-select" id="waferSize" onchange="updateWaferCalc()">
+              <option value="200">200mm (8인치)</option>
+              <option value="300" selected>300mm (12인치)</option>
+              <option value="450">450mm (18인치, 차세대)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">웨이퍼 가격 (USD/장)</label>
+            <input class="form-input" type="number" id="waferPrice" value="4820" step="10" oninput="updateWaferCalc()">
+            <span style="font-size:10px;color:var(--muted)" id="waferPriceRef">참고: 28nm 300mm ≈ $4,200~5,400</span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">다이 크기 (mm²)</label>
+            <input class="form-input" type="number" id="dieSize" value="12.5" step="0.1" oninput="updateWaferCalc()">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">수율 (Yield, %)</label>
+            <input class="form-input" type="number" id="yieldPct" value="82" min="10" max="99" step="1" oninput="updateWaferCalc()">
+            <div style="height:4px;background:var(--surface2);border-radius:2px;margin-top:6px;overflow:hidden">
+              <div id="yieldBar" style="height:100%;background:var(--green);border-radius:2px;width:82%;transition:width 0.3s"></div>
+            </div>
+            <span style="font-size:10px;color:var(--muted)" id="yieldGradeNote">양호 (80~90%)</span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">엣지 다이 여유 (mm)</label>
+            <input class="form-input" type="number" id="edgeExcl" value="3" step="0.5" oninput="updateWaferCalc()">
+            <span style="font-size:10px;color:var(--muted)">웨이퍼 외곽 불용 영역</span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">다이 간격 (Scribe Line, mm)</label>
+            <input class="form-input" type="number" id="scribeLine" value="0.08" step="0.01" oninput="updateWaferCalc()">
+          </div>
+          <div class="form-group">
+            <label class="form-label">산화막 공정 레이어 수</label>
+            <select class="form-select" id="metalLayers" onchange="updateWaferCalc()">
+              <option value="4">4 Metal Layers</option>
+              <option value="6" selected>6 Metal Layers</option>
+              <option value="8">8 Metal Layers</option>
+              <option value="12">12 Metal Layers</option>
+              <option value="16">16+ Metal Layers</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- 웨이퍼 자동 계산 결과 -->
+        <div style="background:var(--surface2);border-radius:10px;padding:16px;display:grid;grid-template-columns:repeat(5,1fr);gap:12px;text-align:center">
+          <div>
+            <div style="font-size:10px;color:var(--muted);margin-bottom:4px">이론 DPW</div>
+            <div style="font-family:var(--mono);font-size:20px;font-weight:700;color:var(--text)" id="theorDPW">1,420</div>
+          </div>
+          <div>
+            <div style="font-size:10px;color:var(--muted);margin-bottom:4px">수율 적용 DPW</div>
+            <div style="font-family:var(--mono);font-size:20px;font-weight:700;color:var(--green)" id="netDPW">1,165</div>
+          </div>
+          <div>
+            <div style="font-size:10px;color:var(--muted);margin-bottom:4px">면적 활용율</div>
+            <div style="font-family:var(--mono);font-size:20px;font-weight:700;color:var(--accent)" id="waferUtil">84.2%</div>
+          </div>
+          <div>
+            <div style="font-size:10px;color:var(--muted);margin-bottom:4px">다이당 웨이퍼 원가</div>
+            <div style="font-family:var(--mono);font-size:20px;font-weight:700;color:var(--yellow)" id="wfrCostPerDie">$4.14</div>
+          </div>
+          <div>
+            <div style="font-size:10px;color:var(--muted);margin-bottom:4px">공정비 가산 (레이어)</div>
+            <div style="font-family:var(--mono);font-size:20px;font-weight:700;color:var(--yellow)" id="layerCostAdj">$0.22</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ③ 패키지 / 테스트 -->
+      <div id="spec-pkg" class="spec-section" style="padding:20px;display:none">
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:16px">
+          <div class="form-group">
+            <label class="form-label">패키지 타입</label>
+            <select class="form-select" id="pkgType" onchange="updatePkgCost()">
+              <option value="qfp">QFP (Quad Flat Package)</option>
+              <option value="lqfp" selected>LQFP (Low-profile QFP)</option>
+              <option value="bga">BGA (Ball Grid Array)</option>
+              <option value="fcbga">FC-BGA (Flip Chip BGA)</option>
+              <option value="qfn">QFN (Quad Flat No-lead)</option>
+              <option value="dfn">DFN (Dual Flat No-lead)</option>
+              <option value="soic">SOIC (Small Outline IC)</option>
+              <option value="to">TO-220 / TO-247 (파워용)</option>
+              <option value="sot">SOT-23 / SOT-223</option>
+              <option value="wlcsp">WLCSP (웨이퍼 레벨)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">핀 수 (Pin Count)</label>
+            <select class="form-select" id="pinCount" onchange="updatePkgCost()">
+              <option value="8">8핀</option><option value="16">16핀</option>
+              <option value="32">32핀</option><option value="48">48핀</option>
+              <option value="64" selected>64핀</option><option value="100">100핀</option>
+              <option value="144">144핀</option><option value="176">176핀</option>
+              <option value="256">256핀 (BGA)</option><option value="512">512핀+</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">패키지 단가 추정 (USD)</label>
+            <input class="form-input" type="number" id="pkgCost" value="0.12" step="0.001" readonly style="color:var(--yellow);background:rgba(255,204,0,0.05)">
+            <span style="font-size:10px;color:var(--muted)">자동 추정됨</span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">패키지 기판 재질</label>
+            <select class="form-select" id="substrateType">
+              <option value="leadframe">리드프레임 (Cu)</option>
+              <option value="bga_substrate">BGA 기판 (유기)</option>
+              <option value="ceramic">세라믹 기판</option>
+              <option value="none">기판 없음 (WLCSP)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">와이어본딩 방식</label>
+            <select class="form-select" id="bondingType">
+              <option value="au">금(Au) 와이어</option>
+              <option value="cu" selected>동(Cu) 와이어</option>
+              <option value="flipchip">플립칩 (Cu Pillar)</option>
+              <option value="none">해당 없음</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">테스트 방식</label>
+            <select class="form-select" id="testType" onchange="updatePkgCost()">
+              <option value="ft_only">Final Test만</option>
+              <option value="wt_ft" selected>Wafer Test + Final Test</option>
+              <option value="full">Full Test (Burn-in 포함)</option>
+              <option value="adas">ADAS급 Full + 신뢰성 시험</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">테스트 단가 추정 (USD)</label>
+            <input class="form-input" type="number" id="testCost" value="0.08" step="0.001" readonly style="color:var(--yellow);background:rgba(255,204,0,0.05)">
+            <span style="font-size:10px;color:var(--muted)">자동 추정됨</span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">OSAT 업체</label>
+            <select class="form-select" id="osat">
+              <option>ASE Group (대만)</option>
+              <option>Amkor Technology (미국)</option>
+              <option>JCET (중국)</option>
+              <option>Tongfu Microelectronics</option>
+              <option>자체 패키징 (IDM)</option>
+            </select>
+          </div>
+        </div>
+        <div style="background:var(--surface2);border-radius:10px;padding:14px;display:grid;grid-template-columns:repeat(3,1fr);gap:16px;text-align:center">
+          <div>
+            <div style="font-size:10px;color:var(--muted);margin-bottom:4px">패키지 원가</div>
+            <div style="font-family:var(--mono);font-size:18px;font-weight:700;color:var(--yellow)" id="sumPkgCost">$0.12</div>
+          </div>
+          <div>
+            <div style="font-size:10px;color:var(--muted);margin-bottom:4px">테스트 원가</div>
+            <div style="font-family:var(--mono);font-size:18px;font-weight:700;color:var(--yellow)" id="sumTestCost">$0.08</div>
+          </div>
+          <div>
+            <div style="font-size:10px;color:var(--muted);margin-bottom:4px">후공정 합계</div>
+            <div style="font-family:var(--mono);font-size:18px;font-weight:700;color:var(--accent)" id="sumBackendCost">$0.20</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ④ 기능 사양 -->
+      <div id="spec-func" class="spec-section" style="padding:20px;display:none">
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px">
+          <div class="form-group">
+            <label class="form-label">CPU 코어</label>
+            <select class="form-select" id="cpuCore">
+              <option>ARM Cortex-M0 / M0+</option>
+              <option>ARM Cortex-M3</option>
+              <option selected>ARM Cortex-M4 / M4F</option>
+              <option>ARM Cortex-M7</option>
+              <option>ARM Cortex-M33</option>
+              <option>ARM Cortex-A53</option>
+              <option>RISC-V</option>
+              <option>PowerPC e200</option>
+              <option>해당 없음</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">동작 주파수</label>
+            <select class="form-select" id="frequency">
+              <option>48 MHz</option><option>72 MHz</option>
+              <option>120 MHz</option><option selected>168 MHz</option>
+              <option>240 MHz</option><option>400 MHz</option>
+              <option>800 MHz</option><option>1 GHz+</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">플래시 메모리 크기</label>
+            <select class="form-select" id="flashSize" onchange="updateMemoryCost()">
+              <option>64 KB</option><option>128 KB</option><option>256 KB</option>
+              <option>512 KB</option><option selected>1 MB</option><option>2 MB</option>
+              <option>4 MB</option><option>8 MB</option><option>16 MB+</option>
+              <option>해당 없음</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">SRAM 크기</label>
+            <select class="form-select" id="ramSize" onchange="updateMemoryCost()">
+              <option>8 KB</option><option>16 KB</option><option>32 KB</option>
+              <option>64 KB</option><option>128 KB</option><option selected>192 KB</option>
+              <option>256 KB</option><option>512 KB</option><option>1 MB+</option>
+              <option>해당 없음</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">외장 메모리 인터페이스</label>
+            <select class="form-select" id="extMemIf">
+              <option value="none">없음</option>
+              <option value="fsmc">FSMC (병렬)</option>
+              <option value="sdram" selected>SDRAM / LPDDR</option>
+              <option value="qspi">QSPI / HyperBus</option>
+              <option value="emmc">eMMC / UFS</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">통신 인터페이스</label>
+            <select class="form-select" id="interface">
+              <option>UART / SPI / I2C</option>
+              <option selected>CAN / LIN + 기본</option>
+              <option>CAN-FD / Ethernet</option>
+              <option>MOST / FlexRay</option>
+              <option>PCIe / USB 3.0</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">보안 기능</label>
+            <select class="form-select" id="security">
+              <option value="none">없음</option>
+              <option value="basic">기본 (TrustZone)</option>
+              <option value="hsm" selected>HSM 내장</option>
+              <option value="evita">EVITA Full (차량 PKI)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">메모리 원가 가산 (USD)</label>
+            <input class="form-input" type="number" id="memoryCostAdj" value="0.18" step="0.001" readonly style="color:var(--yellow);background:rgba(255,204,0,0.05)">
+            <span style="font-size:10px;color:var(--muted)">플래시+SRAM 용량 기반 자동 추정</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ⑤ 구매 조건 -->
+      <div id="spec-order" class="spec-section" style="padding:20px;display:none">
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px">
+          <div class="form-group">
+            <label class="form-label">주문수량 (백만PCS) <span style="color:var(--red)">*</span></label>
+            <input class="form-input" type="number" id="qty" value="5" min="1" max="30" step="0.5">
+            <span style="font-size:10px;color:var(--muted)">1M ~ 30M PCS</span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">참고 환율 (KRW/USD)</label>
+            <input class="form-input" type="number" id="exRate" value="1378">
+            <span style="font-size:10px;color:var(--muted)">KRW 환산 참고용</span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">구매 계약 연도</label>
+            <select class="form-select" id="buyYear">
+              <option>2025년</option><option>2024년</option>
+              <option>2023년</option><option>2022년</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">계약 유형</label>
+            <select class="form-select" id="contractType">
+              <option value="spot">스팟 구매</option>
+              <option value="annual">연간 계약</option>
+              <option value="long">장기 계약 (2년+)</option>
+            </select>
+          </div>
+          <div class="form-group" style="grid-column:span 2">
+            <label class="form-label" style="color:var(--yellow)">🏷️ 실제 구매단가 (USD/PCS)</label>
+            <input class="form-input" type="number" id="actualPrice" placeholder="협력사 견적 · 계약가 입력" step="0.0001" style="border-color:rgba(255,204,0,0.35);font-size:18px;font-weight:700;height:48px">
+            <span style="font-size:10px;color:var(--muted)">입력 시 AI 산출가 대비 과납/절감 비교 분석이 활성화됩니다</span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">납기 요구</label>
+            <select class="form-select" id="reqLeadtime">
+              <option value="8">8주 이내</option>
+              <option value="12" selected>12주 이내</option>
+              <option value="16">16주 이내</option>
+              <option value="24">24주 이내</option>
+              <option value="flex">납기 유연</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">인코텀즈 (Incoterms)</label>
+            <select class="form-select" id="incoterms">
+              <option value="exw">EXW (공장 인도)</option>
+              <option value="fob">FOB (본선 인도)</option>
+              <option value="cif" selected>CIF (보험·운임 포함)</option>
+              <option value="ddp">DDP (관세 포함 인도)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- 입력 완성도 체크 -->
+        <div style="background:var(--surface2);border-radius:10px;padding:14px;margin-bottom:16px">
+          <div style="font-size:11px;color:var(--muted);margin-bottom:10px;text-transform:uppercase;letter-spacing:0.8px">입력 완성도</div>
+          <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px">
+            <div style="text-align:center">
+              <div style="font-size:10px;color:var(--muted);margin-bottom:4px">① 기본 정보</div>
+              <div style="height:4px;background:var(--green);border-radius:2px"></div>
+              <div style="font-size:10px;color:var(--green);margin-top:3px">완료</div>
+            </div>
+            <div style="text-align:center" id="completeness-wafer">
+              <div style="font-size:10px;color:var(--muted);margin-bottom:4px">② 웨이퍼/공정</div>
+              <div style="height:4px;background:var(--green);border-radius:2px"></div>
+              <div style="font-size:10px;color:var(--green);margin-top:3px">완료</div>
+            </div>
+            <div style="text-align:center">
+              <div style="font-size:10px;color:var(--muted);margin-bottom:4px">③ 패키지/테스트</div>
+              <div style="height:4px;background:var(--green);border-radius:2px"></div>
+              <div style="font-size:10px;color:var(--green);margin-top:3px">완료</div>
+            </div>
+            <div style="text-align:center">
+              <div style="font-size:10px;color:var(--muted);margin-bottom:4px">④ 기능 사양</div>
+              <div style="height:4px;background:var(--green);border-radius:2px"></div>
+              <div style="font-size:10px;color:var(--green);margin-top:3px">완료</div>
+            </div>
+            <div style="text-align:center">
+              <div style="font-size:10px;color:var(--muted);margin-bottom:4px">⑤ 구매 조건</div>
+              <div style="height:4px;background:var(--yellow);border-radius:2px"></div>
+              <div style="font-size:10px;color:var(--yellow);margin-top:3px">구매가 입력 권고</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:12px;align-items:center;justify-content:flex-end">
+          <button class="btn" onclick="runFullAnalysis()" style="font-size:15px;padding:13px 36px;font-weight:700;letter-spacing:0.5px">
+            ▶ AI 원가 산출 &amp; 차이 분석 실행
+          </button>
+          <button class="btn-outline" onclick="resetCalc()" style="padding:13px 18px">초기화</button>
+        </div>
+      </div>
+
+      <!-- ── 원가 구성 반영 비율 (접이식, 항상 하단) ── -->
+      <div style="padding:0 20px 16px;border-top:1px solid var(--border);margin-top:0">
+        <div style="padding-top:14px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none" onclick="toggleRatioPanel()">
+          <div style="display:flex;align-items:center;gap:10px">
+            <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--accent)">⚙️ 원가 구성 반영 비율</span>
+            <span style="font-size:11px;color:var(--muted)">— AI 자동 적용 중 · 클릭하여 근거 확인 / 직접 수정</span>
+            <span id="ratioBadge" style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:6px;background:rgba(0,212,255,0.12);color:var(--accent);border:1px solid rgba(0,212,255,0.3)">AI 기본값</span>
+          </div>
+          <span id="ratioChevron" style="color:var(--muted);font-size:14px;transition:transform 0.2s">▼</span>
+        </div>
+        <div id="ratioPanel" style="display:none;margin-top:14px">
+          <!-- 경고/안내 배너 -->
+          <div style="background:rgba(0,212,255,0.06);border:1px solid rgba(0,212,255,0.2);border-radius:10px;padding:14px 18px;margin-bottom:16px;font-size:12px;color:var(--muted);line-height:1.7">
+            <strong style="color:var(--accent)">📌 반영 비율 산출 근거</strong><br>
+            아래 비율은 <strong style="color:var(--text)">IHS Markit 반도체 원가 데이터베이스(2024)</strong>, <strong style="color:var(--text)">SEMI 산업 보고서</strong>,
+            <strong style="color:var(--text)">현대모비스 내부 BOM 분석 결과(2015~2024)</strong>를 종합하여 소자 유형별로 AI가 자동 산출합니다.
+            합계가 <strong style="color:var(--yellow)">100%</strong>가 되어야 하며, 벗어날 경우 경고가 표시됩니다.
+          </div>
+          <div style="overflow-x:auto">
+            <table style="width:100%;border-collapse:collapse;font-size:12px" id="ratioTable">
+              <thead>
+                <tr style="background:var(--surface2)">
+                  <th style="padding:9px 14px;text-align:left;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:0.8px;border-bottom:1px solid var(--border)">원가 항목</th>
+                  <th style="padding:9px 14px;text-align:center;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:0.8px;border-bottom:1px solid var(--border)">AI 기본값</th>
+                  <th style="padding:9px 14px;text-align:center;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:0.8px;border-bottom:1px solid var(--border)">직접 입력 (%)</th>
+                  <th style="padding:9px 14px;text-align:left;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:0.8px;border-bottom:1px solid var(--border)">산출 근거</th>
+                  <th style="padding:9px 14px;text-align:left;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:0.8px;border-bottom:1px solid var(--border)">주요 변동 요인</th>
+                  <th style="padding:9px 14px;text-align:center;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:0.8px;border-bottom:1px solid var(--border)">데이터 출처</th>
+                </tr>
+              </thead>
+              <tbody id="ratioTableBody"></tbody>
+              <tfoot>
+                <tr id="ratioTotalRow" style="background:rgba(0,212,255,0.06);font-weight:700">
+                  <td style="padding:10px 14px;border-top:2px solid rgba(0,212,255,0.3);color:var(--accent)">합 계</td>
+                  <td style="padding:10px 14px;text-align:center;border-top:2px solid rgba(0,212,255,0.3);font-family:var(--mono)">100.0%</td>
+                  <td style="padding:10px 14px;text-align:center;border-top:2px solid rgba(0,212,255,0.3);font-family:var(--mono)" id="ratioInputTotal">—</td>
+                  <td colspan="3" style="border-top:2px solid rgba(0,212,255,0.3)"></td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-top:12px">
+            <div id="ratioWarning" style="font-size:12px;color:var(--muted)">✅ 합계 정상 (100%)</div>
+            <div style="display:flex;gap:10px">
+              <button class="btn-outline" onclick="resetRatios()" style="font-size:12px;padding:6px 14px">AI 기본값 복원</button>
+              <button class="btn-outline" onclick="applyPreset('mcu')" style="font-size:12px;padding:6px 14px">MCU 프리셋</button>
+              <button class="btn-outline" onclick="applyPreset('mosfet')" style="font-size:12px;padding:6px 14px">MOSFET 프리셋</button>
+              <button class="btn-outline" onclick="applyPreset('custom')" style="font-size:12px;padding:6px 14px">내부 원가 기준</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── STEP 2: 분석 결과 (실행 후 표시) ── -->
+  <div id="analysisResult" style="display:none">
+
+    <!-- ━━━ HERO 가격 비교 카드 ━━━ -->
+    <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:0;margin-bottom:20px;align-items:stretch;border:1px solid var(--border);border-radius:16px;overflow:hidden">
+
+      <!-- AI 산출 원가 -->
+      <div style="background:linear-gradient(135deg,rgba(0,212,255,0.12),rgba(0,149,179,0.06));padding:28px 32px;position:relative">
+        <div style="position:absolute;top:16px;left:20px">
+          <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--accent);background:rgba(0,212,255,0.15);border:1px solid rgba(0,212,255,0.3);padding:3px 10px;border-radius:20px">🤖 AI 산출 원가</span>
+        </div>
+        <div style="margin-top:36px">
+          <div style="font-size:13px;color:var(--muted);margin-bottom:6px">협상 기준 단가 (KRW/PCS)</div>
+          <div style="font-family:var(--mono);font-size:52px;font-weight:900;color:var(--accent);line-height:1;letter-spacing:-2px" id="heroAiPrice">₩ —</div>
+          <div style="margin-top:12px;display:flex;gap:12px;flex-wrap:wrap">
+            <div style="background:rgba(0,212,255,0.1);border:1px solid rgba(0,212,255,0.2);border-radius:8px;padding:8px 14px">
+              <div style="font-size:10px;color:var(--muted)">밴드 하한</div>
+              <div style="font-family:var(--mono);font-size:15px;font-weight:700;color:var(--green)" id="heroBandLow">₩—</div>
+            </div>
+            <div style="background:rgba(0,212,255,0.1);border:1px solid rgba(0,212,255,0.2);border-radius:8px;padding:8px 14px">
+              <div style="font-size:10px;color:var(--muted)">밴드 상한</div>
+              <div style="font-family:var(--mono);font-size:15px;font-weight:700;color:var(--red)" id="heroBandHigh">₩—</div>
+            </div>
+            <div style="background:rgba(0,212,255,0.1);border:1px solid rgba(0,212,255,0.2);border-radius:8px;padding:8px 14px">
+              <div style="font-size:10px;color:var(--muted)">유통사 평균</div>
+              <div style="font-family:var(--mono);font-size:15px;font-weight:700;color:var(--yellow)" id="heroDistAvg">₩—</div>
+            </div>
+          </div>
+          <div style="margin-top:16px;font-size:12px;color:var(--muted);line-height:1.6" id="heroAiDesc">—</div>
+        </div>
+      </div>
+
+      <!-- 가운데 갭 패널 -->
+      <div id="heroGapMiddle" style="width:180px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px 16px;background:var(--surface2);border-left:1px solid var(--border);border-right:1px solid var(--border);text-align:center">
+        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px">차이</div>
+        <div style="font-size:36px;margin-bottom:6px" id="heroGapIcon">—</div>
+        <div style="font-family:var(--mono);font-size:22px;font-weight:900;margin-bottom:4px" id="heroGapAmt">—</div>
+        <div style="font-family:var(--mono);font-size:18px;font-weight:700;margin-bottom:14px" id="heroGapPct">—</div>
+        <div style="width:48px;height:2px;background:var(--border);margin-bottom:14px"></div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px">총 절감/과납액</div>
+        <div style="font-family:var(--mono);font-size:16px;font-weight:700" id="heroGapTotal">—</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:2px" id="heroGapQty">—</div>
+        <div style="margin-top:16px;padding:8px 12px;border-radius:8px;font-size:11px;font-weight:700" id="heroGradeChip">—</div>
+      </div>
+
+      <!-- 실 구매단가 -->
+      <div id="heroActPanel" style="padding:28px 32px;position:relative;background:var(--surface)">
+        <div style="position:absolute;top:16px;right:20px">
+          <span id="heroActBadge" style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--yellow);background:rgba(255,204,0,0.15);border:1px solid rgba(255,204,0,0.3);padding:3px 10px;border-radius:20px">🏷️ 실 구매단가</span>
+        </div>
+        <div style="margin-top:36px">
+          <div style="font-size:13px;color:var(--muted);margin-bottom:6px" id="heroActLabel">실제 계약 단가 (KRW/PCS)</div>
+          <div style="font-family:var(--mono);font-size:52px;font-weight:900;line-height:1;letter-spacing:-2px" id="heroActPrice">₩ —</div>
+          <div style="margin-top:12px;display:flex;gap:12px;flex-wrap:wrap">
+            <div style="background:rgba(255,204,0,0.08);border:1px solid rgba(255,204,0,0.2);border-radius:8px;padding:8px 14px">
+              <div style="font-size:10px;color:var(--muted)">계약 연도</div>
+              <div style="font-family:var(--mono);font-size:15px;font-weight:700" id="heroActYear">—</div>
+            </div>
+            <div style="background:rgba(255,204,0,0.08);border:1px solid rgba(255,204,0,0.2);border-radius:8px;padding:8px 14px">
+              <div style="font-size:10px;color:var(--muted)">계약 유형</div>
+              <div style="font-family:var(--mono);font-size:15px;font-weight:700" id="heroActType">—</div>
+            </div>
+            <div style="background:rgba(255,204,0,0.08);border:1px solid rgba(255,204,0,0.2);border-radius:8px;padding:8px 14px">
+              <div style="font-size:10px;color:var(--muted)">협상 목표가</div>
+              <div style="font-family:var(--mono);font-size:15px;font-weight:700;color:#9c6dff" id="heroTargetPrice">₩—</div>
+            </div>
+          </div>
+          <div style="margin-top:16px;font-size:12px;color:var(--muted);line-height:1.6" id="heroActDesc">—</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ━━━ 3열 분석 그리드 ━━━ -->
+    <div style="display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:18px;margin-bottom:18px">
+
+      <!-- 원가 비교 워터폴 차트 -->
+      <div class="panel">
+        <div class="panel-header">
+          <span class="panel-title">📊 원가 구성 vs 구매가 비교</span>
+        </div>
+        <div class="panel-body">
+          <div style="height:280px"><canvas id="gapWaterfallChart"></canvas></div>
+        </div>
+      </div>
+
+      <!-- 가격 포지션 게이지 -->
+      <div class="panel">
+        <div class="panel-header">
+          <span class="panel-title">🎯 가격 포지션 분석</span>
+        </div>
+        <div class="panel-body">
+          <!-- 게이지 바 -->
+          <div style="margin-bottom:20px">
+            <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-bottom:6px">
+              <span>최적가 (AI 밴드 하한)</span>
+              <span>시장 최고가</span>
+            </div>
+            <div style="position:relative;height:36px;border-radius:18px;background:linear-gradient(to right,#00e676,#ffcc00,#ff4444);overflow:hidden;opacity:0.85">
+              <div id="posMarkerAi" style="position:absolute;top:0;width:3px;height:100%;background:#00d4ff;transition:left 0.7s ease"></div>
+              <div id="posMarkerActual" style="position:absolute;top:0;width:3px;height:100%;background:#fff;transition:left 0.7s ease"></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:10px;margin-top:6px">
+              <span id="posLabelMin" style="color:var(--green)">₩-</span>
+              <div style="text-align:center">
+                <div style="font-size:10px;color:var(--accent)">▲ AI 기준</div>
+                <div style="font-size:10px;color:#fff">▲ 구매가</div>
+              </div>
+              <span id="posLabelMax" style="color:var(--red)">₩-</span>
+            </div>
+          </div>
+
+          <!-- 5단계 평가 레이블 -->
+          <div id="posGrade" style="text-align:center;padding:14px;border-radius:10px;margin-bottom:16px">
+            <div style="font-size:28px;margin-bottom:4px" id="posGradeIcon">—</div>
+            <div style="font-weight:700;font-size:15px" id="posGradeText">—</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:4px" id="posGradeDesc">—</div>
+          </div>
+
+          <!-- 세부 수치 -->
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div style="display:flex;justify-content:space-between;font-size:12px;padding:8px 12px;background:var(--surface2);border-radius:6px">
+              <span style="color:var(--muted)">유통사 최저가 대비</span>
+              <span class="mono" id="posVsDist">—</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:12px;padding:8px 12px;background:var(--surface2);border-radius:6px">
+              <span style="color:var(--muted)">AI 산출가 대비</span>
+              <span class="mono" id="posVsAi">—</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:12px;padding:8px 12px;background:var(--surface2);border-radius:6px">
+              <span style="color:var(--muted)">제조 원가 추정 대비</span>
+              <span class="mono" id="posVsMfg">—</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 원가 구성 도넛 -->
+      <div class="panel">
+        <div class="panel-header">
+          <span class="panel-title">📐 원가 구성 분석</span>
+        </div>
+        <div class="panel-body">
+          <div style="height:180px"><canvas id="costChart"></canvas></div>
+          <div style="margin-top:12px;display:flex;flex-direction:column;gap:6px" id="costLegend">
+            <div class="chip"><div class="chip-dot" style="background:#00d4ff"></div> 웨이퍼 원자재 &nbsp;<strong id="lRatio0">28.4%</strong></div>
+            <div class="chip"><div class="chip-dot" style="background:#3399ff"></div> 파운드리 공정비 &nbsp;<strong id="lRatio1">11.0%</strong></div>
+            <div class="chip"><div class="chip-dot" style="background:#ffcc00"></div> 패키징/테스트 &nbsp;<strong id="lRatio2">18.2%</strong></div>
+            <div class="chip"><div class="chip-dot" style="background:#9c6dff"></div> R&D 상각비 &nbsp;<strong id="lRatio3">12.1%</strong></div>
+            <div class="chip"><div class="chip-dot" style="background:#ff4444"></div> 유통 마진 &nbsp;<strong id="lRatio4">14.2%</strong></div>
+            <div class="chip"><div class="chip-dot" style="background:#ff8c42"></div> 관세/물류 &nbsp;<strong id="lRatio5">8.0%</strong></div>
+            <div class="chip"><div class="chip-dot" style="background:#aaaaaa"></div> 환위험/기타 &nbsp;<strong id="lRatio6">8.1%</strong></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 원가 구성 분해 차이 테이블 -->
+    <div class="panel" style="margin-bottom:18px">
+      <div class="panel-header">
+        <span class="panel-title">🔬 원가 구성 항목별 차이 분해 분석</span>
+        <span style="font-size:12px;color:var(--muted)">실제 구매가 vs AI 산출 원가 항목별 기여도</span>
+      </div>
+      <div class="panel-body">
+        <div class="table-scroll">
+          <table class="breakdown-table" id="gapBreakdownTable">
+            <thead>
+              <tr>
+                <th style="width:22%">원가 항목</th>
+                <th class="right" style="width:12%">AI 산출 (KRW)</th>
+                <th class="right" style="width:12%">구매가 비중 추정</th>
+                <th class="right" style="width:10%">항목 차이</th>
+                <th class="right" style="width:9%">기여율</th>
+                <th style="width:22%">차이 시각화</th>
+                <th style="width:13%">분석 의견</th>
+              </tr>
+            </thead>
+            <tbody id="gapBreakdownBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- 하단 2열: 절감 시나리오 + 협상 전략 -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px">
+
+      <!-- 절감 시나리오 분석 -->
+      <div class="panel">
+        <div class="panel-header">
+          <span class="panel-title">💰 수량별 절감 시나리오</span>
+        </div>
+        <div class="panel-body">
+          <div style="height:220px"><canvas id="scenarioChart"></canvas></div>
+          <div id="scenarioTable" style="margin-top:14px;display:flex;flex-direction:column;gap:6px"></div>
+        </div>
+      </div>
+
+      <!-- 협상 전략 권고 -->
+      <div class="panel">
+        <div class="panel-header">
+          <span class="panel-title">📋 AI 협상 전략 권고</span>
+        </div>
+        <div class="panel-body" id="strategyPanel">
+          <!-- JS로 채움 -->
+        </div>
+      </div>
+    </div>
+
+    <!-- 상세 내역 버튼 -->
+    <div style="text-align:center;margin-bottom:8px">
+      <button class="btn" onclick="openDetailModal()" style="font-size:14px;padding:12px 40px">
+        🔬 전체 원가 산출 상세 내역 보기
+      </button>
+    </div>
+
+  </div><!-- end analysisResult -->
+</div>
+
+<!-- ============================
+     TAB 2: 유통사 API
+============================= -->
+<div id="tab-api" class="tab-content">
+  <div class="kpi-row">
+    <div class="kpi-card green">
+      <div class="kpi-label">연결된 유통사</div>
+      <div class="kpi-value">5개</div>
+      <div class="kpi-change down">▼ 정상 연결 중</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">오늘 API 호출</div>
+      <div class="kpi-value">1,842</div>
+      <div class="kpi-change flat">— 갱신 주기 15분</div>
+    </div>
+    <div class="kpi-card yellow">
+      <div class="kpi-label">가격 변동 품번</div>
+      <div class="kpi-value">67</div>
+      <div class="kpi-change up">▲ 오늘 변동</div>
+    </div>
+    <div class="kpi-card red">
+      <div class="kpi-label">API 오류</div>
+      <div class="kpi-value">2</div>
+      <div class="kpi-change up">▲ Mouser 지연</div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-header">
+      <span class="panel-title">🔌 유통사 API 연결 현황</span>
+      <button class="btn" onclick="refreshAll()" style="font-size:12px;padding:6px 14px">전체 새로고침</button>
+    </div>
+    <div class="panel-body">
+      <div class="table-scroll">
+        <table class="data-table" id="apiTable">
+          <thead>
+            <tr>
+              <th>유통사</th>
+              <th>API 상태</th>
+              <th>최종 갱신</th>
+              <th>응답속도</th>
+              <th>오늘 호출수</th>
+              <th>가격 변동 품번</th>
+              <th>커버리지</th>
+              <th>액션</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Mouser Electronics</strong></td>
+              <td><span style="color:var(--yellow)">● 지연</span></td>
+              <td class="mono">14:32:10</td>
+              <td class="mono price-up">3,420ms</td>
+              <td class="mono">412</td>
+              <td class="mono price-up">+18</td>
+              <td>21,400품번</td>
+              <td><button class="btn-outline" style="font-size:11px;padding:4px 10px" onclick="alert('Mouser 재연결 시도 중...')">재연결</button></td>
+            </tr>
+            <tr>
+              <td><strong>Digi-Key</strong></td>
+              <td><span style="color:var(--green)">● 정상</span></td>
+              <td class="mono">14:47:52</td>
+              <td class="mono price-down">312ms</td>
+              <td class="mono">624</td>
+              <td class="mono price-up">+31</td>
+              <td>28,700품번</td>
+              <td><button class="btn-outline" style="font-size:11px;padding:4px 10px">상세</button></td>
+            </tr>
+            <tr>
+              <td><strong>Arrow Electronics</strong></td>
+              <td><span style="color:var(--green)">● 정상</span></td>
+              <td class="mono">14:47:40</td>
+              <td class="mono price-down">287ms</td>
+              <td class="mono">318</td>
+              <td class="mono price-down">-5</td>
+              <td>15,200품번</td>
+              <td><button class="btn-outline" style="font-size:11px;padding:4px 10px">상세</button></td>
+            </tr>
+            <tr>
+              <td><strong>Future Electronics</strong></td>
+              <td><span style="color:var(--green)">● 정상</span></td>
+              <td class="mono">14:47:20</td>
+              <td class="mono price-down">445ms</td>
+              <td class="mono">276</td>
+              <td class="mono price-up">+9</td>
+              <td>12,800품번</td>
+              <td><button class="btn-outline" style="font-size:11px;padding:4px 10px">상세</button></td>
+            </tr>
+            <tr>
+              <td><strong>RS Components</strong></td>
+              <td><span style="color:var(--green)">● 정상</span></td>
+              <td class="mono">14:46:55</td>
+              <td class="mono price-down">390ms</td>
+              <td class="mono">212</td>
+              <td class="mono price-flat">±0</td>
+              <td>9,600품번</td>
+              <td><button class="btn-outline" style="font-size:11px;padding:4px 10px">상세</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-header">
+      <span class="panel-title">📥 오늘의 가격 자동 수집 로그</span>
+    </div>
+    <div class="panel-body">
+      <div style="font-family:var(--mono);font-size:12px;color:var(--muted);background:var(--surface2);border-radius:8px;padding:16px;max-height:200px;overflow-y:auto;line-height:2">
+        <div><span style="color:var(--green)">[14:47:52]</span> Digi-Key API 호출 완료 → 624 품번 가격 갱신 (변동: 31건)</div>
+        <div><span style="color:var(--green)">[14:47:40]</span> Arrow API 호출 완료 → 318 품번 가격 갱신 (변동: 0건)</div>
+        <div><span style="color:var(--green)">[14:47:20]</span> Future 호출 완료 → 276 품번 갱신</div>
+        <div><span style="color:var(--yellow)">[14:32:10]</span> Mouser API 타임아웃 (3,420ms) — 재시도 예정 15:02</div>
+        <div><span style="color:var(--green)">[14:32:00]</span> STM32F407VGT6 → Digi-Key ₩3,720 / Arrow ₩3,650 기록</div>
+        <div><span style="color:var(--green)">[14:17:10]</span> 전체 유통사 동기화 완료 (1,830 품번)</div>
+        <div><span style="color:var(--red)">[14:02:15]</span> ALERT: NXP S32K344 +8.2% 급등 감지 → 리스크 알림 발송</div>
+        <div><span style="color:var(--green)">[14:02:00]</span> 일일 배치 갱신 시작 (대상: 5,600 품번)</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================
+     TAB 3: 품번 조회
+============================= -->
+<div id="tab-search" class="tab-content">
+  <div class="panel">
+    <div class="panel-header">
+      <span class="panel-title">🔍 품번 동시 조회</span>
+      <span style="font-size:12px;color:var(--muted)">5개 유통사 실시간 동시 검색</span>
+    </div>
+    <div class="panel-body">
+      <div class="search-box">
+        <input class="search-input" type="text" id="searchPN" placeholder="품번 입력 (예: STM32F407, NXP S32K, IRFZ44N...)" value="STM32F407VGT6">
+        <button class="btn" onclick="doSearch()">🔍 조회</button>
+        <button class="btn-outline" onclick="doSearch()">즐겨찾기 추가</button>
+      </div>
+
+      <div id="searchResults" style="display:none">
+        <div class="section-title">조회 결과 — STM32F407VGT6 (STMicroelectronics)</div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>유통사</th>
+              <th>단가 (USD)</th>
+              <th>단가 (KRW)</th>
+              <th>재고</th>
+              <th>리드타임</th>
+              <th>MOQ</th>
+              <th>전주比</th>
+              <th>추천</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Digi-Key</strong></td>
+              <td class="mono">$2.70</td>
+              <td class="mono">₩3,721</td>
+              <td class="mono price-down">42,800</td>
+              <td>즉시출고</td>
+              <td class="mono">1</td>
+              <td class="mono price-up">▲+1.2%</td>
+              <td><span class="badge badge-buy">추천</span></td>
+            </tr>
+            <tr>
+              <td><strong>Arrow</strong></td>
+              <td class="mono">$2.65</td>
+              <td class="mono">₩3,652</td>
+              <td class="mono price-down">18,200</td>
+              <td>즉시출고</td>
+              <td class="mono">10</td>
+              <td class="mono price-flat">—0.0%</td>
+              <td><span class="badge badge-buy">추천</span></td>
+            </tr>
+            <tr>
+              <td><strong>Mouser</strong></td>
+              <td class="mono">$2.78</td>
+              <td class="mono">₩3,831</td>
+              <td class="mono price-up" style="color:var(--red)">2,100</td>
+              <td>3주</td>
+              <td class="mono">1</td>
+              <td class="mono price-up">▲+3.0%</td>
+              <td><span class="badge badge-hold">보류</span></td>
+            </tr>
+            <tr>
+              <td><strong>Future</strong></td>
+              <td class="mono">$2.72</td>
+              <td class="mono">₩3,749</td>
+              <td class="mono">5,400</td>
+              <td>1주</td>
+              <td class="mono">50</td>
+              <td class="mono price-down">▼-0.7%</td>
+              <td><span class="badge badge-hold">보류</span></td>
+            </tr>
+            <tr>
+              <td><strong>RS Components</strong></td>
+              <td class="mono">$2.90</td>
+              <td class="mono">₩3,996</td>
+              <td class="mono">8,700</td>
+              <td>즉시출고</td>
+              <td class="mono">1</td>
+              <td class="mono price-up">▲+5.1%</td>
+              <td><span class="badge badge-wait">비추</span></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="result-box" style="margin-top:20px">
+          <div style="font-size:12px;color:var(--muted);margin-bottom:8px">AI 권장 협상 기준가 (KRW, 50,000PCS 기준)</div>
+          <div class="result-price">₩3,420</div>
+          <div class="result-range">유통사 최저가(₩3,652) 대비 6.3% 절감 가능 | 신뢰도 93%</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================
+     TAB 4: 가격 비교
+============================= -->
+<div id="tab-compare" class="tab-content">
+  <div class="panel">
+    <div class="panel-header">
+      <span class="panel-title">📊 유통사별 단가 비교</span>
+    </div>
+    <div class="panel-body">
+      <div class="compare-header">
+        <div class="dist-tag active">MCU</div>
+        <div class="dist-tag">MOSFET</div>
+        <div class="dist-tag">PMIC</div>
+        <div class="dist-tag">이미지센서</div>
+        <div class="dist-tag">플래시</div>
+      </div>
+      <div class="chart-wrap-tall">
+        <canvas id="compareChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-header">
+      <span class="panel-title">주요 MCU 유통사별 단가 비교표</span>
+    </div>
+    <div class="panel-body">
+      <div class="table-scroll">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>품번</th>
+              <th>제조사</th>
+              <th>Digi-Key</th>
+              <th>Arrow</th>
+              <th>Mouser</th>
+              <th>Future</th>
+              <th>RS</th>
+              <th>AI 기준가</th>
+              <th>최대절감</th>
+              <th>추천유통사</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="mono">STM32F407VGT6</td>
+              <td>STM</td>
+              <td class="mono">₩3,721</td>
+              <td class="mono" style="color:var(--green)">₩3,652</td>
+              <td class="mono">₩3,831</td>
+              <td class="mono">₩3,749</td>
+              <td class="mono price-up">₩3,996</td>
+              <td class="mono" style="color:var(--accent)">₩3,420</td>
+              <td class="mono price-down">-6.3%</td>
+              <td>Arrow</td>
+            </tr>
+            <tr>
+              <td class="mono">NXP S32K344</td>
+              <td>NXP</td>
+              <td class="mono">₩12,430</td>
+              <td class="mono">₩12,210</td>
+              <td class="mono price-up">₩13,150</td>
+              <td class="mono" style="color:var(--green)">₩11,980</td>
+              <td class="mono">₩12,640</td>
+              <td class="mono" style="color:var(--accent)">₩11,200</td>
+              <td class="mono price-down">-6.5%</td>
+              <td>Future</td>
+            </tr>
+            <tr>
+              <td class="mono">Infineon TC387</td>
+              <td>Infineon</td>
+              <td class="mono">₩28,400</td>
+              <td class="mono" style="color:var(--green)">₩27,800</td>
+              <td class="mono">₩29,200</td>
+              <td class="mono">₩28,100</td>
+              <td class="mono price-up">₩30,500</td>
+              <td class="mono" style="color:var(--accent)">₩26,100</td>
+              <td class="mono price-down">-6.1%</td>
+              <td>Arrow</td>
+            </tr>
+            <tr>
+              <td class="mono">Renesas RH850</td>
+              <td>Renesas</td>
+              <td class="mono">₩18,720</td>
+              <td class="mono">₩18,400</td>
+              <td class="mono">₩19,100</td>
+              <td class="mono" style="color:var(--green)">₩18,100</td>
+              <td class="mono price-up">₩19,840</td>
+              <td class="mono" style="color:var(--accent)">₩17,200</td>
+              <td class="mono price-down">-5.0%</td>
+              <td>Future</td>
+            </tr>
+            <tr>
+              <td class="mono">TI TMS570LS</td>
+              <td>TI</td>
+              <td class="mono" style="color:var(--green)">₩9,210</td>
+              <td class="mono">₩9,480</td>
+              <td class="mono">₩9,700</td>
+              <td class="mono">₩9,350</td>
+              <td class="mono price-up">₩10,200</td>
+              <td class="mono" style="color:var(--accent)">₩8,640</td>
+              <td class="mono price-down">-6.2%</td>
+              <td>Digi-Key</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================
+     TAB 5: 향후 12개월 가격 전망
+============================= -->
+<div id="tab-trend" class="tab-content">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+    <div>
+      <div style="font-size:18px;font-weight:700;color:var(--text)">향후 12개월 가격 전망</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:3px">기준일: 2025년 04월 · AI 예측 구간: 2025.05 ~ 2026.04</div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <div class="chip" style="border-color:rgba(0,212,255,0.4)"><div class="chip-dot" style="background:var(--accent)"></div> 실측값</div>
+      <div class="chip" style="border-color:rgba(255,107,107,0.4)"><div class="chip-dot" style="background:#ff6b6b"></div> AI 예측 (점선)</div>
+      <div class="chip" style="border-color:rgba(0,212,255,0.2)"><div class="chip-dot" style="background:rgba(0,212,255,0.15)"></div> 예측 신뢰 밴드</div>
+    </div>
+  </div>
+
+  <div class="kpi-row">
+    <div class="kpi-card">
+      <div class="kpi-label">STM32F407 현재가 (기준)</div>
+      <div class="kpi-value">₩3,721</div>
+      <div class="kpi-change up">▲ 12개월 후 전망 +11.5%</div>
+    </div>
+    <div class="kpi-card red">
+      <div class="kpi-label">STM32F407 12개월 전망가</div>
+      <div class="kpi-value">₩4,150</div>
+      <div class="kpi-change up">▲ AI 예측 | 신뢰도 91%</div>
+    </div>
+    <div class="kpi-card yellow">
+      <div class="kpi-label">NXP S32K344 12개월 전망</div>
+      <div class="kpi-value">₩14,800</div>
+      <div class="kpi-change up">▲ 현재比 +23.5% 예측</div>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-label">Infineon TC387 12개월 전망</div>
+      <div class="kpi-value">₩31,200</div>
+      <div class="kpi-change up">▲ 현재比 +9.4% 예측</div>
+    </div>
+  </div>
+
+  <!-- 메인 전망 차트 -->
+  <div class="panel">
+    <div class="panel-header">
+      <span class="panel-title">📈 향후 12개월 AI 가격 전망 (2025.05 → 2026.04)</span>
+      <div style="display:flex;gap:10px;align-items:center">
+        <span style="font-size:11px;color:var(--muted)">▎ 현재 시점</span>
+        <div class="chip"><div class="chip-dot" style="background:var(--accent)"></div> STM32F407</div>
+        <div class="chip"><div class="chip-dot" style="background:var(--yellow)"></div> NXP S32K344</div>
+        <div class="chip"><div class="chip-dot" style="background:var(--green)"></div> Infineon TC387</div>
+      </div>
+    </div>
+    <div class="panel-body">
+      <div class="chart-wrap-tall" style="height:420px">
+        <canvas id="trendChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- 월별 전망 상세 테이블 -->
+  <div class="panel">
+    <div class="panel-header">
+      <span class="panel-title">📋 월별 전망 상세 — STM32F407VGT6</span>
+      <span style="font-size:12px;color:var(--muted)">AI 신뢰도 밴드 포함</span>
+    </div>
+    <div class="panel-body">
+      <div class="table-scroll">
+        <table class="data-table" id="forecastTable">
+          <thead>
+            <tr>
+              <th>예측 월</th>
+              <th class="right">AI 전망 단가</th>
+              <th class="right">하한 (비관)</th>
+              <th class="right">상한 (낙관)</th>
+              <th class="right">현재比 변동</th>
+              <th class="right">신뢰도</th>
+              <th>구매 전략 신호</th>
+              <th>주요 변수</th>
+            </tr>
+          </thead>
+          <tbody id="forecastTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="panel">
+      <div class="panel-header"><span class="panel-title">📉 환율 12개월 전망 (USD/KRW)</span></div>
+      <div class="panel-body">
+        <div class="chart-wrap">
+          <canvas id="fxChart"></canvas>
+        </div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-header"><span class="panel-title">🏭 파운드리 가동율 12개월 전망</span></div>
+      <div class="panel-body">
+        <div class="chart-wrap">
+          <canvas id="foundryChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 구매 타이밍 권고 -->
+  <div class="panel">
+    <div class="panel-header">
+      <span class="panel-title">🎯 AI 구매 타이밍 권고 — 향후 12개월</span>
+    </div>
+    <div class="panel-body">
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px">
+        <div class="risk-alert low" style="flex-direction:column;gap:6px">
+          <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px">즉시 체결 권고</div>
+          <div style="font-weight:700;font-size:15px;color:var(--green)">2025.05 ~ 06</div>
+          <div style="font-size:12px;color:var(--muted)">파운드리 회복 전 저점 구간. STM32·NXP 우선 체결 권고.</div>
+        </div>
+        <div class="risk-alert mid" style="flex-direction:column;gap:6px">
+          <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px">부분 체결 권고</div>
+          <div style="font-weight:700;font-size:15px;color:var(--yellow)">2025.07 ~ 09</div>
+          <div style="font-size:12px;color:var(--muted)">가격 완만한 상승기. 물량 50% 추가 체결 권고.</div>
+        </div>
+        <div class="risk-alert high" style="flex-direction:column;gap:6px">
+          <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px">관망 / 최소 구매</div>
+          <div style="font-weight:700;font-size:15px;color:var(--red)">2025.10 ~ 12</div>
+          <div style="font-size:12px;color:var(--muted)">성수기 수요 급등 예상. 급등 구간 신규 계약 회피 권고.</div>
+        </div>
+        <div class="risk-alert low" style="flex-direction:column;gap:6px">
+          <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px">재체결 기회</div>
+          <div style="font-weight:700;font-size:15px;color:var(--green)">2026.01 ~ 04</div>
+          <div style="font-size:12px;color:var(--muted)">비수기 재고 적체 예상. 중장기 계약 협상 유리.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================
+     TAB 6: 리스크 알림 & 외부환경
+============================= -->
+<div id="tab-risk" class="tab-content">
+
+  <!-- ── 외부환경 KPI 게이지 바 (최상단) ── -->
+  <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:20px">
+
+    <!-- 파운드리 가동율 -->
+    <div class="kpi-card" style="border-left:3px solid var(--red);grid-column:span 1">
+      <div class="kpi-label">TSMC 28nm 가동율</div>
+      <div style="display:flex;align-items:baseline;gap:6px;margin:8px 0 4px">
+        <div style="font-family:var(--mono);font-size:28px;font-weight:700;color:var(--red)">71.2%</div>
+        <div style="font-size:11px;color:var(--red)">▼ 위험</div>
+      </div>
+      <div style="height:6px;background:var(--surface2);border-radius:3px;overflow:hidden;margin-bottom:4px">
+        <div style="width:71.2%;height:100%;background:linear-gradient(to right,var(--green),var(--yellow),var(--red));border-radius:3px"></div>
+      </div>
+      <div class="kpi-change up">정상 기준: 88~92%</div>
+    </div>
+
+    <!-- 삼성 가동율 -->
+    <div class="kpi-card" style="border-left:3px solid var(--yellow)">
+      <div class="kpi-label">삼성 28nm 가동율</div>
+      <div style="display:flex;align-items:baseline;gap:6px;margin:8px 0 4px">
+        <div style="font-family:var(--mono);font-size:28px;font-weight:700;color:var(--yellow)">80.3%</div>
+        <div style="font-size:11px;color:var(--yellow)">▼ 주의</div>
+      </div>
+      <div style="height:6px;background:var(--surface2);border-radius:3px;overflow:hidden;margin-bottom:4px">
+        <div style="width:80.3%;height:100%;background:linear-gradient(to right,var(--green),var(--yellow));border-radius:3px"></div>
+      </div>
+      <div class="kpi-change up">정상 기준: 85~90%</div>
+    </div>
+
+    <!-- PO 리드타임 -->
+    <div class="kpi-card" style="border-left:3px solid var(--red)">
+      <div class="kpi-label">평균 PO 리드타임</div>
+      <div style="display:flex;align-items:baseline;gap:6px;margin:8px 0 4px">
+        <div style="font-family:var(--mono);font-size:28px;font-weight:700;color:var(--red)">18주</div>
+        <div style="font-size:11px;color:var(--red)">▲ 긴급</div>
+      </div>
+      <div style="height:6px;background:var(--surface2);border-radius:3px;overflow:hidden;margin-bottom:4px">
+        <div style="width:82%;height:100%;background:var(--red);border-radius:3px"></div>
+      </div>
+      <div class="kpi-change up">정상 기준: 8~12주</div>
+    </div>
+
+    <!-- MCU 리드타임 -->
+    <div class="kpi-card" style="border-left:3px solid var(--red)">
+      <div class="kpi-label">전장 MCU 리드타임</div>
+      <div style="display:flex;align-items:baseline;gap:6px;margin:8px 0 4px">
+        <div style="font-family:var(--mono);font-size:28px;font-weight:700;color:var(--red)">24주</div>
+        <div style="font-size:11px;color:var(--red)">▲ 위험</div>
+      </div>
+      <div style="height:6px;background:var(--surface2);border-radius:3px;overflow:hidden;margin-bottom:4px">
+        <div style="width:90%;height:100%;background:var(--red);border-radius:3px"></div>
+      </div>
+      <div class="kpi-change up">정상 기준: 10~14주</div>
+    </div>
+
+    <!-- 환율 -->
+    <div class="kpi-card" style="border-left:3px solid var(--yellow)">
+      <div class="kpi-label">USD/KRW 환율</div>
+      <div style="display:flex;align-items:baseline;gap:6px;margin:8px 0 4px">
+        <div style="font-family:var(--mono);font-size:28px;font-weight:700;color:var(--yellow)">1,378</div>
+        <div style="font-size:11px;color:var(--yellow)">▲ 주의</div>
+      </div>
+      <div style="height:6px;background:var(--surface2);border-radius:3px;overflow:hidden;margin-bottom:4px">
+        <div style="width:68%;height:100%;background:linear-gradient(to right,var(--green),var(--yellow));border-radius:3px"></div>
+      </div>
+      <div class="kpi-change up">30일 최고: 1,392원</div>
+    </div>
+
+    <!-- 리스크 알림 건수 -->
+    <div class="kpi-card" style="border-left:3px solid var(--red)">
+      <div class="kpi-label">활성 리스크 알림</div>
+      <div style="display:flex;align-items:baseline;gap:6px;margin:8px 0 4px">
+        <div style="font-family:var(--mono);font-size:28px;font-weight:700;color:var(--red)">10건</div>
+        <div style="font-size:11px;color:var(--red)">▲ 급증</div>
+      </div>
+      <div style="height:6px;background:var(--surface2);border-radius:3px;overflow:hidden;margin-bottom:4px">
+        <div style="width:75%;height:100%;background:var(--red);border-radius:3px"></div>
+      </div>
+      <div class="kpi-change up">긴급 3건 · 주의 7건</div>
+    </div>
+  </div>
+
+  <!-- ── 파운드리 가동율 + PO 리드타임 상세 패널 ── -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px">
+
+    <!-- 파운드리 가동율 상세 -->
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">🏭 파운드리 가동율 현황</span>
+        <span style="font-size:11px;color:var(--muted)">기준일: 2025.04.22</span>
+      </div>
+      <div class="panel-body">
+        <div style="height:200px;margin-bottom:16px"><canvas id="foundryGaugeChart"></canvas></div>
+        <table class="data-table" style="font-size:12px">
+          <thead>
+            <tr>
+              <th>파운드리</th>
+              <th>공정</th>
+              <th class="right">가동율</th>
+              <th class="right">전월比</th>
+              <th>상태</th>
+              <th>가격 영향</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>TSMC</strong></td>
+              <td class="mono">28nm</td>
+              <td class="right mono price-up">71.2%</td>
+              <td class="right mono price-up">▼-12.4%p</td>
+              <td><span class="badge badge-high">위험</span></td>
+              <td style="font-size:11px;color:var(--red)">단가 +8~12% 예상</td>
+            </tr>
+            <tr>
+              <td><strong>TSMC</strong></td>
+              <td class="mono">40nm</td>
+              <td class="right mono price-up">76.8%</td>
+              <td class="right mono price-up">▼-8.1%p</td>
+              <td><span class="badge badge-high">위험</span></td>
+              <td style="font-size:11px;color:var(--red)">단가 +5~8% 예상</td>
+            </tr>
+            <tr>
+              <td><strong>삼성</strong></td>
+              <td class="mono">28nm</td>
+              <td class="right mono price-up" style="color:var(--yellow)">80.3%</td>
+              <td class="right mono price-up">▼-5.2%p</td>
+              <td><span class="badge badge-mid">주의</span></td>
+              <td style="font-size:11px;color:var(--yellow)">단가 +3~5% 예상</td>
+            </tr>
+            <tr>
+              <td><strong>UMC</strong></td>
+              <td class="mono">28nm</td>
+              <td class="right mono" style="color:var(--green)">88.1%</td>
+              <td class="right mono price-down">▲+2.3%p</td>
+              <td><span class="badge badge-low">정상</span></td>
+              <td style="font-size:11px;color:var(--muted)">단가 변동 없음</td>
+            </tr>
+            <tr>
+              <td><strong>SMIC</strong></td>
+              <td class="mono">28nm</td>
+              <td class="right mono" style="color:var(--green)">85.4%</td>
+              <td class="right mono price-flat">—0.1%p</td>
+              <td><span class="badge badge-low">정상</span></td>
+              <td style="font-size:11px;color:var(--muted)">미해당 (비전장)</td>
+            </tr>
+          </tbody>
+        </table>
+        <div style="margin-top:12px;background:rgba(255,68,68,0.06);border:1px solid rgba(255,68,68,0.2);border-radius:8px;padding:12px;font-size:12px;color:var(--muted);line-height:1.6">
+          ⚠️ <strong style="color:var(--red)">가동율 경보:</strong> TSMC 28nm 가동율이 71.2%로 임계치(80%) 하회. 전장 MCU 핵심 공정으로 STM32·NXP·Infineon 품번 공급 차질 및 리드타임 연장이 예상됩니다. 향후 3개월 내 단가 8~12% 상승 가능성 높음.
+        </div>
+      </div>
+    </div>
+
+    <!-- PO 리드타임 상세 -->
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">📦 PO 리드타임 현황</span>
+        <span style="font-size:11px;color:var(--muted)">유통사 + 제조사 직납 기준</span>
+      </div>
+      <div class="panel-body">
+        <div style="height:200px;margin-bottom:16px"><canvas id="leadtimeChart"></canvas></div>
+        <table class="data-table" style="font-size:12px">
+          <thead>
+            <tr>
+              <th>소자 분류</th>
+              <th class="right">현재 리드타임</th>
+              <th class="right">정상 기준</th>
+              <th class="right">연장 기간</th>
+              <th>상태</th>
+              <th>주요 원인</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>전장 MCU</strong></td>
+              <td class="right mono price-up">24주</td>
+              <td class="right mono">10~14주</td>
+              <td class="right mono price-up">+10~14주</td>
+              <td><span class="badge badge-high">위험</span></td>
+              <td style="font-size:11px;color:var(--muted)">TSMC 가동율 저하</td>
+            </tr>
+            <tr>
+              <td><strong>전력 MOSFET</strong></td>
+              <td class="right mono price-up" style="color:var(--yellow)">16주</td>
+              <td class="right mono">8~10주</td>
+              <td class="right mono price-up">+6~8주</td>
+              <td><span class="badge badge-mid">주의</span></td>
+              <td style="font-size:11px;color:var(--muted)">원자재 수급 지연</td>
+            </tr>
+            <tr>
+              <td><strong>PMIC</strong></td>
+              <td class="right mono price-up" style="color:var(--yellow)">14주</td>
+              <td class="right mono">8~12주</td>
+              <td class="right mono price-up">+2~6주</td>
+              <td><span class="badge badge-mid">주의</span></td>
+              <td style="font-size:11px;color:var(--muted)">수요 증가</td>
+            </tr>
+            <tr>
+              <td><strong>이미지센서</strong></td>
+              <td class="right mono" style="color:var(--green)">10주</td>
+              <td class="right mono">8~12주</td>
+              <td class="right mono price-flat">정상</td>
+              <td><span class="badge badge-low">정상</span></td>
+              <td style="font-size:11px;color:var(--muted)">—</td>
+            </tr>
+            <tr>
+              <td><strong>NAND 플래시</strong></td>
+              <td class="right mono" style="color:var(--green)">8주</td>
+              <td class="right mono">6~10주</td>
+              <td class="right mono price-flat">정상</td>
+              <td><span class="badge badge-low">정상</span></td>
+              <td style="font-size:11px;color:var(--muted)">재고 적체 중</td>
+            </tr>
+          </tbody>
+        </table>
+        <div style="margin-top:12px;background:rgba(255,68,68,0.06);border:1px solid rgba(255,68,68,0.2);border-radius:8px;padding:12px;font-size:12px;color:var(--muted);line-height:1.6">
+          ⚠️ <strong style="color:var(--red)">리드타임 경보:</strong> 전장 MCU 평균 리드타임 24주로 역대 최고 수준. PO 발행 후 6개월 이상 대기 발생. 선행 발주 및 안전재고 확보가 시급하며, 신규 PO는 즉시 발행을 권고합니다.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 리드타임 추이 + 가동율 추이 시계열 ── -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px">
+    <div class="panel">
+      <div class="panel-header"><span class="panel-title">📈 PO 리드타임 12개월 추이</span></div>
+      <div class="panel-body">
+        <div style="height:220px"><canvas id="leadtimeTrendChart"></canvas></div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-header"><span class="panel-title">🏭 파운드리 가동율 12개월 추이</span></div>
+      <div class="panel-body">
+        <div style="height:220px"><canvas id="foundryTrendChart"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 리드타임 × 가동율 → 단가 영향 매트릭스 ── -->
+  <div class="panel" style="margin-bottom:18px">
+    <div class="panel-header">
+      <span class="panel-title">🔗 파운드리 가동율 × 리드타임 → 단가 영향 분석</span>
+      <span style="font-size:12px;color:var(--muted)">외부환경 2대 변수 상관관계</span>
+    </div>
+    <div class="panel-body">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+        <div>
+          <div style="height:240px"><canvas id="envCorrelChart"></canvas></div>
+        </div>
+        <div>
+          <div class="section-title" style="margin-bottom:12px">현재 상태 요약</div>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div style="background:rgba(255,68,68,0.06);border:1px solid rgba(255,68,68,0.25);border-radius:10px;padding:14px">
+              <div style="font-weight:700;color:var(--red);margin-bottom:6px">🔴 현재 구간: 고위험</div>
+              <div style="font-size:12px;color:var(--muted);line-height:1.6">파운드리 가동율 71.2%(↓) + MCU 리드타임 24주(↑)의 동시 악화는 단가 상승 압력이 가장 극대화되는 구간입니다. 역사적으로 이 조합에서 6개월 내 전장 MCU 단가가 평균 <strong style="color:var(--red)">+12~18%</strong> 상승하였습니다.</div>
+            </div>
+            <table class="data-table" style="font-size:12px">
+              <thead><tr><th>시나리오</th><th>가동율</th><th>리드타임</th><th>단가 영향</th></tr></thead>
+              <tbody>
+                <tr><td style="color:var(--red)">고위험 (현재)</td><td class="mono price-up">~75%</td><td class="mono price-up">20주+</td><td class="mono price-up">+12~18%</td></tr>
+                <tr><td style="color:var(--yellow)">중위험</td><td class="mono">75~85%</td><td class="mono">14~20주</td><td class="mono price-up">+5~12%</td></tr>
+                <tr><td style="color:var(--green)">정상</td><td class="mono">85~95%</td><td class="mono">8~14주</td><td class="mono price-flat">±2%</td></tr>
+                <tr><td style="color:var(--accent)">초과 공급</td><td class="mono">95%+</td><td class="mono">~8주</td><td class="mono price-down">-3~5%</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 기존 리스크 알림 + 매트릭스 ── -->
+  <div class="grid-65">
+    <div>
+      <div class="panel">
+        <div class="panel-header">
+          <span class="panel-title">⚠️ 실시간 리스크 알림</span>
+          <span style="font-size:11px;color:var(--muted)">최종 업데이트: 14:47</span>
+        </div>
+        <div class="panel-body">
+          <div class="risk-alert high">
+            <div class="risk-icon">🔴</div>
+            <div>
+              <div class="risk-title">TSMC 28nm 가동율 71.2% — 임계치 하회</div>
+              <div class="risk-desc">TSMC 28nm 라인 가동율이 71.2%로 위험 임계치(80%)를 하회하고 있습니다. 전장 MCU(STM32, NXP S32K, Infineon TC) 주요 생산 공정에 직접 영향이 발생 중입니다.</div>
+              <div class="risk-val red">가동율: 71.2% (기준 88~92%) | 리드타임 연장: +10~14주 | 단가 영향: +8~12%</div>
+            </div>
+          </div>
+
+          <div class="risk-alert high">
+            <div class="risk-icon">🔴</div>
+            <div>
+              <div class="risk-title">전장 MCU PO 리드타임 24주 — 역대 최고</div>
+              <div class="risk-desc">전장 MCU 평균 PO 리드타임이 24주로 역대 최고 수준을 기록 중입니다. 현 시점 PO 미발행 물량은 최소 Q4 2025 이후 납기가 불가피합니다.</div>
+              <div class="risk-val red">MCU 리드타임: 24주 (정상: 10~14주) | MOSFET: 16주 | 즉시 PO 발행 권고</div>
+            </div>
+          </div>
+
+          <div class="risk-alert high">
+            <div class="risk-icon">🔴</div>
+            <div>
+              <div class="risk-title">NXP S32K344 — 재고 소진 + 리드타임 26주</div>
+              <div class="risk-desc">복수 유통사에서 S32K344 재고 소진 신호가 감지되었습니다. 제조사 직납 리드타임도 26주로 연장되어 조기 체결이 시급합니다.</div>
+              <div class="risk-val red">Mouser 재고: 890PCS | Digi-Key: 품절 | 직납 리드타임: 26주 | 가격: +8.2%/4주</div>
+            </div>
+          </div>
+
+          <div class="risk-alert mid">
+            <div class="risk-icon">🟡</div>
+            <div>
+              <div class="risk-title">USD/KRW 환율 1,400원 임박</div>
+              <div class="risk-desc">달러 강세 지속으로 원/달러 환율이 1,400원에 근접 중입니다. 달러 결제 비중이 높은 반도체 구매 원가가 추가 상승할 우려가 있습니다.</div>
+              <div class="risk-val yellow">현재: 1,378원 | 30일 최고: 1,392원 | 원가 영향: +3.8% 예상</div>
+            </div>
+          </div>
+
+          <div class="risk-alert mid">
+            <div class="risk-icon">🟡</div>
+            <div>
+              <div class="risk-title">일본 수출규제 — 실리콘 웨이퍼 수급</div>
+              <div class="risk-desc">신에츠·섬코 등 일본산 실리콘 웨이퍼 수출 규제 정책 변화 움직임이 관측됩니다. 공급 차질 시 전 공정 영향 가능.</div>
+              <div class="risk-val yellow">영향 예상: 2025년 Q2 | 영향도: 중간 | 모니터링 지속</div>
+            </div>
+          </div>
+
+          <div class="risk-alert mid">
+            <div class="risk-icon">🟡</div>
+            <div>
+              <div class="risk-title">Infineon TC387 가격 상승 추세 지속</div>
+              <div class="risk-desc">TC387의 12주 연속 단가 상승이 관측됩니다. 자동차용 MCU 수요 급증과 공급 타이트닝이 원인으로 분석됩니다.</div>
+              <div class="risk-val yellow">12주 누적: +11.4% | AI 전망: 향후 8주 +5~8% 추가</div>
+            </div>
+          </div>
+
+          <div class="risk-alert low">
+            <div class="risk-icon">🟢</div>
+            <div>
+              <div class="risk-title">NAND 플래시 — 재고 적체로 구매 기회</div>
+              <div class="risk-desc">NAND 플래시 리드타임이 8주로 정상 수준이며 재고 적체가 관측됩니다. 메모리 탑재 제어기 구매 협상에 유리한 여건입니다.</div>
+              <div class="risk-val green">리드타임: 8주 (정상) | NAND 스팟가: -18%/6개월 | 구매 적기</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 리스크 매트릭스 + 품번 영향 -->
+    <div>
+      <div class="panel">
+        <div class="panel-header"><span class="panel-title">리스크 매트릭스</span></div>
+        <div class="panel-body">
+          <div class="chart-wrap" style="height:240px">
+            <canvas id="riskChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel" style="margin-top:16px">
+        <div class="panel-header"><span class="panel-title">리스크별 영향 품번</span></div>
+        <div class="panel-body">
+          <table class="data-table" style="font-size:12px">
+            <thead><tr><th>품번</th><th>리드타임</th><th>리스크</th><th>영향도</th></tr></thead>
+            <tbody>
+              <tr><td class="mono">NXP S32K344</td><td class="mono price-up">26주</td><td>재고 소진</td><td><span class="badge badge-high">긴급</span></td></tr>
+              <tr><td class="mono">STM32F407VGT6</td><td class="mono price-up">24주</td><td>파운드리↓</td><td><span class="badge badge-high">긴급</span></td></tr>
+              <tr><td class="mono">Infineon TC387</td><td class="mono price-up">22주</td><td>가격 급등</td><td><span class="badge badge-mid">주의</span></td></tr>
+              <tr><td class="mono">Renesas RH850</td><td class="mono" style="color:var(--yellow)">16주</td><td>환율 영향</td><td><span class="badge badge-mid">주의</span></td></tr>
+              <tr><td class="mono">TI TMS570LS</td><td class="mono" style="color:var(--green)">12주</td><td>정상</td><td><span class="badge badge-low">정상</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- end .main -->
+
+<!-- ============================
+     가격 산출 상세 내역 모달
+============================= -->
+<div class="modal-overlay" id="detailModal" onclick="closeModalOutside(event)">
+  <div class="modal" id="modalBox">
+
+    <!-- 모달 헤더 -->
+    <div class="modal-header">
+      <div class="modal-header-left">
+        <div class="modal-header-icon">🔬</div>
+        <div>
+          <div class="modal-title" id="mTitle">가격 산출 상세 내역 — STM32F407VGT6</div>
+          <div class="modal-subtitle" id="mSubtitle">STMicroelectronics · MCU · 40nm · 수량 50,000 PCS · 환율 ₩1,378/USD</div>
+        </div>
+      </div>
+      <button class="modal-close" onclick="closeDetailModal()">✕</button>
+    </div>
+
+    <div class="modal-body">
+
+      <!-- 1. 요약 KPI 바 -->
+      <div class="modal-summary-bar">
+        <div class="msb-card c1">
+          <div class="msb-label">AI 산출 기준가</div>
+          <div class="msb-value" id="mAiPrice" style="color:var(--accent)">₩3,420</div>
+          <div class="msb-sub">협상 목표 단가</div>
+        </div>
+        <div class="msb-card c2">
+          <div class="msb-label">제조 원가 합계</div>
+          <div class="msb-value" id="mMfgCost" style="color:var(--yellow)">₩2,140</div>
+          <div class="msb-sub">BOM 기반 산출</div>
+        </div>
+        <div class="msb-card c3">
+          <div class="msb-label">유통 마진 포함가</div>
+          <div class="msb-value" id="mDistPrice" style="color:#9c6dff">₩2,870</div>
+          <div class="msb-sub">유통사 기준가</div>
+        </div>
+        <div class="msb-card c4">
+          <div class="msb-label">유통사 최저 시장가</div>
+          <div class="msb-value" id="mMktLow" style="color:var(--green)">₩3,652</div>
+          <div class="msb-sub">Arrow Electronics</div>
+        </div>
+        <div class="msb-card c5">
+          <div class="msb-label">협상 가능 절감액</div>
+          <div class="msb-value" id="mSaving" style="color:var(--red)">₩11.6억</div>
+          <div class="msb-sub" id="mSavingSub">연간 5백만PCS 기준</div>
+        </div>
+      </div>
+
+      <!-- 2. 제조 원가 상세 분해 -->
+      <div class="detail-section">
+        <div class="detail-section-title">
+          <span>🏭</span> 제조 원가 (Manufacturing Cost) 상세 분해
+        </div>
+        <table class="breakdown-table" id="mfgTable">
+          <thead>
+            <tr>
+              <th style="width:32%">원가 항목</th>
+              <th class="right" style="width:14%">단가 (KRW)</th>
+              <th class="right" style="width:12%">비중</th>
+              <th style="width:28%">비중 시각화</th>
+              <th class="right" style="width:14%">전년 比</th>
+            </tr>
+          </thead>
+          <tbody id="mfgTableBody">
+            <!-- JS로 채움 -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 3. 유통 마진 & 부대비용 -->
+      <div class="detail-section">
+        <div class="detail-section-title">
+          <span>🏪</span> 유통 마진 및 부대비용
+        </div>
+        <table class="breakdown-table" id="distTable">
+          <thead>
+            <tr>
+              <th style="width:32%">항목</th>
+              <th class="right" style="width:14%">단가 (KRW)</th>
+              <th class="right" style="width:12%">비중</th>
+              <th style="width:28%">비중 시각화</th>
+              <th class="right" style="width:14%">비고</th>
+            </tr>
+          </thead>
+          <tbody id="distTableBody"></tbody>
+        </table>
+      </div>
+
+      <!-- 4. 외부 리스크 보정 -->
+      <div class="detail-section">
+        <div class="detail-section-title">
+          <span>⚡</span> 외부 변수 리스크 보정
+        </div>
+        <table class="breakdown-table">
+          <thead>
+            <tr>
+              <th style="width:28%">리스크 요인</th>
+              <th class="right" style="width:13%">현재값</th>
+              <th class="right" style="width:13%">정상 범위</th>
+              <th class="right" style="width:13%">가격 영향</th>
+              <th style="width:16%">위험도</th>
+              <th class="right" style="width:17%">보정 단가</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>USD/KRW 환율</td>
+              <td class="right mono">₩1,378</td>
+              <td class="right mono">₩1,200~1,350</td>
+              <td class="right mono price-up">+₩182</td>
+              <td><span class="badge badge-high">고위험</span></td>
+              <td class="right mono">+5.3%</td>
+            </tr>
+            <tr class="sub-row">
+              <td>환헤지 비용 포함</td>
+              <td class="right mono">—</td>
+              <td class="right mono">—</td>
+              <td class="right mono price-up">+₩28</td>
+              <td></td>
+              <td class="right mono">+0.8%</td>
+            </tr>
+            <tr>
+              <td>TSMC 28nm 가동율</td>
+              <td class="right mono">71.2%</td>
+              <td class="right mono">88~92%</td>
+              <td class="right mono price-up">+₩95</td>
+              <td><span class="badge badge-high">고위험</span></td>
+              <td class="right mono">+2.8%</td>
+            </tr>
+            <tr class="sub-row">
+              <td>리드타임 연장 리스크</td>
+              <td class="right mono">+6주</td>
+              <td class="right mono">2~3주</td>
+              <td class="right mono price-up">+₩42</td>
+              <td></td>
+              <td class="right mono">+1.2%</td>
+            </tr>
+            <tr>
+              <td>실리콘 웨이퍼 원자재</td>
+              <td class="right mono">$4.82/장</td>
+              <td class="right mono">$3.80~4.20</td>
+              <td class="right mono price-up">+₩58</td>
+              <td><span class="badge badge-mid">중위험</span></td>
+              <td class="right mono">+1.7%</td>
+            </tr>
+            <tr>
+              <td>일본 소재 수출규제</td>
+              <td class="right mono">경계</td>
+              <td class="right mono">정상</td>
+              <td class="right mono price-up">+₩22</td>
+              <td><span class="badge badge-mid">중위험</span></td>
+              <td class="right mono">+0.6%</td>
+            </tr>
+            <tr>
+              <td>수요 증가 (전장화)</td>
+              <td class="right mono">+18%YoY</td>
+              <td class="right mono">5~10%</td>
+              <td class="right mono price-up">+₩67</td>
+              <td><span class="badge badge-mid">중위험</span></td>
+              <td class="right mono">+2.0%</td>
+            </tr>
+            <tr class="total-row">
+              <td><strong>리스크 보정 합계</strong></td>
+              <td class="right mono">—</td>
+              <td class="right mono">—</td>
+              <td class="right mono price-up"><strong>+₩494</strong></td>
+              <td></td>
+              <td class="right mono"><strong>+14.4%</strong></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 5. 수량 할인 구간 -->
+      <div class="detail-section">
+        <div class="detail-section-title">
+          <span>📦</span> 수량 구간별 단가 (Volume Break)
+        </div>
+        <table class="breakdown-table">
+          <thead>
+            <tr>
+              <th>수량 구간</th>
+              <th class="right">USD 단가</th>
+              <th class="right">KRW 단가</th>
+              <th class="right">할인율</th>
+              <th style="width:30%">할인 시각화</th>
+              <th>현재 구간</th>
+            </tr>
+          </thead>
+          <tbody id="volumeTableBody"></tbody>
+        </table>
+      </div>
+
+      <!-- 6. 워터폴 차트 + 시나리오 -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:28px">
+        <div class="detail-section" style="margin-bottom:0">
+          <div class="detail-section-title"><span>📊</span> 원가 구성 워터폴</div>
+          <div class="waterfall-wrap">
+            <canvas id="waterfallChart"></canvas>
+          </div>
+        </div>
+
+        <div class="detail-section" style="margin-bottom:0">
+          <div class="detail-section-title"><span>🎯</span> 협상 시나리오별 목표가</div>
+          <div class="strategy-grid">
+            <div class="strategy-card best">
+              <div class="strategy-label">🏆 최적 협상가</div>
+              <div class="strategy-price" id="sc1Price" style="color:var(--green)">₩3,200</div>
+              <div class="strategy-desc">수량 100,000PCS 이상 장기 계약 기준. 협력사 원가 공개 + NDA 체결 시 가능.</div>
+              <span class="strategy-badge" style="background:rgba(0,230,118,0.15);color:var(--green)">절감 12.5%</span>
+            </div>
+            <div class="strategy-card">
+              <div class="strategy-label">✅ AI 기준 목표가</div>
+              <div class="strategy-price" id="sc2Price" style="color:var(--accent)">₩3,420</div>
+              <div class="strategy-desc">현 수량·공정 기준 AI 산출 원가 기반. 실질 협상 목표치.</div>
+              <span class="strategy-badge" style="background:rgba(0,212,255,0.15);color:var(--accent)">절감 6.4%</span>
+            </div>
+            <div class="strategy-card">
+              <div class="strategy-label">⚠️ 보수 시나리오</div>
+              <div class="strategy-price" id="sc3Price" style="color:var(--yellow)">₩3,580</div>
+              <div class="strategy-desc">환율 1,400원·파운드리 가동 70% 유지 시 예상 단가 상한.</div>
+              <span class="strategy-badge" style="background:rgba(255,204,0,0.15);color:var(--yellow)">2.0% 상승</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 7. 민감도 분석 -->
+      <div class="detail-section">
+        <div class="detail-section-title"><span>🎚️</span> 변수별 가격 민감도 분석 (인터랙티브)</div>
+        <div class="sensitivity-grid">
+          <div>
+            <div class="sens-row">
+              <span class="sens-label">환율 (KRW/USD)</span>
+              <input type="range" class="sens-slider" id="sExRate" min="1200" max="1500" value="1378" oninput="updateSensitivity()">
+              <span class="sens-val" id="sExRateVal">1,378</span>
+              <span class="sens-impact pos" id="sExRateImp">+5.3%</span>
+            </div>
+            <div class="sens-row">
+              <span class="sens-label">파운드리 가동율</span>
+              <input type="range" class="sens-slider" id="sFoundry" min="60" max="100" value="71" oninput="updateSensitivity()">
+              <span class="sens-val" id="sFoundryVal">71%</span>
+              <span class="sens-impact pos" id="sFoundryImp">+2.8%</span>
+            </div>
+            <div class="sens-row">
+              <span class="sens-label">웨이퍼 원자재</span>
+              <input type="range" class="sens-slider" id="sWafer" min="300" max="600" value="482" oninput="updateSensitivity()">
+              <span class="sens-val" id="sWaferVal">$4.82</span>
+              <span class="sens-impact pos" id="sWaferImp">+1.7%</span>
+            </div>
+          </div>
+          <div>
+            <div class="sens-row">
+              <span class="sens-label">수량 (백만 PCS)</span>
+              <input type="range" class="sens-slider" id="sQty" min="1" max="30" value="5" step="0.5" oninput="updateSensitivity()">
+              <span class="sens-val" id="sQtyVal">5M</span>
+              <span class="sens-impact neg" id="sQtyImp">-13%</span>
+            </div>
+            <div class="sens-row">
+              <span class="sens-label">유통사 마진</span>
+              <input type="range" class="sens-slider" id="sMargin" min="10" max="40" value="25" oninput="updateSensitivity()">
+              <span class="sens-val" id="sMarginVal">25%</span>
+              <span class="sens-impact pos" id="sMarginImp">+0.0%</span>
+            </div>
+            <div class="sens-row">
+              <span class="sens-label">장기계약 기간</span>
+              <input type="range" class="sens-slider" id="sContract" min="1" max="36" value="12" oninput="updateSensitivity()">
+              <span class="sens-val" id="sContractVal">12개월</span>
+              <span class="sens-impact neg" id="sContractImp">-2.0%</span>
+            </div>
+          </div>
+        </div>
+        <div class="result-box" style="margin-top:16px;padding:16px">
+          <div style="font-size:11px;color:var(--muted);margin-bottom:6px">민감도 반영 조정 단가</div>
+          <div style="font-family:var(--mono);font-size:32px;font-weight:700;color:var(--accent)" id="sensitivityResult">₩3,420</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:4px" id="sensitivityDesc">현재 조건 기준 AI 산출가</div>
+        </div>
+      </div>
+
+      <!-- 8. 과거 실구매가 vs AI 산출가 비교 -->
+      <div class="detail-section">
+        <div class="detail-section-title"><span>🔄</span> 과거 실구매가 vs AI 산출가 정확도 검증</div>
+        <table class="breakdown-table">
+          <thead>
+            <tr>
+              <th>기준연월</th>
+              <th class="right">실제 구매단가</th>
+              <th class="right">AI 산출 예측가</th>
+              <th class="right">오차율</th>
+              <th class="right">절감 가능액 (50K PCS)</th>
+              <th>정확도</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="mono">2024.04</td>
+              <td class="right mono">₩3,820</td>
+              <td class="right mono">₩3,690</td>
+              <td class="right mono price-down">-3.4%</td>
+              <td class="right mono price-down">-₩6,500만</td>
+              <td><span class="badge badge-buy">96.6%</span></td>
+            </tr>
+            <tr>
+              <td class="mono">2024.01</td>
+              <td class="right mono">₩3,710</td>
+              <td class="right mono">₩3,580</td>
+              <td class="right mono price-down">-3.5%</td>
+              <td class="right mono price-down">-₩6,500만</td>
+              <td><span class="badge badge-buy">96.5%</span></td>
+            </tr>
+            <tr>
+              <td class="mono">2023.10</td>
+              <td class="right mono">₩3,550</td>
+              <td class="right mono">₩3,480</td>
+              <td class="right mono price-down">-2.0%</td>
+              <td class="right mono price-down">-₩3,500만</td>
+              <td><span class="badge badge-buy">98.0%</span></td>
+            </tr>
+            <tr>
+              <td class="mono">2023.07</td>
+              <td class="right mono">₩3,420</td>
+              <td class="right mono">₩3,510</td>
+              <td class="right mono price-up">+2.6%</td>
+              <td class="right mono price-up">+₩4,500만</td>
+              <td><span class="badge badge-hold">97.4%</span></td>
+            </tr>
+            <tr>
+              <td class="mono">2023.04</td>
+              <td class="right mono">₩3,280</td>
+              <td class="right mono">₩3,190</td>
+              <td class="right mono price-down">-2.7%</td>
+              <td class="right mono price-down">-₩4,500만</td>
+              <td><span class="badge badge-buy">97.3%</span></td>
+            </tr>
+            <tr class="total-row">
+              <td><strong>평균 정확도</strong></td>
+              <td class="right mono">—</td>
+              <td class="right mono">—</td>
+              <td class="right mono price-down"><strong>-2.2%</strong></td>
+              <td class="right mono price-down"><strong>-₩4,100만/회</strong></td>
+              <td><strong style="color:var(--green)">97.2%</strong></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div><!-- end modal-body -->
+
+    <!-- 하단 액션 바 -->
+    <div class="modal-action-bar">
+      <div class="action-bar-price">
+        <span class="abp-label">AI 협상 목표가</span>
+        <span class="abp-value" id="mActionPrice">₩3,420</span>
+        <span class="abp-unit" id="mActionUnit">/ PCS (5백만PCS 기준)</span>
+      </div>
+      <div class="action-bar-btns">
+        <button class="btn-outline" onclick="alert('PDF 리포트 생성 기능 (구현 예정)')">📄 PDF 리포트 출력</button>
+        <button class="btn-outline" onclick="alert('협상 가이드 메일 발송 (구현 예정)')">📧 협상 가이드 발송</button>
+        <button class="btn" onclick="closeDetailModal()">확인</button>
+      </div>
+    </div>
+
+  </div><!-- end .modal -->
+</div><!-- end .modal-overlay -->
+
+<div class="footer-bar">
+  현대모비스 전자부품구매실 | 반도체 가격 전망 TOOL v1.0 | AI 기반 구매 인텔리전스 플랫폼 | 데이터 기준: 실시간 (15분 갱신)
+</div>
+
+<script>
+// ============================
+// CLOCK
+// ============================
+function updateTime() {
+  const now = new Date();
+  document.getElementById('headerTime').textContent = 
+    now.toLocaleDateString('ko-KR') + ' ' + now.toLocaleTimeString('ko-KR');
+}
+updateTime();
+setInterval(updateTime, 1000);
+
+// ============================
+// TAB SWITCH
+// ============================
+function switchTab(tab) {
+  document.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  const tabMap = ['calc','api','search','trend','compare','trend','risk'];
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    if(btn.getAttribute('onclick').includes(tab)) btn.classList.add('active');
+  });
+  document.getElementById('tab-'+tab).classList.add('active');
+  // init charts on first show
+  if(tab === 'trend' && !window._trendInit) { initTrendCharts(); window._trendInit = true; }
+  if(tab === 'compare' && !window._compareInit) { initCompareChart(); window._compareInit = true; }
+  if(tab === 'risk' && !window._riskInit) { initRiskChart(); window._riskInit = true; }
+}
+
+// ============================
+// 소자 상세 입력 탭 전환
+// ============================
+function switchSpecTab(tab, btn) {
+  document.querySelectorAll('.spec-tab').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.spec-section').forEach(s => s.style.display = 'none');
+  btn.classList.add('active');
+  document.getElementById('spec-' + tab).style.display = 'block';
+}
+
+// ── 웨이퍼 자동 계산 ──
+function updateWaferCalc() {
+  const waferDiam = parseFloat(document.getElementById('waferSize').value) || 300;
+  const dieArea   = parseFloat(document.getElementById('dieSize').value) || 12.5;
+  const yld       = parseFloat(document.getElementById('yieldPct').value) / 100 || 0.82;
+  const wfrPrice  = parseFloat(document.getElementById('waferPrice').value) || 4820;
+  const edge      = parseFloat(document.getElementById('edgeExcl')?.value) || 3;
+  const scribe    = parseFloat(document.getElementById('scribeLine')?.value) || 0.08;
+  const layers    = parseInt(document.getElementById('metalLayers')?.value) || 6;
+  const nodeNm    = parseInt(document.getElementById('process')?.value) || 28;
+
+  // 이론 DPW = π × (r-edge)² / (dieArea + scribe×√dieArea) × 보정
+  const r = waferDiam / 2;
+  const usableR = r - edge;
+  const effectiveDieArea = (Math.sqrt(dieArea) + scribe) ** 2;
+  const theor = Math.floor(Math.PI * usableR * usableR / effectiveDieArea);
+  const goodDies = Math.floor(theor * yld);
+  const util = (theor * dieArea / (Math.PI * usableR * usableR) * 100).toFixed(1);
+  const costPerDie = goodDies > 0 ? (wfrPrice / goodDies).toFixed(4) : '—';
+
+  // 레이어 원가 가산 (레이어당 약 $0.04)
+  const layerAdj = ((layers - 4) * 0.04 + (nodeNm <= 28 ? 0.18 : nodeNm <= 65 ? 0.08 : 0)).toFixed(2);
+
+  // 웨이퍼 참고가 업데이트
+  const wfrRef = document.getElementById('waferPriceRef');
+  if (wfrRef) {
+    const refMap = {5:'$8,000~12,000', 7:'$6,000~9,000', 10:'$4,800~7,000', 14:'$3,500~5,500',
+      28:'$4,200~5,400', 40:'$2,800~3,800', 90:'$1,800~2,600', 180:'$900~1,400', 350:'$500~900'};
+    wfrRef.textContent = `참고: ${nodeNm}nm ${waferDiam}mm ≈ ${refMap[nodeNm] || '$2,000~5,000'}`;
+  }
+
+  // 수율 바 + 등급
+  const yBar = document.getElementById('yieldBar');
+  const yNote = document.getElementById('yieldGradeNote');
+  if (yBar) { yBar.style.width = (yld*100) + '%'; yBar.style.background = yld>=0.9?'var(--accent)':yld>=0.8?'var(--green)':yld>=0.6?'var(--yellow)':'var(--red)'; }
+  if (yNote) { yNote.textContent = yld>=0.9?'최고 (90%+)':yld>=0.8?'양호 (80~90%)':yld>=0.6?'보통 (60~80%)':'주의 (60% 미만)'; }
+
+  // 결과 표시
+  const set = (id, v) => { const el = document.getElementById(id); if(el) el.textContent = v; };
+  set('theorDPW', theor.toLocaleString());
+  set('netDPW', goodDies.toLocaleString());
+  set('waferUtil', util + '%');
+  set('wfrCostPerDie', '$' + costPerDie);
+  set('layerCostAdj', '$' + layerAdj);
+  // 하위 호환 (이전 ID)
+  const dpwEl = document.getElementById('dpw'); if(dpwEl) dpwEl.value = theor;
+  const gdEl  = document.getElementById('goodDies'); if(gdEl) gdEl.value = goodDies;
+  const cpdEl = document.getElementById('costPerDie'); if(cpdEl) cpdEl.value = parseFloat(costPerDie)||0;
+}
+
+// ── 패키지/테스트 원가 자동 추정 ──
+function updatePkgCost() {
+  const pkg  = document.getElementById('pkgType')?.value || 'lqfp';
+  const pins = parseInt(document.getElementById('pinCount')?.value) || 64;
+  const test = document.getElementById('testType')?.value || 'wt_ft';
+
+  const pkgBase = {qfp:0.10,lqfp:0.09,bga:0.18,fcbga:0.35,qfn:0.07,dfn:0.05,soic:0.06,to:0.12,sot:0.04,wlcsp:0.06};
+  const pinAdj  = Math.max(0, (pins - 32) * 0.0005);
+  const pkgCostV = ((pkgBase[pkg]||0.09) + pinAdj).toFixed(3);
+
+  const testBase = {ft_only:0.05, wt_ft:0.08, full:0.14, adas:0.22};
+  const testCostV = (testBase[test]||0.08).toFixed(3);
+
+  const setV = (id, v) => { const el = document.getElementById(id); if(el) el.value = v; };
+  setV('pkgCost', pkgCostV);
+  setV('testCost', testCostV);
+
+  const set = (id, v) => { const el = document.getElementById(id); if(el) el.textContent = v; };
+  set('sumPkgCost',  '$' + pkgCostV);
+  set('sumTestCost', '$' + testCostV);
+  set('sumBackendCost', '$' + (parseFloat(pkgCostV)+parseFloat(testCostV)).toFixed(3));
+}
+
+// ── 메모리 원가 가산 ──
+function updateMemoryCost() {
+  const flashMap = {'64 KB':0.02,'128 KB':0.03,'256 KB':0.05,'512 KB':0.08,'1 MB':0.10,'2 MB':0.14,'4 MB':0.20,'8 MB':0.30,'16 MB+':0.45,'해당 없음':0};
+  const ramMap   = {'8 KB':0.01,'16 KB':0.02,'32 KB':0.03,'64 KB':0.04,'128 KB':0.06,'192 KB':0.08,'256 KB':0.10,'512 KB':0.15,'1 MB+':0.25,'해당 없음':0};
+  const flash = document.getElementById('flashSize')?.value;
+  const ram   = document.getElementById('ramSize')?.value;
+  const adj   = ((flashMap[flash]||0.10) + (ramMap[ram]||0.08)).toFixed(3);
+  const el = document.getElementById('memoryCostAdj'); if(el) el.value = adj;
+}
+
+// ── 샘플 로드 ──
+function loadPresetSpec() {
+  // 기본 정보
+  document.getElementById('partCategory').value = 'mcu';
+  document.getElementById('partNum').value = 'STM32F407VGT6';
+  updatePart();
+  document.getElementById('foundry').value = 'tsmc';
+  document.getElementById('carSystem').value = 'adas';
+  document.getElementById('aecq').value = 'q100';
+  document.getElementById('tempRange').value = 'auto';
+
+  // 웨이퍼
+  document.getElementById('process').value = '90';
+  document.getElementById('waferSize').value = '300';
+  document.getElementById('waferPrice').value = '2400';
+  document.getElementById('dieSize').value = '12.5';
+  document.getElementById('yieldPct').value = '82';
+  if(document.getElementById('edgeExcl')) document.getElementById('edgeExcl').value = '3';
+  if(document.getElementById('scribeLine')) document.getElementById('scribeLine').value = '0.08';
+  if(document.getElementById('metalLayers')) document.getElementById('metalLayers').value = '6';
+  updateWaferCalc();
+
+  // 패키지
+  document.getElementById('pkgType').value = 'lqfp';
+  document.getElementById('pinCount').value = '64';
+  document.getElementById('testType').value = 'wt_ft';
+  updatePkgCost();
+
+  // 기능
+  document.getElementById('flashSize').value = '1 MB';
+  document.getElementById('ramSize').value = '192 KB';
+  updateMemoryCost();
+
+  // 구매 조건
+  document.getElementById('qty').value = '5';
+  document.getElementById('exRate').value = '1378';
+
+  // 탭 이동
+  document.querySelectorAll('.spec-tab').forEach((b,i) => { if(i===0) b.click(); });
+  alert('STM32F407VGT6 샘플 사양이 로드되었습니다.\n⑤ 구매 조건 탭에서 실제 구매단가를 입력하고 분석을 실행하세요.');
+}
+
+function clearAllSpec() {
+  if (!confirm('모든 입력값을 초기화하시겠습니까?')) return;
+  document.getElementById('partNum').value = '';
+  document.getElementById('actualPrice').value = '';
+  document.getElementById('qty').value = '5';
+  document.getElementById('exRate').value = '1378';
+  updateWaferCalc();
+  updatePkgCost();
+  updateMemoryCost();
+}
+
+// 초기 계산 실행
+window.addEventListener('DOMContentLoaded', () => {
+  updateWaferCalc();
+  updatePkgCost();
+  updateMemoryCost();
+});
+
+
+const RATIO_DEFAULTS = [
+  {
+    key: 'wafer',
+    name: '실리콘 웨이퍼 원자재',
+    color: '#00d4ff',
+    ai: 28.4,
+    basis: '웨이퍼 1장당 가공 다이 수(Die/Wafer) 및 수율(Yield) 기반 역산. 28nm 기준 $$4.82/장',
+    driver: '파운드리 가동율, 실리콘 원자재 시세, 일본 수출규제',
+    source: 'SEMI 실리콘 웨이퍼 시장 보고서 2024'
+  },
+  {
+    key: 'process',
+    name: '파운드리 공정비',
+    color: '#00d4ff',
+    ai: 11.0,
+    basis: 'TSMC/삼성 웨이퍼 처리 단가(WPP) 공시 기준. 28nm Wafer = $3,200~4,800',
+    driver: 'TSMC 28nm 가동율(현재 71.2%), 선단공정 전환 수요',
+    source: 'TSMC Q1 2024 실적발표 / IHS Markit Foundry Cost DB'
+  },
+  {
+    key: 'pkg',
+    name: '패키징 / 테스트',
+    color: '#ffcc00',
+    ai: 18.2,
+    basis: 'OSAT(외주 후공정) 단가 분석. QFP 패키지 기준 $0.08~0.15/unit',
+    driver: '봉지재(EMC) 원자재가, 리드프레임 동가격, 인건비',
+    source: 'ASE Group / Amkor 원가 공시, 현대모비스 BOM 내부 분석'
+  },
+  {
+    key: 'rnd',
+    name: 'R&D 상각 / 라이선스',
+    color: '#9c6dff',
+    ai: 12.1,
+    basis: 'IC 제조사 연간 R&D 지출을 출하량으로 나눈 단위당 상각비. STM 기준 매출 대비 13.2%',
+    driver: '신규 아키텍처 개발 주기, IP 로열티 협상 조건',
+    source: 'STMicroelectronics 2023 Annual Report / NXP 20-F'
+  },
+  {
+    key: 'dist',
+    name: '유통사 마진',
+    color: '#ff4444',
+    ai: 14.2,
+    basis: '글로벌 유통사(Digi-Key·Mouser·Arrow) 공개 재무제표 기반 영업이익률 분석. 평균 12~17%',
+    driver: '재고 회전율, 독점 계약 여부, 수량 협상',
+    source: 'Arrow Electronics 10-K / Digi-Key 내부 마진 추정'
+  },
+  {
+    key: 'tariff',
+    name: '관세 / 물류비',
+    color: '#ff4444',
+    ai: 8.0,
+    basis: '한국 수입관세 8% + CIF 기준 해상운임. 인천항 기준 평균 운임 $0.02~0.04/unit',
+    driver: '미-중 무역분쟁, 해운 운임 지수(SCFI), 항공 긴급운송 비율',
+    source: '관세청 HS Code 8542 세율, SCFI 지수 2024'
+  },
+  {
+    key: 'fx',
+    name: '환위험 / 기타',
+    color: '#ff8c42',
+    ai: 8.1,
+    basis: '달러 결제 비중 92% 기준 환헤지 비용 + 재고 보험료. 환율 변동성 1σ 기준 ±2.3%',
+    driver: 'USD/KRW 변동성, 헤지 계약 조건, 보험료율',
+    source: '현대모비스 구매팀 환헤지 내부 정책, 2024 환율 데이터'
+  },
+];
+
+// 소자 유형별 프리셋
+const RATIO_PRESETS = {
+  mcu:    [28.4, 11.0, 18.2, 12.1, 14.2, 8.0, 8.1],
+  mosfet: [22.0, 14.5, 24.0,  8.0, 16.0, 8.5, 7.0],
+  sensor: [18.0, 16.0, 26.0, 15.0, 12.5, 7.0, 5.5],
+  power:  [24.0, 12.0, 20.0, 10.0, 16.0, 9.0, 9.0],
+  memory: [32.0, 10.0, 16.0, 14.0, 13.0, 8.0, 7.0],
+  sbc:    [26.0, 13.0, 15.0, 16.0, 14.0, 8.5, 7.5],
+  custom: [30.0, 12.0, 16.0, 11.0, 18.0, 7.5, 5.5], // 내부 원가 기준
+};
+
+let ratioCustom = null; // null = AI 기본값 사용
+
+function toggleRatioPanel() {
+  const panel = document.getElementById('ratioPanel');
+  const chevron = document.getElementById('ratioChevron');
+  const isOpen = panel.style.display !== 'none';
+  panel.style.display = isOpen ? 'none' : 'block';
+  chevron.style.transform = isOpen ? '' : 'rotate(180deg)';
+  if (!isOpen) renderRatioTable();
+}
+
+function renderRatioTable() {
+  const tbody = document.getElementById('ratioTableBody');
+  const current = ratioCustom || RATIO_DEFAULTS.map(r => r.ai);
+  tbody.innerHTML = '';
+  RATIO_DEFAULTS.forEach((item, i) => {
+    const val = current[i];
+    tbody.innerHTML += `<tr style="border-bottom:1px solid rgba(30,45,69,0.4)">
+      <td style="padding:10px 14px">
+        <div style="display:flex;align-items:center;gap:8px">
+          <div style="width:10px;height:10px;border-radius:50%;background:${item.color};flex-shrink:0"></div>
+          <span style="font-weight:600">${item.name}</span>
+        </div>
+      </td>
+      <td style="padding:10px 14px;text-align:center;font-family:var(--mono);color:var(--muted)">${item.ai.toFixed(1)}%</td>
+      <td style="padding:10px 14px;text-align:center">
+        <input type="number" step="0.1" min="0" max="100"
+          id="ratio_${item.key}"
+          value="${val.toFixed(1)}"
+          oninput="onRatioChange()"
+          style="width:72px;background:var(--surface2);border:1px solid ${val !== item.ai ? 'rgba(255,204,0,0.5)' : 'var(--border)'};
+                 color:${val !== item.ai ? 'var(--yellow)' : 'var(--text)'};
+                 font-family:var(--mono);font-size:13px;font-weight:700;
+                 padding:5px 8px;border-radius:6px;text-align:center;outline:none">
+      </td>
+      <td style="padding:10px 14px;font-size:11px;color:var(--muted);max-width:220px;line-height:1.5">${item.basis}</td>
+      <td style="padding:10px 14px;font-size:11px;color:var(--muted);max-width:180px;line-height:1.5">${item.driver}</td>
+      <td style="padding:10px 14px;text-align:center">
+        <span style="font-size:10px;background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:3px 7px;color:var(--muted);white-space:nowrap">${item.source.split('/')[0]}</span>
+      </td>
+    </tr>`;
+  });
+  updateRatioTotal();
+}
+
+function onRatioChange() {
+  const vals = RATIO_DEFAULTS.map(r => parseFloat(document.getElementById('ratio_'+r.key).value) || 0);
+  ratioCustom = vals;
+  const badge = document.getElementById('ratioBadge');
+  badge.textContent = '사용자 입력';
+  badge.style.background = 'rgba(255,204,0,0.15)';
+  badge.style.color = 'var(--yellow)';
+  badge.style.borderColor = 'rgba(255,204,0,0.4)';
+  // 변경된 셀 노란 테두리
+  RATIO_DEFAULTS.forEach((r, i) => {
+    const el = document.getElementById('ratio_'+r.key);
+    if (!el) return;
+    const changed = Math.abs(vals[i] - r.ai) > 0.05;
+    el.style.borderColor = changed ? 'rgba(255,204,0,0.5)' : 'var(--border)';
+    el.style.color = changed ? 'var(--yellow)' : 'var(--text)';
+  });
+  updateRatioTotal();
+}
+
+function updateRatioTotal() {
+  const vals = RATIO_DEFAULTS.map(r => {
+    const el = document.getElementById('ratio_'+r.key);
+    return el ? (parseFloat(el.value) || 0) : r.ai;
+  });
+  const total = vals.reduce((a,b) => a+b, 0);
+  const totalEl = document.getElementById('ratioInputTotal');
+  const warnEl  = document.getElementById('ratioWarning');
+  if (totalEl) totalEl.textContent = total.toFixed(1) + '%';
+  const ok = Math.abs(total - 100) < 0.5;
+  if (totalEl) totalEl.style.color = ok ? 'var(--green)' : 'var(--red)';
+  if (warnEl)  warnEl.innerHTML = ok
+    ? '✅ 합계 정상 (100%)'
+    : `⚠️ 합계 ${total.toFixed(1)}% — 100%와 ${(total-100).toFixed(1)}%p 차이. 비율을 조정하세요.`;
+  if (warnEl)  warnEl.style.color = ok ? 'var(--green)' : 'var(--red)';
+}
+
+function resetRatios() {
+  ratioCustom = null;
+  const badge = document.getElementById('ratioBadge');
+  badge.textContent = 'AI 기본값';
+  badge.style.background = 'rgba(0,212,255,0.12)';
+  badge.style.color = 'var(--accent)';
+  badge.style.borderColor = 'rgba(0,212,255,0.3)';
+  renderRatioTable();
+}
+
+function applyPreset(type) {
+  const cat = type === 'custom' ? 'custom' : (type || document.getElementById('partCategory').value);
+  const preset = RATIO_PRESETS[cat] || RATIO_PRESETS.mcu;
+  ratioCustom = [...preset];
+  RATIO_DEFAULTS.forEach((r, i) => {
+    const el = document.getElementById('ratio_'+r.key);
+    if (el) el.value = preset[i].toFixed(1);
+  });
+  onRatioChange();
+  const badge = document.getElementById('ratioBadge');
+  badge.textContent = type === 'custom' ? '내부 원가 기준' : `${cat.toUpperCase()} 프리셋`;
+}
+
+function getRatios() {
+  // ratioCustom 있으면 사용, 없으면 AI 기본값
+  return ratioCustom || RATIO_DEFAULTS.map(r => r.ai);
+}
+
+// ============================
+// CALC TAB — 통합 분석
+// ============================
+let _gapWaterfallChart = null;
+let _scenarioChart = null;
+let _costChartInst = null;
+
+function calcPrice() { runFullAnalysis(); } // 하위 호환
+
+function resetCalc() {
+  document.getElementById('analysisResult').style.display = 'none';
+  document.getElementById('actualPrice').value = '';
+  if (_gapWaterfallChart) { _gapWaterfallChart.destroy(); _gapWaterfallChart = null; }
+  if (_scenarioChart)     { _scenarioChart.destroy();     _scenarioChart = null; }
+}
+
+function runFullAnalysis() {
+  const qtyM    = parseFloat(document.getElementById('qty').value) || 5;
+  const qtyPCS  = qtyM * 1_000_000;
+  const exRate  = parseInt(document.getElementById('exRate').value) || 1378;
+  const cat     = document.getElementById('partCategory').value;
+  const baseUSD = {mcu:2.48, mosfet:0.82, sensor:4.20, power:1.15, memory:3.80, sbc:8.40};
+  const base    = baseUSD[cat] || 2.48;
+  const partNum = document.getElementById('partNum').value || 'STM32F407VGT6';
+  const byYear  = document.getElementById('buyYear').value;
+  const ctype   = document.getElementById('contractType').value;
+
+  // 수량 할인
+  let disc;
+  if      (qtyM >= 20) disc = 0.72;
+  else if (qtyM >= 15) disc = 0.76;
+  else if (qtyM >= 10) disc = 0.80;
+  else if (qtyM >= 7)  disc = 0.84;
+  else if (qtyM >= 5)  disc = 0.87;
+  else if (qtyM >= 3)  disc = 0.90;
+  else                 disc = 0.94;
+
+  // ── 모든 단가를 USD 기준으로 계산 (소수점 4자리 정밀도) ──
+  const usd  = v => Math.round(v * 10000) / 10000; // USD 반올림 헬퍼
+  const fmt  = v => '$' + v.toFixed(4);             // 상세 표시
+  const fmt2 = v => '$' + v.toFixed(2);             // 간략 표시
+  const fmt4 = v => '$' + v.toFixed(4);
+
+  const aiPrice    = usd(base * disc);
+  const bandLow    = usd(aiPrice * 0.93);
+  const bandHigh   = usd(aiPrice * 1.09);
+  const distAvg    = usd(aiPrice * 1.065);
+  const ratios     = getRatios();
+  const mfgCost    = usd(aiPrice * (ratios[0]+ratios[1]+ratios[2]+ratios[3]) / 100);
+  const targetPrice = usd(aiPrice * 0.97);
+
+  // 실구매가 (USD)
+  const actualRaw  = parseFloat(document.getElementById('actualPrice').value) || 0;
+  const hasActual  = actualRaw > 0;
+  const actualPrice = hasActual ? actualRaw : distAvg;
+  const diff       = usd(actualPrice - aiPrice);
+  const diffPct    = (diff / aiPrice * 100);
+  const isOver     = diff > 0;
+  const savingPCS  = Math.abs(diff);
+  // 총 절감/과납액: USD 기준 (백만 달러)
+  const savingTotalM = usd(savingPCS * qtyPCS / 1_000_000); // 백만 달러
+  const sign       = diff >= 0 ? '+' : '';
+  const ctypeLabel = {spot:'스팟 구매', annual:'연간 계약', long:'장기 계약(2년+)'}[ctype];
+
+  // KRW 환산 참고 헬퍼
+  const krwRef = v => '(₩' + Math.round(v * exRate).toLocaleString() + ')';
+
+  // ── HERO 카드 ──
+  document.getElementById('heroAiPrice').textContent  = fmt2(aiPrice);
+  document.getElementById('heroBandLow').textContent  = fmt2(bandLow);
+  document.getElementById('heroBandHigh').textContent = fmt2(bandHigh);
+  document.getElementById('heroDistAvg').textContent  = fmt2(distAvg);
+  document.getElementById('heroAiDesc').textContent   =
+    `${cat.toUpperCase()} · ${qtyM}M PCS · ${document.getElementById('process').value} · 수량 할인 ${Math.round((1-disc)*100)}% 적용. 참고 환율 ₩${exRate.toLocaleString()}/USD 기준 ₩${Math.round(aiPrice*exRate).toLocaleString()}/PCS`;
+
+  const actColor = isOver ? '#ff6b6b' : '#00e676';
+  document.getElementById('heroActPrice').textContent  = hasActual ? fmt2(actualPrice) : '미입력';
+  document.getElementById('heroActPrice').style.color  = hasActual ? actColor : 'var(--muted)';
+  document.getElementById('heroActYear').textContent   = byYear;
+  document.getElementById('heroActType').textContent   = ctypeLabel;
+  document.getElementById('heroTargetPrice').textContent = fmt2(targetPrice);
+  document.getElementById('heroActLabel').textContent  = hasActual ? '실제 계약 단가 (USD/PCS)' : '구매단가 미입력 — AI 기준 분석';
+  document.getElementById('heroActDesc').textContent   = hasActual
+    ? `유통사 평균(${fmt2(distAvg)}) 대비 ${(((actualPrice-distAvg)/distAvg)*100).toFixed(1)}%, AI 산출가 대비 ${sign}${diffPct.toFixed(1)}% 수준. 환산 ₩${Math.round(actualPrice*exRate).toLocaleString()}/PCS`
+    : '실제 구매단가를 입력하면 과납/절감 분석, 협상 전략 권고가 표시됩니다.';
+
+  if (hasActual) {
+    document.getElementById('heroGapAmt').textContent   = sign + fmt2(Math.abs(diff));
+    document.getElementById('heroGapAmt').style.color   = isOver ? 'var(--red)' : 'var(--green)';
+    document.getElementById('heroGapPct').textContent   = sign + diffPct.toFixed(2) + '%';
+    document.getElementById('heroGapPct').style.color   = isOver ? 'var(--red)' : 'var(--green)';
+    document.getElementById('heroGapIcon').textContent  = isOver ? '🔴' : '🟢';
+    document.getElementById('heroGapTotal').textContent = (isOver ? '과납 $' : '절감 $') + savingTotalM.toFixed(2) + 'M';
+    document.getElementById('heroGapTotal').style.color = isOver ? 'var(--red)' : 'var(--green)';
+    document.getElementById('heroGapQty').textContent   = `${qtyM}M PCS · ${krwRef(savingTotalM*1_000_000/qtyPCS)} /PCS`;
+    document.getElementById('heroGapMiddle').style.background = isOver
+      ? 'linear-gradient(180deg,rgba(255,68,68,0.08),rgba(255,68,68,0.02))'
+      : 'linear-gradient(180deg,rgba(0,230,118,0.08),rgba(0,230,118,0.02))';
+    document.getElementById('heroActPanel').style.background = isOver
+      ? 'linear-gradient(135deg,rgba(255,68,68,0.07),rgba(255,68,68,0.02))'
+      : 'linear-gradient(135deg,rgba(0,230,118,0.07),rgba(0,230,118,0.02))';
+  } else {
+    document.getElementById('heroGapAmt').textContent  = '—';
+    document.getElementById('heroGapPct').textContent  = '구매가 미입력';
+    document.getElementById('heroGapPct').style.color  = 'var(--muted)';
+    document.getElementById('heroGapIcon').textContent = '➖';
+    document.getElementById('heroGapTotal').textContent = '—';
+    document.getElementById('heroGapQty').textContent   = '';
+  }
+
+  let chipText, chipBg;
+  if      (diffPct <= -10) { chipText='🏆 최우수 협상'; chipBg='rgba(0,230,118,0.15)'; }
+  else if (diffPct <= -3)  { chipText='✅ 우수 협상';   chipBg='rgba(0,230,118,0.12)'; }
+  else if (diffPct <= 3)   { chipText='🟡 적정 수준';   chipBg='rgba(255,204,0,0.12)'; }
+  else if (diffPct <= 10)  { chipText='⚠️ 재협상 권고'; chipBg='rgba(255,204,0,0.15)'; }
+  else                     { chipText='🔴 즉시 재협상'; chipBg='rgba(255,68,68,0.15)'; }
+  const gc = document.getElementById('heroGradeChip');
+  gc.textContent = hasActual ? chipText : '분석 대기';
+  gc.style.background = hasActual ? chipBg : 'rgba(120,120,120,0.1)';
+  gc.style.color = hasActual ? 'var(--text)' : 'var(--muted)';
+
+  // ── 가격 포지션 게이지 ──
+  const posMin = usd(aiPrice * 0.85);
+  const posMax = usd(distAvg * 1.25);
+  const posRange = posMax - posMin;
+  const aiPct  = Math.min(98, Math.max(2, (aiPrice    - posMin) / posRange * 100));
+  const actPct = Math.min(98, Math.max(2, (actualPrice - posMin) / posRange * 100));
+  document.getElementById('posMarkerAi').style.left     = aiPct + '%';
+  document.getElementById('posMarkerActual').style.left = actPct + '%';
+  document.getElementById('posLabelMin').textContent = fmt2(posMin);
+  document.getElementById('posLabelMax').textContent = fmt2(posMax);
+  document.getElementById('posVsDist').textContent = (((actualPrice-distAvg)/distAvg)*100).toFixed(1) + '%';
+  document.getElementById('posVsAi').textContent   = sign + diffPct.toFixed(1) + '%';
+  document.getElementById('posVsMfg').textContent  = (((actualPrice-mfgCost)/mfgCost)*100).toFixed(1) + '%';
+
+  let gIcon, gText, gDesc, gBg;
+  if      (diffPct <= -10) { gIcon='🏆'; gText='최우수 협상'; gDesc='AI 기준 대비 10% 이상 절감. 탁월한 협상 성과.'; gBg='rgba(0,230,118,0.1)'; }
+  else if (diffPct <= -3)  { gIcon='✅'; gText='우수 협상';   gDesc='AI 기준 이하 달성. 협상력이 잘 발휘된 계약.'; gBg='rgba(0,230,118,0.07)'; }
+  else if (diffPct <= 3)   { gIcon='🟡'; gText='적정 수준';   gDesc='AI 기준가 ±3% 이내. 시장 수준 계약.'; gBg='rgba(255,204,0,0.07)'; }
+  else if (diffPct <= 10)  { gIcon='⚠️'; gText='재협상 권고'; gDesc='AI 기준 대비 소폭 과납. 다음 계약 시 개선 필요.'; gBg='rgba(255,204,0,0.1)'; }
+  else                     { gIcon='🔴'; gText='즉시 재협상'; gDesc='AI 기준 10% 초과 과납. 협력사 원가 검증 필요.'; gBg='rgba(255,68,68,0.1)'; }
+  document.getElementById('posGrade').style.background = gBg;
+  document.getElementById('posGradeIcon').textContent = gIcon;
+  document.getElementById('posGradeText').textContent = gText;
+  document.getElementById('posGradeDesc').textContent = gDesc;
+
+  // ── 원가 항목별 차이 분해 테이블 ──
+  const gapItems = [
+    { name:'웨이퍼 원자재',   aiPct:ratios[0], buyPct:ratios[0]*(isOver?1.065:0.95),  color:'#00d4ff', comment:'파운드리 가동율 하락 반영' },
+    { name:'파운드리 공정비', aiPct:ratios[1], buyPct:ratios[1]*(isOver?1.073:0.97),  color:'#00d4ff', comment:'TSMC 28nm 프리미엄' },
+    { name:'패키징/테스트',   aiPct:ratios[2], buyPct:ratios[2]*(isOver?0.962:1.012), color:'#ffcc00', comment:isOver?'협상 여지 있음':'협상 절감' },
+    { name:'R&D 상각/고정비', aiPct:ratios[3], buyPct:ratios[3],                       color:'#9c6dff', comment:'변동 없음' },
+    { name:'유통사 마진',     aiPct:ratios[4], buyPct:ratios[4]*(isOver?1.183:0.915), color:'#ff4444', comment:isOver?'마진 협상 여지':'마진 협상 성공' },
+    { name:'관세/물류',       aiPct:ratios[5], buyPct:ratios[5]*0.975,                 color:'#ff4444', comment:'환율 부분 반영' },
+    { name:'환위험/기타',     aiPct:ratios[6], buyPct:ratios[6]*(isOver?0.469:0.938), color:'#ff8c42', comment:'환헤지 비용 차이' },
+  ];
+  const tbody = document.getElementById('gapBreakdownBody');
+  tbody.innerHTML = '';
+  gapItems.forEach(item => {
+    const aiAmt  = usd(aiPrice    * item.aiPct  / 100);
+    const actAmt = usd(actualPrice * item.buyPct / 100);
+    const d = usd(actAmt - aiAmt);
+    const dSign = d >= 0 ? '+' : '';
+    const dColor = d > 0 ? 'var(--red)' : d < 0 ? 'var(--green)' : 'var(--muted)';
+    const contrib = diff !== 0 ? (d / diff * 100).toFixed(0) : '0';
+    const barW = Math.min(100, Math.abs(d) / Math.max(0.0001, Math.abs(diff)) * 100);
+    const barClr = d > 0 ? 'var(--red)' : 'var(--green)';
+    tbody.innerHTML += `<tr>
+      <td>${item.name}</td>
+      <td class="right mono">${fmt4(aiAmt)}<br><span style="font-size:10px;color:var(--muted)">${item.aiPct.toFixed(1)}%</span></td>
+      <td class="right mono">${fmt4(actAmt)}<br><span style="font-size:10px;color:var(--muted)">${item.buyPct.toFixed(1)}%</span></td>
+      <td class="right mono" style="color:${dColor}">${dSign}${fmt4(Math.abs(d))}</td>
+      <td class="right mono" style="color:${dColor}">${dSign}${contrib}%</td>
+      <td><div style="display:flex;align-items:center;gap:6px">
+        <div style="flex:1;height:6px;background:var(--surface2);border-radius:3px;overflow:hidden">
+          <div style="width:${barW}%;height:100%;background:${barClr};border-radius:3px;transition:width 0.6s"></div>
+        </div></div></td>
+      <td style="font-size:11px;color:var(--muted)">${item.comment}</td>
+    </tr>`;
+  });
+  tbody.innerHTML += `<tr class="grand-total">
+    <td>합 계</td>
+    <td class="right mono">${fmt2(aiPrice)}</td>
+    <td class="right mono">${fmt2(actualPrice)}</td>
+    <td class="right mono" style="color:${isOver?'var(--red)':'var(--green)'}">${sign}${fmt2(Math.abs(diff))}</td>
+    <td class="right mono" style="color:${isOver?'var(--red)':'var(--green)'}">${sign}${diffPct.toFixed(1)}%</td>
+    <td></td><td></td>
+  </tr>`;
+
+  // ── 워터폴 차트 (USD) ──
+  if (_gapWaterfallChart) { _gapWaterfallChart.destroy(); _gapWaterfallChart = null; }
+  const wCtx = document.getElementById('gapWaterfallChart').getContext('2d');
+  _gapWaterfallChart = new Chart(wCtx, {
+    type:'bar',
+    data:{
+      labels:['웨이퍼','공정비','패키징','R&D','유통마진','관세/물류','기타','AI단가','구매가'],
+      datasets:[
+        { label:'AI 산출', data: gapItems.map(i=>usd(aiPrice*i.aiPct/100)).concat([aiPrice,null]),
+          backgroundColor:'rgba(0,212,255,0.65)', borderColor:'#00d4ff', borderWidth:1, borderRadius:4 },
+        { label:'실 구매가', data: gapItems.map(i=>usd(actualPrice*i.buyPct/100)).concat([null,actualPrice]),
+          backgroundColor: gapItems.map(i=>{
+            const d=usd(actualPrice*i.buyPct/100)-usd(aiPrice*i.aiPct/100);
+            return d>0?'rgba(255,68,68,0.7)':d<0?'rgba(0,230,118,0.7)':'rgba(120,120,120,0.4)';
+          }).concat([null,isOver?'rgba(255,68,68,0.8)':'rgba(0,230,118,0.8)']),
+          borderColor:isOver?'#ff4444':'#00e676', borderWidth:1, borderRadius:4 }
+      ]
+    },
+    options:{ responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{labels:{color:'#7a9ab0',font:{size:11}}}},
+      scales:{
+        x:{ticks:{color:'#7a9ab0',font:{size:10}},grid:{display:false}},
+        y:{ticks:{color:'#7a9ab0',callback:v=>'$'+v.toFixed(2)},grid:{color:'rgba(30,45,69,0.4)'}}
+      }
+    }
+  });
+
+  // ── 시나리오 차트 (USD) ──
+  const qtys = [1,3,5,7,10,15,20,30];
+  const savArr = qtys.map(q => {
+    let d2 = q>=20?0.72:q>=15?0.76:q>=10?0.80:q>=7?0.84:q>=5?0.87:q>=3?0.90:0.94;
+    const ai2 = usd(base * d2);
+    return usd((actualPrice - ai2) * q * 1_000_000 / 1_000_000);
+  });
+  if (_scenarioChart) { _scenarioChart.destroy(); _scenarioChart = null; }
+  const sCtx = document.getElementById('scenarioChart').getContext('2d');
+  _scenarioChart = new Chart(sCtx, {
+    type:'bar',
+    data:{
+      labels:qtys.map(q=>q+'M'),
+      datasets:[{ label:'절감/과납액 ($M)',
+        data:savArr,
+        backgroundColor:savArr.map(v=>v>0?'rgba(0,230,118,0.7)':'rgba(255,68,68,0.7)'),
+        borderColor:savArr.map(v=>v>0?'#00e676':'#ff4444'),
+        borderWidth:1, borderRadius:5 }]
+    },
+    options:{ responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{display:false},
+        tooltip:{callbacks:{label:ctx=>` $${ctx.parsed.y.toFixed(2)}M`}}},
+      scales:{
+        x:{ticks:{color:'#7a9ab0'},grid:{display:false}},
+        y:{ticks:{color:'#7a9ab0',callback:v=>'$'+v.toFixed(1)+'M'},grid:{color:'rgba(30,45,69,0.4)'},
+          title:{display:true,text:'절감/과납 ($M)',color:'#7a9ab0',font:{size:10}}}
+      }
+    }
+  });
+
+  // 시나리오 수치 테이블
+  const scTable = document.getElementById('scenarioTable');
+  scTable.innerHTML = '';
+  [[5,disc],[10,0.80],[20,0.72]].forEach(([q,d]) => {
+    const ai2 = usd(base*d);
+    const sav = usd((actualPrice-ai2)*q*1_000_000/1_000_000);
+    scTable.innerHTML += `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:var(--surface2);border-radius:6px;font-size:12px">
+      <span style="color:var(--muted)">${q}M PCS · AI ${fmt2(ai2)}/PCS (${Math.round(d*100)}% 할인)</span>
+      <span class="mono" style="font-weight:700;color:${sav>0?'var(--green)':'var(--red)'}">${sav>0?'절감':'과납'} $${Math.abs(sav).toFixed(2)}M</span>
+    </div>`;
+  });
+
+  // ── 협상 전략 ──
+  const sp = document.getElementById('strategyPanel');
+  const strategies = isOver ? [
+    { icon:'🔴', title:'즉각 원가 검증 요청', desc:`협력사에 BOM 기준 원가 산출서 제출 요청. AI 기준가 ${fmt2(aiPrice)} 대비 초과분(${fmt2(Math.abs(diff))}/PCS)에 대한 근거 자료 요구.`, tag:'긴급', tagClr:'var(--red)' },
+    { icon:'📋', title:'AI 산출 원가 협상 레버리지 활용', desc:`본 시스템 산출 원가(${fmt2(aiPrice)})를 협상 기준선으로 제시. 원가 구성 항목별 분해 자료를 협상 자료로 첨부.`, tag:'협상전략', tagClr:'var(--yellow)' },
+    { icon:'📦', title:'수량 확대로 단가 인하 유도', desc:`현 ${qtyM}M → 10M+ PCS 확대 시 ${fmt2(usd(base*0.80))} 달성 가능. 연간 발주 집계로 협상력 강화.`, tag:'수량전략', tagClr:'var(--accent)' },
+    { icon:'⏰', title:'장기 계약 체결 조건 협의', desc:`2년 이상 장기 계약 시 5~8% 추가 할인 협의 가능. 공급 안정성 확보와 단가 고정 효과.`, tag:'계약전략', tagClr:'#9c6dff' },
+  ] : [
+    { icon:'✅', title:'우수 협상 조건 레퍼런스화', desc:`현 계약가(${fmt2(actualPrice)})는 AI 기준 대비 ${Math.abs(diffPct).toFixed(1)}% 절감. 타 품번 협상의 벤치마크로 활용.`, tag:'우수사례', tagClr:'var(--green)' },
+    { icon:'🔄', title:'동일 조건 조기 갱신 권고', desc:`현재 유리한 공급 조건 유지 시점에 조기 갱신 체결 권고. 파운드리 가동율 하락 시 단가 상승 리스크 방어.`, tag:'유지전략', tagClr:'var(--accent)' },
+    { icon:'📊', title:'절감 성과 내부 보고 활용', desc:`절감액 $${savingTotalM.toFixed(2)}M을 구매 KPI로 기록. 동일 협력사 타 품번 협상 레버리지로 재활용.`, tag:'성과관리', tagClr:'var(--yellow)' },
+    { icon:'📦', title:'안전재고 추가 확보 검토', desc:`현 유리한 단가에서 안전재고 수량 확대 검토. 향후 공급 부족 리스크 헷지.`, tag:'공급전략', tagClr:'#9c6dff' },
+  ];
+  sp.innerHTML = strategies.map(s=>`
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px;display:flex;gap:12px;align-items:flex-start">
+      <div style="font-size:22px;flex-shrink:0">${s.icon}</div>
+      <div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px">
+          <span style="font-weight:700;font-size:13px">${s.title}</span>
+          <span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:6px;background:${s.tagClr}22;color:${s.tagClr};border:1px solid ${s.tagClr}44">${s.tag}</span>
+        </div>
+        <div style="font-size:12px;color:var(--muted);line-height:1.6">${s.desc}</div>
+      </div>
+    </div>`).join('');
+
+  // ── 도넛 차트 ──
+  if (_costChartInst) { _costChartInst.destroy(); _costChartInst = null; }
+  const cCtx = document.getElementById('costChart').getContext('2d');
+  _costChartInst = new Chart(cCtx, {
+    type:'doughnut',
+    data:{ labels:RATIO_DEFAULTS.map(r=>r.name),
+      datasets:[{ data:ratios, backgroundColor:['#00d4ff','#3399ff','#ffcc00','#9c6dff','#ff4444','#ff8c42','#aaaaaa'], borderWidth:0, hoverOffset:8 }] },
+    options:{ cutout:'68%', responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}} }
+  });
+
+  // 범례 + 하위 호환 업데이트
+  ratios.forEach((v,i) => { const el=document.getElementById('lRatio'+i); if(el) el.textContent=v.toFixed(1)+'%'; });
+  if (document.getElementById('resultPrice')) document.getElementById('resultPrice').textContent = fmt2(aiPrice);
+  if (document.getElementById('distAvg'))     document.getElementById('distAvg').textContent     = fmt2(distAvg);
+
+  document.getElementById('analysisResult').style.display = 'block';
+  document.getElementById('analysisResult').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function calcGap() {} // 하위 호환 stub
+function updatePart() {
+  const partMap = {mcu:'STM32F407VGT6',mosfet:'IRFZ44NPBF',sensor:'OV13850',power:'TPS65982',memory:'MX25L12835F',sbc:'i.MX8QM'};
+  const makerMap = {mcu:'STMicroelectronics',mosfet:'Infineon Technologies',sensor:'OmniVision',power:'Texas Instruments',memory:'Macronix',sbc:'NXP Semiconductors'};
+  const cat = document.getElementById('partCategory').value;
+  document.getElementById('partNum').value = partMap[cat]||'';
+  const sel = document.getElementById('maker');
+  for(let i=0;i<sel.options.length;i++){
+    if(sel.options[i].text === makerMap[cat]) { sel.selectedIndex=i; break; }
+  }
+}
+
+// ============================
+// COST DONUT — initialized inside runFullAnalysis
+// ============================
+
+// ============================
+// SEARCH
+// ============================
+function doSearch() {
+  document.getElementById('searchResults').style.display = 'block';
+}
+
+// ============================
+// COMPARE CHART
+// ============================
+function initCompareChart() {
+  const ctx = document.getElementById('compareChart').getContext('2d');
+  const labels = ['STM32F407VGT6','NXP S32K344 (÷4)','Infineon TC387 (÷10)','Renesas RH850 (÷6)','TI TMS570 (÷3)'];
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        { label: 'Digi-Key', data: [3721,3108,2840,3120,3070], backgroundColor: 'rgba(0,212,255,0.7)', borderRadius: 4 },
+        { label: 'Arrow', data: [3652,3050,2780,3067,3160], backgroundColor: 'rgba(0,230,118,0.7)', borderRadius: 4 },
+        { label: 'Mouser', data: [3831,3288,2920,3183,3233], backgroundColor: 'rgba(255,204,0,0.7)', borderRadius: 4 },
+        { label: 'AI 기준가', data: [3420,2800,2610,2867,2880], backgroundColor: 'rgba(255,68,68,0.7)', borderRadius: 4 },
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { labels: { color: '#7a9ab0', font:{size:11} } } },
+      scales: {
+        x: { ticks:{color:'#7a9ab0',font:{size:10}}, grid:{color:'rgba(30,45,69,0.5)'} },
+        y: { ticks:{color:'#7a9ab0',callback:v=>'₩'+v.toLocaleString()}, grid:{color:'rgba(30,45,69,0.5)'} }
+      }
+    }
+  });
+}
+
+// ============================
+// TREND CHARTS — 향후 12개월 전망
+// ============================
+function initTrendCharts() {
+  // 라벨: 현재 달(4월) + 향후 12개월
+  const labels = ['25.04\n(현재)','25.05','25.06','25.07','25.08','25.09','25.10','25.11','25.12','26.01','26.02','26.03','26.04'];
+
+  // STM32F407 데이터 (현재 1점 실측 + 12개월 예측)
+  const stmActual =  [3721,null,null,null,null,null,null,null,null,null,null,null,null];
+  const stmForecast= [3721,3780,3830,3870,3920,3980,4050,4100,4060,3990,3960,4020,4150];
+  const stmHigh =    [3721,3880,3960,4010,4080,4160,4260,4330,4280,4200,4160,4230,4380];
+  const stmLow  =    [3721,3680,3710,3740,3770,3810,3860,3890,3860,3800,3770,3830,3940];
+
+  // NXP S32K344 (÷4 스케일)
+  const nxpForecast= [2995,3050,3120,3180,3250,3340,3430,3490,3450,3380,3360,3430,3700];
+
+  // Infineon TC387 (÷9 스케일)
+  const infForecast= [3156,3200,3250,3290,3330,3370,3400,3430,3410,3380,3360,3380,3467];
+
+  const ctx = document.getElementById('trendChart').getContext('2d');
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        // 신뢰 밴드 (상한)
+        {
+          label: '예측 상한',
+          data: stmHigh,
+          borderColor: 'transparent',
+          backgroundColor: 'rgba(0,212,255,0.10)',
+          borderWidth: 0, pointRadius: 0, fill: '+1', tension: 0.4,
+        },
+        // 신뢰 밴드 (하한)
+        {
+          label: '예측 하한',
+          data: stmLow,
+          borderColor: 'transparent',
+          backgroundColor: 'rgba(0,212,255,0.10)',
+          borderWidth: 0, pointRadius: 0, fill: false, tension: 0.4,
+        },
+        // STM32 현재 실측 포인트
+        {
+          label: 'STM32F407 현재가',
+          data: stmActual,
+          borderColor: '#00d4ff',
+          backgroundColor: '#00d4ff',
+          borderWidth: 0, pointRadius: [7,0,0,0,0,0,0,0,0,0,0,0,0],
+          pointStyle: 'circle', fill: false,
+        },
+        // STM32 AI 전망 (점선)
+        {
+          label: 'STM32F407 AI 전망',
+          data: stmForecast,
+          borderColor: '#00d4ff',
+          backgroundColor: 'transparent',
+          borderWidth: 2.5, borderDash: [8, 4],
+          pointRadius: 3, pointBackgroundColor: '#00d4ff',
+          fill: false, tension: 0.4,
+        },
+        // NXP AI 전망
+        {
+          label: 'NXP S32K344 AI 전망 (÷4)',
+          data: nxpForecast,
+          borderColor: '#ffcc00',
+          backgroundColor: 'transparent',
+          borderWidth: 2, borderDash: [8, 4],
+          pointRadius: 2, pointBackgroundColor: '#ffcc00',
+          fill: false, tension: 0.4,
+        },
+        // Infineon AI 전망
+        {
+          label: 'Infineon TC387 AI 전망 (÷9)',
+          data: infForecast,
+          borderColor: '#00e676',
+          backgroundColor: 'transparent',
+          borderWidth: 2, borderDash: [8, 4],
+          pointRadius: 2, pointBackgroundColor: '#00e676',
+          fill: false, tension: 0.4,
+        },
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: {
+          labels: {
+            color: '#7a9ab0', font: { size: 11 },
+            filter: item => !['예측 상한','예측 하한'].includes(item.text)
+          }
+        },
+        tooltip: {
+          callbacks: {
+            label: ctx => {
+              if (['예측 상한','예측 하한','STM32F407 현재가'].includes(ctx.dataset.label)) return null;
+              return ` ${ctx.dataset.label}: ₩${ctx.parsed.y?.toLocaleString() ?? '-'}`;
+            }
+          }
+        },
+        annotation: {}
+      },
+      scales: {
+        x: {
+          ticks: { color: '#7a9ab0', maxRotation: 0 },
+          grid: { color: 'rgba(30,45,69,0.4)' }
+        },
+        y: {
+          ticks: { color: '#7a9ab0', callback: v => '₩' + v.toLocaleString() },
+          grid: { color: 'rgba(30,45,69,0.4)' }
+        }
+      }
+    }
+  });
+
+  // 월별 전망 테이블 데이터
+  const FORECAST_MONTHS = [
+    { m:'2025.05', price:3780, low:3680, high:3880, conf:93, signal:'buy',   var:'파운드리 회복 초기' },
+    { m:'2025.06', price:3830, low:3710, high:3960, conf:92, signal:'buy',   var:'공급 안정화 진입' },
+    { m:'2025.07', price:3870, low:3740, high:4010, conf:91, signal:'hold',  var:'수요 증가 시작' },
+    { m:'2025.08', price:3920, low:3770, high:4080, conf:89, signal:'hold',  var:'전장 수요 피크 시작' },
+    { m:'2025.09', price:3980, low:3810, high:4160, conf:87, signal:'hold',  var:'환율 변동성 확대' },
+    { m:'2025.10', price:4050, low:3860, high:4260, conf:85, signal:'wait',  var:'성수기 수요 급등' },
+    { m:'2025.11', price:4100, low:3890, high:4330, conf:83, signal:'wait',  var:'Q4 재고 축적 수요' },
+    { m:'2025.12', price:4060, low:3860, high:4280, conf:82, signal:'wait',  var:'연말 조정 가능성' },
+    { m:'2026.01', price:3990, low:3800, high:4200, conf:80, signal:'buy',   var:'비수기 조정 예상' },
+    { m:'2026.02', price:3960, low:3770, high:4160, conf:79, signal:'buy',   var:'재고 적체 구간' },
+    { m:'2026.03', price:4020, low:3830, high:4230, conf:78, signal:'hold',  var:'Q2 수요 회복' },
+    { m:'2026.04', price:4150, low:3940, high:4380, conf:76, signal:'hold',  var:'파운드리 신규 계약' },
+  ];
+
+  const tbody = document.getElementById('forecastTableBody');
+  if (tbody) {
+    tbody.innerHTML = '';
+    const base = 3721;
+    FORECAST_MONTHS.forEach(row => {
+      const diff = row.price - base;
+      const diffPct = (diff / base * 100).toFixed(1);
+      const diffStr = (diff >= 0 ? '▲+' : '▼') + diffPct + '%';
+      const diffColor = diff >= 0 ? 'var(--red)' : 'var(--green)';
+      const signalMap = { buy: ['badge-buy','즉시 매입'], hold: ['badge-hold','관망'], wait: ['badge-wait','매입 보류'] };
+      const [cls, label] = signalMap[row.signal];
+      tbody.innerHTML += `
+        <tr>
+          <td class="mono" style="font-weight:600">${row.m}</td>
+          <td class="right mono" style="font-weight:700;color:var(--accent)">₩${row.price.toLocaleString()}</td>
+          <td class="right mono" style="color:var(--muted)">₩${row.low.toLocaleString()}</td>
+          <td class="right mono" style="color:var(--muted)">₩${row.high.toLocaleString()}</td>
+          <td class="right mono" style="color:${diffColor}">${diffStr}</td>
+          <td class="right mono" style="color:${row.conf>=88?'var(--green)':row.conf>=83?'var(--yellow)':'var(--red)'}">${row.conf}%</td>
+          <td><span class="badge ${cls}">${label}</span></td>
+          <td style="font-size:12px;color:var(--muted)">${row.var}</td>
+        </tr>`;
+    });
+  }
+
+  // 환율 12개월 전망
+  const fxLabels = ['25.04','25.05','25.06','25.07','25.08','25.09','25.10','25.11','25.12','26.01','26.02','26.03','26.04'];
+  const fxActual  = [1378, null,null,null,null,null,null,null,null,null,null,null,null];
+  const fxForecast= [1378, 1385,1392,1400,1408,1415,1420,1412,1405,1390,1380,1375,1382];
+  const fxHigh    = [1378, 1420,1435,1450,1460,1470,1480,1468,1455,1435,1420,1412,1420];
+  const fxLow     = [1378, 1350,1352,1355,1360,1365,1368,1362,1358,1348,1342,1340,1346];
+
+  const fxCtx = document.getElementById('fxChart').getContext('2d');
+  new Chart(fxCtx, {
+    type: 'line',
+    data: {
+      labels: fxLabels,
+      datasets: [
+        { label:'전망 상한', data:fxHigh, borderColor:'transparent', backgroundColor:'rgba(255,204,0,0.08)', borderWidth:0, pointRadius:0, fill:'+1', tension:0.4 },
+        { label:'전망 하한', data:fxLow,  borderColor:'transparent', backgroundColor:'rgba(255,204,0,0.08)', borderWidth:0, pointRadius:0, fill:false, tension:0.4 },
+        { label:'현재 환율', data:fxActual, borderColor:'#ffcc00', backgroundColor:'#ffcc00', borderWidth:0, pointRadius:[7,0,0,0,0,0,0,0,0,0,0,0,0], fill:false },
+        { label:'USD/KRW AI 전망', data:fxForecast, borderColor:'#ffcc00', backgroundColor:'rgba(255,204,0,0.05)', borderWidth:2.5, borderDash:[7,4], pointRadius:2, pointBackgroundColor:'#ffcc00', fill:false, tension:0.4 },
+      ]
+    },
+    options: {
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{ labels:{ color:'#7a9ab0', font:{size:11}, filter: i => !['전망 상한','전망 하한','현재 환율'].includes(i.text) }} },
+      scales:{
+        x:{ticks:{color:'#7a9ab0'},grid:{color:'rgba(30,45,69,0.4)'}},
+        y:{ticks:{color:'#7a9ab0'},grid:{color:'rgba(30,45,69,0.4)'},min:1320,max:1500}
+      }
+    }
+  });
+
+  // 파운드리 가동율 전망
+  const fdLabels = fxLabels;
+  const fdTSMC   = [71, 73, 76, 79, 82, 83, 84, 85, 84, 83, 82, 83, 84];
+  const fdSamsung= [80, 81, 82, 83, 84, 85, 86, 87, 86, 85, 84, 85, 86];
+
+  const fdCtx = document.getElementById('foundryChart').getContext('2d');
+  new Chart(fdCtx, {
+    type: 'line',
+    data: {
+      labels: fdLabels,
+      datasets: [
+        { label:'TSMC 28nm 전망(%)', data:fdTSMC, borderColor:'#ff4444', backgroundColor:'rgba(255,68,68,0.08)', borderWidth:2.5, borderDash:[7,4], pointRadius:3, pointBackgroundColor:'#ff4444', fill:true, tension:0.4 },
+        { label:'삼성 28nm 전망(%)', data:fdSamsung, borderColor:'#00d4ff', backgroundColor:'rgba(0,212,255,0.05)', borderWidth:2, borderDash:[7,4], pointRadius:2, pointBackgroundColor:'#00d4ff', fill:false, tension:0.4 },
+      ]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{labels:{color:'#7a9ab0',font:{size:11}}} },
+      scales:{
+        x:{ticks:{color:'#7a9ab0'},grid:{color:'rgba(30,45,69,0.4)'}},
+        y:{ticks:{color:'#7a9ab0',callback:v=>v+'%'},grid:{color:'rgba(30,45,69,0.4)'},min:60,max:100,
+          title:{display:true,text:'가동율 (%)',color:'#7a9ab0',font:{size:10}}}
+      }
+    }
+  });
+}
+
+// ============================
+// RISK & EXTERNAL ENV CHARTS
+// ============================
+function initRiskChart() {
+  // ── 파운드리 가동율 가로 바 차트 ──
+  const fgCtx = document.getElementById('foundryGaugeChart').getContext('2d');
+  new Chart(fgCtx, {
+    type: 'bar',
+    data: {
+      labels: ['TSMC 28nm', 'TSMC 40nm', '삼성 28nm', 'UMC 28nm', 'SMIC 28nm'],
+      datasets: [
+        { label: '현재 가동율', data: [71.2, 76.8, 80.3, 88.1, 85.4],
+          backgroundColor: ['rgba(255,68,68,0.8)','rgba(255,68,68,0.7)','rgba(255,204,0,0.75)','rgba(0,230,118,0.7)','rgba(0,230,118,0.65)'],
+          borderColor: ['#ff4444','#ff4444','#ffcc00','#00e676','#00e676'],
+          borderWidth: 1, borderRadius: 5 },
+        { label: '정상 기준 (하한)', data: [88, 85, 85, 85, 85],
+          backgroundColor: 'rgba(0,212,255,0.08)', borderColor: 'rgba(0,212,255,0.4)',
+          borderWidth: 1, borderDash: [4,3], type: 'line', pointRadius: 0 }
+      ]
+    },
+    options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { color: '#7a9ab0', callback: v => v+'%' }, grid: { color: 'rgba(30,45,69,0.4)' }, min: 60, max: 100 },
+        y: { ticks: { color: '#7a9ab0', font: { size: 11 } }, grid: { display: false } }
+      }
+    }
+  });
+
+  // ── PO 리드타임 가로 바 차트 ──
+  const ltCtx = document.getElementById('leadtimeChart').getContext('2d');
+  new Chart(ltCtx, {
+    type: 'bar',
+    data: {
+      labels: ['전장 MCU', '전력 MOSFET', 'PMIC', '이미지센서', 'NAND 플래시'],
+      datasets: [
+        { label: '현재 리드타임 (주)', data: [24, 16, 14, 10, 8],
+          backgroundColor: ['rgba(255,68,68,0.8)','rgba(255,204,0,0.75)','rgba(255,204,0,0.7)','rgba(0,230,118,0.7)','rgba(0,230,118,0.7)'],
+          borderColor: ['#ff4444','#ffcc00','#ffcc00','#00e676','#00e676'],
+          borderWidth: 1, borderRadius: 5 },
+        { label: '정상 기준 (상한)', data: [14, 10, 12, 12, 10],
+          backgroundColor: 'transparent', borderColor: 'rgba(0,212,255,0.5)',
+          borderWidth: 1.5, borderDash: [4,3], type: 'line', pointRadius: 0 }
+      ]
+    },
+    options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false },
+        tooltip: { callbacks: { label: ctx => ` ${ctx.parsed.x}주` } } },
+      scales: {
+        x: { ticks: { color: '#7a9ab0', callback: v => v+'주' }, grid: { color: 'rgba(30,45,69,0.4)' }, min: 0, max: 30 },
+        y: { ticks: { color: '#7a9ab0', font: { size: 11 } }, grid: { display: false } }
+      }
+    }
+  });
+
+  // ── PO 리드타임 12개월 추이 ──
+  const months12 = ['24.05','24.07','24.09','24.11','25.01','25.03','25.04'];
+  const ltTrendCtx = document.getElementById('leadtimeTrendChart').getContext('2d');
+  new Chart(ltTrendCtx, {
+    type: 'line',
+    data: {
+      labels: months12,
+      datasets: [
+        { label: '전장 MCU', data: [12, 14, 16, 18, 20, 22, 24],
+          borderColor: '#ff4444', backgroundColor: 'rgba(255,68,68,0.08)',
+          borderWidth: 2.5, pointRadius: 3, fill: true, tension: 0.4 },
+        { label: '전력 MOSFET', data: [10, 11, 12, 13, 14, 15, 16],
+          borderColor: '#ffcc00', backgroundColor: 'rgba(255,204,0,0.05)',
+          borderWidth: 2, pointRadius: 2, fill: false, tension: 0.4 },
+        { label: 'NAND 플래시', data: [9, 9, 8, 8, 7, 8, 8],
+          borderColor: '#00e676', backgroundColor: 'transparent',
+          borderWidth: 2, pointRadius: 2, fill: false, tension: 0.4, borderDash: [5,3] },
+      ]
+    },
+    options: { responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { labels: { color: '#7a9ab0', font: { size: 10 } } } },
+      scales: {
+        x: { ticks: { color: '#7a9ab0' }, grid: { color: 'rgba(30,45,69,0.4)' } },
+        y: { ticks: { color: '#7a9ab0', callback: v => v+'주' }, grid: { color: 'rgba(30,45,69,0.4)' },
+          title: { display: true, text: '리드타임 (주)', color: '#7a9ab0', font: { size: 10 } } }
+      }
+    }
+  });
+
+  // ── 파운드리 가동율 12개월 추이 ──
+  const fdTrendCtx = document.getElementById('foundryTrendChart').getContext('2d');
+  new Chart(fdTrendCtx, {
+    type: 'line',
+    data: {
+      labels: months12,
+      datasets: [
+        { label: 'TSMC 28nm', data: [91, 89, 87, 83, 79, 74, 71],
+          borderColor: '#ff4444', backgroundColor: 'rgba(255,68,68,0.08)',
+          borderWidth: 2.5, pointRadius: 3, fill: true, tension: 0.4 },
+        { label: '삼성 28nm', data: [88, 87, 85, 84, 82, 81, 80],
+          borderColor: '#ffcc00', backgroundColor: 'transparent',
+          borderWidth: 2, pointRadius: 2, fill: false, tension: 0.4 },
+        { label: 'UMC 28nm',  data: [84, 85, 86, 87, 88, 88, 88],
+          borderColor: '#00e676', backgroundColor: 'transparent',
+          borderWidth: 2, pointRadius: 2, fill: false, tension: 0.4, borderDash: [5,3] },
+      ]
+    },
+    options: { responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { labels: { color: '#7a9ab0', font: { size: 10 } } } },
+      scales: {
+        x: { ticks: { color: '#7a9ab0' }, grid: { color: 'rgba(30,45,69,0.4)' } },
+        y: { ticks: { color: '#7a9ab0', callback: v => v+'%' }, grid: { color: 'rgba(30,45,69,0.4)' },
+          min: 60, max: 100,
+          title: { display: true, text: '가동율 (%)', color: '#7a9ab0', font: { size: 10 } } }
+      }
+    }
+  });
+
+  // ── 가동율 × 리드타임 상관 산점도 ──
+  const corrCtx = document.getElementById('envCorrelChart').getContext('2d');
+  new Chart(corrCtx, {
+    type: 'scatter',
+    data: {
+      datasets: [
+        { label: '과거 데이터 (12개월)', pointRadius: 5,
+          data: [
+            {x:91,y:12},{x:89,y:14},{x:87,y:16},{x:83,y:18},{x:79,y:20},{x:74,y:22},
+          ],
+          backgroundColor: 'rgba(0,212,255,0.5)', borderColor: '#00d4ff', borderWidth: 1 },
+        { label: '현재 (2025.04)', pointRadius: 10, pointStyle: 'star',
+          data: [{x:71.2, y:24}],
+          backgroundColor: 'rgba(255,68,68,0.8)', borderColor: '#ff4444', borderWidth: 2 },
+        { label: '정상 기준점', pointRadius: 8, pointStyle: 'crossRot',
+          data: [{x:90, y:11}],
+          backgroundColor: 'rgba(0,230,118,0.7)', borderColor: '#00e676', borderWidth: 2 },
+      ]
+    },
+    options: { responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { labels: { color: '#7a9ab0', font: { size: 10 } } },
+        tooltip: { callbacks: {
+          label: ctx => ` 가동율 ${ctx.parsed.x}% / 리드타임 ${ctx.parsed.y}주`
+        }}
+      },
+      scales: {
+        x: { ticks: { color: '#7a9ab0', callback: v => v+'%' }, grid: { color: 'rgba(30,45,69,0.4)' },
+          title: { display: true, text: '파운드리 가동율 (%)', color: '#7a9ab0', font: { size: 10 } },
+          min: 65, max: 95 },
+        y: { ticks: { color: '#7a9ab0', callback: v => v+'주' }, grid: { color: 'rgba(30,45,69,0.4)' },
+          title: { display: true, text: 'PO 리드타임 (주)', color: '#7a9ab0', font: { size: 10 } },
+          min: 8, max: 28 }
+      }
+    }
+  });
+
+  // ── 리스크 버블 매트릭스 ──
+  const ctx = document.getElementById('riskChart').getContext('2d');
+  new Chart(ctx, {
+    type: 'bubble',
+    data: {
+      datasets: [
+        { label: '긴급', data: [
+            {x:9,y:9,r:18,label:'파운드리 가동율↓'},
+            {x:9,y:8,r:16,label:'MCU 리드타임↑'},
+            {x:8,y:8,r:14,label:'NXP 재고소진'},
+          ], backgroundColor: 'rgba(255,68,68,0.6)' },
+        { label: '주의', data: [
+            {x:7,y:6,r:11,label:'환율 급등'},
+            {x:6,y:5,r:9,label:'TC387 가격↑'},
+            {x:5,y:6,r:8,label:'일본 수출규제'},
+            {x:4,y:4,r:7,label:'MOSFET LT↑'},
+          ], backgroundColor: 'rgba(255,204,0,0.6)' },
+        { label: '정상', data: [
+            {x:2,y:3,r:8,label:'NAND 안정'},
+            {x:3,y:2,r:6,label:'이미지센서'},
+          ], backgroundColor: 'rgba(0,230,118,0.6)' }
+      ]
+    },
+    options: { responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { labels: { color: '#7a9ab0', font: { size: 11 } } } },
+      scales: {
+        x: { title: { display: true, text: '발생 가능성', color: '#7a9ab0' },
+          ticks: { color: '#7a9ab0' }, grid: { color: 'rgba(30,45,69,0.4)' }, min: 0, max: 10 },
+        y: { title: { display: true, text: '영향도', color: '#7a9ab0' },
+          ticks: { color: '#7a9ab0' }, grid: { color: 'rgba(30,45,69,0.4)' }, min: 0, max: 10 }
+      }
+    }
+  });
+}
+
+// ============================
+// API REFRESH ANIMATION
+// ============================
+function refreshAll() {
+  const btn = event.target;
+  btn.textContent = '⟳ 갱신 중...';
+  btn.disabled = true;
+  setTimeout(() => {
+    btn.textContent = '전체 새로고침';
+    btn.disabled = false;
+    alert('5개 유통사 API 갱신 완료!\n총 78,700 품번 가격 업데이트');
+  }, 2000);
+}// ============================
+// MODAL: 가격 산출 상세 내역
+// ============================
+let _waterfallChart = null;
+
+// 제조 원가 항목 데이터
+const MFG_ITEMS = [
+  { group: '웨이퍼 제조 원가', items: [
+    { name: '실리콘 웨이퍼 원자재', pct: 12.4, yoy: '+8.2%', color: '#00d4ff' },
+    { name: '포토마스크 비용', pct: 6.8, yoy: '+2.1%', color: '#00d4ff' },
+    { name: '공정 소모품 (가스·화학물질)', pct: 4.2, yoy: '+4.8%', color: '#00d4ff' },
+    { name: '파운드리 가공비 (TSMC 28nm)', pct: 5.0, yoy: '+11.3%', color: '#00d4ff' },
+  ]},
+  { group: '패키징 / 테스트', items: [
+    { name: '패키징 원자재 (봉지재·기판)', pct: 7.1, yoy: '+3.4%', color: '#ffcc00' },
+    { name: '와이어본딩 공정비', pct: 4.2, yoy: '+1.2%', color: '#ffcc00' },
+    { name: '웨이퍼 레벨 테스트', pct: 3.8, yoy: '-1.5%', color: '#ffcc00' },
+    { name: '최종 패키지 테스트', pct: 3.1, yoy: '-0.8%', color: '#ffcc00' },
+  ]},
+  { group: 'R&D 상각 / 고정비', items: [
+    { name: 'R&D 비용 상각', pct: 5.8, yoy: '+0.0%', color: '#9c6dff' },
+    { name: '설비 감가상각', pct: 4.2, yoy: '+0.5%', color: '#9c6dff' },
+    { name: '로열티 / IP 라이선스', pct: 2.1, yoy: '+1.1%', color: '#9c6dff' },
+  ]},
+];
+
+const DIST_ITEMS = [
+  { name: '유통사 기본 마진', pct: 14.2, note: '유통사 협상 반영', color: '#ff4444' },
+  { name: '보험·운송비 (CIF 기준)', pct: 3.8, note: '인천항 기준', color: '#ff4444' },
+  { name: '관세 (8%)', pct: 4.2, note: '한국 수입 관세', color: '#ff4444' },
+  { name: '부가세 제외 통관 수수료', pct: 1.2, note: '관세사 수수료', color: '#ff4444' },
+  { name: '환위험 프리미엄', pct: 1.9, note: '달러 결제 리스크', color: '#ff4444' },
+];
+
+const VOLUME_BREAKS = [
+  { range: '100만 ~ 299만', usd: '$2.33', krw: '₩3,211', disc: '-6%',  active: false },
+  { range: '300만 ~ 499만', usd: '$2.23', krw: '₩3,073', disc: '-10%', active: false },
+  { range: '500만 ~ 699만', usd: '$2.16', krw: '₩2,977', disc: '-13%', active: true  },
+  { range: '700만 ~ 999만', usd: '$2.07', krw: '₩2,854', disc: '-16%', active: false },
+  { range: '1,000만 ~ 1,499만', usd: '$1.98', krw: '₩2,730', disc: '-20%', active: false },
+  { range: '1,500만 ~ 1,999만', usd: '$1.89', krw: '₩2,606', disc: '-24%', active: false },
+  { range: '2,000만 ~ 3,000만', usd: '$1.79', krw: '₩2,467', disc: '-28%', active: false },
+];
+
+function openDetailModal() {
+  const partNum = document.getElementById('partNum').value || 'STM32F407VGT6';
+  const maker = document.getElementById('maker').value || 'STMicroelectronics';
+  const qtyM = parseFloat(document.getElementById('qty').value) || 5; // 백만 단위
+  const qtyPCS = qtyM * 1000000;
+  const exRate = parseInt(document.getElementById('exRate').value) || 1378;
+  const process = document.getElementById('process').value || '40nm';
+  const aiPriceEl = document.getElementById('resultPrice');
+  const aiPrice = aiPriceEl ? aiPriceEl.textContent : '₩3,420';
+  const aiPriceNum = parseInt(aiPrice.replace(/[₩,]/g, '')) || 3420;
+
+  // 헤더 업데이트
+  document.getElementById('mTitle').textContent = `가격 산출 상세 내역 — ${partNum}`;
+  document.getElementById('mSubtitle').textContent = `${maker} · MCU · ${process} · 수량 ${qtyM.toLocaleString()}백만 PCS · 환율 ₩${exRate.toLocaleString()}/USD`;
+
+  // 요약 KPI
+  const mfgCost = Math.round(aiPriceNum * 0.626);
+  const distPrice = Math.round(aiPriceNum * 0.839);
+  const mktLow = Math.round(aiPriceNum * 1.068);
+  const savingBil = Math.round((mktLow - aiPriceNum) * qtyPCS / 1000000000 * 10) / 10; // 십억 단위
+
+  document.getElementById('mAiPrice').textContent = '₩' + aiPriceNum.toLocaleString();
+  document.getElementById('mMfgCost').textContent = '₩' + mfgCost.toLocaleString();
+  document.getElementById('mDistPrice').textContent = '₩' + distPrice.toLocaleString();
+  document.getElementById('mMktLow').textContent = '₩' + mktLow.toLocaleString();
+  document.getElementById('mSaving').textContent = savingBil.toFixed(0) + '억';
+  const qtyLabel = qtyM >= 1 ? qtyM.toLocaleString() + '백만' : (qtyM * 100).toFixed(0) + '만';
+  if (document.getElementById('mSavingSub')) document.getElementById('mSavingSub').textContent = `연간 ${qtyLabel}PCS 기준`;
+  if (document.getElementById('mActionUnit')) document.getElementById('mActionUnit').textContent = `/ PCS (${qtyLabel}PCS 기준)`;
+  document.getElementById('mActionPrice').textContent = '₩' + aiPriceNum.toLocaleString();
+
+  // 시나리오
+  document.getElementById('sc1Price').textContent = '₩' + Math.round(aiPriceNum * 0.936 / 10) * 10;
+  document.getElementById('sc2Price').textContent = '₩' + aiPriceNum.toLocaleString();
+  document.getElementById('sc3Price').textContent = '₩' + Math.round(aiPriceNum * 1.047 / 10) * 10;
+
+  // VOLUME_BREAKS 현재 구간 동적 활성화
+  VOLUME_BREAKS.forEach(b => b.active = false);
+  if      (qtyM >= 20) VOLUME_BREAKS[6].active = true;
+  else if (qtyM >= 15) VOLUME_BREAKS[5].active = true;
+  else if (qtyM >= 10) VOLUME_BREAKS[4].active = true;
+  else if (qtyM >= 7)  VOLUME_BREAKS[3].active = true;
+  else if (qtyM >= 5)  VOLUME_BREAKS[2].active = true;
+  else if (qtyM >= 3)  VOLUME_BREAKS[1].active = true;
+  else                 VOLUME_BREAKS[0].active = true;
+
+  // 제조 원가 테이블
+  const mfgBody = document.getElementById('mfgTableBody');
+  mfgBody.innerHTML = '';
+  let grandTotal = 0;
+  MFG_ITEMS.forEach(grp => {
+    let grpTotal = 0;
+    grp.items.forEach(item => {
+      const krw = Math.round(aiPriceNum * item.pct / 100);
+      grpTotal += krw; grandTotal += krw;
+      const yoyColor = item.yoy.startsWith('-') ? 'var(--green)' : 'var(--red)';
+      mfgBody.innerHTML += `
+        <tr class="sub-row">
+          <td>${item.name}</td>
+          <td class="right mono">₩${krw.toLocaleString()}</td>
+          <td class="right mono">${item.pct.toFixed(1)}%</td>
+          <td>
+            <div class="inline-bar">
+              <div class="ibar-bg"><div class="ibar-fill" style="width:${item.pct*3.5}%;background:${item.color}"></div></div>
+              <span class="pct-text">${item.pct.toFixed(1)}%</span>
+            </div>
+          </td>
+          <td class="right mono" style="color:${yoyColor}">${item.yoy}</td>
+        </tr>`;
+    });
+    mfgBody.innerHTML += `
+      <tr class="total-row">
+        <td><strong>${grp.group} 소계</strong></td>
+        <td class="right mono"><strong>₩${grpTotal.toLocaleString()}</strong></td>
+        <td class="right mono"><strong>${(grpTotal/aiPriceNum*100).toFixed(1)}%</strong></td>
+        <td></td><td></td>
+      </tr>`;
+  });
+  mfgBody.innerHTML += `
+    <tr class="grand-total">
+      <td>제조 원가 합계</td>
+      <td class="right mono">₩${Math.round(aiPriceNum*0.626).toLocaleString()}</td>
+      <td class="right mono">62.6%</td>
+      <td></td><td></td>
+    </tr>`;
+
+  // 유통 마진 테이블
+  const distBody = document.getElementById('distTableBody');
+  distBody.innerHTML = '';
+  let distTotal = 0;
+  DIST_ITEMS.forEach(item => {
+    const krw = Math.round(aiPriceNum * item.pct / 100);
+    distTotal += krw;
+    distBody.innerHTML += `
+      <tr>
+        <td>${item.name}</td>
+        <td class="right mono">₩${krw.toLocaleString()}</td>
+        <td class="right mono">${item.pct.toFixed(1)}%</td>
+        <td>
+          <div class="inline-bar">
+            <div class="ibar-bg"><div class="ibar-fill" style="width:${item.pct*7}%;background:var(--red)"></div></div>
+            <span class="pct-text">${item.pct.toFixed(1)}%</span>
+          </div>
+        </td>
+        <td style="color:var(--muted);font-size:12px">${item.note}</td>
+      </tr>`;
+  });
+  distBody.innerHTML += `
+    <tr class="total-row">
+      <td><strong>유통 마진 합계</strong></td>
+      <td class="right mono"><strong>₩${distTotal.toLocaleString()}</strong></td>
+      <td class="right mono"><strong>25.3%</strong></td>
+      <td></td><td></td>
+    </tr>`;
+
+  // 수량 구간 테이블
+  const volBody = document.getElementById('volumeTableBody');
+  volBody.innerHTML = '';
+  VOLUME_BREAKS.forEach(row => {
+    const discNum = Math.abs(parseFloat(row.disc));
+    const bar = `<div class="ibar-bg" style="width:100%"><div class="ibar-fill" style="width:${discNum/28*100}%;background:${row.active ? 'var(--green)' : 'var(--border)'}"></div></div>`;
+    const activeMark = row.active ? `<span class="badge badge-buy">현재 구간</span>` : '';
+    volBody.innerHTML += `
+      <tr ${row.active ? 'style="background:rgba(0,230,118,0.04)"' : ''}>
+        <td class="mono">${row.range} PCS</td>
+        <td class="right mono">${row.usd}</td>
+        <td class="right mono" ${row.active ? 'style="color:var(--green);font-weight:700"' : ''}>${row.krw}</td>
+        <td class="right mono" style="color:var(--green)">${row.disc}</td>
+        <td>${bar}</td>
+        <td>${activeMark}</td>
+      </tr>`;
+  });
+
+  // 워터폴 차트
+  if (_waterfallChart) { _waterfallChart.destroy(); _waterfallChart = null; }
+  setTimeout(() => {
+    const wCtx = document.getElementById('waterfallChart').getContext('2d');
+    const base = Math.round(aiPriceNum * 0.284);
+    const pkg  = Math.round(aiPriceNum * 0.182);
+    const rnd  = Math.round(aiPriceNum * 0.121);
+    const dist = Math.round(aiPriceNum * 0.253);
+    const risk = Math.round(aiPriceNum * 0.16);
+    _waterfallChart = new Chart(wCtx, {
+      type: 'bar',
+      data: {
+        labels: ['웨이퍼\n원자재', '패키징\n테스트', 'R&D\n상각', '유통\n마진', '리스크\n보정', '산출\n기준가'],
+        datasets: [{
+          label: '단가 구성 (KRW)',
+          data: [base, pkg, rnd, dist, risk, aiPriceNum],
+          backgroundColor: ['#00d4ff','#ffcc00','#9c6dff','#ff4444','#ff8c42','rgba(0,212,255,0.15)'],
+          borderColor: ['#00d4ff','#ffcc00','#9c6dff','#ff4444','#ff8c42','#00d4ff'],
+          borderWidth: [0,0,0,0,0,2],
+          borderRadius: 6,
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { ticks: { color: '#7a9ab0', font: { size: 10 } }, grid: { color: 'rgba(30,45,69,0.4)' } },
+          y: { ticks: { color: '#7a9ab0', callback: v => '₩' + v.toLocaleString() }, grid: { color: 'rgba(30,45,69,0.4)' } }
+        }
+      }
+    });
+  }, 80);
+
+  document.getElementById('detailModal').classList.add('open');
+}
+
+function closeDetailModal() {
+  document.getElementById('detailModal').classList.remove('open');
+}
+
+function closeModalOutside(e) {
+  if (e.target === document.getElementById('detailModal')) closeDetailModal();
+}
+
+// ESC 키로 닫기
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDetailModal(); });
+
+// 민감도 슬라이더 업데이트
+function updateSensitivity() {
+  const exRate = parseInt(document.getElementById('sExRate').value);
+  const foundry = parseInt(document.getElementById('sFoundry').value);
+  const wafer = parseInt(document.getElementById('sWafer').value) / 100;
+  const qty = parseInt(document.getElementById('sQty').value) * 1000;
+  const margin = parseInt(document.getElementById('sMargin').value);
+  const contract = parseInt(document.getElementById('sContract').value);
+
+  document.getElementById('sExRateVal').textContent = exRate.toLocaleString();
+  document.getElementById('sFoundryVal').textContent = foundry + '%';
+  document.getElementById('sWaferVal').textContent = '$' + wafer.toFixed(2);
+  document.getElementById('sQtyVal').textContent = (qty/1000) + 'K';
+  document.getElementById('sMarginVal').textContent = margin + '%';
+  document.getElementById('sContractVal').textContent = contract + '개월';
+
+  const basePrice = 3420;
+  let adj = 1.0;
+  adj *= (exRate / 1378);
+  adj *= (90 / Math.max(foundry, 60)) * 0.08 + 0.92;
+  adj *= (wafer / 4.82) * 0.15 + 0.85;
+  adj *= qty >= 100000 ? 0.88 : qty >= 50000 ? 0.94 : qty >= 10000 ? 0.97 : 1.0;
+  adj *= (margin / 25) * 0.12 + 0.88;
+  adj *= contract >= 24 ? 0.95 : contract >= 12 ? 0.98 : 1.0;
+
+  const newPrice = Math.round(basePrice * adj / 10) * 10;
+  const diff = ((newPrice - basePrice) / basePrice * 100).toFixed(1);
+  document.getElementById('sensitivityResult').textContent = '₩' + newPrice.toLocaleString();
+  document.getElementById('sensitivityDesc').textContent =
+    `기준가(₩${basePrice.toLocaleString()}) 대비 ${diff > 0 ? '+' : ''}${diff}% 조정`;
+  document.getElementById('mActionPrice').textContent = '₩' + newPrice.toLocaleString();
+
+  // 환율 영향
+  const exImp = ((exRate - 1378) / 1378 * 100).toFixed(1);
+  document.getElementById('sExRateImp').textContent = (exImp >= 0 ? '+' : '') + exImp + '%';
+  document.getElementById('sExRateImp').className = 'sens-impact ' + (exImp >= 0 ? 'pos' : 'neg');
+  // 파운드리
+  const fdImp = (-(foundry - 71) / 71 * 3).toFixed(1);
+  document.getElementById('sFoundryImp').textContent = (fdImp >= 0 ? '+' : '') + fdImp + '%';
+  document.getElementById('sFoundryImp').className = 'sens-impact ' + (fdImp >= 0 ? 'pos' : 'neg');
+  // 웨이퍼
+  const waferImp = ((wafer - 4.82) / 4.82 * 12).toFixed(1);
+  document.getElementById('sWaferImp').textContent = (waferImp >= 0 ? '+' : '') + waferImp + '%';
+  document.getElementById('sWaferImp').className = 'sens-impact ' + (waferImp >= 0 ? 'pos' : 'neg');
+  // 수량
+  const qtyImp = qty >= 100000 ? -12.0 : qty >= 50000 ? -6.0 : qty >= 10000 ? -3.0 : 0.0;
+  document.getElementById('sQtyImp').textContent = qtyImp.toFixed(1) + '%';
+  document.getElementById('sQtyImp').className = 'sens-impact ' + (qtyImp <= 0 ? 'neg' : 'pos');
+  // 마진
+  const mgnImp = ((margin - 25) / 25 * 8).toFixed(1);
+  document.getElementById('sMarginImp').textContent = (mgnImp >= 0 ? '+' : '') + mgnImp + '%';
+  document.getElementById('sMarginImp').className = 'sens-impact ' + (mgnImp >= 0 ? 'pos' : 'neg');
+  // 계약
+  const ctImp = contract >= 24 ? -5.0 : contract >= 12 ? -2.0 : 0.0;
+  document.getElementById('sContractImp').textContent = ctImp.toFixed(1) + '%';
+  document.getElementById('sContractImp').className = 'sens-impact ' + (ctImp <= 0 ? 'neg' : 'pos');
+}
+</script>
+</body>
+</html>
