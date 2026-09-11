@@ -14,24 +14,66 @@
     background: var(--navy); color: #fff; font-size: 19px; font-weight: 700;
     letter-spacing: -.01em;
   }
-  .agent-kind {
-    margin: 6px 0 0; font-size: 16px; font-weight: 700;
-    color: var(--green); letter-spacing: .06em;
-  }
   .agent-pic {
-    margin: 8px 0 12px; height: 252px; overflow: hidden;
+    margin: 14px 0 14px; height: 300px; overflow: hidden;
     border: 1.5px solid #C6D0E2; border-radius: 14px; background: #F5F7FB;
   }
   .agent-pic img { display: block; width: 100%; height: 100%; object-fit: cover; }
-  .agent-name { margin: 0 0 6px; font-size: 20px; font-weight: 700; color: var(--navy); }
-  .agent-desc { margin: 0; font-size: 15px; line-height: 1.55; color: #7C8698; }
+  .agent-name { margin: 0 0 7px; font-size: 22px; font-weight: 700; color: var(--navy); }
+  .agent-desc { margin: 0; font-size: 17px; line-height: 1.55; color: #7C8698; }
 
-  /* OT 8p — 고정폭(빨간 계정 글씨·URL)을 옆 글자와 같은 크기로 */
+  /* OT 14p — 한 장짜리 그림을 3컷으로 나눠 보여준다 (파일은 그대로, 보이는 영역만 자른다) */
+  /* 그림 맨 위의 'Agent = 알바생' 제목은 슬라이드 제목과 겹치므로 잘라내고,
+     세 장면을 따로 떼어 간격을 벌린다. 화살표는 그 여백 한가운데 놓는다 */
+  .ot-cuts { display: flex; gap: 25px; justify-content: center; align-items: center; }
+  .ot-cut  { overflow: hidden; height: 395px; }
+  .ot-cut img { display: block; width: 718px; max-width: none; margin-top: -132px; }
+  .ot-arrow { position: relative; z-index: 1; overflow: hidden; width: 33px; height: 19px; }
+  .ot-arrow img { display: block; width: 718px; max-width: none; }
+  /* 2번 컷은 캡션이 화살표 자리까지 뻗어 있어 함께 담고, 화살표만 흰색으로 덮는다 */
+  .ot-cut--mask { position: relative; }
+  .ot-cut--mask span { position: absolute; background: #fff; }
+
+  /* OT 13p — 화면 캡처 오른쪽 아래에 알바생(14p 2번 컷 인물)을 살짝 겹쳐 놓는다 */
+  .ot-with-agent { position: relative; width: 640px; margin: 0 auto; }
+  /* --w 만 바꾸면 머리 중심(580, 127)은 그대로 두고 크기만 커진다 */
+  .ot-side-agent {
+    --w: 158px;
+    position: absolute; width: var(--w);
+    left: calc(580px - var(--w) * 0.4684);
+    top:  calc(127px - var(--w) * 0.4904);
+  }
+  .ot-side-agent img { display: block; width: 100%; height: auto; }
+
+  /* OT 8p — 고정폭(URL)은 옆 글자와 같은 크기, 빨간 계정 값만 조금 더 크게 */
   .ot-login .mono { font-size: 1em; }
+  .ot-login .hl.mono { font-size: 1.2em; }
 
   /* OT 11p — 최종 체크 목록 (항목이 적어 크게 띄운다) */
   .ot-check > li { font-size: 30px; margin-bottom: 26px; }
   .ot-check > li:last-child { margin-bottom: 0; }
+
+  /* OT 3p — 강의 주제 카드 (모서리를 둥글리고 그림자를 부드럽게) */
+  .ot-cards { gap: 26px; }
+  .ot-cards .card {
+    position: relative;
+    overflow: hidden;
+    flex: 0 0 296px;
+    min-height: 0;
+    padding: 16px 18px;
+    font-size: 21px;
+    border: 1px solid rgba(255, 255, 255, .16);
+    border-radius: 14px;
+    background: linear-gradient(158deg, #5585D8 0%, #2F5FB5 52%, #244C97 100%);
+    box-shadow: 0 12px 26px rgba(22, 65, 148, .20), 0 2px 6px rgba(22, 65, 148, .14);
+  }
+  /* 위쪽에 옅은 빛을 얹어 평평해 보이지 않게 한다 */
+  .ot-cards .card::before {
+    content: "";
+    position: absolute; inset: 0;
+    background: linear-gradient(180deg, rgba(255, 255, 255, .18), rgba(255, 255, 255, 0) 58%);
+    pointer-events: none;
+  }
 
   /* OT 8p · 9p — 캡처 위 빨간 마킹 (강의실 메뉴 · 강사님 자료 버튼) */
   .shot--mark { position: relative; overflow: visible; }
@@ -68,7 +110,7 @@
       <h2 class="ch-title">과정 안내</h2>
       <div class="ch-rule"></div>
       <p class="ch-desc">오늘 하루 무엇을 통해 어떤 것을 익히는지 살펴 봅니다.</p>
-      <ul class="ch-keys"><li>강의 주제</li><li>오늘의 흐름</li><li>학습 페어제</li></ul>
+      <ul class="ch-keys"><li>강의 주제</li><li>오늘의 흐름</li><li>학습 페어</li></ul>
     </div>
   </section>
 
@@ -77,19 +119,19 @@
     <div class="slide-head"><h2>강의 주제</h2></div>
     <div class="slide-body">
       <p class="lead">
-        AI는 이미 일하는 속도를 바꾸고 있습니다. <strong class="navy">쓰는 만큼 성과가 달라집니다.</strong><br>
-        오늘은 AI와 <strong class="navy">대화</strong>하며 일하고, 반복되는 일을 <strong class="navy">규칙</strong>으로 만들고,<br>
-        내 업무를 바꿀 <strong class="navy">아이디어</strong>까지 직접 만들어 봅니다.
+        AI는 이미 우리가 일하는 속도를 바꿔 놓고 있습니다.<br>
+        <strong class="navy">어떻게 쓰느냐</strong>에 따라 하루가 꽤 달라질 수 있습니다.<br>
+        오늘은 그 방법을 <strong class="navy">세 단계</strong>로 나눠, 하나씩 직접 해 봅니다.
       </p>
 
       <p class="block-title" style="text-align:center; margin:44px 0 18px">
         업무 효율화 <span class="navy">(나만의 AI 업무도구 제작)</span> 프로젝트
       </p>
 
-      <div class="cards">
-        <div class="card" style="flex:0 0 340px">대화형 AI 활용</div>
-        <div class="card" style="flex:0 0 340px">반복업무 구조화</div>
-        <div class="card" style="flex:0 0 340px">업무 혁신 아이디어 도출</div>
+      <div class="cards ot-cards">
+        <div class="card">대화형 AI 활용</div>
+        <div class="card">반복업무 구조화</div>
+        <div class="card">업무 혁신 아이디어 도출</div>
       </div>
     </div>
   </section>
@@ -134,16 +176,16 @@
     </div>
   </section>
 
-  <!-- 6. 학습 페어 제도 -------------------------------------------- -->
+  <!-- 6. 학습 페어 -------------------------------------------- -->
   <section class="slide">
-    <div class="slide-head"><h2>학습 페어 제도</h2></div>
+    <div class="slide-head"><h2>학습 페어</h2></div>
     <div class="slide-body">
       <p class="lead">
-        짝꿍과 서로 도움을 주고 받을 수 있도록 <strong class="navy">학습 페어 제도</strong>를 운영합니다.
+        짝꿍과 서로 도울 수 있도록 <strong class="navy">학습 페어 제도</strong>를 운영합니다.
       </p>
       <p class="lead" style="margin-top:26px">
         과정이 빠르게 진행되어 놓치는 부분이 생길 수 있으니<br>
-        <strong class="navy">학습 페어</strong>께서는 서로 도움을 주고 받으며 진행해 주세요!
+        <strong class="navy">학습 페어</strong>께서는 도움을 주고 받으며 진행해 주세요!
       </p>
 
       <p class="lead" style="margin-top:26px">
@@ -173,7 +215,7 @@
     <div class="slide-body" style="padding-top:22px">
       <p class="lead" style="margin-bottom:12px; font-size:25px">
         <a class="mono" href="https://hyundai.mincoding.co.kr" target="_blank" rel="noopener noreferrer"
-           style="color:#164194">hyundai.mincoding.co.kr</a> 에 접속해주세요.
+           style="color:#164194; font-weight:700">hyundai.mincoding.co.kr</a> 에 접속해주세요.
       </p>
       <p class="lead" style="margin-bottom:6px; font-size:25px">강사님 안내에 따라, 본인의 계정으로 로그인 해주세요.</p>
       <ul class="dash-list" style="margin-bottom:6px; font-size:23px">
@@ -193,7 +235,7 @@
         <div>
           <div class="shot shot--mark" style="width:325px">
             <img src="assets/img/ot-login-classroom.png" alt="강의실 비밀번호 입력 화면">
-            <span class="mark" style="left:82.3%; top:-1.5%; width:22%; height:22%"></span>
+            <span class="mark" style="left:82.3%; top:-4.5%; width:22%; height:22%"></span>
           </div>
           <p class="shot-cap">② 강의실 &gt; 강의장 비밀번호 입력</p>
         </div>
@@ -209,7 +251,10 @@
         <strong class="hl">강사님 자료</strong> 메뉴의 <strong class="hl">교재 업로드</strong> 항목을 클릭하면,<br>
         <strong class="hl">강의자료</strong>를 다운로드 받을 수 있습니다.
       </p>
-      <p class="lead" style="margin-top:26px">강의자료 다운로드 후 압축을 해제해 주시면 됩니다.</p>
+      <p class="lead" style="margin-top:26px">
+        이 파일 안에 교재와 실습에 필요한 준비물이 모두 들어있으니<br>
+        다운로드한 강의자료는 압축을 해제해 주시면 됩니다.
+      </p>
 
       <div class="figure" style="margin-top:48px">
         <div class="shot shot--mark" style="width:620px;margin:0 auto">
@@ -279,7 +324,10 @@
       </p>
 
       <div class="figure" style="margin:0">
-        <div class="shot" style="width:640px; margin:0 auto"><img src="assets/img/ot-hchat-intro.png" alt="H Chat Pro 시작 화면 — 왼쪽에 이미지 생성 · AI 번역 · 코드 리뷰 메뉴"></div>
+        <div class="ot-with-agent">
+          <div class="shot"><img src="assets/img/ot-hchat-intro.png" alt="H Chat Pro 시작 화면 — 왼쪽에 이미지 생성 · AI 번역 · 코드 리뷰 메뉴"></div>
+          <div class="ot-side-agent"><img src="assets/img/ot-agent-only.png" alt=""></div>
+        </div>
       </div>
     </div>
   </section>
@@ -288,15 +336,38 @@
   <section class="slide">
     <div class="slide-head"><h2>Agent = 알바생</h2></div>
     <div class="slide-body">
-      <p class="lead" style="margin:0 0 12px; text-align:center">
-        이제부터 Agent를 <strong class="navy">아르바이트생</strong>으로 비유하겠습니다.
+      <p class="lead" style="margin:0 0 16px; text-align:center; font-size:25px">
+        오늘 무엇을 만드는지 안내드리기 전에,<br>
+        한 가지 용어부터 <strong class="hl">암기</strong>하고 시작하겠습니다.
       </p>
+
       <div class="figure" style="margin:0">
-        <div class="shot" style="width:840px; margin:0 auto">
-          <img src="assets/img/ot-agent-metaphor.jpg"
-               alt="사장님이 일을 시키면 알바생(Agent)이 대신 수행하는 그림 — 업무 지시 · 알바생 · 업무 실행">
+        <div class="ot-cuts">
+          <div class="ot-cut" style="width:209px">
+            <img src="assets/img/ot-agent-metaphor.png" style="margin-left:0"
+                 alt="사람 = 사장님 — 업무를 지시한다">
+          </div>
+          <div class="ot-arrow">
+            <img src="assets/img/ot-agent-metaphor.png" style="margin:-309px 0 0 -217px" alt="">
+          </div>
+          <div class="ot-cut ot-cut--mask" style="width:186px">
+            <img src="assets/img/ot-agent-metaphor.png" style="margin-left:-256px"
+                 alt="Agent = 알바생 — 사장님의 일을 대신한다">
+            <span style="left:147px; top:172px; width:42px; height:28px"></span>
+          </div>
+          <div class="ot-arrow" style="margin:0 13px 0 -38px">
+            <img src="assets/img/ot-agent-metaphor.png" style="margin:-309px 0 0 -217px" alt="">
+          </div>
+          <div class="ot-cut" style="width:271px">
+            <img src="assets/img/ot-agent-metaphor.png" style="margin-left:-447px"
+                 alt="업무 수행 — 진열 정리 · 고객 응대">
+          </div>
         </div>
       </div>
+
+      <p style="margin:20px 0 0; text-align:center; font-size:18px; line-height:1.6; color:var(--ink-soft); letter-spacing:-.01em">
+        Agent의 정확한 정의 : 목적을 이루기 위해 스스로 상황을 파악하고 판단해 도구를 사용하는 프로그램
+      </p>
     </div>
   </section>
 
@@ -331,7 +402,6 @@
       <div class="agents">
         <div class="agent">
           <span class="agent-badge">H&nbsp;Chat Pro</span>
-          <p class="agent-kind">Agent</p>
           <div class="agent-pic">
             <img src="assets/img/ot-agent-hchat.jpg" style="object-position:center 46%"
                  alt="카운터 앞에서 손짓하며 말로 안내하는 H Chat 알바생">
@@ -342,7 +412,6 @@
 
         <div class="agent">
           <span class="agent-badge">H&nbsp;Chat Desktop</span>
-          <p class="agent-kind">Agent</p>
           <div class="agent-pic">
             <img src="assets/img/ot-agent-desktop.jpg" style="object-position:center 46%"
                  alt="책상에 앉아 키보드로 직접 일하는 H Chat 데스크탑 알바생">
@@ -353,7 +422,6 @@
 
         <div class="agent">
           <span class="agent-badge">Claude Code</span>
-          <p class="agent-kind">Agent</p>
           <div class="agent-pic">
             <img src="assets/img/ot-agent-code.jpg" style="object-position:center 46%"
                  alt="노트북과 화면 여러 개를 놓고 일하는 Claude Code 알바생">
@@ -395,14 +463,6 @@
     </div>
   </section>
 
-  <!-- 18. 마무리 -------------------------------------------------- -->
-  <section class="slide slide--cover">
-    <div class="cover-text">
-      <h1 class="cover-title" style="font-size:64px">감사합니다.</h1>
-      <p class="cover-meta">이어서 M1. H Chat으로 시작하는 AI 업무 활용</p>
-    </div>
-  </section>
-
 </div>
 
 <nav class="deck-bar">
@@ -418,7 +478,7 @@
 
     <div class="deck-meta">
       <span class="deck-title">OT. 사전 준비사항 점검 및 과정 안내</span>
-      <span class="deck-count" id="count">1 / 18</span>
+      <span class="deck-count" id="count">1 / 17</span>
     </div>
 
     <button class="deck-arrow" id="next" type="button" aria-label="다음 슬라이드" title="다음 (→)">
