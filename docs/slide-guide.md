@@ -423,7 +423,7 @@ python tools/build-single.py     # → dist/AX중급과정_교안.html (약 8MB)
 - **영상은 본문에 넣지 않습니다.** `<video src="파일이름.mp4" controls preload="metadata">` 처럼
   **경로 없이 파일 이름만** 쓰고, 그 mp4 를 **HTML 과 같은 폴더**에 둡니다 (배포본은 `dist/` 안).
   빌드는 영상 경로를 건드리지 않으므로 원본 교안과 배포본이 같은 참조를 씁니다.
-  → 배포할 때 **HTML 과 mp4 를 함께** 전달합니다. 구현 예: `ot.html` 4p.
+  → 배포할 때 **HTML 과 mp4 를 함께** 전달합니다. 구현 예: `ot.html` 5p.
   루트에서 `ot.html` 을 직접 열어 영상까지 확인하려면 mp4 를 **프로젝트 루트에도** 한 벌 두면 됩니다 (`.gitignore` 처리됨).
   `<video>` 에 포커스가 있을 때는 `deck.js` 가 방향키·Space 를 가로채지 않으므로 영상 탐색에 그대로 씁니다.
 - 모듈 HTML `<head>` 안의 **`<style>` 블록도 함께 실립니다.** 모듈 고유 스타일을 `deck.css` 로 옮기지 마세요.

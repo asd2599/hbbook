@@ -57,7 +57,7 @@
         </div>
       </div>
 
-      <div class="note" style="margin-top:26px">먼저 <strong class="navy">알바생(Agent)과 두뇌(모델)</strong> 개념을 잡고, 말로 웹페이지 한 장을 만듭니다.</div>
+      <div class="note" style="margin-top:26px">Agent와 대화를 통해 웹 페이지 뿐만 아니라, H Chat의 프로젝트 기능을 중심으로 실습해봅니다.</div>
     </div>
   </section>
 
@@ -69,66 +69,29 @@
 
       <div class="shots" style="gap:20px">
           <div>
-            <div class="shot" style="width:284px"><img src="assets/img/m1-web-before.png" alt="처음 만들어진 웹페이지"></div>
-            <p class="shot-cap">① 부탁해서 나온 첫 화면</p>
+            <div class="shot" style="width:284px;height:404px"><img src="assets/img/m1-web-before.png" alt="처음 만들어진 웹페이지" style="height:100%;object-fit:cover;object-position:top"></div>
           </div>
           <div>
-            <div class="shot" style="width:284px"><img src="assets/img/m1-web-after.png" alt="말로 고친 웹페이지"></div>
-            <p class="shot-cap">② 말로 고친 결과</p>
+            <div class="shot" style="width:284px;height:404px"><img src="assets/img/m1-web-after.png" alt="말로 고친 웹페이지" style="height:100%;object-fit:cover;object-position:top"></div>
           </div>
       </div>
 
-      <div class="note" style="margin-top:16px">코드는 한 줄도 쓰지 않습니다. <strong class="navy">문장으로 만들고 문장으로 고칩니다.</strong></div>
+      <div class="note" style="margin-top:16px">코드를 직접 쓰지 않고, <strong class="navy">Agent와 대화만으로 프로그램을 제작합니다.</strong></div>
     </div>
   </section>
 
-  <!-- 4. [챕터] AI 활용의 변화와 모델 이해 -------------- -->
-  <section class="slide slide--chapter" data-chapter="AI 활용의 변화와 모델 이해">
+  <!-- 4. [챕터] H Chat Pro 살펴보기 -------------------- -->
+  <section class="slide slide--chapter" data-chapter="H Chat Pro 살펴보기">
     <div class="chapter">
       <p class="ch-eyebrow">CHAPTER 1</p>
-      <h2 class="ch-title">AI 활용의 변화와 모델 이해</h2>
+      <h2 class="ch-title">H&nbsp;Chat Pro 살펴보기</h2>
       <div class="ch-rule"></div>
       <p class="ch-desc">무엇이 달라졌는지 보고, H Chat 화면에서 모델과 기능을 찾아봅니다.</p>
       <ul class="ch-keys"><li>모델 = 두뇌</li><li>세 회사 비교</li><li>화면 익히기</li></ul>
     </div>
   </section>
 
-  <!-- 5. AI 활용의 변화 -------------------------------------- -->
-  <section class="slide">
-    <div class="slide-head"><h2>AI 활용의 변화</h2><span class="head-tag">M1-1 · 개념</span></div>
-    <div class="slide-body">
-      <p class="lead" style="margin-bottom:30px">
-        AI를 <strong class="navy">‘질문하면 답하는 챗봇’</strong> 정도로만 쓰면,
-        이후에 배울 자동화가 왜 필요한지 와닿지 않습니다.
-      </p>
-
-      <div class="flow">
-        <div class="flow-step">
-          <p class="flow-no">STEP 1</p>
-          <p class="flow-name">대화형 AI</p>
-          <p class="flow-desc">물어보면 답한다.<br>매번 새로 설명해야 한다.</p>
-        </div>
-        <div class="flow-arrow">›</div>
-        <div class="flow-step is-now">
-          <p class="flow-no">STEP 2 — 오늘 M1</p>
-          <p class="flow-name">반복업무 구조화</p>
-          <p class="flow-desc">자주 하는 일의 기준·자료를<br>미리 넣어두고 재사용한다.</p>
-        </div>
-        <div class="flow-arrow">›</div>
-        <div class="flow-step">
-          <p class="flow-no">STEP 3 — M2 이후</p>
-          <p class="flow-name">Agent 활용</p>
-          <p class="flow-desc">여러 파일을 읽고 처리하며<br>업무를 대신 수행한다.</p>
-        </div>
-      </div>
-
-      <div class="note">
-        대화형 AI에서 Agent로 확장되며 업무 효율화가 가능해집니다.
-      </div>
-    </div>
-  </section>
-
-  <!-- 6. H Chat 모델·기능 한눈에 이해 ------------------ -->
+  <!-- 5. H Chat 모델·기능 한눈에 이해 ------------------ -->
   <section class="slide">
     <div class="slide-head"><h2>H&nbsp;Chat 모델·기능 한눈에 이해</h2><span class="head-tag">M1-1 · 개념</span></div>
     <div class="slide-body slide-body--top" style="padding-top:32px">
@@ -172,7 +135,7 @@
     </div>
   </section>
 
-  <!-- 7. 모델이란? ---------------------------------------------- -->
+  <!-- 6. 모델이란? ---------------------------------------------- -->
   <section class="slide">
     <div class="slide-head"><h2>모델이란?</h2><span class="head-tag">M1-1 · 개념</span></div>
     <div class="slide-body">
@@ -182,90 +145,67 @@
       </p>
 
       <div class="figure" style="margin:0">
-        <svg viewBox="0 0 1000 410" width="1096" height="449" role="img"
-             aria-label="아르바이트생 그림 옆에 IQ 게이지가 있고, 알바생은 그대로 두고 IQ만 골라 끼운다는 그림">
-          <defs>
-            <linearGradient id="iqbar" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0" stop-color="#70AD47"/>
-              <stop offset="1" stop-color="#164194"/>
-            </linearGradient>
-          </defs>
+        <div style="display:flex; align-items:center; justify-content:center; gap:34px">
 
-          <!-- 아르바이트생 -->
-          <rect x="60" y="36" width="212" height="192" rx="32" fill="#F2F2F2" stroke="#204273" stroke-width="5"/>
-          <circle cx="114" cy="100" r="12" fill="#204273"/>
-          <circle cx="218" cy="100" r="12" fill="#204273"/>
-          <rect x="106" y="142" width="120" height="54" rx="13" fill="#164194"/>
-          <text x="166" y="181" text-anchor="middle" font-size="30" font-weight="800" fill="#fff">IQ</text>
-          <rect x="151" y="226" width="30" height="20" fill="#204273"/>
-          <rect x="96" y="244" width="140" height="62" rx="22" fill="#204273"/>
-          <text x="166" y="356" text-anchor="middle" font-size="21" fill="#7C8698">Agent = 아르바이트생</text>
+          <div style="text-align:center; flex:0 0 auto">
+            <p style="margin:0 0 6px; font-size:18px; font-weight:700; color:var(--navy)">IQ = 모델</p>
+            <img src="assets/img/m1-model-brain.png"
+                 alt="모자를 쓰고 앞치마를 두른 아르바이트생의 옆모습, 머리 속 두뇌만 환하게 빛나고 있다"
+                 style="display:block; height:428px; width:auto">
+            <p style="margin:8px 0 0; font-size:21px; color:#7C8698">Agent = 아르바이트생</p>
+          </div>
 
-          <path d="M300 160 L346 160" stroke="#7C8698" stroke-width="5" fill="none"/>
-          <path d="M346 148 L366 160 L346 172 Z" fill="#7C8698"/>
+          <svg viewBox="0 0 46 24" width="46" height="24" style="flex:0 0 auto" role="presentation">
+            <path d="M0 12 L26 12" stroke="#7C8698" stroke-width="5" fill="none"/>
+            <path d="M26 0 L46 12 L26 24 Z" fill="#7C8698"/>
+          </svg>
 
-          <!-- IQ 게이지 -->
-          <rect x="382" y="36" width="578" height="292" rx="16" fill="#F2F2F2"/>
-          <text x="418" y="98" font-size="27" font-weight="800" fill="#164194">모델 = 그 알바생의 IQ</text>
+          <div style="flex:0 0 578px; background:#F2F2F2; border-radius:16px; padding:30px 36px 34px; text-align:left">
+            <p style="margin:0; font-size:27px; font-weight:800; color:var(--navy); letter-spacing:-.02em">모델 = 그 알바생의 IQ</p>
+            <div style="margin:26px 0 0; height:30px; border-radius:15px; background:linear-gradient(90deg,#70AD47,#164194)"></div>
+            <div style="display:flex; justify-content:space-between; margin:14px 0 0; font-size:17px; line-height:1.4; color:#7C8698; text-align:center">
+              <span>IQ를 낮게 설정<br>(가격이 저렴)</span>
+              <span>IQ를 높게 설정<br>(가격이 비쌈)</span>
+            </div>
+            <div style="margin:22px 0 0; padding-top:22px; border-top:2px solid #DCE3EE; font-size:22px; font-weight:700; color:var(--navy); letter-spacing:-.01em">
+              Agent의 IQ를 선택할 수 있습니다.
+            </div>
+          </div>
 
-          <rect x="418" y="140" width="506" height="30" rx="15" fill="url(#iqbar)"/>
-          <text x="418" y="206" font-size="19" fill="#7C8698">IQ 낮음 &mdash; 싸고 빠르다</text>
-          <text x="924" y="206" text-anchor="end" font-size="19" fill="#7C8698">IQ 높음 &mdash; 비싸고 꼼꼼하다</text>
-
-          <line x1="418" y1="238" x2="924" y2="238" stroke="#DCE3EE" stroke-width="2"/>
-          <text x="418" y="292" font-size="22" fill="#1A1A1A">알바생은 그대로 두고, <tspan font-weight="700" fill="#164194">IQ만 골라 끼웁니다</tspan></text>
-        </svg>
+        </div>
       </div>
     </div>
   </section>
 
-  <!-- 8. Claude 모델 세 가지 ---------------------------- -->
+  <!-- 7. Claude 모델 세 가지 ---------------------------- -->
   <section class="slide">
     <div class="slide-head"><h2>Claude 모델 세 가지</h2><span class="head-tag">M1-1 · 개념</span></div>
     <div class="slide-body">
       <p class="lead" style="margin-bottom:22px">
-        클로드 기준으로 <strong class="navy">이 셋</strong>이 자주 쓰입니다. IQ가 높을수록 <strong class="navy">비쌉니다.</strong>
+        클로드 기준, <strong class="navy">세 가지 모델</strong> 소개합니다.
       </p>
 
       <div class="kv kv--3">
         <div class="kv-item">
-          <div style="text-align:center; margin:0 0 14px"><svg viewBox="0 0 160 66" width="152" height="63" role="img" aria-label="세단 그림">
-            <path d="M18 46 L29 24 Q32 17 42 17 L112 17 Q123 17 128 24 L142 46 Z" fill="#204273"/>
-            <rect x="14" y="44" width="132" height="10" rx="5" fill="#204273"/>
-            <rect x="46" y="25" width="30" height="17" rx="3" fill="#F2F2F2"/>
-            <rect x="84" y="25" width="34" height="17" rx="3" fill="#F2F2F2"/>
-            <circle cx="46" cy="56" r="9" fill="#204273"/>
-            <circle cx="116" cy="56" r="9" fill="#204273"/>
-          </svg></div>
+          <img src="assets/img/m1-car-opus.jpg" alt="제네시스 — 고급 대형 세단 사진"
+               style="display:block; width:100%; aspect-ratio:16/9; object-fit:cover; border-radius:8px; margin:0 0 14px">
           <p class="kv-name">Opus<svg viewBox="0 0 46 18" width="46" height="18" style="vertical-align:-1px;margin-left:9px" role="img" aria-label="비용 3단계"><circle cx="8" cy="9" r="6" fill="#70AD47"/><circle cx="22" cy="9" r="6" fill="#70AD47"/><circle cx="36" cy="9" r="6" fill="#70AD47"/></svg></p>
-          <p class="kv-like"><b>제네시스급</b> — 가장 똑똑합니다</p>
+          <p class="kv-like"><b>제네시스</b> — 많이 똑똑합니다</p>
           <p class="kv-when">비싸서 <strong>사내에서는 쓸 수 없습니다</strong></p>
         </div>
         <div class="kv-item" style="border-color:var(--navy); box-shadow:0 0 0 3px #DCE6F7">
-          <div style="text-align:center; margin:0 0 14px"><svg viewBox="0 0 160 66" width="152" height="63" role="img" aria-label="세단 그림">
-            <g transform="translate(14,9) scale(0.82)"><path d="M18 46 L29 24 Q32 17 42 17 L112 17 Q123 17 128 24 L142 46 Z" fill="#164194"/>
-            <rect x="14" y="44" width="132" height="10" rx="5" fill="#204273"/>
-            <rect x="46" y="25" width="30" height="17" rx="3" fill="#F2F2F2"/>
-            <rect x="84" y="25" width="34" height="17" rx="3" fill="#F2F2F2"/>
-            <circle cx="46" cy="56" r="9" fill="#204273"/>
-            <circle cx="116" cy="56" r="9" fill="#204273"/>
-          </g></svg></div>
+          <img src="assets/img/m1-car-sonnet.jpg" alt="그랜저 — 중형 세단 사진"
+               style="display:block; width:100%; aspect-ratio:16/9; object-fit:cover; border-radius:8px; margin:0 0 14px">
           <p class="kv-name">Sonnet<svg viewBox="0 0 32 18" width="32" height="18" style="vertical-align:-1px;margin-left:9px" role="img" aria-label="비용 2단계"><circle cx="8" cy="9" r="6" fill="#70AD47"/><circle cx="22" cy="9" r="6" fill="#70AD47"/></svg></p>
-          <p class="kv-like"><b>그랜저급</b> — 중간입니다</p>
-          <p class="kv-when">업무에 쓰기 좋은 균형 — <strong>오늘 쓰는 모델</strong></p>
+          <p class="kv-like"><b>그랜저</b> — 똑똑합니다</p>
+          <p class="kv-when">업무에서 쓰기 좋은 균형 — <strong>오늘 수업 사용</strong></p>
         </div>
         <div class="kv-item">
-          <div style="text-align:center; margin:0 0 14px"><svg viewBox="0 0 160 66" width="152" height="63" role="img" aria-label="자전거 그림">
-            <circle cx="42" cy="46" r="16" fill="none" stroke="#7C8698" stroke-width="4"/>
-            <circle cx="120" cy="46" r="16" fill="none" stroke="#7C8698" stroke-width="4"/>
-            <path d="M42 46 L68 46 L86 20 L104 46 L120 46" fill="none" stroke="#70AD47"
-                  stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
-            <path d="M68 46 L86 20" stroke="#70AD47" stroke-width="4" stroke-linecap="round"/>
-            <path d="M78 20 L98 20" stroke="#70AD47" stroke-width="4" stroke-linecap="round"/>
-          </svg></div>
+          <img src="assets/img/m1-car-haiku.jpg" alt="자전거 사진"
+               style="display:block; width:100%; aspect-ratio:16/9; object-fit:cover; border-radius:8px; margin:0 0 14px">
           <p class="kv-name">Haiku<svg viewBox="0 0 18 18" width="18" height="18" style="vertical-align:-1px;margin-left:9px" role="img" aria-label="비용 1단계"><circle cx="8" cy="9" r="6" fill="#70AD47"/></svg></p>
-          <p class="kv-like"><b>자전거급</b> — 가볍고 저렴합니다</p>
-          <p class="kv-when">단순 요약 · 형식 정리 같은 반복 작업</p>
+          <p class="kv-like"><b>자전거</b> — 가볍고 저렴합니다</p>
+          <p class="kv-when">단, 사람의 의도를 잘못 파악할 수 있어요</p>
         </div>
       </div>
 
@@ -275,61 +215,58 @@
     </div>
   </section>
 
-  <!-- 9. 사내에서는 GPT · Gemini 도 씁니다 -------- -->
+  <!-- 8. 모델은 이렇게 고릅니다 -------------------------- -->
   <section class="slide">
-    <div class="slide-head"><h2>사내에서는 GPT &middot; Gemini 도 씁니다</h2><span class="head-tag">M1-1 · 개념</span></div>
-    <div class="slide-body">
+    <div class="slide-head"><h2>모델은 이렇게 고릅니다</h2><span class="head-tag">M1-1 · 개념</span></div>
+    <div class="slide-body slide-body--top" style="padding-top:30px">
       <p class="lead" style="margin-bottom:20px">
-        H Chat에는 Claude뿐 아니라 <strong class="navy">GPT · Gemini</strong> 모델까지 함께 들어 있습니다.
+        모델은 <strong class="navy">화면 맨 위</strong>에서 언제든 갈아 끼웁니다.
+        오늘은 <strong class="navy">Sonnet</strong> 으로 맞춰 두고 시작합니다.
       </p>
 
-      <div class="split" style="gap:28px">
-        <div class="split-main">
-          <div class="ba">
-            <div class="ba-col ba--before">
-              <p class="ba-head">모델 초기에는</p>
-              <div class="ba-body">
-                <p>&ldquo;GPT가 코딩을 더 잘하더라&rdquo;</p>
-                <p>&ldquo;Gemini가 이건 더 낫더라&rdquo;</p>
-                <p class="ba-quote">회사별로 잘하는 일이 뚜렷해서, 골라 쓰는 재미가 있었습니다.</p>
-              </div>
-            </div>
-            <div class="ba-col ba--after">
-              <p class="ba-head">지금은</p>
-              <div class="ba-body">
-                <p>전부 <strong>범용 성능이 올라갔습니다</strong></p>
-                <p>웬만한 업무에서는 <strong>차이를 체감하기 어렵습니다</strong></p>
-                <p class="ba-quote">어느 것을 골라도 대체로 됩니다.</p>
-              </div>
-            </div>
+      <div class="split" style="gap:40px">
+        <div class="split-main" style="flex:0 0 330px; padding-right:34px">
+          <div class="pin-wrap">
+            <img src="assets/img/m1-model-select.png" alt="H Chat Pro 모델 선택 — 위쪽 모델 이름을 누르면 목록이 열리고 Claude Sonnet 5 에 체크가 붙는다">
+            <span class="pin-box" style="left:1.5%;top:0.6%;width:42%;height:4.6%"><span class="pin-no">1</span></span>
+            <span class="pin-box" style="left:3.5%;top:43.6%;width:90%;height:12.5%"><span class="pin-no">2</span></span>
           </div>
         </div>
 
-        <div class="split-side" style="flex:0 0 206px">
-          <div class="shot"><img src="assets/img/m1-model-select.png" alt="H Chat Pro 모델 선택 목록"></div>
-          <p class="shot-cap">골라 쓰는 자리</p>
-        </div>
-      </div>
+        <div class="split-side" style="flex:1 1 auto">
+          <ol class="steps">
+            <li>화면 맨 위의 <b>모델 이름</b>을 누릅니다.
+              <small>지금 쓰고 있는 모델이 거기 적혀 있습니다.</small></li>
+            <li>목록에서 <b>Claude Sonnet 5</b> 를 고릅니다.
+              <small>오른쪽에 체크 표시가 붙으면 바뀐 것입니다.</small></li>
+          </ol>
 
-      <div class="note" style="margin-top:20px">
-        그래서 <strong class="navy">모델 고르기에 오래 고민하지 않아도 됩니다.</strong>
-        오늘은 <strong class="navy">Sonnet</strong> 으로 통일합니다.
+          <div class="note" style="margin-top:22px">
+            <strong class="navy">[참고]</strong> 사내에서는 Claude 모델인 <strong>Sonnet · Haiku</strong> 말고도
+            <strong>GPT · Gemini</strong> 같은 다른 모델도 사용할 수 있습니다.
+          </div>
+
+          <div class="note" style="margin-top:14px">
+            지금은 <strong>어느 회사 모델이든 범용 성능이 올라와</strong> 업무에서 차이를 체감하기 어렵습니다.
+            <strong class="navy">모델 고르기에 오래 고민하지 않아도 됩니다.</strong>
+          </div>
+        </div>
       </div>
     </div>
   </section>
 
-  <!-- 10. [챕터] 첫 웹페이지 만들기 -------------------------- -->
+  <!-- 9. [챕터] 첫 웹페이지 만들기 -------------------------- -->
   <section class="slide slide--chapter" data-chapter="첫 웹페이지 만들기">
     <div class="chapter">
       <p class="ch-eyebrow">CHAPTER 2</p>
       <h2 class="ch-title">첫 웹페이지 만들기</h2>
       <div class="ch-rule"></div>
-      <p class="ch-desc">말로 부탁해 웹페이지를 만들고, 미리보기로 확인하고, 말로 고칩니다.</p>
+      <p class="ch-desc">Agent와 대화를 통해 웹페이지를 만들어보고, 기능도 추가해봅시다.</p>
       <ul class="ch-keys"><li>HTML 한 장</li><li>미리보기</li><li>Before &rarr; After</li></ul>
     </div>
   </section>
 
-  <!-- 11. 이번에는 눈에 보이는 결과물을 만듭니다 -------------- -->
+  <!-- 10. 이번에는 눈에 보이는 결과물을 만듭니다 -------------- -->
   <section class="slide">
     <div class="slide-head"><h2>이번에는 눈에 보이는 결과물을 만듭니다</h2><span class="head-tag">M1-2 · 개념</span></div>
     <div class="slide-body">
@@ -362,7 +299,7 @@
     </div>
   </section>
 
-  <!-- 12. 부탁하고 → 미리보기로 확인하면 끝 ------------------ -->
+  <!-- 11. 부탁하고 → 미리보기로 확인하면 끝 ------------------ -->
   <section class="slide">
     <div class="slide-head"><h2>부탁하고 → 미리보기로 확인하면 끝</h2><span class="head-tag">M1-2 · 개념</span></div>
     <div class="slide-body">
@@ -403,7 +340,7 @@
     </div>
   </section>
 
-  <!-- 13. [실습] 첫 웹페이지 만들기 -------------------------- -->
+  <!-- 12. [실습] 첫 웹페이지 만들기 -------------------------- -->
   <section class="slide">
     <div class="slide-head"><h2>[실습] 첫 웹페이지 만들기</h2><span class="head-tag">M1-2 · 실습</span></div>
     <div class="slide-body" style="padding-top:30px">
@@ -419,7 +356,6 @@
             <p class="pbox-t">그대로 붙여넣는 문장</p>
             <p>나를 소개하는 웹페이지를 <b>HTML 파일 하나로</b> 만들어줘.</p>
             <p>제목은 ‘OOO의 소개 페이지’, 인사말 한 줄, 내가 좋아하는 것 3가지 목록을 넣어줘.</p>
-            <p>디자인도 같은 파일 안에 넣고, <b>코드 전체</b>를 한 번에 보여줘.</p>
           </div>
         </div>
 
@@ -442,7 +378,7 @@
     </div>
   </section>
 
-  <!-- 14. 결과 확인 — [HTML 미리보기] ------------------ -->
+  <!-- 13. 결과 확인 — [HTML 미리보기] ------------------ -->
   <section class="slide">
     <div class="slide-head"><h2>결과 확인 — [HTML 미리보기]</h2><span class="head-tag">M1-2 · 실습</span></div>
     <div class="slide-body">
@@ -461,7 +397,7 @@
     </div>
   </section>
 
-  <!-- 15. 마음에 안 들면 — 말로 고칩니다 -------------------- -->
+  <!-- 14. 마음에 안 들면 — 말로 고칩니다 -------------------- -->
   <section class="slide">
     <div class="slide-head"><h2>마음에 안 들면 — 말로 고칩니다</h2><span class="head-tag">M1-2 · 시연</span></div>
     <div class="slide-body">
@@ -490,7 +426,7 @@
     </div>
   </section>
 
-  <!-- 16. 이렇게 말하면 고쳐집니다 ------------------------------ -->
+  <!-- 15. 이렇게 말하면 고쳐집니다 ------------------------------ -->
   <section class="slide">
     <div class="slide-head"><h2>이렇게 말하면 고쳐집니다</h2><span class="head-tag">M1-2 · 시연</span></div>
     <div class="slide-body">
@@ -527,7 +463,7 @@
     </div>
   </section>
 
-  <!-- 17. [챕터] 나만의 웹페이지 만들고 공유하기 ------------ -->
+  <!-- 16. [챕터] 나만의 웹페이지 만들고 공유하기 ------------ -->
   <section class="slide slide--chapter" data-chapter="나만의 웹페이지 만들고 공유하기">
     <div class="chapter">
       <p class="ch-eyebrow">CHAPTER 3</p>
@@ -538,7 +474,7 @@
     </div>
   </section>
 
-  <!-- 18. [실습] 나만의 웹페이지 만들기 ---------------------- -->
+  <!-- 17. [실습] 나만의 웹페이지 만들기 ---------------------- -->
   <section class="slide">
     <div class="slide-head"><h2>[실습] 나만의 웹페이지 만들기</h2><span class="head-tag">M1-3 · 실습</span></div>
     <div class="slide-body">
@@ -571,7 +507,7 @@
     </div>
   </section>
 
-  <!-- 19. 무엇을 만들까 — 예시 -------------------------------- -->
+  <!-- 18. 무엇을 만들까 — 예시 -------------------------------- -->
   <section class="slide">
     <div class="slide-head"><h2>무엇을 만들까 — 예시</h2><span class="head-tag">M1-3 · 실습</span></div>
     <div class="slide-body">
@@ -609,7 +545,7 @@
     </div>
   </section>
 
-  <!-- 20. [실습] 만든 페이지를 플랫폼에 올리기 -------------- -->
+  <!-- 19. [실습] 만든 페이지를 플랫폼에 올리기 -------------- -->
   <section class="slide">
     <div class="slide-head"><h2>[실습] 만든 페이지를 플랫폼에 올리기</h2><span class="head-tag">M1-3 · 실습</span></div>
     <div class="slide-body" style="padding-top:28px">
@@ -644,7 +580,7 @@
     </div>
   </section>
 
-  <!-- 21. 서로 보고 · 한 줄 남기기 -------------------------- -->
+  <!-- 20. 서로 보고 · 한 줄 남기기 -------------------------- -->
   <section class="slide">
     <div class="slide-head"><h2>서로 보고 · 한 줄 남기기</h2><span class="head-tag">M1-3 · 공유</span></div>
     <div class="slide-body">
@@ -666,7 +602,7 @@
     </div>
   </section>
 
-  <!-- 22. [챕터] 프로젝트와 CO-STAR -------------------- -->
+  <!-- 21. [챕터] 프로젝트와 CO-STAR -------------------- -->
   <section class="slide slide--chapter" data-chapter="프로젝트와 CO-STAR">
     <div class="chapter">
       <p class="ch-eyebrow">CHAPTER 4</p>
@@ -677,7 +613,7 @@
     </div>
   </section>
 
-  <!-- 23. 매번 처음부터 다시 설명하고 있지 않나요 ------------ -->
+  <!-- 22. 매번 처음부터 다시 설명하고 있지 않나요 ------------ -->
   <section class="slide">
     <div class="slide-head"><h2>매번 처음부터 다시 설명하고 있지 않나요</h2><span class="head-tag">M1-4 · 개념</span></div>
     <div class="slide-body">
@@ -699,7 +635,7 @@
     </div>
   </section>
 
-  <!-- 24. 프로젝트 만들기 — 두 번 클릭이면 끝 -------------- -->
+  <!-- 23. 프로젝트 만들기 — 두 번 클릭이면 끝 -------------- -->
   <section class="slide">
     <div class="slide-head"><h2>프로젝트 만들기 — 두 번 클릭이면 끝</h2><span class="head-tag">M1-4 · 개념</span></div>
     <div class="slide-body">
@@ -741,7 +677,7 @@
     </div>
   </section>
 
-  <!-- 25. 우리 팀 양식을 리소스로 넣어두기 -------------------- -->
+  <!-- 24. 우리 팀 양식을 리소스로 넣어두기 -------------------- -->
   <section class="slide">
     <div class="slide-head"><h2>우리 팀 양식을 리소스로 넣어두기</h2><span class="head-tag">M1-4 · 개념</span></div>
     <div class="slide-body">
@@ -774,7 +710,7 @@
     </div>
   </section>
 
-  <!-- 26. 왜 결과가 매번 다를까요 ------------------------------ -->
+  <!-- 25. 왜 결과가 매번 다를까요 ------------------------------ -->
   <section class="slide">
     <div class="slide-head"><h2>왜 결과가 매번 다를까요</h2><span class="head-tag">M1-4 · 개념</span></div>
     <div class="slide-body">
@@ -814,7 +750,7 @@
     </div>
   </section>
 
-  <!-- 27. 프롬프트 대회 우승 방식 — CO-STAR ---------- -->
+  <!-- 26. 프롬프트 대회 우승 방식 — CO-STAR ---------- -->
   <section class="slide">
     <div class="slide-head"><h2>프롬프트 대회 우승 방식 — CO-STAR</h2><span class="head-tag">M1-4 · 개념</span></div>
     <div class="slide-body">
@@ -867,7 +803,7 @@
     </div>
   </section>
 
-  <!-- 28. 지시사항 — 이 방이 알아야 할 규칙 ---------------- -->
+  <!-- 27. 지시사항 — 이 방이 알아야 할 규칙 ---------------- -->
   <section class="slide">
     <div class="slide-head"><h2>지시사항 — 이 방이 알아야 할 규칙</h2><span class="head-tag">M1-4 · 개념</span></div>
     <div class="slide-body">
@@ -905,7 +841,7 @@
     </div>
   </section>
 
-  <!-- 29. 이 방의 규칙을 지시사항에 적어둡니다 ---------------- -->
+  <!-- 28. 이 방의 규칙을 지시사항에 적어둡니다 ---------------- -->
   <section class="slide">
     <div class="slide-head"><h2>이 방의 규칙을 지시사항에 적어둡니다</h2><span class="head-tag">M1-4 · 개념</span></div>
     <div class="slide-body">
@@ -943,7 +879,7 @@
     </div>
   </section>
 
-  <!-- 30. 이제 키워드만 넣으면 됩니다 -------------------------- -->
+  <!-- 29. 이제 키워드만 넣으면 됩니다 -------------------------- -->
   <section class="slide">
     <div class="slide-head"><h2>이제 키워드만 넣으면 됩니다</h2><span class="head-tag">M1-4 · 개념</span></div>
     <div class="slide-body">
@@ -965,7 +901,7 @@
     </div>
   </section>
 
-  <!-- 31. [실습] 내 업무로 프로젝트 만들기 ------------------ -->
+  <!-- 30. [실습] 내 업무로 프로젝트 만들기 ------------------ -->
   <section class="slide">
     <div class="slide-head"><h2>[실습] 내 업무로 프로젝트 만들기</h2><span class="head-tag">M1-4 · 실습</span></div>
     <div class="slide-body" style="padding-top:18px">
@@ -1001,7 +937,7 @@
     </div>
   </section>
 
-  <!-- 32. [챕터] 커넥터 - 사내 자료 연결 ------------------ -->
+  <!-- 31. [챕터] 커넥터 - 사내 자료 연결 ------------------ -->
   <section class="slide slide--chapter" data-chapter="커넥터 &mdash; 사내 자료 연결">
     <div class="chapter">
       <p class="ch-eyebrow">CHAPTER 5</p>
@@ -1012,7 +948,7 @@
     </div>
   </section>
 
-  <!-- 33. 지금 AI와의 대화, 이런 문제가 있습니다 ---------- -->
+  <!-- 32. 지금 AI와의 대화, 이런 문제가 있습니다 ---------- -->
   <section class="slide">
     <div class="slide-head"><h2>지금 AI와의 대화, 이런 문제가 있습니다</h2><span class="head-tag">M1-5 · 개념</span></div>
     <div class="slide-body">
@@ -1045,7 +981,7 @@
     </div>
   </section>
 
-  <!-- 34. 연결해두면 — 사내 자료를 스스로 찾아 씁니다 ------ -->
+  <!-- 33. 연결해두면 — 사내 자료를 스스로 찾아 씁니다 ------ -->
   <section class="slide">
     <div class="slide-head"><h2>연결해두면 — 사내 자료를 스스로 찾아 씁니다</h2><span class="head-tag">M1-5 · 시연</span></div>
     <div class="slide-body">
@@ -1083,7 +1019,7 @@
     </div>
   </section>
 
-  <!-- 35. M1 정리 ---------------------------------------------- -->
+  <!-- 34. M1 정리 ---------------------------------------------- -->
   <section class="slide" data-chapter="M1 정리">
     <div class="slide-head"><h2>M1 정리</h2><span class="head-tag">M1 · 정리</span></div>
     <div class="slide-body">
@@ -1118,7 +1054,7 @@
     </div>
   </section>
 
-  <!-- 36. H Chat 데스크탑 내려받기 ------------------------ -->
+  <!-- 35. H Chat 데스크탑 내려받기 ------------------------ -->
   <section class="slide">
     <div class="slide-head"><h2>H&nbsp;Chat 데스크탑 내려받기</h2><span class="head-tag">M2 준비</span></div>
     <div class="slide-body">
@@ -1145,7 +1081,7 @@
     </div>
   </section>
 
-  <!-- 37. 감사합니다. -------------------------------------------- -->
+  <!-- 36. 감사합니다. -------------------------------------------- -->
   <section class="slide slide--cover">
     <div class="cover-text">
       <h1 class="cover-title" style="font-size:64px">감사합니다.</h1>
@@ -1168,7 +1104,7 @@
 
     <div class="deck-meta">
       <span class="deck-title">M1. H Chat으로 시작하는 AI 업무 활용</span>
-      <span class="deck-count" id="count">1 / 37</span>
+      <span class="deck-count" id="count">1 / 36</span>
     </div>
 
     <button class="deck-arrow" id="next" type="button" aria-label="다음 슬라이드" title="다음 (→)">
