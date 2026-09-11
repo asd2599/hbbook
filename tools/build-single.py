@@ -26,7 +26,6 @@ OUT = DIST / 'AX중급과정_교안.html'
 
 # 목차에 실을 순서. (파일, 덱 id, 목차 카드 링크 대상)
 MODULES = [
-    ('ot.html', 'ot'),
     ('m1.html', 'm1'),
     ('m2.html', 'm2'),
     ('m3.html', 'm3'),
