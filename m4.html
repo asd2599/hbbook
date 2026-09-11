@@ -29,6 +29,8 @@
   <!-- 1. 표지 ---------------------------------------------------- -->
 
   <!-- 1. 데이터 시각화 · AI 업무도구 만들기 -------------- -->
+
+  <!-- 1. 데이터 시각화 · AI 업무도구 만들기 -------------- -->
   <section class="slide slide--cover is-active">
     <div class="cover-text">
       <p class="cover-eyebrow">Module 4.</p>
@@ -561,72 +563,75 @@
     </div>
   </section>
 
-  <!-- 21. [실습] 강의자료 폴더를 열고 시작합니다 ------------ -->
+  <!-- 21. [실습] 강의자료 폴더를 열고 Claude를 켭니다 ---- -->
   <section class="slide">
-    <div class="slide-head"><h2>[실습] 강의자료 폴더를 열고 시작합니다</h2><span class="head-tag">M4-2 · 실습</span></div>
+    <div class="slide-head"><h2>[실습] 강의자료 폴더를 열고 Claude를 켭니다</h2><span class="head-tag">M4-2 · 실습</span></div>
     <div class="slide-body">
       <div class="split">
         <div class="split-main">
           <ol class="steps">
-            <li>배포받은 <strong>강의자료</strong>에서 <span class="mono">실습자료 &gt; M4 실습3 Base</span> 폴더를 엽니다<small>안에 <strong>app.html · server.js · 샘플 보고서.pdf</strong> 가 들어 있습니다</small></li>
+            <li>배포받은 <strong>강의자료</strong>에서 <span class="mono">실습자료 &gt; base</span> 폴더를 엽니다<small>안에 <strong>app.html · server.js · 샘플 보고서.pdf</strong> 가 들어 있습니다</small></li>
             <li>그 폴더에서 <strong>주소창에</strong> <span class="mono">code .</span> 을 입력합니다<small>점 하나까지 그대로 &mdash; &ldquo;지금 이 폴더를 VS Code로 열어라&rdquo;라는 뜻입니다</small></li>
-            <li>VS Code가 열리면 <strong>터미널</strong>을 엽니다<small>상단 메뉴 Terminal &gt; New Terminal</small></li>
+            <li>VS Code 터미널에서 <span class="mono">claude</span> 를 실행합니다<small>터미널은 상단 메뉴 Terminal &gt; New Terminal</small></li>
           </ol>
           <div class="note" style="margin-top:16px">
             오늘 만드는 것이 전부 <strong class="navy">이 폴더 안</strong>에 쌓입니다.
           </div>
         </div>
         <div class="split-side" style="flex:0 0 450px">
-          <div class="shot" style="width:450px"><img src="assets/img/m4-course-folder.png" alt="강의자료 폴더 안의 실습자료와 M4 실습3 Base 폴더"></div>
+          <div class="shot" style="width:450px"><img src="assets/img/m4-course-folder.png" alt="강의자료 폴더 안의 실습자료와 base 폴더"></div>
           <p class="shot-cap">이 폴더에서 <span class="mono">code .</span></p>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- 22. [실습] 서버를 띄워 봅니다 -------------------------- -->
+  <!-- 22. [실습] 띄워 달라고 시킵니다 ------------------------ -->
   <section class="slide">
-    <div class="slide-head"><h2>[실습] 서버를 띄워 봅니다</h2><span class="head-tag">M4-2 · 실습</span></div>
+    <div class="slide-head"><h2>[실습] 띄워 달라고 시킵니다</h2><span class="head-tag">M4-2 · 실습</span></div>
     <div class="slide-body">
       <div class="split">
         <div class="split-main">
-          <ol class="steps steps--lg">
-            <li>터미널에 <span class="mono">node server.js</span><small>&ldquo;준비됐습니다&rdquo; 와 주소가 뜹니다</small></li>
-            <li>브라우저에서 <span class="mono">http://localhost:8787</span><small>화면이 뜨면 질문을 하나 적고 [보내기]</small></li>
-          </ol>
+          <div class="pbox">
+            <p class="pbox-t">Claude Code에 그대로 붙여넣기</p>
+            <p>이 폴더의 server.js 를 실행해서 중계 서버를 띄우고,</p>
+            <p>app.html 을 브라우저로 열어줘</p>
+            <p>서버는 백그라운드로 띄우고, 꺼지지 않게 해줘</p>
+          </div>
+          <p class="sub" style="margin-top:16px">
+            터미널에 <span class="mono">node server.js</span> 를 직접 치지 않습니다.
+            <strong class="navy">말로 시킵니다.</strong>
+          </p>
         </div>
         <div class="split-side">
-          <div class="side-box side-box--warn">
-            <p class="side-t">답이 오지 않습니다</p>
-            <p class="side-d">화면 아래에 빨간 글씨로<br>
-              <strong>&ldquo;API 키가 없습니다&rdquo;</strong> 라고 뜹니다.</p>
+          <div class="side-box">
+            <p class="side-t">이렇게 뜨면 성공</p>
+            <p class="side-d">터미널에 <span class="mono">Claude proxy 실행 중: http://localhost:8787</span><br>
+              그리고 브라우저에 <strong>Claude API 연결 테스트</strong> 화면이 뜹니다.</p>
           </div>
-          <div class="side-box" style="margin-top:12px">
-            <p class="side-t">당연합니다</p>
-            <p class="side-d">앞 챕터에서 본 <strong>준비물</strong>을 아직 넣지 않았습니다.</p>
+          <div class="side-box side-box--warn" style="margin-top:12px">
+            <p class="side-t">안 열리면</p>
+            <p class="side-d">&ldquo;브라우저가 안 열렸어, 다시 열어줘&rdquo; 라고 한 번 더 시키면 됩니다.</p>
           </div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- 23. [실습] server.js 에 키를 넣습니다 -------- -->
+  <!-- 23. [실습] 화면에 API 키를 넣고 연결합니다 -------- -->
   <section class="slide">
-    <div class="slide-head"><h2>[실습] server.js 에 키를 넣습니다</h2><span class="head-tag">M4-2 · 실습</span></div>
+    <div class="slide-head"><h2>[실습] 화면에 API 키를 넣고 연결합니다</h2><span class="head-tag">M4-2 · 실습</span></div>
     <div class="slide-body">
       <div class="split">
         <div class="split-main">
           <ol class="steps steps--lg">
-            <li>VS Code에서 <span class="mono">server.js</span> 를 엽니다<small>왼쪽 파일 목록에서 클릭</small></li>
-            <li>맨 위 <span class="mono">const API_KEY = '';</span> 의 <strong>따옴표 안</strong>에 키를 붙여넣습니다<small>메모장에 적어 둔 그 키입니다</small></li>
-            <li><span class="mono">Ctrl + S</span> 로 저장하고, 터미널에서 <strong>다시</strong> <span class="mono">node server.js</span><small>먼저 <span class="mono">Ctrl + C</span> 로 끄고 다시 켭니다</small></li>
+            <li><strong>Claude API Key</strong> 칸에 키를 붙여넣습니다<small>메모장에 적어 둔 그 키입니다</small></li>
+            <li><strong>[연결 테스트]</strong> 를 누릅니다<small>&ldquo;연결 테스트 중…&rdquo; 이 잠깐 보입니다</small></li>
+            <li><strong>연결 성공</strong> 이 뜨면 채팅 화면으로 바뀝니다<small>바로 질문을 적어 보세요</small></li>
           </ol>
         </div>
-        <div class="split-side">
-          <div class="side-box">
-            <p class="side-t">이렇게 생겼습니다</p>
-            <p class="side-d"><span class="mono">const API_KEY = '여기에붙여넣기';</span></p>
-          </div>
+        <div class="split-side" style="flex:0 0 400px">
+          <div class="shot" style="width:400px"><img src="assets/img/m4-app-key.png" alt="API 키를 입력하고 연결 테스트를 누르는 화면"></div>
           <div class="side-box side-box--warn" style="margin-top:12px">
             <p class="side-t">키는 나만</p>
             <p class="side-d">화면 공유 · 메신저 · 게시판에 <strong>올리지 않습니다.</strong></p>
@@ -641,13 +646,10 @@
     <div class="slide-head"><h2>잘 동작하죠?</h2><span class="head-tag">M4-2 · 확인</span></div>
     <div class="slide-body">
       <p class="lead" style="margin-bottom:14px; text-align:center">
-        같은 화면인데, 이제 <strong class="navy">답이 옵니다.</strong>
+        코드는 한 줄도 쓰지 않았습니다. <strong class="navy">두 파일을 열어 달라고 했을 뿐</strong>입니다.
       </p>
       <div class="figure" style="margin:0">
-        <div class="shot" style="width:700px; margin:0 auto"><img src="assets/img/m4-app-ok.png" alt="질문에 대한 답이 화면에 표시된 앱"></div>
-      </div>
-      <div class="note" style="margin-top:14px; text-align:center">
-        바뀐 것은 <strong class="navy">server.js 하나</strong>뿐입니다.
+        <div class="shot" style="width:540px; margin:0 auto"><img src="assets/img/m4-app-ok.png" alt="연결에 성공해 질문에 답이 온 채팅 화면"></div>
       </div>
     </div>
   </section>
@@ -661,7 +663,7 @@
       </p>
 
       <div style="display:flex; gap:24px; align-items:center">
-        <div class="shot" style="width:420px"><img src="assets/img/m4-app-fail.png" alt="사외 주소로 직접 나가려다 막힌 화면"></div>
+        <div class="shot" style="width:420px"><img src="assets/img/m4-app-fail.png" alt="사외 주소로 직접 나가려다 연결 실패가 뜬 화면"></div>
         <div style="flex:1 1 auto; min-width:0">
           <ul class="dash-list">
             <li><strong>Claude가 만든 코드는 사외로 나갑니다</strong><small>사내망에서는 요청 자체가 막힙니다</small></li>

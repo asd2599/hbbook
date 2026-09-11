@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude API 테스트</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    background: #f4f3ef;
+    color: #1a1a1a;
+    margin: 0;
+    padding: 24px;
+    display: flex;
+    justify-content: center;
+  }
+  .container {
+    width: 100%;
+    max-width: 720px;
+  }
+  h1 {
+    font-size: 20px;
+    margin-bottom: 4px;
+  }
+  .sub {
+    color: #666;
+    font-size: 13px;
+    margin-bottom: 20px;
+  }
+  .card {
+    background: #fff;
+    border: 1px solid #e0ddd6;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+  label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: #333;
+  }
+  input[type="password"], input[type="text"] {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ccc7ba;
+    border-radius: 6px;
+    font-size: 14px;
+    margin-bottom: 12px;
+  }
+  button {
+    background: #c15f3c;
+    color: #fff;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  button:hover:not(:disabled) {
+    background: #a94f30;
+  }
+  button:disabled {
+    background: #cbb9ae;
+    cursor: not-allowed;
+  }
+  .status {
+    margin-top: 12px;
+    font-size: 13px;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  .status.ok { color: #1a7a3c; }
+  .status.err {
+    color: #b3261e;
+    background: #fdecea;
+    border: 1px solid #f3c2be;
+    border-radius: 6px;
+    padding: 10px 12px;
+  }
+  .status.info { color: #555; }
+  #chatSection { display: none; }
+  #chatLog {
+    height: 380px;
+    overflow-y: auto;
+    border: 1px solid #e0ddd6;
+    border-radius: 8px;
+    padding: 12px;
+    background: #fafaf7;
+    margin-bottom: 12px;
+  }
+  .msg {
+    margin-bottom: 14px;
+    max-width: 100%;
+  }
+  .msg .role {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    margin-bottom: 4px;
+  }
+  .msg.user .role { color: #4a5aa8; }
+  .msg.assistant .role { color: #c15f3c; }
+  .msg.error .role { color: #b3261e; }
+  .msg .content {
+    white-space: pre-wrap;
+    word-break: break-word;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  .msg.error .content {
+    color: #b3261e;
+    background: #fdecea;
+    border: 1px solid #f3c2be;
+    border-radius: 6px;
+    padding: 10px 12px;
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    font-size: 12.5px;
+  }
+  .chat-input-row {
+    display: flex;
+    gap: 8px;
+  }
+  .chat-input-row textarea {
+    flex: 1;
+    resize: none;
+    padding: 10px 12px;
+    border: 1px solid #ccc7ba;
+    border-radius: 6px;
+    font-size: 14px;
+    font-family: inherit;
+    height: 44px;
+  }
+  .small-note {
+    font-size: 12px;
+    color: #888;
+    margin-top: 8px;
+  }
+  .reset-link {
+    font-size: 12px;
+    color: #4a5aa8;
+    cursor: pointer;
+    text-decoration: underline;
+    margin-top: 8px;
+    display: inline-block;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Claude API 연결 테스트</h1>
+  <div class="sub">중계 서버(localhost:8787) 경유 · server.js 필요</div>
+
+  <div class="card" id="setupSection">
+    <label for="apiKey">Claude API Key</label>
+    <input type="password" id="apiKey" placeholder="sk-ant-..." autocomplete="off">
+    <button id="testBtn">연결 테스트</button>
+    <div id="testStatus" class="status"></div>
+  </div>
+
+  <div class="card" id="chatSection">
+    <div id="chatLog"></div>
+    <div class="chat-input-row">
+      <textarea id="promptInput" placeholder="프롬프트를 입력하세요... (Enter로 전송, Shift+Enter로 줄바꿈)"></textarea>
+      <button id="sendBtn">전송</button>
+    </div>
+    <div class="small-note">API Key는 브라우저에만 저장되며 서버로 전송되지 않습니다(Anthropic API 제외).</div>
+    <span class="reset-link" id="resetLink">API Key 다시 입력하기</span>
+  </div>
+</div>
+
+<script>
+const API_URL = "http://localhost:8787/v1/messages";
+
+const apiKeyInput = document.getElementById("apiKey");
+const testBtn = document.getElementById("testBtn");
+const testStatus = document.getElementById("testStatus");
+const setupSection = document.getElementById("setupSection");
+const chatSection = document.getElementById("chatSection");
+const chatLog = document.getElementById("chatLog");
+const promptInput = document.getElementById("promptInput");
+const sendBtn = document.getElementById("sendBtn");
+const resetLink = document.getElementById("resetLink");
+
+let currentApiKey = "";
+let conversation = []; // { role, content }
+
+function setStatus(el, text, type) {
+  el.textContent = text;
+  el.className = "status" + (type ? " " + type : "");
+}
+
+// 중계 서버(server.js)로만 요청을 보낸다. 실패 시 상태 코드 + 응답 본문을 그대로 노출.
+async function callClaude(apiKey, messages) {
+  let response;
+  try {
+    response = await fetch(API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + apiKey
+      },
+      body: JSON.stringify({
+        messages: messages
+      })
+    });
+  } catch (networkErr) {
+    throw new Error(
+      `프록시 서버(${API_URL}) 요청 실패: ${networkErr.name || "Error"}: ${networkErr.message || String(networkErr)}\n` +
+      (networkErr.stack ? "스택 트레이스:\n" + networkErr.stack + "\n" : "") +
+      "가능한 원인: server.js가 실행 중이 아님, 포트가 8787이 아닌 다른 포트로 열림, 방화벽 차단 등."
+    );
+  }
+
+  const rawBody = await response.text();
+
+  if (!response.ok) {
+    throw new Error(
+      `HTTP 상태: ${response.status} ${response.statusText}\n` +
+      `응답 본문:\n${rawBody || "(본문 없음)"}`
+    );
+  }
+
+  let data;
+  try {
+    data = JSON.parse(rawBody);
+  } catch (e) {
+    throw new Error(
+      "응답을 JSON으로 파싱하는 데 실패했습니다.\n" +
+      "오류: " + e.message + "\n" +
+      "원본 응답 본문:\n" + rawBody
+    );
+  }
+
+  return data;
+}
+
+testBtn.addEventListener("click", async () => {
+  const key = apiKeyInput.value.trim();
+  if (!key) {
+    setStatus(testStatus, "API Key를 입력해주세요.", "err");
+    return;
+  }
+
+  testBtn.disabled = true;
+  setStatus(testStatus, "연결 테스트 중...", "info");
+
+  try {
+    const data = await callClaude(key, [
+      { role: "user", content: "ping" }
+    ]);
+
+    if (!data.content || !Array.isArray(data.content) || data.content.length === 0) {
+      setStatus(
+        testStatus,
+        "연결은 되었지만 예상치 못한 응답 형식입니다.\n전체 응답:\n" + JSON.stringify(data, null, 2),
+        "err"
+      );
+      testBtn.disabled = false;
+      return;
+    }
+
+    setStatus(testStatus, "✅ 연결 성공! (모델: " + (data.model || "claude-sonnet-5") + ")", "ok");
+    currentApiKey = key;
+
+    setTimeout(() => {
+      setupSection.style.display = "none";
+      chatSection.style.display = "block";
+      promptInput.focus();
+    }, 500);
+
+  } catch (e) {
+    setStatus(testStatus, "❌ 연결 실패\n\n" + e.message, "err");
+  } finally {
+    testBtn.disabled = false;
+  }
+});
+
+apiKeyInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    testBtn.click();
+  }
+});
+
+function appendMessage(role, text, isError) {
+  const wrap = document.createElement("div");
+  wrap.className = "msg " + (isError ? "error" : role);
+
+  const roleEl = document.createElement("div");
+  roleEl.className = "role";
+  roleEl.textContent = isError ? "ERROR" : (role === "user" ? "나" : "Claude");
+
+  const contentEl = document.createElement("div");
+  contentEl.className = "content";
+  contentEl.textContent = text;
+
+  wrap.appendChild(roleEl);
+  wrap.appendChild(contentEl);
+  chatLog.appendChild(wrap);
+  chatLog.scrollTop = chatLog.scrollHeight;
+}
+
+async function sendPrompt() {
+  const text = promptInput.value.trim();
+  if (!text) return;
+
+  appendMessage("user", text, false);
+  conversation.push({ role: "user", content: text });
+  promptInput.value = "";
+  sendBtn.disabled = true;
+
+  try {
+    const data = await callClaude(currentApiKey, conversation);
+
+    if (!data.content || !Array.isArray(data.content) || data.content.length === 0) {
+      appendMessage(
+        "assistant",
+        "빈 응답을 받았습니다. 채팅에 아무 내용도 표시되지 않아 디버깅 정보를 대신 표시합니다.\n\n" +
+        "stop_reason: " + (data.stop_reason || "(없음)") + "\n" +
+        "전체 응답 JSON:\n" + JSON.stringify(data, null, 2),
+        true
+      );
+      return;
+    }
+
+    const textBlocks = data.content.filter(b => b.type === "text").map(b => b.text);
+    const replyText = textBlocks.join("\n").trim();
+
+    if (!replyText) {
+      appendMessage(
+        "assistant",
+        "응답에 텍스트 블록이 없습니다(도구 호출 등 다른 콘텐츠일 수 있음). 디버깅용 전체 응답:\n\n" +
+        JSON.stringify(data, null, 2),
+        true
+      );
+      return;
+    }
+
+    appendMessage("assistant", replyText, false);
+    conversation.push({ role: "assistant", content: replyText });
+
+  } catch (e) {
+    appendMessage(
+      "assistant",
+      "응답을 받지 못했습니다. 디버깅용 자세한 오류 정보:\n\n" + e.message,
+      true
+    );
+    conversation.pop();
+  } finally {
+    sendBtn.disabled = false;
+    promptInput.focus();
+  }
+}
+
+sendBtn.addEventListener("click", sendPrompt);
+
+promptInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter" && !e.shiftKey) {
+    e.preventDefault();
+    sendPrompt();
+  }
+});
+
+resetLink.addEventListener("click", () => {
+  currentApiKey = "";
+  conversation = [];
+  chatLog.innerHTML = "";
+  apiKeyInput.value = "";
+  setStatus(testStatus, "", "");
+  chatSection.style.display = "none";
+  setupSection.style.display = "block";
+  apiKeyInput.focus();
+});
+</script>
+</body>
+</html>
