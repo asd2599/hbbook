@@ -148,6 +148,7 @@
       }
       if (prevBtn) prevBtn.disabled = idx === 0;
       if (nextBtn) nextBtn.disabled = idx === slides.length - 1;
+      markNow();
       if (writeHash !== false && history.replaceState) {
         history.replaceState(null, '', '#' + (id ? id + '/' : '') + (idx + 1));
       }
@@ -181,12 +182,106 @@
       });
     }
 
+    /* ---- 왼쪽 챕터 서랍 --------------------------------------------- */
+    /* data-chapter 를 단 슬라이드(챕터 표지 · 정리)를 모아 목차를 만든다.
+       상단 바의 [챕터] 버튼으로 열고 닫고, 항목을 누르면 그 장으로 간다.   */
+    var marks = [];
+    slides.forEach(function (s, i) {
+      var t = s.getAttribute('data-chapter');
+      if (t) marks.push({ i: i, t: t, end: !s.classList.contains('slide--chapter') });
+    });
+
+    var side = null, sideBtn = null, items = [];
+
+    if (marks.length) {
+      var bar  = root.querySelector('.deck-bar');
+      var home = root.querySelector('.deck-home');
+
+      sideBtn = document.createElement('button');
+      sideBtn.type = 'button';
+      sideBtn.className = 'deck-chapters';
+      sideBtn.setAttribute('aria-expanded', 'false');
+      sideBtn.innerHTML = '<span class="dc-bars"><i></i><i></i><i></i></span>챕터';
+
+      side = document.createElement('aside');
+      side.className = 'deck-side';
+      side.setAttribute('aria-label', '챕터 목록');
+
+      var head = document.createElement('p');
+      head.className = 'ds-head';
+      head.textContent = '챕터';
+      side.appendChild(head);
+
+      var list = document.createElement('ol');
+      list.className = 'ds-list';
+
+      var no = 0;
+      marks.forEach(function (m) {
+        var li = document.createElement('li');
+        var b  = document.createElement('button');
+        b.type = 'button';
+        b.className = 'ds-item';
+        if (!m.end) no += 1;
+        b.innerHTML =
+          '<span class="ds-no' + (m.end ? ' ds-no--end' : '') + '">' + (m.end ? '·' : no) + '</span>' +
+          '<span class="ds-t"></span>' +
+          '<span class="ds-page">' + (m.i + 1) + '</span>';
+        b.querySelector('.ds-t').textContent = m.t;
+        b.addEventListener('click', function () { go(m.i); });
+        li.appendChild(b);
+        list.appendChild(li);
+        items.push(b);
+      });
+
+      side.appendChild(list);
+
+      if (bar && home && home.parentNode === bar) bar.insertBefore(sideBtn, home.nextSibling);
+      else if (bar) bar.insertBefore(sideBtn, bar.firstChild);
+      (root === document ? document.body : root).appendChild(side);
+
+      sideBtn.addEventListener('click', function () {
+        toggleSide(!side.classList.contains('is-open'));
+      });
+      /* 창이 좁으면 슬라이드가 너무 작아지므로 접어 둔 채로 시작한다 */
+      toggleSide(window.innerWidth >= 1180);
+    }
+
+    function toggleSide(open) {
+      if (!side) return;
+      side.classList.toggle('is-open', open);
+      sideBtn.classList.toggle('is-open', open);
+      sideBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      syncSide();
+    }
+    function closeSide() { toggleSide(false); }
+    function sideOpen() { return !!side && side.classList.contains('is-open'); }
+
+    /* 서랍이 차지하는 폭을 무대에 알려 준다 — 슬라이드가 그만큼 비켜 앉는다 */
+    function syncSide() {
+      var css = getComputedStyle(document.documentElement);
+      var w = (css.getPropertyValue('--side-open-w') || '282px').trim();
+      document.documentElement.style.setProperty('--side-w', sideOpen() ? w : '0px');
+      fit();
+    }
+
+    /* 지금 보고 있는 장이 속한 챕터를 표시한다 */
+    function markNow() {
+      if (!items.length) return;
+      var cur = -1;
+      for (var k = 0; k < marks.length; k++) if (marks[k].i <= idx) cur = k;
+      items.forEach(function (b, k) { b.classList.toggle('is-now', k === cur); });
+    }
+
     return {
       id: id,
       root: root,
       count: slides.length,
       go: go,
       render: render,
+      markNow: markNow,
+      closeSide: closeSide,
+      sideOpen: sideOpen,
+      syncSide: syncSide,
       at: function () { return idx; },
       set: function (n) { idx = Math.max(0, Math.min(slides.length - 1, n)); }
     };
@@ -217,7 +312,7 @@
           active = decks[i];
           if (typeof n === 'number') active.set(n - 1);
           active.render();
-          fit();
+          if (active.syncSide) active.syncSide(); else fit();
           return active;
         }
       }
@@ -235,8 +330,9 @@
     var cs = getComputedStyle(document.documentElement);
     var w = parseFloat(cs.getPropertyValue('--slide-w'));
     var h = parseFloat(cs.getPropertyValue('--slide-h'));
+    var side = parseFloat(cs.getPropertyValue('--side-w')) || 0;
     var scale = Math.min(
-      (window.innerWidth  - CHROME_W) / w,
+      (window.innerWidth  - CHROME_W - side) / w,
       (window.innerHeight - CHROME_H) / h
     );
     document.documentElement.style.setProperty('--scale', Math.min(scale, 1.35));
@@ -246,13 +342,15 @@
   document.addEventListener('keydown', function (e) {
     if (e.defaultPrevented || e.ctrlKey || e.altKey || e.metaKey) return;
     var t = e.target;                       // 입력칸에 글을 쓰는 중이면 슬라이드를 넘기지 않는다
-    if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
+    if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'VIDEO' ||
+              t.isContentEditable)) return;
     switch (e.key) {
       case 'ArrowRight': case 'PageDown': case ' ': active.go(active.at() + 1); e.preventDefault(); break;
       case 'ArrowLeft':  case 'PageUp':          active.go(active.at() - 1); e.preventDefault(); break;
       case 'Home':                               active.go(0); e.preventDefault(); break;
       case 'End':                                active.go(active.count - 1); e.preventDefault(); break;
       case 'Escape':
+        if (active.sideOpen && active.sideOpen()) { active.closeSide(); e.preventDefault(); break; }
         if (typeof window.deckHome === 'function') window.deckHome();
         else location.href = 'index.html';
         break;
@@ -300,7 +398,11 @@
   }, { passive: true });
 
   /* ---- 리사이즈 ----------------------------------------------------------- */
-  window.addEventListener('resize', fit);
+  window.addEventListener('resize', function () {
+    // 창이 좁아지면 서랍을 접어 슬라이드를 살린다
+    if (active.sideOpen && active.sideOpen() && window.innerWidth < 1180) active.closeSide();
+    else fit();
+  });
 
   /* ---- 시작 --------------------------------------------------------------- */
   fit();

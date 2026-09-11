@@ -10,6 +10,10 @@ docs/*.png
 docs/*.pptx
 docs/*.docx
 
+# 강의 영상 — 용량이 커서 저장소에 올리지 않습니다
+# 교안 HTML 과 **같은 폴더**에 두면 재생됩니다 (배포본은 dist/ 안에 함께 둡니다)
+*.mp4
+
 # OS
 Thumbs.db
 .DS_Store

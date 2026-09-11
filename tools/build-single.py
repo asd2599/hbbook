@@ -15,6 +15,7 @@ CSS · JS · 이미지를 모두 본문에 넣어 파일 하나만으로 열리�
 """
 import base64
 import mimetypes
+import shutil
 import pathlib
 import re
 import sys
@@ -69,9 +70,14 @@ def style_of(html):
 
 
 def build_deck(fname, deck_id):
-    """모듈 교안 한 편을 <div class="deck" data-deck="…"> 로 감싼다."""
+    """모듈 교안 한 편을 <div class="deck" data-deck="…"> 로 감싼다.
+
+    모듈 고유 스타일(<head> 안의 <style>)도 함께 돌려준다.
+    이걸 빠뜨리면 배포본에서 그 모듈의 레이아웃만 조용히 무너진다.
+    """
     html = read(fname)
     body = body_of(html)
+    css = inline_images(style_of(html))
 
     # 스크립트 태그 제거 (공용 JS는 마지막에 한 번만 넣는다)
     body = re.sub(r'<script[^>]*>.*?</script>', '', body, flags=re.S)
@@ -82,7 +88,8 @@ def build_deck(fname, deck_id):
     body = body.replace('class="deck-count" id="count"', 'class="deck-count js-count"')
 
     body = inline_images(body)
-    return '<div class="deck" data-deck="%s" hidden>\n%s\n</div>\n' % (deck_id, body.strip())
+    deck = '<div class="deck" data-deck="%s" hidden>\n%s\n</div>\n' % (deck_id, body.strip())
+    return css, deck
 
 
 ROUTER = """
@@ -132,6 +139,15 @@ def main():
     deck_css = read('assets/css/deck.css')
     deck_js = read('assets/js/deck.js')
 
+    # 모듈 고유 스타일을 먼저 모은다 (head 의 <style> 에 함께 넣기 위해)
+    decks, module_css = [], []
+    for fname, deck_id in MODULES:
+        print('  + %s → data-deck="%s"' % (fname, deck_id))
+        css, deck = build_deck(fname, deck_id)
+        if css.strip():
+            module_css.append('/* ---- %s 고유 스타일 ---- */\n%s' % (fname, css.strip()))
+        decks.append(deck)
+
     # 목차 — 모듈 카드 링크를 덱 전환으로 바꾼다
     home = body_of(index_html)
     for fname, deck_id in MODULES:
@@ -148,6 +164,7 @@ def main():
         '<style>',
         deck_css,
         style_of(index_html),
+        '\n'.join(module_css),
         EXTRA_CSS,
         '</style>',
         '</head>',
@@ -159,9 +176,7 @@ def main():
         '',
     ]
 
-    for fname, deck_id in MODULES:
-        print('  + %s → data-deck="%s"' % (fname, deck_id))
-        parts.append(build_deck(fname, deck_id))
+    parts += decks
 
     parts += [
         '<script>',
@@ -177,6 +192,41 @@ def main():
     OUT.write_text('\n'.join(parts), encoding='utf-8')
     size = OUT.stat().st_size / 1024 / 1024
     print('완료 : %s (%.1f MB)' % (OUT.relative_to(ROOT), size))
+
+    # 우수사례 원본 HTML 은 본문에 넣지 않고 파일째 함께 둔다 (M4 사례 슬라이드의 링크 대상).
+    cases_src = ROOT / 'assets' / '우수사례'
+    if cases_src.is_dir():
+        cases_dst = DIST / 'assets' / '우수사례'
+        cases_dst.mkdir(parents=True, exist_ok=True)
+        total = 0
+        for f in sorted(cases_src.glob('*.html')):
+            shutil.copy2(f, cases_dst / f.name)
+            total += f.stat().st_size
+        print('  . 우수사례 : %d개 (%.1f MB) → dist/assets/우수사례/' %
+              (len(list(cases_src.glob('*.html'))), total / 1024 / 1024))
+        print('  > 배포할 때 HTML 과 assets 폴더를 함께 전달해야 사례 링크가 열립니다.')
+
+    # 실습자료도 함께 넣는다 — 배포본 폴더가 그대로 '강의자료' 가 된다.
+    # 교육생은 dist/실습자료/M4 실습3 Base 에서 바로 `code .` 로 실습을 시작한다.
+    prac_src = ROOT / 'assets' / '실습자료'
+    if prac_src.is_dir():
+        prac_dst = DIST / '실습자료'
+        if prac_dst.exists():
+            shutil.rmtree(prac_dst)
+        shutil.copytree(prac_src, prac_dst)
+        files = [f for f in prac_dst.rglob('*') if f.is_file()]
+        print('  . 실습자료 : %d개 파일 (%.1f MB) → dist/실습자료/' %
+              (len(files), sum(f.stat().st_size for f in files) / 1024 / 1024))
+
+    # 영상은 경로 없이 파일 이름으로만 참조한다 (본문에 넣지 않는다).
+    # dist/ 안에 mp4 가 함께 있어야 재생된다.
+    videos = sorted(DIST.glob('*.mp4'))
+    for mp4 in videos:
+        print('  . 영상 : %s (%.0f MB)' % (mp4.name, mp4.stat().st_size / 1024 / 1024))
+    if videos:
+        print('  > 배포할 때 HTML 과 mp4 를 같은 폴더에 함께 전달하세요.')
+    else:
+        print('  ! dist 안에 mp4 가 없습니다 - OT 4p 영상이 재생되지 않습니다.')
 
 
 if __name__ == '__main__':

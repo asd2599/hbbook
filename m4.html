@@ -5,12 +5,30 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>M4. 데이터 시각화 · AI 업무도구 만들기 — AX 중급과정</title>
 <link rel="stylesheet" href="assets/css/deck.css">
+<style>
+  /* 작품 미리보기 — 사례 결과물 다섯 개를 한 줄로 */
+  .works { display: flex; gap: 12px; align-items: flex-start; justify-content: center; }
+  .wk-item { flex: 0 0 208px; text-align: center; }
+  .wk-pic {
+    height: 132px; border-radius: 10px; overflow: hidden;
+    border: 2px solid var(--line); background: #F5F7FB;
+  }
+  .wk-pic img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: 50% 0; }
+  .wk-name { margin: 11px 0 0; font-size: 19px; font-weight: 700; color: var(--navy); letter-spacing: -.02em; }
+  .wk-sub  { margin: 4px 0 0; font-size: 16px; line-height: 1.4; color: #7C8698; letter-spacing: -.01em; }
+
+  /* 사례 원본 링크 */
+  .case-link { margin: 14px 0 0; font-size: 17px; }
+  .case-link a { color: var(--navy); font-weight: 700; }
+</style>
 </head>
 <body>
 
 <div class="stage">
 
-  <!-- 1. 표지 ------------------------------------------------------------------------ -->
+  <!-- 1. 표지 ---------------------------------------------------- -->
+
+  <!-- 1. 데이터 시각화 · AI 업무도구 만들기 -------------- -->
   <section class="slide slide--cover is-active">
     <div class="cover-text">
       <p class="cover-eyebrow">Module 4.</p>
@@ -18,37 +36,112 @@
     </div>
   </section>
 
-  <!-- 2. 이 시간에 할 일 ----------------------------------------------------------------- -->
+  <!-- 2. 오늘 만드는 것들 -------------------------------------- -->
   <section class="slide">
-    <div class="slide-head"><h2>이 시간에 할 일</h2><span class="head-tag">M4</span></div>
+    <div class="slide-head"><h2>오늘 만드는 것들</h2><span class="head-tag">전체 흐름</span></div>
     <div class="slide-body">
-      <p class="lead" style="margin-bottom:22px">
-        설문조사 결과를 넣으면 <strong class="navy">핵심 인사이트 · 차트 · 경영층 보고서</strong>가 나오는 화면을 만듭니다.<br>
-        보고서는 <strong class="navy">PPT로 내려받고</strong>, 화면은 <strong class="navy">동료가 더블클릭으로 여는 프로그램</strong>으로 바꿉니다.
-      </p>
+      <p class="lead" style="margin-bottom:24px">같은 Claude Code로, 이번에는 <strong class="navy">업무도구</strong>를 만듭니다.</p>
 
-      <table class="agenda">
-        <thead>
-          <tr><th style="width:126px">구분</th><th>내용</th></tr>
-        </thead>
-        <tbody>
-          <tr><td class="m">열쇠</td><td><strong>Claude API</strong> — 내가 만든 프로그램 안에서 AI를 부르는 열쇠</td></tr>
-          <tr><td class="m">검증</td><td>큰 걸 만들기 전에 <strong>작은 걸로 먼저</strong> 되는지 확인</td></tr>
-          <tr><td class="m">설계</td><td><strong>기획서 · 스펙 · 단계</strong> — 만들기 전에 말로 적는 문서 세 개</td></tr>
-          <tr><td class="m">제작</td><td><strong>Phase 1~4</strong> — 한 단계씩 만들고 사람이 확인</td></tr>
-          <tr><td class="m">배포</td><td>동료에게 <strong>파일 하나</strong>로 전달하기 · 사내 배포 가이드</td></tr>
-        </tbody>
-      </table>
-
-      <div class="note" style="margin-top:20px">
-        오늘도 <strong class="navy">코드는 한 줄도 쓰지 않습니다.</strong> 전부 말로 시킵니다.
+      <div class="roadmap">
+        <div class="rm-step is-done">
+          <div class="rm-pic"><img src="assets/img/m1-web-after.png" alt="말로 만들어 고친 웹페이지"></div>
+          <p class="rm-mod">M1</p>
+          <p class="rm-out">나만의 웹페이지</p>
+        </div>
+        <div class="rm-arrow">›</div>
+        <div class="rm-step is-done">
+          <div class="rm-pic"><img src="assets/img/m2-merged-result.png" alt="지점별 파일을 합친 통합표"></div>
+          <p class="rm-mod">M2</p>
+          <p class="rm-out">주간 실적 통합표</p>
+        </div>
+        <div class="rm-arrow">›</div>
+        <div class="rm-step is-done">
+          <div class="rm-pic"><img src="assets/img/m3-minutes-pdf.png" alt="메모에서 뽑아낸 회의록"></div>
+          <p class="rm-mod">M3</p>
+          <p class="rm-out">회의록 PDF</p>
+        </div>
+        <div class="rm-arrow">›</div>
+        <div class="rm-step is-now">
+          <div class="rm-pic"><img src="assets/img/m4-chart.png" alt="PDF를 읽어 대시보드로 보여 주는 화면"></div>
+          <p class="rm-mod">M4</p>
+          <p class="rm-out">PDF 분석 대시보드</p>
+          <p class="rm-here">지금 여기</p>
+        </div>
+        <div class="rm-arrow">›</div>
+        <div class="rm-step is-next">
+          <div class="rm-pic"><img src="assets/img/m5-poc-card.png" alt="내 업무로 가져갈 개선안"></div>
+          <p class="rm-mod">M5</p>
+          <p class="rm-out">아이디어 기획서 한 장</p>
+        </div>
       </div>
+
+      <div class="note" style="margin-top:26px">PDF를 넣으면 AI가 읽고 <strong class="navy">대시보드로</strong> 보여 주는 앱을 만듭니다.</div>
     </div>
   </section>
 
-  <!-- 3. [우수 사례] 팀원 평가 · 피드백 대시보드 ------------------------------------------------ -->
+  <!-- 3. 이번 시간에 만들 것 ---------------------------------- -->
   <section class="slide">
-    <div class="slide-head"><h2>[우수 사례] 팀원 평가 · 자동 피드백 대시보드</h2><span class="head-tag">M4-1 · 시연</span></div>
+    <div class="slide-head"><h2>이번 시간에 만들 것</h2><span class="head-tag">결과물 미리보기</span></div>
+    <div class="slide-body">
+      <p class="lead" style="margin-bottom:16px">PDF를 넣으면 <strong class="navy">요약 · 차트 · 챗봇</strong>이 있는 화면을 만듭니다.</p>
+
+      <div class="shots" style="gap:20px;align-items:flex-end">
+          <div>
+            <div class="shot" style="width:520px"><img src="assets/img/m4-pdf-chat.png" alt="PDF 분석 대시보드와 문서에 물어보는 챗봇"></div>
+            <p class="shot-cap">① PDF 분석 대시보드 · 챗봇</p>
+          </div>
+          <div>
+            <div class="shot" style="width:270px"><img src="assets/img/m4-dist-zip.png" alt="동료에게 줄 폴더와 압축 파일"></div>
+            <p class="shot-cap">② 압축 파일 하나로 전달</p>
+          </div>
+      </div>
+
+      <div class="note" style="margin-top:16px">이 챕터 이후, 여러분은 <strong class="navy">나만의 업무용 도구를 직접 만들 수 있습니다!</strong></div>
+    </div>
+  </section>
+
+  <!-- 4. 이번 챕터를 마스터하시면 ------------------------------ -->
+  <section class="slide">
+    <div class="slide-head"><h2>이번 챕터를 마스터하시면</h2><span class="head-tag">결과물 미리보기</span></div>
+    <div class="slide-body">
+      <p class="lead" style="margin-bottom:20px">
+        다음과 같은 <strong class="navy">멋진 작품</strong>도 만들 수 있습니다.
+      </p>
+
+      <div class="works">
+        <div class="wk-item">
+          <div class="wk-pic"><img src="assets/img/m4-case-a.png" alt="팀원 평가 대시보드 화면"></div>
+          <p class="wk-name">팀원 평가 대시보드</p>
+          <p class="wk-sub">흩어진 기록 → 피드백 초안</p>
+        </div>
+        <div class="wk-item">
+          <div class="wk-pic"><img src="assets/img/m4-case-schedule-a.png" alt="실시간 일정 관리 화면"></div>
+          <p class="wk-name">실시간 일정 관리</p>
+          <p class="wk-sub">메일·메신저를 한 줄 요약으로</p>
+        </div>
+        <div class="wk-item">
+          <div class="wk-pic"><img src="assets/img/m4-case-order-a.png" alt="지시사항 이행관리 화면"></div>
+          <p class="wk-name">지시사항 이행관리</p>
+          <p class="wk-sub">회의록에서 할 일과 기한을</p>
+        </div>
+        <div class="wk-item">
+          <div class="wk-pic"><img src="assets/img/m4-case-market-a.png" alt="신시장 인텔리전스 화면"></div>
+          <p class="wk-name">신시장 인텔리전스</p>
+          <p class="wk-sub">흩어진 조사 자료를 한 화면에</p>
+        </div>
+        <div class="wk-item">
+          <div class="wk-pic"><img src="assets/img/m4-case-steel-a.png" alt="설비고장 도제 시스템 화면"></div>
+          <p class="wk-name">설비고장 도제 시스템</p>
+          <p class="wk-sub">30년 노하우를 물어보는 화면으로</p>
+        </div>
+      </div>
+    
+    </div>
+  </section>
+
+  <!-- 5. [우수 사례] 팀원 평가 · 자동 피드백 대시보드 ---- -->
+  <section class="slide">
+    <div class="slide-head"><h2>[우수 사례] 팀원 평가 · 자동 피드백 대시보드</h2><span class="head-tag">M4 · 사례</span></div>
     <div class="slide-body">
       <p class="lead" style="margin-bottom:14px">
         현대자동차 전자편의제어시험1팀 — 흩어진 기록을 모아 <strong class="navy">근거가 붙은 피드백 초안</strong>까지
@@ -69,12 +162,14 @@
         기술이 화려해서가 아니라 <strong class="navy">고른 문제</strong>가 좋았습니다 —
         리더라면 누구나 겪는 일을, 기억이 아니라 <strong class="navy">기록으로</strong>, 판단은 <strong class="navy">사람이 마지막에</strong>.
       </div>
+    
+      <p class="case-link"><a href="assets/우수사례/case1-feedback.html" target="_blank" rel="noopener">원본 결과물 열어 보기 &rarr;</a></p>
     </div>
   </section>
 
-  <!-- 4. [우수 사례] 실시간 일정 관리 AI Agent ------------------------------------------------- -->
+  <!-- 6. [우수 사례] 실시간 일정 관리 AI Agent ---- -->
   <section class="slide">
-    <div class="slide-head"><h2>[우수 사례] 실시간 일정 관리 AI Agent</h2><span class="head-tag">M4-1 · 사례</span></div>
+    <div class="slide-head"><h2>[우수 사례] 실시간 일정 관리 AI Agent</h2><span class="head-tag">M4 · 사례</span></div>
     <div class="slide-body">
       <p class="lead" style="margin-bottom:14px">
         현대모비스 조향시스템설계2팀 — 메일 · 메신저 · 회의 초청이 <strong class="navy">하루 종일 섞여</strong> 들어온다
@@ -95,12 +190,14 @@
         <strong class="navy">검토 의견</strong> — 사내 아웃룩 / 팀즈와 연동하여
         <strong class="navy">일정 관리 · 메일 초안 작성 자동화 비서봇</strong> 설계 시도
       </div>
+    
+      <p class="case-link"><a href="assets/우수사례/case2-schedule.html" target="_blank" rel="noopener">원본 결과물 열어 보기 &rarr;</a></p>
     </div>
   </section>
 
-  <!-- 5. [우수 사례] 지시사항 이행관리 시스템 ---------------------------------------------------- -->
+  <!-- 7. [우수 사례] 지시사항 이행관리 시스템 -------------- -->
   <section class="slide">
-    <div class="slide-head"><h2>[우수 사례] 지시사항 이행관리 시스템</h2><span class="head-tag">M4-1 · 사례</span></div>
+    <div class="slide-head"><h2>[우수 사례] 지시사항 이행관리 시스템</h2><span class="head-tag">M4 · 사례</span></div>
     <div class="slide-body">
       <p class="lead" style="margin-bottom:14px">
         현대자동차 미래전략운영팀 — 회의록은 쌓이는데 <strong class="navy">누가 언제까지</strong> 하는지는 흩어진다
@@ -121,12 +218,14 @@
         <strong class="navy">검토 의견</strong> — 회의 실시간 녹음을 기반으로
         <strong class="navy">내용 요약 · 지시사항 정리</strong>를 위한 시스템 내 받아쓰기 기능 구현
       </div>
+    
+      <p class="case-link"><a href="assets/우수사례/case3-orders.html" target="_blank" rel="noopener">원본 결과물 열어 보기 &rarr;</a></p>
     </div>
   </section>
 
-  <!-- 6. [우수 사례] 신시장 인텔리전스 대시보드 --------------------------------------------------- -->
+  <!-- 8. [우수 사례] 신시장 인텔리전스 대시보드 ------------ -->
   <section class="slide">
-    <div class="slide-head"><h2>[우수 사례] 신시장 인텔리전스 대시보드</h2><span class="head-tag">M4-1 · 사례</span></div>
+    <div class="slide-head"><h2>[우수 사례] 신시장 인텔리전스 대시보드</h2><span class="head-tag">M4 · 사례</span></div>
     <div class="slide-body">
       <p class="lead" style="margin-bottom:14px">
         현대자동차 미래혁신2팀 — 신시장 조사는 <strong class="navy">흩어진 자료를 사람이</strong> 읽고 정리해야 했다
@@ -143,27 +242,75 @@
         <strong class="navy">검토 의견</strong> — 웹 검색 자료 분석과
         <strong class="navy">보고서 자동 생성 기능</strong>을 탑재한 챗봇 + 대시보드 화면 구현
       </div>
+    
+      <p class="case-link"><a href="assets/우수사례/case4-market.html" target="_blank" rel="noopener">원본 결과물 열어 보기 &rarr;</a></p>
     </div>
   </section>
 
-  <!-- 7. 오늘 만들 것 -------------------------------------------------------------------- -->
+  <!-- 9. [우수 사례] 설비고장 도제 시스템 ------------------ -->
   <section class="slide">
-    <div class="slide-head"><h2>오늘 만들 것 — 설문 결과에서 경영층 보고서까지</h2><span class="head-tag">M4-1 · 시연</span></div>
+    <div class="slide-head"><h2>[우수 사례] 설비고장 도제 시스템</h2><span class="head-tag">M4 · 사례</span></div>
+    <div class="slide-body">
+      <div style="display:flex; gap:26px; align-items:center">
+        <div class="shot" style="width:600px"><img src="assets/img/m4-case-steel-a.png" alt="설비 고장 원인을 묻고 분석받는 STEEL MIND 화면"></div>
+        <div style="flex:1 1 auto; min-width:0">
+          <p class="lead" style="margin-bottom:14px">
+            현대제철 제선정비실 &mdash; 30년 노하우를 <strong class="navy">물어보는 화면</strong>으로
+          </p>
+          <ul class="dash-list">
+            <li><strong>정비 보고서를 재료로</strong><small>쌓여만 있던 문서를 AI가 읽게 했습니다</small></li>
+            <li><strong>고장 현상을 적으면 원인과 조치</strong><small>베테랑에게 묻던 것을 화면에서 바로</small></li>
+            <li><strong>현장 용어 사전까지</strong><small>처음 온 사람도 같은 기준으로 판단합니다</small></li>
+          </ul>
+          <p class="case-link"><a href="assets/우수사례/case5-steel.html" target="_blank" rel="noopener">원본 결과물 열어 보기 &rarr;</a></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 10. 이제 본격적으로 만들어 봅시다 ------------------------ -->
+  <section class="slide">
+    <div class="slide-head"><h2>이제 본격적으로 만들어 봅시다</h2></div>
+    <div class="slide-body">
+      <p class="lead" style="margin-bottom:16px; text-align:center">
+        자, 그러면 지금부터 <strong class="navy">멋진 작품</strong>을 하나 만들어 보겠습니다.
+      </p>
+      <div class="figure" style="margin:0">
+        <div class="shot" style="width:820px; margin:0 auto"><img src="assets/img/m4-pdf-chat.png" alt="오늘 만들 PDF 분석 대시보드와 챗봇"></div>
+      </div>
+      <p class="shot-cap" style="margin-top:12px">오늘 여러분이 만들 화면입니다</p>
+    </div>
+  </section>
+
+  <!-- 11. [챕터] 작품을 만들기 위한 준비 단계 -------------- -->
+  <section class="slide slide--chapter" data-chapter="작품을 만들기 위한 준비 단계">
+    <div class="chapter">
+      <p class="ch-eyebrow">CHAPTER 1</p>
+      <h2 class="ch-title">작품을 만들기 위한 준비 단계</h2>
+      <div class="ch-rule"></div>
+      <p class="ch-desc">무엇을 만들지 정하고, AI 기능을 넣기 위한 준비물 하나를 챙깁니다.</p>
+      <ul class="ch-keys"><li>만들 것</li><li>AI 기능</li><li>Claude API KEY</li></ul>
+    </div>
+  </section>
+
+  <!-- 12. 오늘 만들 것 - PDF 한 장에서 대시보드까지 ---- -->
+  <section class="slide">
+    <div class="slide-head"><h2>오늘 만들 것 &mdash; PDF 한 장에서 대시보드까지</h2><span class="head-tag">M4-1 · 시연</span></div>
     <div class="slide-body">
       <p class="lead" style="margin-bottom:20px">
-        모아 놓고 열어 보지 못한 <strong class="navy">설문조사 결과</strong>를 넣으면,<br>
-        AI가 읽고 <strong class="navy">보고서 초안까지</strong> 만들어 주는 화면을 만듭니다.
+        받아 놓고 다 읽지 못한 <strong class="navy">PDF 보고서</strong>를 넣으면,<br>
+        AI가 읽고 <strong class="navy">요약 · 차트</strong>로 보여 주는 화면을 만듭니다.
       </p>
 
       <div class="flow">
         <div class="flow-step">
-          <p class="flow-name">① 설문 결과 올리기</p>
-          <p class="flow-desc">받은 CSV 파일 그대로</p>
+          <p class="flow-name">① PDF 올리기</p>
+          <p class="flow-desc">받은 보고서 파일 그대로</p>
         </div>
         <div class="flow-arrow">→</div>
         <div class="flow-step">
-          <p class="flow-name">② AI가 인사이트 분석</p>
-          <p class="flow-desc">무엇이 문제이고 어디가 심각한지</p>
+          <p class="flow-name">② AI가 읽고 정리</p>
+          <p class="flow-desc">무엇이 핵심이고 어디가 심각한지</p>
         </div>
         <div class="flow-arrow">→</div>
         <div class="flow-step">
@@ -172,144 +319,161 @@
         </div>
         <div class="flow-arrow">→</div>
         <div class="flow-step is-now">
-          <p class="flow-name">④ 보고서 PPT 받기</p>
-          <p class="flow-desc">경영층 보고 초안을 파일로</p>
-        </div>
-      </div>
-
-      <div class="kv kv--3" style="margin-top:22px">
-        <div class="kv-item">
-          <p class="kv-name">생산팀</p>
-          <p class="kv-like">라인 작업자 만족도 설문</p>
-          <p class="kv-when">어느 공정에 불만이 몰리는지</p>
-        </div>
-        <div class="kv-item">
-          <p class="kv-name">설비팀</p>
-          <p class="kv-like">설비 가동 · 고장 관련 설문</p>
-          <p class="kv-when">어떤 설비가 반복해서 걸리는지</p>
-        </div>
-        <div class="kv-item">
-          <p class="kv-name">고객VOC팀</p>
-          <p class="kv-like">고객 만족도 설문</p>
-          <p class="kv-when">어떤 불만이 늘고 있는지</p>
+          <p class="flow-name">④ 문서에 물어보기</p>
+          <p class="flow-desc">궁금한 것은 챗봇에게 바로</p>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- 8. 매번 엑셀을 여는 일 ---------------------------------------------------------------- -->
+  <!-- 13. 우리 App에는 'AI 기능'이 필요합니다 ---------- -->
   <section class="slide">
-    <div class="slide-head"><h2>매번 엑셀을 여는 일을, 한 화면으로</h2><span class="head-tag">M4-1 · 개념</span></div>
+    <div class="slide-head"><h2>우리 App에는 &lsquo;AI 기능&rsquo;이 필요합니다</h2><span class="head-tag">M4-1 · 개념</span></div>
     <div class="slide-body">
-      <p class="lead" style="margin-bottom:22px">
-        같은 자료를 <strong class="navy">매주 같은 방식으로</strong> 보고 있다면, 그건 화면 하나로 만들 수 있습니다.
+      <p class="lead" style="margin-bottom:18px">
+        앞 장의 네 단계 중 <strong class="navy">②번</strong>이 문제입니다.
       </p>
 
+      <div class="flow" style="margin-bottom:18px">
+        <div class="flow-step">
+          <p class="flow-no">①</p>
+          <p class="flow-name">PDF 올리기</p>
+          <p class="flow-desc">화면만 있으면 됩니다</p>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step is-now">
+          <p class="flow-no">②</p>
+          <p class="flow-name">AI가 읽고 정리</p>
+          <p class="flow-desc">여기에 <strong>AI 기능</strong>이 들어가야 합니다</p>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+          <p class="flow-no">③</p>
+          <p class="flow-name">대시보드로 확인</p>
+          <p class="flow-desc">화면만 있으면 됩니다</p>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+          <p class="flow-no">④</p>
+          <p class="flow-name">문서에 물어보기</p>
+          <p class="flow-desc">여기도 <strong>AI 기능</strong>입니다</p>
+        </div>
+      </div>
+
+      <div class="note note--warn">
+        ①③은 그냥 화면입니다. 그런데 <strong class="hl">②를 만들려면 AI 기능이 들어가야 합니다.</strong>
+      </div>
+    </div>
+  </section>
+
+  <!-- 14. AI 기능을 넣으려면 준비물이 하나 필요합니다 ------ -->
+  <section class="slide">
+    <div class="slide-head"><h2>AI 기능을 넣으려면 준비물이 하나 필요합니다</h2><span class="head-tag">M4-1 · 개념</span></div>
+    <div class="slide-body">
+      <div class="figure" style="margin:0">
+        <svg viewBox="0 0 1000 250" width="1060" height="265" role="img"
+             aria-label="Claude API KEY 라고 크게 적힌 열쇠 그림">
+          <rect x="20" y="20" width="960" height="210" rx="18" fill="#F2F2F2"/>
+          <g transform="translate(70,88)">
+            <circle cx="34" cy="34" r="32" fill="none" stroke="#164194" stroke-width="12"/>
+            <rect x="60" y="26" width="118" height="16" rx="6" fill="#164194"/>
+            <rect x="150" y="42" width="14" height="26" rx="5" fill="#164194"/>
+            <rect x="120" y="42" width="14" height="20" rx="5" fill="#164194"/>
+          </g>
+          <text x="290" y="118" font-size="58" font-weight="800" fill="#164194">Claude API KEY</text>
+          <text x="292" y="172" font-size="24" fill="#4A4A4A">AI 기능을 부르는 열쇠 &mdash; 이것만 있으면 됩니다</text>
+        </svg>
+      </div>
+
+      <div class="note" style="margin-top:22px">
+        이 키만 있으면 단순 App이 아니라, <strong class="navy">AI App을 만들 수 있습니다!!</strong>
+      </div>
+    </div>
+  </section>
+
+  <!-- 15. App vs AI App ------------------------------ -->
+  <section class="slide">
+    <div class="slide-head"><h2>App vs AI App</h2><span class="head-tag">M4-1 · 개념</span></div>
+    <div class="slide-body">
       <div class="ba">
         <div class="ba-col ba--before">
-          <p class="ba-head">지금</p>
+          <p class="ba-head">App &mdash; 시킨 대로만</p>
           <div class="ba-body">
-            <p>파일 열기 → 필터 → 정렬 → 차트 → 부분 캡처 → 문서에 붙여넣기</p>
-            <p class="ba-quote">매번 처음부터. 사람마다 잘라 온 그림이 다릅니다.</p>
+            <p>사람끼리 대결하는 <strong>오목 게임</strong></p>
+            <p>PDF 파일에 들어 있는 <strong>글자만 추출</strong></p>
+            <div class="figure" style="margin:14px 0 0">
+              <svg viewBox="0 0 300 122" width="300" height="122" role="img" aria-label="PDF 파일에서 글자만 뽑아내는 그림">
+                <rect x="14" y="10" width="74" height="90" rx="7" fill="#fff" stroke="#7C8698" stroke-width="3"/>
+                <text x="51" y="62" text-anchor="middle" font-size="18" font-weight="800" fill="#7C8698">PDF</text>
+                <path d="M100 55 L138 55" stroke="#7C8698" stroke-width="3"/>
+                <path d="M138 47 L152 55 L138 63 Z" fill="#7C8698"/>
+                <rect x="164" y="22" width="122" height="9" rx="4" fill="#C9D2E0"/>
+                <rect x="164" y="44" width="122" height="9" rx="4" fill="#C9D2E0"/>
+                <rect x="164" y="66" width="96" height="9" rx="4" fill="#C9D2E0"/>
+                <text x="164" y="114" font-size="16" fill="#7C8698">글자만 그대로</text>
+              </svg>
+            </div>
           </div>
         </div>
         <div class="ba-col ba--after">
-          <p class="ba-head">화면 하나를 만든 뒤</p>
+          <p class="ba-head">AI App &mdash; 이해하고 판단까지</p>
           <div class="ba-body">
-            <p>열면 이미 그 화면. 새 자료만 올리면 끝</p>
-            <p class="ba-quote">누가 봐도 같은 그림이라, 회의에서 바로 같은 이야기를 합니다.</p>
+            <p><strong>인공지능과 대결</strong>하는 오목 게임</p>
+            <p>PDF의 <strong>그림과 글을 모두 이해한 뒤 정리</strong></p>
+            <div class="figure" style="margin:14px 0 0">
+              <svg viewBox="0 0 300 122" width="300" height="122" role="img" aria-label="PDF 를 이해해 요약과 차트로 정리하는 그림">
+                <rect x="14" y="10" width="74" height="90" rx="7" fill="#fff" stroke="#164194" stroke-width="3"/>
+                <text x="51" y="62" text-anchor="middle" font-size="18" font-weight="800" fill="#164194">PDF</text>
+                <path d="M100 55 L138 55" stroke="#70AD47" stroke-width="3"/>
+                <path d="M138 47 L152 55 L138 63 Z" fill="#70AD47"/>
+                <rect x="164" y="16" width="122" height="34" rx="6" fill="#EDF1F8"/>
+                <text x="176" y="38" font-size="16" font-weight="700" fill="#164194">핵심 3줄 요약</text>
+                <rect x="164" y="58" width="30" height="30" rx="3" fill="#164194"/>
+                <rect x="200" y="68" width="30" height="20" rx="3" fill="#70AD47"/>
+                <rect x="236" y="62" width="30" height="26" rx="3" fill="#164194"/>
+                <text x="164" y="114" font-size="16" fill="#7C8698">이해 &rarr; 정리 &rarr; 그림</text>
+              </svg>
+            </div>
           </div>
-        </div>
-      </div>
-
-      <div class="note" style="margin-top:20px">
-        만드는 것이 목적이 아닙니다. <strong class="navy">반복해서 보는 자료를 한 번에 보는 것</strong>이 목적입니다.
-      </div>
-    </div>
-  </section>
-
-  <!-- 9. AI가 없는 화면, 있는 화면 ------------------------------------------------------------ -->
-  <section class="slide">
-    <div class="slide-head"><h2>AI가 없는 화면, AI가 들어간 화면</h2><span class="head-tag">M4-1 · 개념</span></div>
-    <div class="slide-body">
-      <div class="ba">
-        <div class="ba-col ba--before">
-          <p class="ba-head">AI가 없으면</p>
-          <div class="ba-body">
-            <p>테트리스 게임</p>
-            <p>이력서 PDF를 텍스트 파일로 바꿔 주기</p>
-            <p>정해진 모양의 표를 차트로 그려 주기</p>
-            <p class="ba-quote">정해진 입력만 처리합니다. 형식이 조금만 달라도 멈춥니다.</p>
-          </div>
-        </div>
-        <div class="ba-col ba--after">
-          <p class="ba-head">AI가 들어가면</p>
-          <div class="ba-body">
-            <p>AI와 대결하는 테트리스 게임</p>
-            <p>이력서를 <strong>읽어 보고</strong> 등급까지 매기기</p>
-            <p><strong>처음 보는</strong> 표를 이해하고 어울리는 차트 고르기</p>
-            <p class="ba-quote">내용을 이해합니다. 처음 보는 자료도 다룹니다.</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="note" style="margin-top:20px">
-        오늘 만드는 것은 <strong class="grn">오른쪽</strong>입니다. 처음 보는 설문 응답을 AI가 읽고 인사이트로 정리합니다.
-      </div>
-    </div>
-  </section>
-
-  <!-- 10. 대시보드는 이런 화면 ---------------------------------------------------------------- -->
-  <section class="slide">
-    <div class="slide-head"><h2>대시보드는 이런 화면입니다</h2><span class="head-tag">M4-1 · 개념</span></div>
-    <div class="slide-body">
-      <div style="display:flex; gap:30px; align-items:center">
-        <div>
-          <div class="shot" style="width:520px"><img src="assets/img/m4-chart.png" alt="불량 리포트 분석 대시보드 예시"></div>
-        </div>
-        <div style="flex:1 1 auto; min-width:0">
-          <p class="lead" style="margin-bottom:16px">같은 방식으로 만든<br>다른 대시보드입니다.</p>
-          <ul class="dash-list">
-            <li>위쪽 — <strong>숫자 카드</strong><small>가장 먼저 봐야 하는 지표</small></li>
-            <li>아래쪽 — <strong>차트</strong><small>흐름과 비중을 눈으로</small></li>
-            <li>위 탭 — <strong>업로드 · 표 · 대시보드 · 보고서</strong><small>보고 싶은 깊이를 골라서 본다</small></li>
-          </ul>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- 11. Claude Code와 Claude API ------------------------------------------------------- -->
+  <!-- 16. AI App을 만들고 싶다면 -------------------------- -->
   <section class="slide">
-    <div class="slide-head"><h2>Claude Code와 Claude API는 다릅니다</h2><span class="head-tag">M4-4 · 개념</span></div>
+    <div class="slide-head"><h2>AI App을 만들고 싶다면</h2><span class="head-tag">M4-1 · 개념</span></div>
     <div class="slide-body">
-      <p class="lead" style="margin-bottom:22px">
-        지금까지는 <strong class="navy">내가</strong> AI에게 시켰습니다.<br>
-        이제는 <strong class="navy">내가 만든 프로그램이</strong> AI에게 시켜야 합니다.
-      </p>
+      <div class="figure" style="margin:0">
+        <p class="lead" style="font-size:34px; line-height:1.55; text-align:center; margin:0">
+          여러분이 <strong class="navy">AI 기능이 있는 App</strong>을 만들고 싶으시다면<br>
+          반드시 <strong class="navy">Claude API KEY</strong>가 준비물로 필요합니다!!!
+        </p>
+      </div>
 
-      <div class="kv kv--2">
+      <div class="kv kv--3" style="margin-top:34px">
         <div class="kv-item">
-          <p class="kv-name">Claude Code</p>
-          <p class="kv-like">내 컴퓨터에서 대신 일해 주는 AI 일꾼</p>
-          <p class="kv-when">사람이 시키면 파일을 만들고 고친다 — M3에서 계속 써 온 것</p>
+          <p class="kv-name">없으면</p>
+          <p class="kv-like">화면은 떠도 <b>답이 오지 않습니다</b></p>
+          <p class="kv-when">버튼만 있는 껍데기가 됩니다</p>
         </div>
         <div class="kv-item">
-          <p class="kv-name">Claude API</p>
-          <p class="kv-like">프로그램 안에서 AI를 부르는 <strong>열쇠</strong></p>
-          <p class="kv-when">사람이 없어도, 프로그램이 스스로 AI에게 물어보고 답을 받는다</p>
+          <p class="kv-name">있으면</p>
+          <p class="kv-like">읽고 · 정리하고 · <b>답하는 앱</b>이 됩니다</p>
+          <p class="kv-when">오늘 만드는 것이 바로 이것입니다</p>
         </div>
-      </div>
-
-      <div class="note note--warn" style="margin-top:20px">
-        열쇠를 쓰려면 <strong class="hl">KEY</strong>가 필요합니다. 다음 장에서 발급받아 메모장에 적어 둡니다.
+        <div class="kv-item">
+          <p class="kv-name">주의</p>
+          <p class="kv-like">키는 <b>아이디 · 비밀번호</b>와 같습니다</p>
+          <p class="kv-when">화면 공유 · 메신저 · 게시판에 올리지 않습니다</p>
+        </div>
       </div>
     </div>
   </section>
 
-  <!-- 12. [실습] API 키 발급 ---------------------------------------------------------------- -->
+  <!-- 17. [실습] 내 API 키를 발급받습니다 ---------------- -->
   <section class="slide">
-    <div class="slide-head"><h2>[실습] 내 API 키를 발급받습니다</h2><span class="head-tag">M4-4 · 실습</span></div>
+    <div class="slide-head"><h2>[실습] 내 API 키를 발급받습니다</h2><span class="head-tag">M4-1 · 실습</span></div>
     <div class="slide-body">
       <div class="split">
         <div class="split-main">
@@ -331,533 +495,354 @@
     </div>
   </section>
 
-  <!-- 13. 기술검증 ----------------------------------------------------------------------- -->
+  <!-- 18. [챕터] 가장 단순한 AI App 만들어보기 -------- -->
+  <section class="slide slide--chapter" data-chapter="가장 단순한 AI App 만들어보기">
+    <div class="chapter">
+      <p class="ch-eyebrow">CHAPTER 2</p>
+      <h2 class="ch-title">가장 단순한 AI App 만들어보기</h2>
+      <div class="ch-rule"></div>
+      <p class="ch-desc">API 키가 진짜 되는지 확인하고, 가장 단순한 AI 앱 하나를 손에 쥡니다.</p>
+      <ul class="ch-keys"><li>app.html</li><li>server.js</li><li>사내망</li><li>동작 확인</li></ul>
+    </div>
+  </section>
+
+  <!-- 19. Claude Code와 Claude API는 다릅니다 ---- -->
   <section class="slide">
-    <div class="slide-head"><h2>큰 걸 만들기 전에, 작은 걸로 먼저 확인합니다</h2><span class="head-tag">M4-4 · 개념</span></div>
+    <div class="slide-head"><h2>Claude Code와 Claude API는 다릅니다</h2><span class="head-tag">M4-2 · 개념</span></div>
     <div class="slide-body">
       <p class="lead" style="margin-bottom:22px">
-        처음 쓰는 기술은 <strong class="navy">되는지부터</strong> 확인합니다.<br>
-        작게 만들어 확인해 보는 것을 <strong class="navy">기술검증</strong>이라고 합니다.
+        지금까지는 <strong class="navy">내가</strong> AI에게 시켰습니다.<br>
+        이제는 <strong class="navy">내가 만든 프로그램이</strong> AI에게 시켜야 합니다.
       </p>
 
-      <div class="flow">
-        <div class="flow-step">
-          <p class="flow-name">① HTML 파일 한 장</p>
-          <p class="flow-desc">더블클릭하면 브라우저에 화면이 뜨는지</p>
+      <div class="kv kv--2">
+        <div class="kv-item">
+          <p class="kv-name">Claude Code</p>
+          <p class="kv-like">내 컴퓨터에서 일하는 <b>아르바이트생</b></p>
+          <p class="kv-when">사람이 시키면 파일을 만들고 고친다 — M3에서 계속 써 온 것</p>
         </div>
-        <div class="flow-arrow">→</div>
-        <div class="flow-step">
-          <p class="flow-name">② API로 AI와 대화하기</p>
-          <p class="flow-desc">내 키를 넣으면 답이 돌아오는지</p>
-        </div>
-        <div class="flow-arrow">→</div>
-        <div class="flow-step is-now">
-          <p class="flow-name">③ 그다음이 본 작업</p>
-          <p class="flow-desc">둘 다 되면 더 큰 프로젝트로 넘어간다</p>
+        <div class="kv-item">
+          <p class="kv-name">Claude API</p>
+          <p class="kv-like">프로그램 안에서 AI를 부르는 <strong>열쇠</strong></p>
+          <p class="kv-when">사람이 없어도, 프로그램이 스스로 AI에게 물어보고 답을 받는다</p>
         </div>
       </div>
 
-      <div class="note" style="margin-top:22px">
-        여기서는 화면을 <strong class="navy">HTML 파일 한 장</strong>으로 만듭니다. 프레임워크도 설치도 쓰지 않습니다.<br>
-        이 둘이 안 되면 뒤의 작업은 전부 헛수고가 됩니다. <strong class="navy">그래서 먼저 합니다.</strong>
+      <div class="note note--warn" style="margin-top:20px">
+        열쇠를 쓰려면 <strong class="hl">KEY</strong>가 필요합니다. 다음 장에서 발급받아 메모장에 적어 둡니다.
       </div>
     </div>
   </section>
 
-  <!-- 14. [실습] 작업 폴더와 Claude ----------------------------------------------------------- -->
+  <!-- 20. AI 앱은 파일 두 개면 됩니다 ---------------------- -->
   <section class="slide">
-    <div class="slide-head"><h2>[실습] 작업 폴더를 만들고 Claude를 켭니다</h2><span class="head-tag">M4-2 · 실습</span></div>
+    <div class="slide-head"><h2>AI 앱은 파일 두 개면 됩니다</h2><span class="head-tag">M4-2 · 개념</span></div>
+    <div class="slide-body">
+      <p class="lead" style="margin-bottom:20px">
+        거창한 프로그램이 아닙니다. <strong class="navy">파일 두 개</strong>가 전부입니다.
+      </p>
+
+      <div class="kv kv--2">
+        <div class="kv-item">
+          <p class="kv-name">app.html</p>
+          <p class="kv-like">눈에 <b>보이는 화면</b></p>
+          <p class="kv-when">버튼 · 입력칸 · 결과가 그려지는 곳 — 사람이 보는 전부</p>
+        </div>
+        <div class="kv-item">
+          <p class="kv-name">server.js</p>
+          <p class="kv-like">화면과 AI를 <strong>이어 주는 서버</strong></p>
+          <p class="kv-when">화면이 물어보면 사내 Claude API 로 넘겨 주고, 답을 돌려준다</p>
+        </div>
+      </div>
+
+      <div class="note" style="margin-top:20px">
+        앞으로 무엇을 만들든 이 둘을 <strong class="navy">고쳐 쓰기만</strong> 하면 됩니다.
+      </div>
+    </div>
+  </section>
+
+  <!-- 21. [실습] 강의자료 폴더를 열고 시작합니다 ------------ -->
+  <section class="slide">
+    <div class="slide-head"><h2>[실습] 강의자료 폴더를 열고 시작합니다</h2><span class="head-tag">M4-2 · 실습</span></div>
     <div class="slide-body">
       <div class="split">
         <div class="split-main">
           <ol class="steps">
-            <li>탐색기에서 <span class="mono">C:\work</span> 안에 <span class="mono">dashboard</span> 폴더를 만듭니다<small>오늘 만드는 것이 전부 이 폴더 안에 쌓입니다</small></li>
-            <li>그 폴더를 열고, <strong>주소창에</strong> <span class="mono">code .</span> 을 입력합니다<small>점 하나까지 그대로 — “지금 이 폴더를 VS Code로 열어라”라는 뜻입니다</small></li>
-            <li>VS Code가 열리면 <strong>터미널</strong>에서 <span class="mono">claude</span> 를 실행합니다<small>터미널은 상단 메뉴 Terminal &gt; New Terminal</small></li>
+            <li>배포받은 <strong>강의자료</strong>에서 <span class="mono">실습자료 &gt; M4 실습3 Base</span> 폴더를 엽니다<small>안에 <strong>app.html · server.js · 샘플 보고서.pdf</strong> 가 들어 있습니다</small></li>
+            <li>그 폴더에서 <strong>주소창에</strong> <span class="mono">code .</span> 을 입력합니다<small>점 하나까지 그대로 &mdash; &ldquo;지금 이 폴더를 VS Code로 열어라&rdquo;라는 뜻입니다</small></li>
+            <li>VS Code가 열리면 <strong>터미널</strong>을 엽니다<small>상단 메뉴 Terminal &gt; New Terminal</small></li>
           </ol>
+          <div class="note" style="margin-top:16px">
+            오늘 만드는 것이 전부 <strong class="navy">이 폴더 안</strong>에 쌓입니다.
+          </div>
         </div>
-        <div class="split-side">
-          <div class="shot" style="width:250px"><img src="assets/img/m4-vscode-folder.png" alt="dashboard 폴더가 열린 VS Code"></div>
-          <p class="shot-cap">② 이 폴더로 열립니다</p>
-          <div class="shot" style="width:322px; margin-top:12px"><img src="assets/img/m4-term-claude.png" alt="VS Code 터미널에서 claude 실행"></div>
-          <p class="shot-cap">③ VS Code 터미널에서 claude</p>
+        <div class="split-side" style="flex:0 0 450px">
+          <div class="shot" style="width:450px"><img src="assets/img/m4-course-folder.png" alt="강의자료 폴더 안의 실습자료와 M4 실습3 Base 폴더"></div>
+          <p class="shot-cap">이 폴더에서 <span class="mono">code .</span></p>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- 15. [실습] 사내망 준비 ---------------------------------------------------------------- -->
+  <!-- 22. [실습] 서버를 띄워 봅니다 -------------------------- -->
   <section class="slide">
-    <div class="slide-head"><h2>[실습] 사내망에서 먼저 맞춰 둘 두 가지</h2><span class="head-tag">M4-4 · 실습</span></div>
+    <div class="slide-head"><h2>[실습] 서버를 띄워 봅니다</h2><span class="head-tag">M4-2 · 실습</span></div>
     <div class="slide-body">
       <div class="split">
         <div class="split-main">
-          <p class="lead" style="margin-bottom:16px">
-            만들기 전에 <strong class="navy">준비물부터</strong> 확인합니다. 둘 다 Claude에게 시키면 됩니다.<br>
-            건너뛰면 뒤에서 설치할 때 <strong class="hl">조용히 실패</strong>합니다.
-          </p>
-          <div class="pbox">
-            <p class="pbox-t">① 파이썬 확인하고, 없으면 설치</p>
-            <p>파이썬이 설치되어 있는지 확인해줘</p>
-            <p>설치되어 있지 않으면 설치해줘</p>
-            <p>끝나면 버전을 알려줘</p>
-          </div>
-          <div class="pbox" style="margin-top:16px">
-            <p class="pbox-t">② 사내망에서 설치가 막히지 않게</p>
-            <p>사내망이라 설치가 막힐 수 있어</p>
-            <p>npm config set strict-ssl false 를 실행하고</p>
-            <p>설정이 잘 들어갔는지 확인해줘</p>
-          </div>
+          <ol class="steps steps--lg">
+            <li>터미널에 <span class="mono">node server.js</span><small>&ldquo;준비됐습니다&rdquo; 와 주소가 뜹니다</small></li>
+            <li>브라우저에서 <span class="mono">http://localhost:8787</span><small>화면이 뜨면 질문을 하나 적고 [보내기]</small></li>
+          </ol>
         </div>
         <div class="split-side">
-          <div class="side-box">
-            <p class="side-t">① 파이썬은 왜</p>
-            <p class="side-d">AI가 표 자료를 다루거나 파일을 만들 때 <strong>자주 꺼내 쓰는 도구</strong>입니다.
-              컴퓨터에 없으면 그 자리에서 “못 하겠다”가 됩니다.</p>
+          <div class="side-box side-box--warn">
+            <p class="side-t">답이 오지 않습니다</p>
+            <p class="side-d">화면 아래에 빨간 글씨로<br>
+              <strong>&ldquo;API 키가 없습니다&rdquo;</strong> 라고 뜹니다.</p>
           </div>
           <div class="side-box" style="margin-top:12px">
-            <p class="side-t">② strict-ssl 은 왜 끄나</p>
-            <p class="side-d">사내 보안장비가 인터넷에서 오는 <strong>상자를 열어 확인하고 다시 포장해</strong> 전달합니다.
-              그러면 “봉인이 처음과 다르다”며 받기를 거부합니다.<br>
-              이 설정은 <strong>사내에서는 봉인 검사를 하지 마</strong>라고 알려 주는 것입니다.</p>
+            <p class="side-t">당연합니다</p>
+            <p class="side-d">앞 챕터에서 본 <strong>준비물</strong>을 아직 넣지 않았습니다.</p>
           </div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- 16. [실습] API 연결 테스트 화면 ------------------------------------------------------------ -->
+  <!-- 23. [실습] server.js 에 키를 넣습니다 -------- -->
   <section class="slide">
-    <div class="slide-head"><h2>[실습] HTML 한 장으로 API 연결을 확인합니다</h2><span class="head-tag">M4-4 · 실습</span></div>
+    <div class="slide-head"><h2>[실습] server.js 에 키를 넣습니다</h2><span class="head-tag">M4-2 · 실습</span></div>
+    <div class="slide-body">
+      <div class="split">
+        <div class="split-main">
+          <ol class="steps steps--lg">
+            <li>VS Code에서 <span class="mono">server.js</span> 를 엽니다<small>왼쪽 파일 목록에서 클릭</small></li>
+            <li>맨 위 <span class="mono">const API_KEY = '';</span> 의 <strong>따옴표 안</strong>에 키를 붙여넣습니다<small>메모장에 적어 둔 그 키입니다</small></li>
+            <li><span class="mono">Ctrl + S</span> 로 저장하고, 터미널에서 <strong>다시</strong> <span class="mono">node server.js</span><small>먼저 <span class="mono">Ctrl + C</span> 로 끄고 다시 켭니다</small></li>
+          </ol>
+        </div>
+        <div class="split-side">
+          <div class="side-box">
+            <p class="side-t">이렇게 생겼습니다</p>
+            <p class="side-d"><span class="mono">const API_KEY = '여기에붙여넣기';</span></p>
+          </div>
+          <div class="side-box side-box--warn" style="margin-top:12px">
+            <p class="side-t">키는 나만</p>
+            <p class="side-d">화면 공유 · 메신저 · 게시판에 <strong>올리지 않습니다.</strong></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 24. 잘 동작하죠? ------------------------------------------ -->
+  <section class="slide">
+    <div class="slide-head"><h2>잘 동작하죠?</h2><span class="head-tag">M4-2 · 확인</span></div>
+    <div class="slide-body">
+      <p class="lead" style="margin-bottom:14px; text-align:center">
+        같은 화면인데, 이제 <strong class="navy">답이 옵니다.</strong>
+      </p>
+      <div class="figure" style="margin:0">
+        <div class="shot" style="width:700px; margin:0 auto"><img src="assets/img/m4-app-ok.png" alt="질문에 대한 답이 화면에 표시된 앱"></div>
+      </div>
+      <div class="note" style="margin-top:14px; text-align:center">
+        바뀐 것은 <strong class="navy">server.js 하나</strong>뿐입니다.
+      </div>
+    </div>
+  </section>
+
+  <!-- 25. 왜 이 server.js 를 드릴까요 ---------------- -->
+  <section class="slide">
+    <div class="slide-head"><h2>왜 이 server.js 를 드릴까요</h2><span class="head-tag">M4-2 · 개념</span></div>
+    <div class="slide-body">
+      <p class="lead" style="margin-bottom:16px">
+        직접 만들어 보면 <strong class="navy">여기는 보안 사업장</strong>이라 막힙니다.
+      </p>
+
+      <div style="display:flex; gap:24px; align-items:center">
+        <div class="shot" style="width:420px"><img src="assets/img/m4-app-fail.png" alt="사외 주소로 직접 나가려다 막힌 화면"></div>
+        <div style="flex:1 1 auto; min-width:0">
+          <ul class="dash-list">
+            <li><strong>Claude가 만든 코드는 사외로 나갑니다</strong><small>사내망에서는 요청 자체가 막힙니다</small></li>
+            <li><strong>화면 쪽 코드로는 못 고칩니다</strong><small>브라우저가 붙이는 정보라 지울 수 없습니다</small></li>
+            <li><strong>드린 server.js 는 사내 규칙을 압니다</strong><small>사내 주소로 보내고, 막히는 정보는 떼어 냅니다</small></li>
+          </ul>
+          <div class="note" style="margin-top:14px">
+            그래서 <strong class="navy">검증해 둔 파일</strong>을 드리고 시작합니다.
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 26. 이 두 파일이면, 사내에서 무엇이든 만듭니다 -------- -->
+  <section class="slide">
+    <div class="slide-head"><h2>이 두 파일이면, 사내에서 무엇이든 만듭니다</h2><span class="head-tag">M4-2 · 개념</span></div>
+    <div class="slide-body">
+      <p class="lead" style="margin-bottom:22px">
+        <strong class="navy">app.html + server.js</strong> — 이 한 쌍이 사내 AI 앱의 <strong class="navy">출발점</strong>입니다.
+      </p>
+
+      <div class="kv kv--3">
+        <div class="kv-item">
+          <p class="kv-name">문서를 읽는 앱</p>
+          <p class="kv-like">PDF · 보고서를 넣으면 요약과 차트</p>
+          <p class="kv-when">오늘 바로 만들어 봅니다</p>
+        </div>
+        <div class="kv-item">
+          <p class="kv-name">자료를 정리하는 앱</p>
+          <p class="kv-like">엑셀 · CSV 를 넣으면 표와 인사이트</p>
+          <p class="kv-when">화면만 바꾸면 그대로</p>
+        </div>
+        <div class="kv-item">
+          <p class="kv-name">물어보는 앱</p>
+          <p class="kv-like">우리 팀 자료에 대해 대화하는 챗봇</p>
+          <p class="kv-when">기능을 더 붙이면 됩니다</p>
+        </div>
+      </div>
+
+      <div class="note" style="margin-top:20px">
+        바꾸는 방법도 하나입니다 &mdash; <strong class="navy">Claude Code에게 말로 시킵니다.</strong>
+      </div>
+    </div>
+  </section>
+
+  <!-- 27. [챕터] 멋진 AI App으로 만들기 ---------------- -->
+  <section class="slide slide--chapter" data-chapter="멋진 AI App으로 만들기">
+    <div class="chapter">
+      <p class="ch-eyebrow">CHAPTER 3</p>
+      <h2 class="ch-title">멋진 AI App으로 만들기</h2>
+      <div class="ch-rule"></div>
+      <p class="ch-desc">말 한 줄로 PDF 분석 대시보드를 만들고 챗봇까지 붙입니다.</p>
+      <ul class="ch-keys"><li>PDF 읽기</li><li>대시보드</li><li>챗봇 붙이기</li></ul>
+    </div>
+  </section>
+
+  <!-- 28. [실습] PDF를 읽는 대시보드로 바꿉니다 ---------- -->
+  <section class="slide">
+    <div class="slide-head"><h2>[실습] PDF를 읽는 대시보드로 바꿉니다</h2><span class="head-tag">M4-3 · 실습</span></div>
     <div class="slide-body">
       <div class="split">
         <div class="split-main">
           <div class="pbox">
             <p class="pbox-t">Claude Code에 그대로 붙여넣기</p>
-            <p>Claude API가 잘 동작되는지 테스트를 해보고자 해</p>
-            <p>화면은 HTML 파일 하나로만 만들어줘</p>
-            <p>화면에서 Claude API KEY를 입력 받고</p>
-            <p>버튼을 누르면 잘 동작되는지 테스트 되고</p>
-            <p>에러가 나면, 디버깅 가능하게끔 자세한 에러메시지가 보여짐</p>
-            <p>연결이 된 후에는 간단한 채팅 화면이 뜨는데</p>
-            <p>내가 프롬프트를 작성하면 답변이 화면에 보이도록 개발해줘</p>
-            <p>만약 채팅에 아무런 메세지가 안뜬다면 디버깅 할 수 있게</p>
-            <p>자세한 오류메세지로 대답을 대신해줘</p>
-            <p>주의사항 : 엔트로픽 SDK나 라이브러리를 설치하지 마</p>
-            <p>모델은 sonnet으로만 해야해</p>
+            <p>PDF 파일을 불러와서 AI로 이해하고,</p>
+            <p>대시보드로 출력해주는 App으로 수정해줘</p>
+            <p>(자세한건 묻지말고 알아서 만들어줘)</p>
           </div>
-          <p class="sub" style="margin-top:14px">
-            만들어진 <span class="mono">html</span> 파일을 <strong class="navy">더블클릭</strong>하면 브라우저에 화면이 뜹니다.
+          <p class="sub" style="margin-top:16px">
+            다 되면 브라우저를 <strong class="navy">새로고침</strong>하고, PDF를 하나 올려 봅니다.
           </p>
         </div>
         <div class="split-side">
-          <div class="shot" style="width:322px"><img src="assets/img/m4-apitest.png" alt="Claude API 연결 테스트 화면"></div>
-          <p class="shot-cap">이런 화면이 뜹니다</p>
-          <div class="side-box side-box--warn" style="margin-top:12px">
-            <p class="side-t">아직은 안 됩니다</p>
-            <p class="side-d">화면은 뜨지만 키를 넣어도 동작하지 않습니다. 다음 장에서 고칩니다.</p>
+          <div class="side-box">
+            <p class="side-t">왜 이렇게 짧게 시키나</p>
+            <p class="side-d">지금은 <strong>어디까지 알아서 해 주는지</strong> 보는 중입니다. 뒤에서 더 잘 시키는 법을 배웁니다.</p>
+          </div>
+          <div class="side-box" style="margin-top:12px">
+            <p class="side-t">올릴 PDF가 없다면</p>
+            <p class="side-d">Base 폴더의 <span class="mono">샘플 보고서.pdf</span> 를 씁니다. 사내 기밀 문서는 올리지 않습니다.</p>
           </div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- 17. 사내에서는 왜 그냥 안 되나 -------------------------------------------------------- -->
+  <!-- 29. 이런 화면이 나옵니다 ---------------------------------- -->
   <section class="slide">
-    <div class="slide-head"><h2>[필수] 사내에서는 그냥 부르면 막힙니다</h2><span class="head-tag">M4-4 · 개념</span></div>
+    <div class="slide-head"><h2>이런 화면이 나옵니다</h2><span class="head-tag">M4-3 · 확인</span></div>
     <div class="slide-body">
-      <div style="display:flex; gap:26px; align-items:center; margin-bottom:16px">
-        <p class="lead" style="margin:0; flex:1 1 auto">
-          Claude가 만든 코드는 <strong class="hl">사외 인터넷으로 직접 접속</strong>하게 되어 있어,<br>
-          사내 노트북에서는 키가 맞아도 오류가 납니다.
-        </p>
-        <div class="shot" style="width:196px; flex:0 0 auto"><img src="assets/img/m4-api-invalid.png" alt="API key is invalid 오류 화면"></div>
+      <div class="figure" style="margin:0">
+        <div class="shot" style="width:900px; margin:0 auto"><img src="assets/img/m4-pdf-dash.png" alt="PDF를 읽어 요약 숫자와 차트, 핵심 문장을 보여 주는 대시보드"></div>
       </div>
+      <div class="note" style="margin-top:16px; text-align:center">
+        코드는 한 줄도 쓰지 않았습니다. <strong class="navy">문장 세 줄</strong>로 나온 화면입니다.
+      </div>
+    </div>
+  </section>
+
+  <!-- 30. [실습] 문서와 대화하는 챗봇을 붙입니다 ------------ -->
+  <section class="slide">
+    <div class="slide-head"><h2>[실습] 문서와 대화하는 챗봇을 붙입니다</h2><span class="head-tag">M4-3 · 실습</span></div>
+    <div class="slide-body">
+      <div class="split">
+        <div class="split-main">
+          <div class="pbox">
+            <p class="pbox-t">Claude Code에 그대로 붙여넣기</p>
+            <p>챗봇 기능을 추가해서,</p>
+            <p>PDF 파일에 대해 대화할수있는 기능 추가해줘</p>
+            <p>(자세한건 묻지말고 알아서 만들어줘)</p>
+          </div>
+          <p class="sub" style="margin-top:16px">
+            기능을 <strong class="navy">더할 때도 같습니다.</strong> 무엇을 더할지만 말합니다.
+          </p>
+        </div>
+        <div class="split-side">
+          <div class="side-box">
+            <p class="side-t">이때가 기회입니다</p>
+            <p class="side-d">Agent가 만드는 동안 화면만 보고 있지 마세요. 다음 장부터 <strong>더 잘 시키는 법</strong>을 봅니다.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 31. 이런 화면이 나옵니다 ---------------------------------- -->
+  <section class="slide">
+    <div class="slide-head"><h2>이런 화면이 나옵니다</h2><span class="head-tag">M4-3 · 확인</span></div>
+    <div class="slide-body">
+      <div class="figure" style="margin:0">
+        <div class="shot" style="width:840px; margin:0 auto"><img src="assets/img/m4-pdf-chat.png" alt="대시보드 오른쪽에 문서에 대해 묻고 답하는 챗봇이 붙은 화면"></div>
+      </div>
+      <div class="note" style="margin-top:14px; text-align:center">
+        이제 <strong class="navy">문서에게 직접 물어볼 수 있습니다.</strong>
+      </div>
+    </div>
+  </section>
+
+  <!-- 32. [챕터] Agent에게 더 잘 시키는 방법 ---------- -->
+  <section class="slide slide--chapter" data-chapter="Agent에게 더 잘 시키는 방법">
+    <div class="chapter">
+      <p class="ch-eyebrow">CHAPTER 4</p>
+      <h2 class="ch-title">Agent에게 더 잘 시키는 방법</h2>
+      <div class="ch-rule"></div>
+      <p class="ch-desc">한 번에 다 시키지 않습니다. 중간에 끼어들어야 내가 원하는 것이 나옵니다.</p>
+      <ul class="ch-keys"><li>한 번에 시키기</li><li>Human-in-the-loop</li><li>중간 검토</li></ul>
+    </div>
+  </section>
+
+  <!-- 33. 지금 하신 것 - 한 번에 완성본 시키기 ------------ -->
+  <section class="slide">
+    <div class="slide-head"><h2>지금 하신 것 &mdash; 한 번에 완성본 시키기</h2><span class="head-tag">M4-4 · 개념</span></div>
+    <div class="slide-body">
+      <p class="lead" style="margin-bottom:20px">
+        방금은 <strong class="navy">한 줄 시키고 완성본을 기다렸습니다.</strong> 이런 모습입니다.
+      </p>
 
       <div class="ba">
         <div class="ba-col ba--before">
-          <p class="ba-head">HTML이 사내 서버를 직접 부르면</p>
+          <p class="ba-head">사장님이 이렇게 시킨다면</p>
           <div class="ba-body">
-            <p>브라우저가 <strong>Origin 헤더</strong>를 자동으로 붙여 보냅니다</p>
-            <p>사내 서버는 그 헤더를 보고 <strong class="hl">403으로 막습니다</strong></p>
-            <p class="ba-quote">이 헤더는 화면 쪽 코드로 지울 수 없습니다.</p>
+            <p>&ldquo;자료 몇 개 줄 테니,<br><strong>멋진 문서 오늘 저녁까지</strong> 다 만들어서 가져와&rdquo;</p>
+            <p class="ba-quote">저녁에 받아 보고 나서야 압니다. &ldquo;내가 원한 게 이게 아닌데.&rdquo;</p>
           </div>
         </div>
         <div class="ba-col ba--after">
-          <p class="ba-head">사이에 작은 중계 프로그램을 두면</p>
+          <p class="ba-head">Agent도 똑같습니다</p>
           <div class="ba-body">
-            <p>HTML은 <strong>내 컴퓨터의 중계 프로그램</strong>에게 부탁하고</p>
-            <p>중계 프로그램이 헤더를 정리해 사내 서버로 보냅니다</p>
-            <p class="ba-quote">브라우저의 제약을 받지 않으니 통과합니다.</p>
+            <p>다 만들어 온 뒤에야 <strong>어디가 어긋났는지</strong> 보입니다</p>
+            <p>고치라고 하면 <strong>멀쩡한 곳까지</strong> 함께 바뀝니다</p>
+            <p class="ba-quote">한 번에 크게 시킬수록, 되돌리기 어려워집니다.</p>
           </div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- 18. [실습] 중계 프로그램 만들기 ----------------------------------------------------------- -->
+  <!-- 34. [주의] 크게 시킬수록 내 것이 아니게 됩니다 ------ -->
   <section class="slide">
-    <div class="slide-head"><h2>[실습] 중계 프로그램을 만들고 연결합니다</h2><span class="head-tag">M4-4 · 실습</span></div>
-    <div class="slide-body">
-      <div class="pbox">
-        <p class="pbox-t">Claude Code에 그대로 붙여넣기</p>
-        <p>방금 만든 HTML이 사내에서 동작하도록 고쳐줘</p>
-        <p>브라우저에서 사내 서버를 직접 부르면 막히니까, 같은 폴더에</p>
-        <p>claude-proxy.js 라는 작은 중계 서버를 만들고 HTML은 거기로만 요청하게 해줘</p>
-        <p>중계 서버는 아래를 지켜야 해</p>
-        <p>1. 모델 이름은 claude-sonnet-5 로 쓴다 (날짜가 붙은 이름은 사내 서버가 500 에러를 낸다)</p>
-        <p>2. 사내 프록시로 보낸다 https://h-chat-api.autoever.com/claude-code/v2/v1/messages</p>
-        <p>3. 인증 헤더는 Authorization: Bearer 를 쓴다 (사외의 x-api-key 가 아니다)</p>
-        <p>4. Origin 과 Referer 헤더는 지우고 보낸다</p>
-        <p>5. SSL 인증서 검증은 끈다</p>
-        <p>6. Content-Type 은 application/json; charset=utf-8 로 적는다</p>
-        <p>예시 코드는 https://pro.mincoding.co.kr/public/upload/py2x9ajcg5.js 와 같아</p>
-        <p>다 만들면 node.js로 중계 서버를 실행하고, 브라우저에서 열 주소를 알려줘</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- 19. 기술검증 끝 -------------------------------------------------------------------- -->
-  <section class="slide">
-    <div class="slide-head"><h2>기술검증 끝 — 백업하고 자리를 비웁니다</h2><span class="head-tag">M4-4 · 실습</span></div>
-    <div class="slide-body">
-      <div class="split">
-        <div class="split-main">
-          <ol class="steps">
-            <li>채팅이 오가는지 확인합니다<small>안 되면 “1~7번까지 모두 적용한 것 맞는지 확인해. 더블체크해서 빠진 부분이 있다면 다시 적용해줘”</small></li>
-            <li>동작이 확인된 이 <strong>폴더를 통째로</strong> 복사해 <span class="mono">base</span> 로 남겨 둡니다<small>HTML과 중계 서버가 한 벌입니다. 다음에 다른 도구를 만들 때 여기서부터 시작하면 됩니다</small></li>
-            <li><span class="mono">/clear</span> 로 지금까지의 <strong>대화만</strong> 비웁니다<small>파일은 그대로 둡니다. 이 HTML과 중계 서버 위에 대시보드를 얹어 갑니다</small></li>
-          </ol>
-        </div>
-        <div class="split-side">
-          <div class="shot" style="width:322px"><img src="assets/img/m4-chat.png" alt="Claude API 채팅 화면"></div>
-          <p class="shot-cap">① 채팅이 되면 검증 완료</p>
-          <div class="shot" style="width:250px; margin-top:10px"><img src="assets/img/m4-backup.png" alt="dashboard 폴더를 base로 복사"></div>
-          <p class="shot-cap">② 백업 폴더 base</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 20. CLAUDE.md에 개발 방식 적기 --------------------------------------------------- -->
-  <section class="slide">
-    <div class="slide-head"><h2>CLAUDE.md에 개발 방식을 못 박습니다</h2><span class="head-tag">M4-2 · 실습</span></div>
-    <div class="slide-body">
-      <p class="lead" style="margin-bottom:18px">
-        방금 검증한 <strong class="navy">HTML 한 장 + 중계 서버</strong>, 이 구조 그대로 대시보드를 만듭니다.<br>
-        그러지 않으면 Claude는 <strong class="hl">멋대로 새 프로젝트를 만들어 버립니다.</strong>
-      </p>
-
-      <div class="pbox">
-        <p class="pbox-t">Claude Code에 그대로 붙여넣기</p>
-        <p>CLAUDE.md 만들고 이 프로젝트의 개발 방식을 명시해줘</p>
-        <p>지금 이 폴더에 있는 HTML 파일 한 장과 claude-proxy.js 중계 서버, 이 둘로만 개발한다</p>
-        <p>React, Vite, TypeScript 같은 프레임워크는 쓰지 않는다</p>
-        <p>다만 PPT 파일 만들기처럼 꼭 필요한 라이브러리는 써도 된다</p>
-        <p>새 프로젝트를 만들지 말고, 지금 있는 파일을 이어서 고친다</p>
-        <p>Claude API는 항상 claude-proxy.js 를 거쳐서 부른다</p>
-      </div>
-
-      <div class="note" style="margin-top:18px">
-        M3에서 배운 그대로입니다. <strong class="navy">CLAUDE.md는 내 모든 지시 앞에 붙습니다.</strong>
-        한 번 적어 두면 다음부터 매번 말하지 않아도 됩니다.
-      </div>
-    </div>
-  </section>
-
-  <!-- 21. CLAUDE.md에 목적 ------------------------------------------------------------ -->
-  <section class="slide">
-    <div class="slide-head"><h2>CLAUDE.md에 목적을 적습니다</h2><span class="head-tag">M4-2 · 실습</span></div>
-    <div class="slide-body">
-      <p class="lead" style="margin-bottom:20px">
-        앞에서는 <strong class="navy">어떻게</strong> 만들지를 적었습니다. 이번에는 <strong class="navy">무엇을</strong> 만들지를 적습니다.<br>
-        <strong class="navy">마지막에 무엇이 되어야 하는지</strong>까지 처음부터 알려 줍니다.
-      </p>
-
-      <div class="pbox">
-        <p class="pbox-t">Claude Code에 그대로 붙여넣기</p>
-        <p>CLAUDE.md에 이 프로젝트의 목적을 적어줘</p>
-        <p>VOC팀에서 받은 설문조사 결과 CSV 파일을 불러와서</p>
-        <p>AI가 응답을 분석해 핵심 인사이트를 뽑아 주고</p>
-        <p>대시보드로 한눈에 보여주는 앱이야</p>
-        <p>그리고 경영층 보고서 초안을 자동으로 만들어 PPT 파일로 내려받을 수 있어야 해</p>
-        <p>마지막에는 electron 으로 실행파일(exe)을 만들어 동료에게 그대로 나눠 줄 거야</p>
-      </div>
-
-      <div class="note" style="margin-top:20px">
-        이 한 문단이 앞으로 <strong class="navy">모든 지시 앞에 붙습니다.</strong>
-        <strong class="navy">exe로 배포한다</strong>는 것까지 미리 알려 두면, Claude가 처음부터 그에 맞게 만듭니다.
-      </div>
-    </div>
-  </section>
-
-  <!-- 22. CLAUDE.md에 규칙 ------------------------------------------------------------ -->
-  <section class="slide">
-    <div class="slide-head"><h2>나에게 맞는 규칙을 하나 더합니다</h2><span class="head-tag">M4-2 · 실습</span></div>
-    <div class="slide-body">
-      <p class="lead" style="margin-bottom:20px">둘 중 <strong class="navy">하나만</strong> 골라 넣습니다.</p>
-
-      <div class="split">
-        <div class="split-main">
-          <div class="pbox">
-            <p class="pbox-t">선택 1 — 빠르게 진행하고 싶다면</p>
-            <p>CLAUDE.md에 Rule을 하나 추가할게</p>
-            <p>나는 비 개발자이므로,</p>
-            <p>내가 모호하게 시켜도 내 의도를 파악해서</p>
-            <p>질문하지 말고 알아서 파악해줘</p>
-          </div>
-        </div>
-        <div class="split-main">
-          <div class="pbox">
-            <p class="pbox-t">선택 2 — 하나씩 확인하며 가고 싶다면</p>
-            <p>CLAUDE.md에 Rule을 하나 추가할게</p>
-            <p>내가 시킨것에 대해 모호한 경우</p>
-            <p>스스로 해석하지 말아주고,</p>
-            <p>모호한 질문은 내게 다시 물어봐줘</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="note" style="margin-top:18px">
-        오늘은 시간이 정해져 있으니 <strong class="grn">선택 1</strong>을 권합니다. 개발 경험이 있어도 마찬가지입니다.
-      </div>
-    </div>
-  </section>
-
-  <!-- 23. [실습] CLAUDE.md 완성하기 --------------------------------------------------------- -->
-  <section class="slide">
-    <div class="slide-head"><h2>[실습] CLAUDE.md를 완성합니다</h2><span class="head-tag">M4-2 · 실습</span></div>
-    <div class="slide-body">
-      <div class="split">
-        <div class="split-main">
-          <ol class="steps steps--lg">
-            <li>앞 세 장의 문장을 <strong>순서대로</strong> 넣습니다<small>받아 적지 말고 [복사] 버튼으로 가져다 쓰세요</small></li>
-            <li>CLAUDE.md를 열어 <strong>개발 방식 · 목적 · 규칙이 다 들어갔는지</strong> 눈으로 확인합니다</li>
-            <li>자기 업무에 맞는 내용을 넣을 수 있는 분은 <strong>우리 팀 설문</strong>으로 바꿔 적어 보세요</li>
-          </ol>
-        </div>
-        <div class="split-side side-lg">
-          <div class="side-box">
-            <p class="side-t">왜 눈으로 확인하나</p>
-            <p class="side-d">AI는 매번 조금씩 다르게 적습니다. 내가 말한 것이 실제로 들어갔는지는 열어 봐야 압니다.</p>
-          </div>
-          <div class="side-box side-box--warn" style="margin-top:12px">
-            <p class="side-t">길게 쓰지 않습니다</p>
-            <p class="side-d">CLAUDE.md는 <strong>모든 지시 앞에 붙습니다.</strong> 너무 많이 적으면 오히려 지시를 흐립니다 — M3에서 본 그대로입니다.</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 24. 문서 세 개 -------------------------------------------------------------------- -->
-  <section class="slide">
-    <div class="slide-head"><h2>여기서부터가 진짜 — 문서 세 개로 방향을 잡습니다</h2><span class="head-tag">M4-2 · 개념</span></div>
-    <div class="slide-body">
-      <p class="lead" style="margin-bottom:22px">
-        바로 만들라고 하면 AI는 <strong class="hl">자기 마음대로</strong> 만듭니다.<br>
-        만들기 전에 <strong class="navy">무엇을 · 어떻게 · 어떤 순서로</strong> 를 먼저 적습니다.
-      </p>
-
-      <div class="flow">
-        <div class="flow-step">
-          <p class="flow-name">PROPOSAL.md</p>
-          <p class="flow-desc">무엇을 원하는가<br>사용자 입장의 요구사항</p>
-        </div>
-        <div class="flow-arrow">→</div>
-        <div class="flow-step">
-          <p class="flow-name">SPEC.md</p>
-          <p class="flow-desc">어떻게 동작하는가<br>집계 기준 · 화면 구성</p>
-        </div>
-        <div class="flow-arrow">→</div>
-        <div class="flow-step">
-          <p class="flow-name">PHASES.md</p>
-          <p class="flow-desc">어떤 순서로 만드는가<br>단계별 계획</p>
-        </div>
-      </div>
-
-      <div class="note" style="margin-top:22px">
-        세 문서 모두 <strong class="navy">CLAUDE.md에 경로를 적어 둡니다.</strong>
-        M3의 캐비닛 이야기 그대로 — 경로가 없으면 있어도 못 찾습니다.
-      </div>
-    </div>
-  </section>
-
-  <!-- 25. 기획서란 --------------------------------------------------------------------- -->
-  <section class="slide">
-    <div class="slide-head"><h2>기획서 — 사용자 입장에서 적는 문서</h2><span class="head-tag">M4-2 · 개념</span></div>
-    <div class="slide-body">
-      <div class="split">
-        <div class="split-main">
-          <p class="lead" style="margin-bottom:16px">
-            기획서에는 <strong class="hl">개발 이야기를 넣지 않습니다.</strong><br>
-            “이런 게 있으면 좋겠다”만 적습니다.
-          </p>
-          <div class="pbox">
-            <p class="pbox-t">빈 파일부터 만들기</p>
-            <p>docs/PROPOSAL.md 를 빈 파일로 만들어줘</p>
-            <p>여기에는 개발자가 아닌 사용자 입장에서 프로그램의 요구사항을 기입할꺼야.</p>
-            <p>그리고 CLAUDE.md 에 이 파일에 대해 명시해줘</p>
-          </div>
-        </div>
-        <div class="split-side">
-          <div class="shot" style="width:200px"><img src="assets/img/m4-proposal.png" alt="docs 폴더에 만들어진 PROPOSAL.md"></div>
-          <p class="shot-cap">docs 폴더에 생깁니다</p>
-          <div class="side-box" style="margin-top:12px">
-            <p class="side-t">왜 CLAUDE.md에 적나</p>
-            <p class="side-d">경로를 적어 둬야 Claude가 필요할 때 이 문서를 찾아 읽습니다.</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 26. 요구사항 다섯 줄 -------------------------------------------------------------- -->
-  <section class="slide">
-    <div class="slide-head"><h2>원하는 것을 다섯 줄로 적습니다</h2><span class="head-tag">M4-2 · 실습</span></div>
-    <div class="slide-body">
-      <div class="pbox">
-        <p class="pbox-t">그대로 붙여넣기 — 아래 다섯 줄이 오늘의 요구사항입니다</p>
-        <p>docs/PROPOSAL.md 에 다음 요구사항을 적어줘</p>
-        <p>1. 먼저 Claude API 키 테스트를 하고, 성공하면 본 화면이 나온다.</p>
-        <p>2. 설문조사 결과 CSV 파일을 불러와, 문항과 응답을 정리해 표로 보여준다.</p>
-        <p>3. Claude API로 응답을 분석해 핵심 인사이트를 뽑는다. 무엇이 문제이고 어디가 심각한지, 무엇부터 손대야 하는지.</p>
-        <p>4. Dashboard 탭을 누르면 인사이트에 어울리는 차트와 수치가 보여진다.</p>
-        <p>5. 보고서 탭에서 경영층 보고 초안이 자동으로 만들어지고, PPT 파일로 내려받을 수 있다.</p>
-      </div>
-      <div class="note" style="margin-top:20px">
-        전부 <strong class="navy">사람이 보는 관점</strong>으로만 적혀 있습니다. 어떤 기술로 만들지는 한 줄도 없습니다.
-      </div>
-    </div>
-  </section>
-
-  <!-- 27. [실습] 기획서 작성하기 ------------------------------------------------------------- -->
-  <section class="slide">
-    <div class="slide-head"><h2>[실습] 기획서를 직접 써 봅니다</h2><span class="head-tag">M4-2 · 실습</span></div>
-    <div class="slide-body">
-      <div class="split">
-        <div class="split-main">
-          <p class="lead" style="margin-bottom:16px">
-            기획서에는 <strong class="navy">사람이 보는 것만</strong> 적습니다.
-          </p>
-          <ol class="steps">
-            <li>교안을 참고해 <span class="mono">docs/PROPOSAL.md</span> 를 <strong>직접 만들어 봅니다</strong></li>
-            <li>한 줄씩 <strong>“무엇을 누르면 무엇이 보인다”</strong> 로 적습니다<small>“~을 개발한다”가 아니라 “~가 보인다 · ~를 누르면 ~가 된다”</small></li>
-            <li>화면을 여는 순간부터 끝낼 때까지, <strong>쓰는 사람이 겪는 순서대로</strong> 늘어놓습니다</li>
-            <li>자기 업무로 바꿀 수 있는 분은 <strong>우리 팀이 매번 반복해서 보는 자료</strong>로 바꿔 적어 보세요</li>
-          </ol>
-        </div>
-        <div class="split-side">
-          <div class="side-box">
-            <p class="side-t">왜 쓰는가</p>
-            <p class="side-d">안 적으면 AI가 자기 마음대로 만듭니다. <strong>다 만든 뒤에야</strong> “내가 원한 게 이게 아닌데”를 알게 됩니다.</p>
-          </div>
-          <div class="side-box" style="margin-top:12px">
-            <p class="side-t">무엇을 적는가</p>
-            <p class="side-d">① 무엇을 넣는가 ② 무엇이 나오는가 ③ 누가 보는가<br>
-              이 셋을 <strong>화면에 보이는 순서대로</strong> 한 줄씩.</p>
-          </div>
-          <div class="side-box side-box--warn" style="margin-top:12px">
-            <p class="side-t">적지 않는 것</p>
-            <p class="side-d">어떤 기술로 만들지는 <strong>한 줄도 적지 않습니다.</strong> 그건 AI가 정할 몫입니다.</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 28. 스펙이란 --------------------------------------------------------------------- -->
-  <section class="slide">
-    <div class="slide-head"><h2>스펙 — ‘정확히 어떻게’를 정하는 문서</h2><span class="head-tag">M4-2 · 개념</span></div>
-    <div class="slide-body">
-      <div class="split">
-        <div class="split-main">
-          <p class="lead" style="margin-bottom:18px">
-            요구사항은 <strong class="navy">무엇을 원하는가</strong>,<br>
-            스펙은 <strong class="navy">정확히 어떻게 동작하는가</strong>입니다.
-          </p>
-          <ul class="dash-list">
-            <li>“차트를 보여준다” → 요구사항<small>이대로 두면 AI가 알아서 아무 차트나 그립니다</small></li>
-            <li>“불만 유형 7개로 나눠 막대차트, 부서별 비중은 원형차트” → 스펙<small>여기까지 정해야 원하는 화면이 나옵니다</small></li>
-            <li>기준이 없으면 <strong class="hl">잘 만들었는지 판단할 수도 없습니다</strong></li>
-          </ul>
-        </div>
-        <div class="split-side">
-          <div class="shot" style="width:200px"><img src="assets/img/m4-spec-ex.png" alt="제품 스펙 문서 예시"></div>
-          <p class="shot-cap">제품 스펙 문서 예시 —<br>이 정도로 구체적으로 적습니다</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 29. [실습] SPEC 초안 뽑기 ---------------------------------------------------------- -->
-  <section class="slide">
-    <div class="slide-head"><h2>[실습] 설문을 읽혀 스펙 초안을 뽑습니다</h2><span class="head-tag">M4-2 · 실습</span></div>
-    <div class="slide-body">
-      <div class="split">
-        <div class="split-main">
-          <ol class="steps">
-            <li><span class="mono">docs/SPEC.md 빈 파일 만들어줘</span> 로 파일을 만들고 CLAUDE.md에도 적게 합니다</li>
-            <li><strong>배포받은 자료</strong>의 설문 결과 CSV 3개를 <span class="mono">docs</span> 폴더에 끌어다 놓고 <span class="mono">survey1~3</span> 으로 이름을 바꿉니다<small>VOC팀 설문 결과를 CSV로 저장해 둔 교육용 가상 데이터입니다</small></li>
-            <li>아래 문장으로 <strong>AI에게 초안을 쓰게 합니다</strong></li>
-          </ol>
-          <div class="pbox" style="margin-top:6px">
-            <p class="pbox-t">그대로 붙여넣기</p>
-            <p>내가 설문조사 결과 CSV 파일을 3개 줄테니까</p>
-            <p>너가 SPEC.md 문서 초안을 한번 작성해줘</p>
-            <p>@docs/survey1.csv @docs/survey2.csv @docs/survey3.csv</p>
-            <p>그리고 내가 직접 작성할 부분도 1개만 표시해줘</p>
-          </div>
-        </div>
-        <div class="split-side">
-          <div class="side-box">
-            <p class="side-t">왜 AI에게 시키나</p>
-            <p class="side-d">문항이 몇 개이고 어떤 값이 들어 있는지, 사람보다 파일을 직접 읽은 쪽이 정확합니다.</p>
-          </div>
-          <div class="side-box side-box--warn" style="margin-top:12px">
-            <p class="side-t">그대로 두지 않습니다</p>
-            <p class="side-d">AI가 쓴 것은 <strong>초안</strong>입니다. 다음 장에서 내 기준으로 고칩니다.</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 30. [도전] 내 기준으로 고치기 ------------------------------------------------------------ -->
-  <section class="slide">
-    <div class="slide-head"><h2>[도전] 초안을 내 기준으로 고칩니다</h2><span class="head-tag">M4-2 · 실습</span></div>
-    <div class="slide-body">
-      <div class="split">
-        <div class="split-main">
-          <p class="lead" style="margin-bottom:18px">
-            AI가 쓴 초안을 <strong class="navy">읽어 보고</strong>, 내가 아는 기준으로 바꿉니다.
-          </p>
-          <div class="pbox">
-            <p class="pbox-t">불만 유형을 내가 정한 7개로 바꾸기</p>
-            <p>응답을 분류할 불만 유형은 설비 안정성, 작업 안전, 근무시간 · 교대,</p>
-            <p>소통 · 보고체계, 교육 · 숙련도, 작업환경, 고객 응대 7개로 해줘</p>
-          </div>
-          <div class="note" style="margin-top:16px">
-            내 업무를 아는 사람은 <strong class="navy">나</strong>입니다. 여기서 바꾼 만큼 결과가 내 것에 가까워집니다.
-          </div>
-        </div>
-        <div class="split-side">
-          <div class="side-box">
-            <p class="side-t">우리 팀이라면</p>
-            <p class="side-d">우리 팀 설문에서 실제로 쓰는 분류가 있다면 그것으로 바꿔 보세요. 그 순간 이 앱은 우리 팀 도구가 됩니다.</p>
-          </div>
-          <div class="side-box side-box--warn" style="margin-top:12px">
-            <p class="side-t">분류가 곧 보고서</p>
-            <p class="side-d">여기서 정한 7개가 그대로 차트의 축이 되고, 보고서의 목차가 됩니다.</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 31. [주의] 전부 맡기면 안 됩니다 ---------------------------------------------------------- -->
-  <section class="slide">
-    <div class="slide-head"><h2>[주의] AI에게 전부 맡기면 안 됩니다</h2><span class="head-tag">M4-2 · 개념</span></div>
+    <div class="slide-head"><h2>[주의] 크게 시킬수록 내 것이 아니게 됩니다</h2><span class="head-tag">M4-4 · 개념</span></div>
     <div class="slide-body">
       <p class="lead" style="margin-bottom:22px">
         이 한마디를 하는 순간, 결과물은 <strong class="hl">내 것이 아니게 됩니다.</strong>
@@ -889,97 +874,15 @@
     </div>
   </section>
 
-  <!-- 32. 단계 나누기 ------------------------------------------------------------------- -->
+  <!-- 35. 한 단계씩 만들고, 사람이 봅니다 -------------------- -->
   <section class="slide">
-    <div class="slide-head"><h2>단계를 나눕니다 — PHASES.md</h2><span class="head-tag">M4-2 · 개념</span></div>
-    <div class="slide-body">
-      <p class="lead" style="margin-bottom:20px">
-        건물을 지을 때 <strong class="navy">기초 → 골조 → 외장 → 설비 → 인테리어</strong> 순서가 정해져 있듯,<br>
-        앱도 <strong class="navy">만드는 순서</strong>를 먼저 정합니다.
-      </p>
-
-      <div class="flow">
-        <div class="flow-step">
-          <p class="flow-name">Phase 1<br>화면 구성</p>
-          <p class="flow-desc">가짜 데이터로 완성된 화면만 먼저 본다</p>
-        </div>
-        <div class="flow-arrow">→</div>
-        <div class="flow-step">
-          <p class="flow-name">Phase 2<br>설문 불러오기</p>
-          <p class="flow-desc">CSV 파일을 읽어 표로 확인한다</p>
-        </div>
-        <div class="flow-arrow">→</div>
-        <div class="flow-step">
-          <p class="flow-name">Phase 3<br>인사이트 · 대시보드</p>
-          <p class="flow-desc">핵심 인사이트와 차트를 완성한다</p>
-        </div>
-        <div class="flow-arrow">→</div>
-        <div class="flow-step">
-          <p class="flow-name">Phase 4<br>보고서 · PPT</p>
-          <p class="flow-desc">보고서 초안을 만들어 PPT로 내려받는다</p>
-        </div>
-      </div>
-
-      <div class="note" style="margin-top:22px">
-        각 단계는 <strong class="navy">그 자체로 동작해야 하고, 사람이 눈으로 확인</strong>할 수 있어야 합니다.
-      </div>
-    </div>
-  </section>
-
-  <!-- 33. PHASES.md 작성 --------------------------------------------------------- -->
-  <section class="slide">
-    <div class="slide-head"><h2>만드는 순서를 문서로 적습니다</h2><span class="head-tag">M4-2 · 실습</span></div>
-    <div class="slide-body">
-      <div class="pbox">
-        <p class="pbox-t">그대로 붙여넣기</p>
-        <p>docs/PHASES.md 파일에 Phase1 ~ 4까지 내용 써줘</p>
-        <p>Phase1 : UI 구성 — UI 테스트 버튼을 누르면, 가짜데이터를 이용하여 완성된 UI가 바로 보여진다. 기능 동작은 안되고 UI만 살펴볼 목적이다.</p>
-        <p>Phase2 : 설문 데이터 로더 구현 — 설문 결과 CSV 파일을 불러오고, 문항과 응답을 표로 확인 가능</p>
-        <p>Phase3 : 인사이트 분석과 Dashboard 완성 — Claude API로 핵심 인사이트를 뽑고, 요약과 차트 출력까지 완료한다.</p>
-        <p>Phase4 : 경영층 보고서 완성 — 보고서 초안을 자동 생성하고 PPT 파일로 내려받는 기능까지 완료한다.</p>
-      </div>
-      <div class="note" style="margin-top:22px">
-        이제 <strong class="navy">기획서 · 스펙 · 단계</strong> 세 문서가 모두 준비됐습니다. 이 세 개가 오늘의 설계도입니다.
-      </div>
-    </div>
-  </section>
-
-  <!-- 34. Phase 규칙 추가 --------------------------------------------------------- -->
-  <section class="slide">
-    <div class="slide-head"><h2>“한 단계만 하라”는 규칙을 겁니다</h2><span class="head-tag">M4-2 · 실습</span></div>
-    <div class="slide-body">
-      <p class="lead" style="margin-bottom:20px">
-        규칙이 없으면 AI는 <strong class="hl">묻지도 않고 끝까지 다 만들어 버립니다.</strong>
-      </p>
-
-      <div class="pbox">
-        <p class="pbox-t">① 경로를 알려 주기</p>
-        <p>CLAUDE.md 에다가 PHASES.md 파일을 언급해줘</p>
-      </div>
-
-      <div class="pbox" style="margin-top:18px">
-        <p class="pbox-t">② 규칙 걸기</p>
-        <p>CLAUDE.md에 Rule을 하나 더 추가해줘</p>
-        <p>개발을 할 때면 각 PHASE에 맞는 내용만 개발해야하며, 더 많은 내용을 개발해서는 안돼</p>
-        <p>예를들어 PHASE1 개발하라고 했는데, PHASE2 내용까지 개발하면 안돼</p>
-      </div>
-
-      <div class="note" style="margin-top:20px">
-        규칙 하나로 <strong class="navy">Phase 1만 시켰는데 Phase 3까지 만들어 놓는 일</strong>을 막습니다.<br>
-        중간에 확인할 기회가 생기고, 잘못된 방향으로 멀리 가지 않습니다.
-      </div>
-    </div>
-  </section>
-
-  <!-- 35. Human-in-the-loop ------------------------------------------------------------ -->
-  <section class="slide">
-    <div class="slide-head"><h2>한 단계씩 만들고, 사람이 봅니다</h2><span class="head-tag">M4-2 · 개념</span></div>
+    <div class="slide-head"><h2>한 단계씩 만들고, 사람이 봅니다</h2><span class="head-tag">M4-4 · 개념</span></div>
     <div class="slide-body">
       <div class="ba">
         <div class="ba-col ba--before">
           <p class="ba-head">이렇게 시키면</p>
           <div class="ba-body">
-            <p><span class="mono">Phase 1 ~ 4 까지 전부 개발해줘</span></p>
+            <p><span class="mono">알아서 다 만들어줘</span></p>
             <p class="ba-quote">중간에 어디서 어긋났는지 알 수 없습니다.
               다 만든 뒤에야 “내가 원한 게 이게 아닌데”를 알게 됩니다.</p>
           </div>
@@ -987,10 +890,9 @@
         <div class="ba-col ba--after">
           <p class="ba-head">이렇게 시킵니다</p>
           <div class="ba-body">
-            <p>Phase 1 개발 → <strong>사람의 검토</strong></p>
-            <p>Phase 2 개발 → <strong>사람의 검토</strong></p>
-            <p>Phase 3 개발 → <strong>사람의 검토</strong></p>
-            <p>Phase 4 개발 → <strong>사람의 검토</strong></p>
+            <p>화면부터 만들어 → <strong>내가 확인</strong></p>
+            <p>기능 하나 붙여 → <strong>내가 확인</strong></p>
+            <p>다음 기능 붙여 → <strong>내가 확인</strong></p>
           </div>
         </div>
       </div>
@@ -1002,162 +904,145 @@
     </div>
   </section>
 
-  <!-- 36. Phase 1 --------------------------------------------------------------- -->
+  <!-- 36. [프롬프트 1] 가짜 데이터로 화면부터 시킵니다 ---- -->
   <section class="slide">
-    <div class="slide-head"><h2>Phase 1 — 화면부터 만듭니다</h2><span class="head-tag">M4-2 · 실습</span></div>
+    <div class="slide-head"><h2>[프롬프트 1] 가짜 데이터로 화면부터 시킵니다</h2><span class="head-tag">M4-4 · 실습</span></div>
     <div class="slide-body">
       <div class="split">
         <div class="split-main">
-          <div class="pbox">
-            <p class="pbox-t">그대로 붙여넣기</p>
-            <p>Phase1 내용을 요약하여 내게 말해주고, 개발을 진행시켜</p>
-            <p>이후 내가 직접 동작결과를 확인하고 검토해볼꺼야</p>
-          </div>
-          <ol class="steps" style="margin-top:18px">
-            <li>먼저 나오는 <strong>요약을 읽고</strong> 방향이 맞는지 봅니다</li>
-            <li>개발이 끝나면 <strong>UI 테스트 버튼</strong>을 눌러 화면을 확인합니다</li>
-            <li>마음에 안 드는 부분은 <strong>말로 고칩니다</strong></li>
-          </ol>
-        </div>
-        <div class="split-side">
-          <div class="side-box">
-            <p class="side-t">왜 화면부터인가</p>
-            <p class="side-d">기능보다 화면을 먼저 보면, 방향이 어긋났을 때 바로 잡을 수 있습니다.</p>
-          </div>
-          <div class="side-box side-box--warn" style="margin-top:12px">
-            <p class="side-t">여기서 멈춥니다</p>
-            <p class="side-d">Phase 1만 시켰는데 분석까지 만들어 놨다면, 되돌리라고 말합니다.</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 37. [실습] Phase 2~4 -------------------------------------------------------------- -->
-  <section class="slide">
-    <div class="slide-head"><h2>[실습] Phase 2 ~ 4를 같은 방법으로</h2><span class="head-tag">M4-2 · 실습</span></div>
-    <div class="slide-body">
-      <div class="pbox">
-        <p class="pbox-t">숫자만 바꿔 가며 네 번 반복합니다</p>
-        <p>Phase2 내용을 요약하여 내게 말해주고, 개발을 진행시켜</p>
-        <p>이후 내가 직접 동작결과를 확인하고 검토해볼꺼야</p>
-      </div>
-
-      <div class="flow" style="margin-top:24px">
-        <div class="flow-step">
-          <p class="flow-name">Phase 2</p>
-          <p class="flow-desc">CSV를 불러와 표로 확인</p>
-        </div>
-        <div class="flow-arrow">→</div>
-        <div class="flow-step">
-          <p class="flow-name">Phase 3</p>
-          <p class="flow-desc">인사이트와 대시보드가 잘 나왔는지 확인</p>
-        </div>
-        <div class="flow-arrow">→</div>
-        <div class="flow-step">
-          <p class="flow-name">Phase 4</p>
-          <p class="flow-desc">보고서 초안과 PPT 다운로드 확인</p>
-        </div>
-      </div>
-
-      <div class="note" style="margin-top:22px">
-        단계마다 <strong class="navy">직접 눌러 보고</strong>, 마음에 들지 않으면 다음으로 넘어가기 전에 고칩니다.
-      </div>
-    </div>
-  </section>
-
-  <!-- 38. 말로 고칩니다 ------------------------------------------------------------------ -->
-  <section class="slide">
-    <div class="slide-head"><h2>마음에 안 들면, 말로 고칩니다</h2><span class="head-tag">M4-3 · 실습</span></div>
-    <div class="slide-body">
-      <div class="split">
-        <div class="split-main">
-          <p class="lead" style="margin-bottom:16px">
-            한 번에 완벽하게 만들지 않습니다.<br>
-            <strong class="navy">결과 확인 → 수정 요청 → 재확인</strong>을 반복합니다.
-          </p>
-          <ol class="steps">
-            <li>이 화면을 <strong>누가 보는지</strong> 정합니다<small>팀장이 보는 화면과 임원이 보는 화면은 다릅니다</small></li>
-            <li>“가장 중요한 지표를 크게, 색으로 강조해줘”</li>
-            <li>“이 차트는 안 보니까 빼줘”</li>
-            <li>“분기별로 볼 수 있는 필터 하나 넣어줘”</li>
-            <li>“데이터를 해석한 한 줄 요약을 위에 붙여줘”</li>
-          </ol>
-        </div>
-        <div class="split-side">
-          <div class="side-box">
-            <p class="side-t">왜 하는가</p>
-            <p class="side-d">처음 나온 화면은 내 보고 방식과 다릅니다. 그대로 두면 쓰지 않게 됩니다.</p>
-          </div>
-          <div class="side-box" style="margin-top:12px">
-            <p class="side-t">무엇이 남는가</p>
-            <p class="side-d">고치기 전과 후를 캡처해 두면, 무엇을 어떻게 바꿨는지가 그대로 기록으로 남습니다.</p>
-          </div>
-          <div class="side-box side-box--warn" style="margin-top:12px">
-            <p class="side-t">보고 전 습관</p>
-            <p class="side-d">보고 전에 말로 다섯 번만 고쳐 보세요. 이 방식이 바이브코딩입니다.</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 39. Electron --------------------------------------------------------------------- -->
-  <section class="slide">
-    <div class="slide-head"><h2>Electron — 웹으로 만든 걸 프로그램으로</h2><span class="head-tag">M4-5 · 개념</span></div>
-    <div class="slide-body">
-      <div class="split">
-        <div class="split-main">
-          <p class="lead" style="margin-bottom:16px">
-            지금 만든 화면은 <strong class="hl">내 컴퓨터에서 서버를 띄워야</strong> 열립니다. 동료에게 그대로 줄 수 없습니다.<br>
-            Electron은 그 화면을 <strong class="navy">그냥 실행되는 프로그램</strong>으로 바꿔 주는 도구입니다.
-          </p>
-          <ul class="dash-list">
-            <li><strong>원리</strong><small>크롬의 핵심 부분과 node.js를 프로그램 안에 같이 넣어 버립니다</small></li>
-            <li><strong>받는 사람</strong><small>설치도 설정도 없이 더블클릭만 하면 열립니다</small></li>
-            <li><strong>이미 쓰고 있는 것들</strong><small>VS Code · Discord · Notion 모두 이 방식으로 만들어졌습니다</small></li>
-          </ul>
-          <div class="note note--warn" style="margin-top:16px">
-            <strong>단점</strong> — 크롬과 node.js가 통째로 들어가서 용량이 큽니다.
-            Hello World 하나짜리 프로그램도 <strong class="hl">약 106MB</strong>입니다.
-          </div>
-        </div>
-        <div class="split-side">
-          <div class="shot" style="width:132px"><img src="assets/img/m4-setup-exe.png" alt="만들어진 설치 파일"></div>
-          <p class="shot-cap">결과물은 이 파일 하나</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 40. [실습] 지금 만든 앱을 실행파일로 --------------------------------------------------- -->
-  <section class="slide">
-    <div class="slide-head"><h2>[실습] 지금 만든 앱을 실행파일로 뽑습니다</h2><span class="head-tag">M4-5 · 실습</span></div>
-    <div class="slide-body">
-      <div class="split">
-        <div class="split-main">
-          <p class="lead" style="margin-bottom:16px">
-            연습용을 따로 만들지 않습니다. <strong class="navy">지금까지 만든 그 앱</strong>을 그대로 프로그램으로 바꿉니다.
-          </p>
           <div class="pbox">
             <p class="pbox-t">Claude Code에 그대로 붙여넣기</p>
-            <p>Desktop App이 되게끔 electron 으로 배포해</p>
+            <p>PDF 입력하면 대시보드 만드는 App을 만들건데,</p>
+            <p>Agent야. 일단 가짜데이터들을 사용해서</p>
+            <p>완성된 UI만 만들어서 내게 보여줘봐</p>
+            <p>그러면 내가 UI가 마음에 드는지 안드는지 말해줄께</p>
           </div>
-          <ol class="steps" style="margin-top:18px">
-            <li>이 <strong>한 문장이면 됩니다</strong><small>설정도 준비물도 따로 없습니다</small></li>
-            <li>작업 폴더 안에 <span class="mono">release</span> 폴더가 생기고, 그 안에 <strong>exe 파일 하나</strong>가 만들어집니다</li>
-            <li>더블클릭해서 <strong>창으로 뜨는지</strong> 확인합니다</li>
-          </ol>
+          <p class="sub" style="margin-top:16px">
+            기능은 아직 넣지 않습니다. <strong class="navy">보이는 것부터</strong> 맞춥니다.
+          </p>
         </div>
         <div class="split-side">
-          <div class="shot" style="width:322px"><img src="assets/img/m4-release.png" alt="release 폴더에 만들어진 실행파일"></div>
-          <p class="shot-cap">release 폴더 — 이 파일 하나가 전부</p>
+          <div class="side-box">
+            <p class="side-t">왜 가짜 데이터로</p>
+            <p class="side-d">진짜 자료를 붙이기 전이라 <strong>빨리 나오고, 마음껏 갈아엎을 수 있습니다.</strong></p>
+          </div>
+          <div class="side-box" style="margin-top:12px">
+            <p class="side-t">여기서 정할 것</p>
+            <p class="side-d">무엇이 위에 오는지 · 몇 칸으로 나눌지 · 무엇을 크게 보여줄지</p>
+          </div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- 41. [실습] 고쳐서 다시 뽑기 ------------------------------------------------------------- -->
+  <!-- 37. 마음에 들 때까지 다그칩니다 -------------------------- -->
+  <section class="slide">
+    <div class="slide-head"><h2>마음에 들 때까지 다그칩니다</h2><span class="head-tag">M4-4 · 실습</span></div>
+    <div class="slide-body">
+      <div style="display:flex; gap:26px; align-items:center">
+        <div class="shot" style="width:660px"><img src="assets/img/m4-ui-draft.png" alt="가짜 데이터로 만든 UI 초안 화면과 상단이 엉망이라는 지적"></div>
+        <div style="flex:1 1 auto; min-width:0">
+          <p class="lead" style="margin-bottom:14px">
+            받아 보고 <strong class="navy">바로 되돌려 보냅니다.</strong>
+          </p>
+          <div class="pbox">
+            <p class="pbox-t">이렇게 말하면 됩니다</p>
+            <p>아니야. 다시해와. 상단부분이 엉망이야</p>
+            <p>제목은 가운데로, 버튼은 오른쪽 끝으로 옮겨줘</p>
+          </div>
+          <div class="note" style="margin-top:14px">
+            마음에 들 때까지 <strong class="navy">이 단계에서만</strong> 고칩니다.
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 38. 다음 프로젝트에 그대로 쓰세요 ------------------------ -->
+  <section class="slide">
+    <div class="slide-head"><h2>다음 프로젝트에 그대로 쓰세요</h2><span class="head-tag">M4-4 · 개념</span></div>
+    <div class="slide-body">
+      <p class="lead" style="margin-bottom:20px">
+        오늘 만든 것보다, <strong class="navy">이 시키는 방법</strong>이 더 오래 남습니다.
+      </p>
+
+      <ol class="steps steps--lg">
+        <li><strong>작게 쪼개서 시킨다</strong><small>화면 먼저 → 기능 하나 → 다음 기능</small></li>
+        <li><strong>중간에 받아 본다</strong><small>완성될 때까지 기다리지 않습니다</small></li>
+        <li><strong>마음에 들 때까지 되돌려 보낸다</strong><small>&ldquo;여기가 엉망이야, 다시&rdquo; 한마디면 됩니다</small></li>
+      </ol>
+
+      <div class="note" style="margin-top:18px">
+        M5에서 <strong class="navy">내 업무 기획서</strong>를 쓸 때, 이 순서대로 시켜 보세요.
+      </div>
+    </div>
+  </section>
+
+  <!-- 39. [챕터] 배포하기 -------------------------------------- -->
+  <section class="slide slide--chapter" data-chapter="배포하기">
+    <div class="chapter">
+      <p class="ch-eyebrow">CHAPTER 5</p>
+      <h2 class="ch-title">배포하기</h2>
+      <div class="ch-rule"></div>
+      <p class="ch-desc">실행.bat 과 zip 으로 동료에게 그대로 건넵니다.</p>
+      <ul class="ch-keys"><li>실행.bat</li><li>zip</li><li>사내 배포</li></ul>
+    </div>
+  </section>
+
+  <!-- 40. 배포 — 폴더째 압축해서 건네줍니다 ------------------ -->
+  <section class="slide">
+    <div class="slide-head"><h2>배포 — 폴더째 압축해서 건네줍니다</h2><span class="head-tag">M4-5 · 개념</span></div>
+    <div class="slide-body">
+      <div class="split" style="gap:28px">
+        <div class="split-main">
+          <p class="lead" style="margin-bottom:16px">
+            지금 만든 화면은 <strong class="hl">중계 서버가 떠 있어야</strong> 열립니다. 그대로는 못 줍니다.<br>
+            필요한 것을 <strong class="navy">한 폴더에 모아 압축</strong>하면 그게 배포판입니다.
+          </p>
+          <ul class="dash-list">
+            <li><strong>같이 넣는 것</strong><small><strong>app.html · server.js · 실행.bat</strong> 셋뿐 — 압축하면 <strong>0.1MB</strong>라 메일에 그냥 붙습니다</small></li>
+            <li><strong>받는 사람 준비물</strong><small><strong>Node.js 하나</strong>. 없으면 실행.bat이 <strong>설치 안내를 띄워 줍니다</strong></small></li>
+            <li><strong>받는 사람</strong><small>압축 풀고 <strong>실행.bat 더블클릭</strong>. 그게 전부입니다</small></li>
+          </ul>
+          <div class="note note--warn" style="margin-top:16px">
+            <strong>기억할 것</strong> — 실행하면 <strong class="hl">검은 창이 하나 떠 있습니다.</strong>
+            그 창을 닫으면 앱도 꺼집니다. 쓰는 동안은 그대로 두세요.
+          </div>
+        </div>
+        <div class="split-side" style="flex:0 0 330px">
+          <div class="shot" style="width:340px"><img src="assets/img/m4-dist-zip.png" alt="dist 폴더에 든 세 개의 파일과 압축 파일"></div>
+          <p class="shot-cap" style="text-align:left">셋을 모아 압축하면 끝</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 41. [실습] 실행.bat 을 만들고 압축합니다 ---------- -->
+  <section class="slide">
+    <div class="slide-head"><h2>[실습] 실행.bat 을 만들고 압축합니다</h2><span class="head-tag">M4-5 · 실습</span></div>
+    <div class="slide-body">
+      <p class="lead" style="margin-bottom:14px">
+        연습용을 따로 만들지 않습니다. <strong class="navy">지금까지 만든 그 앱</strong>을 그대로 묶습니다.
+      </p>
+
+      <div class="pbox">
+        <p class="pbox-t">Claude Code에 그대로 붙여넣기</p>
+        <p>동료에게 그대로 줄 수 있게 <b>배포 폴더</b>를 만들어줘.</p>
+        <p>1. dist 폴더를 만들고 app.html 과 server.js 를 복사한다</p>
+        <p>2. <b>실행.bat</b> 을 만든다 — 먼저 <b>node 가 깔려 있는지 확인</b>하고, 없으면</p>
+        <p>&nbsp; &lsquo;Node.js가 필요합니다. nodejs.org 에서 LTS를 설치한 뒤 다시 실행해 주세요&rsquo; 라고 알리고 멈춘다</p>
+        <p>3. node 가 있으면 중계 서버를 띄우고 브라우저를 연 뒤,</p>
+        <p>&nbsp; &lsquo;이 창을 닫으면 앱이 꺼집니다&rsquo; 라고 안내한다</p>
+        <p>4. dist 폴더를 <b>zip 으로 압축</b>한다</p>
+      </div>
+
+      <ol class="steps" style="margin-top:14px">
+        <li>압축을 <strong class="navy">다른 폴더에 풀어</strong> 실행.bat 을 더블클릭해 봅니다<small>내 작업 폴더가 아닌 곳에서도 열려야 진짜 배포판입니다</small></li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- 42. [실습] 고치고 다시 뽑아 봅니다 -------------------- -->
   <section class="slide">
     <div class="slide-head"><h2>[실습] 고치고 다시 뽑아 봅니다</h2><span class="head-tag">M4-5 · 실습</span></div>
     <div class="slide-body">
@@ -1169,17 +1054,17 @@
           <div class="pbox">
             <p class="pbox-t">예시 — 자기 앱에 맞게 바꿔 넣으세요</p>
             <p>보고서 표지에 우리 팀 이름과 오늘 날짜를 넣어줘</p>
-            <p>이후, electron 으로 다시 배포해</p>
+            <p>이후, dist 폴더를 다시 만들고 zip 으로 압축해</p>
           </div>
           <div class="note" style="margin-top:18px">
-            앞으로 무엇을 고치든 <strong class="navy">고치기 → 다시 배포</strong> 두 단계입니다.
-            받는 사람은 <strong>새 exe 파일 하나만</strong> 다시 받으면 됩니다.
+            앞으로 무엇을 고치든 <strong class="navy">고치기 → 다시 압축</strong> 두 단계입니다.
+            받는 사람은 <strong>새 zip 하나만</strong> 다시 받으면 됩니다.
           </div>
         </div>
         <div class="split-side">
           <div class="side-box">
             <p class="side-t">동료가 할 일</p>
-            <p class="side-d">받은 파일을 <strong>더블클릭</strong>. 설치도 설정도 없습니다.</p>
+            <p class="side-d">압축을 풀고 <strong>실행.bat 더블클릭</strong>. 설치도 설정도 없습니다.</p>
           </div>
           <div class="side-box side-box--warn" style="margin-top:12px">
             <p class="side-t">보내기 전에</p>
@@ -1190,7 +1075,7 @@
     </div>
   </section>
 
-  <!-- 42. 사내 배포 가이드 ----------------------------------------------------------------- -->
+  <!-- 43. 현대자동차 사내 배포 가이드 -------------------------- -->
   <section class="slide">
     <div class="slide-head"><h2>현대자동차 사내 배포 가이드</h2><span class="head-tag">M4-5 · 개념</span></div>
     <div class="slide-body">
@@ -1198,7 +1083,7 @@
         <div class="split-main">
           <ol class="steps">
             <li><strong>HTML 파일 하나로 만든 경우</strong><small>메일 · 메신저로 전달. 또는 Confluence 빈 페이지에서 //HMG HTML PRO 를 입력하고 소스 전체를 붙여넣기</small></li>
-            <li><strong>exe 파일로 만든 경우</strong><small>메일 · 메신저로 전달</small></li>
+            <li><strong>압축 파일(zip)로 만든 경우</strong><small>메일 · 메신저로 전달. exe 첨부는 대부분 차단되지만 zip은 통과합니다. 용량이 크면 공유 드라이브로</small></li>
             <li><strong>DB가 들어간 웹 App인 경우</strong><small>팀원 데이터를 저장하는 운영 수준이면 표준 H Cloud 환경에 배포해야 합니다</small></li>
           </ol>
           <p style="margin:12px 0 0"><a class="btn-link" href="https://hmg.atlassian.net/servicedesk/customer/portal/1304">③ AI 과제 등록하기</a></p>
@@ -1215,7 +1100,7 @@
     </div>
   </section>
 
-  <!-- 43. [실습] 결과물 정리하고 공유 ------------------------------------------------------------ -->
+  <!-- 44. [실습] 결과물을 정리하고 공유합니다 ---------------- -->
   <section class="slide">
     <div class="slide-head"><h2>[실습] 결과물을 정리하고 공유합니다</h2><span class="head-tag">M4-5 · 실습</span></div>
     <div class="slide-body">
@@ -1248,9 +1133,9 @@
     </div>
   </section>
 
-  <!-- 44. M4 정리 --------------------------------------------------------------------- -->
-  <section class="slide">
-    <div class="slide-head"><h2>M4 정리</h2><span class="head-tag">M4-6 · 정리</span></div>
+  <!-- 45. M4 정리 ---------------------------------------------- -->
+  <section class="slide" data-chapter="M4 정리">
+    <div class="slide-head"><h2>M4 정리</h2><span class="head-tag">M4 · 정리</span></div>
     <div class="slide-body">
       <div class="recap">
         <div class="recap-row">
@@ -1258,36 +1143,32 @@
           <span class="recap-v">내 프로그램 안에서 AI를 부르는 열쇠. <strong>키는 나만 갖고 있는다</strong></span>
         </div>
         <div class="recap-row">
-          <span class="recap-k">기술검증</span>
-          <span class="recap-v">큰 걸 만들기 전에 <strong>작은 걸로 먼저</strong> 되는지 확인한다</span>
+          <span class="recap-k">app.html · server.js</span>
+          <span class="recap-v">이 <strong>두 파일</strong>이면 사내에서 도는 AI 앱이 된다</span>
         </div>
         <div class="recap-row">
-          <span class="recap-k">PROPOSAL.md</span>
-          <span class="recap-v">사용자 입장에서 <strong>무엇을 원하는가</strong></span>
+          <span class="recap-k">사내망</span>
+          <span class="recap-v">막히는 곳은 <strong>server.js 하나</strong> — 받은 파일로 덮어쓰면 끝</span>
         </div>
         <div class="recap-row">
-          <span class="recap-k">SPEC.md</span>
-          <span class="recap-v">정확히 <strong>어떻게 동작하는가</strong> — 집계 기준과 화면 구성</span>
-        </div>
-        <div class="recap-row">
-          <span class="recap-k">PHASES.md</span>
-          <span class="recap-v"><strong>어떤 순서로 만드는가</strong> — 단계마다 눈으로 확인할 수 있게</span>
+          <span class="recap-k">기능 바꾸기</span>
+          <span class="recap-v">PDF 대시보드도 챗봇도 <strong>말 한 줄</strong>로 붙였다</span>
         </div>
         <div class="recap-row">
           <span class="recap-k">Human-in-the-loop</span>
-          <span class="recap-v">한 단계 만들고 <strong>사람이 검토한 뒤</strong> 다음으로 넘어간다</span>
+          <span class="recap-v">한 번에 크게 시키지 않고 <strong>중간에 받아 보고 되돌려 보낸다</strong></span>
         </div>
         <div class="recap-row">
-          <span class="recap-k">Electron</span>
-          <span class="recap-v">웹으로 만든 화면을 <strong>더블클릭으로 열리는 프로그램</strong>으로</span>
+          <span class="recap-k">압축 배포</span>
+          <span class="recap-v">세 파일을 한 폴더에 모아 zip — <strong>0.1MB, 메일로 그냥 보낸다</strong></span>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- 45. 우리는 코딩하지 않았습니다 ------------------------------------------------------------ -->
+  <!-- 46. 우리는 코딩하지 않았습니다 ---------------------------- -->
   <section class="slide">
-    <div class="slide-head"><h2>우리는 코딩하지 않았습니다</h2><span class="head-tag">M4-6 · 정리</span></div>
+    <div class="slide-head"><h2>우리는 코딩하지 않았습니다</h2><span class="head-tag">M4 · 정리</span></div>
     <div class="slide-body">
       <p class="lead--lg" style="margin-bottom:22px; text-align:center">
         오늘 만든 것은 코드로 만든 것이 아니라,<br>
@@ -1309,14 +1190,13 @@
     </div>
   </section>
 
-  <!-- 46. 마무리 ---------------------------------------------------------------------- -->
+  <!-- 47. 감사합니다. -------------------------------------------- -->
   <section class="slide slide--cover">
     <div class="cover-text">
       <h1 class="cover-title" style="font-size:64px">감사합니다.</h1>
-      <p class="cover-meta">이어서 M5. 나만의 업무 혁신 PoC 설계</p>
+      <p class="cover-meta">이어서 M5. 나만의 업무 혁신 아이디어 기획서</p>
     </div>
   </section>
-
 </div>
 
 <nav class="deck-bar">
@@ -1332,7 +1212,7 @@
 
     <div class="deck-meta">
       <span class="deck-title">M4. 데이터 시각화 · AI 업무도구 만들기</span>
-      <span class="deck-count" id="count">1 / 46</span>
+      <span class="deck-count" id="count">1 / 47</span>
     </div>
 
     <button class="deck-arrow" id="next" type="button" aria-label="다음 슬라이드" title="다음 (→)">

@@ -1,0 +1,3409 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>지시사항 이행관리 시스템</title>
+<style>
+
+  :root {
+    --navy: #0A1628;
+    --navy-mid: #112240;
+    --navy-light: #1A3A6B;
+    --blue: #1E6FFF;
+    --blue-light: #4D8FFF;
+    --blue-glow: rgba(30,111,255,0.15);
+    --silver: #8A9BB5;
+    --line: rgba(255,255,255,0.07);
+    --white: #FFFFFF;
+    --off-white: #F0F4FF;
+    --text-sub: #8A9BB5;
+
+    --tag-head: #1E6FFF;
+    --tag-vice: #7C3AED;
+    --tag-exec: #DC2626;
+
+    --step-done: #10B981;
+    --step-active: #1E6FFF;
+    --step-idle: #1A3A6B;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', -apple-system, sans-serif;
+    background: var(--navy);
+    color: var(--white);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: var(--navy-mid);
+    border-bottom: 1px solid var(--line);
+    padding: 0 32px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .logo-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--blue);
+    box-shadow: 0 0 8px var(--blue);
+  }
+  .logo-text { font-size: 14px; font-weight: 700; letter-spacing: 0.5px; color: var(--white); }
+  .logo-sub { font-size: 11px; color: var(--text-sub); margin-left: 4px; }
+
+  .nav-tabs {
+    display: flex;
+    gap: 2px;
+    background: var(--navy);
+    border-radius: 8px;
+    padding: 3px;
+  }
+  .nav-tab {
+    padding: 6px 16px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    color: var(--text-sub);
+    transition: all 0.2s;
+    border: none;
+    background: none;
+  }
+  .nav-tab.active {
+    background: var(--blue);
+    color: #fff;
+  }
+  .nav-tab:hover:not(.active) { color: var(--white); }
+
+  .user-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--text-sub);
+  }
+  .avatar {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    background: var(--navy-light);
+    border: 1.5px solid var(--blue);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700; color: var(--blue);
+  }
+
+  /* ── LAYOUT ── */
+  .main {
+    display: flex;
+    flex: 1;
+  }
+
+  /* ── SIDEBAR ── */
+  aside {
+    width: 220px;
+    min-height: calc(100vh - 60px);
+    background: var(--navy-mid);
+    border-right: 1px solid var(--line);
+    padding: 24px 0;
+    flex-shrink: 0;
+  }
+  .aside-section { margin-bottom: 28px; }
+  .aside-label {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--text-sub);
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    padding: 0 20px;
+    margin-bottom: 8px;
+  }
+  .aside-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 20px;
+    font-size: 13px;
+    color: var(--text-sub);
+    cursor: pointer;
+    transition: all 0.15s;
+    border-left: 2px solid transparent;
+  }
+  .aside-item:hover { color: var(--white); background: var(--blue-glow); }
+  .aside-item.active {
+    color: var(--white);
+    border-left-color: var(--blue);
+    background: var(--blue-glow);
+  }
+  .aside-icon { font-size: 15px; width: 20px; text-align: center; }
+  .aside-badge {
+    margin-left: auto;
+    background: var(--blue);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 10px;
+  }
+
+  /* ── CONTENT ── */
+  .content {
+    flex: 1;
+    padding: 32px;
+    overflow-y: auto;
+  }
+
+  .page-title {
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .page-sub {
+    font-size: 13px;
+    color: var(--text-sub);
+    margin-bottom: 28px;
+  }
+
+  /* ── STEP INDICATOR ── */
+  .steps {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin-bottom: 32px;
+    background: var(--navy-mid);
+    border-radius: 12px;
+    padding: 20px 24px;
+    border: 1px solid var(--line);
+  }
+  .step {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+  }
+  .step-num {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700;
+    flex-shrink: 0;
+    transition: all 0.3s;
+  }
+  .step-num.done { background: var(--step-done); color: #fff; }
+  .step-num.active { background: var(--step-active); color: #fff; box-shadow: 0 0 12px rgba(30,111,255,0.5); }
+  .step-num.idle { background: var(--step-idle); color: var(--text-sub); }
+  .step-info { flex: 1; }
+  .step-name { font-size: 12px; font-weight: 600; }
+  .step-desc { font-size: 11px; color: var(--text-sub); margin-top: 2px; }
+  .step-line {
+    width: 32px; height: 1px;
+    background: var(--line);
+    flex-shrink: 0;
+    margin: 0 4px;
+  }
+  .step-line.done { background: var(--step-done); }
+
+  /* ── CARDS ── */
+  .card {
+    background: var(--navy-mid);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 16px;
+  }
+  .card-title {
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* ── MEETING TYPE SELECTOR ── */
+  .type-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 0;
+  }
+  .type-card {
+    border-radius: 10px;
+    padding: 16px;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: all 0.2s;
+    background: var(--navy);
+  }
+  .type-card:hover { border-color: var(--blue-light); }
+  .type-card.selected { border-color: var(--blue); background: var(--blue-glow); }
+  .type-badge {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    display: inline-block;
+    margin-bottom: 8px;
+  }
+  .badge-head { background: rgba(30,111,255,0.2); color: #4D8FFF; }
+  .badge-vice { background: rgba(124,58,237,0.2); color: #A78BFA; }
+  .badge-exec { background: rgba(220,38,38,0.2); color: #F87171; }
+  .type-name { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+  .type-desc { font-size: 11px; color: var(--text-sub); line-height: 1.5; }
+
+  /* ── UPLOAD ZONE ── */
+  .upload-zone {
+    border: 2px dashed var(--navy-light);
+    border-radius: 10px;
+    padding: 36px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: var(--navy);
+  }
+  .upload-zone:hover, .upload-zone.drag { border-color: var(--blue); background: var(--blue-glow); }
+  .upload-icon { font-size: 32px; margin-bottom: 10px; }
+  .upload-text { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+  .upload-sub { font-size: 11px; color: var(--text-sub); }
+  .upload-btn {
+    margin-top: 14px;
+    background: var(--blue);
+    color: #fff;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .upload-btn:hover { background: var(--blue-light); }
+
+  /* ── SELF REPORT (부회장) ── */
+  .self-report-box {
+    display: none;
+  }
+  .exec-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .exec-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--navy);
+    border-radius: 8px;
+    padding: 12px 16px;
+    border: 1px solid var(--line);
+  }
+  .exec-name { font-size: 13px; font-weight: 600; }
+  .exec-role { font-size: 11px; color: var(--text-sub); margin-top: 2px; }
+  .status-pill {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 20px;
+  }
+  .pill-sent { background: rgba(30,111,255,0.2); color: #4D8FFF; }
+  .pill-done { background: rgba(16,185,129,0.2); color: #34D399; }
+  .pill-wait { background: rgba(245,158,11,0.2); color: #FBBF24; }
+
+  .send-btn {
+    width: 100%;
+    margin-top: 14px;
+    background: var(--blue);
+    color: #fff;
+    border: none;
+    padding: 11px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .send-btn:hover { background: var(--blue-light); }
+
+  /* ── PROGRESS BAR ── */
+  .progress-wrap { margin-bottom: 8px; }
+  .progress-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--text-sub);
+    margin-bottom: 6px;
+  }
+  .progress-bar {
+    height: 6px;
+    background: var(--navy);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    border-radius: 3px;
+    background: linear-gradient(90deg, var(--blue), var(--blue-light));
+    transition: width 0.5s ease;
+  }
+
+  /* ── AI OUTPUT ── */
+  .ai-output {
+    background: var(--navy);
+    border-radius: 10px;
+    padding: 20px;
+    font-size: 13px;
+    line-height: 1.8;
+    color: var(--off-white);
+    border: 1px solid var(--navy-light);
+    min-height: 120px;
+  }
+  .ai-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--blue);
+    letter-spacing: 0.5px;
+    margin-bottom: 10px;
+    background: var(--blue-glow);
+    padding: 3px 10px;
+    border-radius: 4px;
+  }
+  .directive-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 12px;
+  }
+  .directive-item {
+    background: var(--navy-mid);
+    border-left: 3px solid var(--blue);
+    border-radius: 0 8px 8px 0;
+    padding: 10px 14px;
+    font-size: 12px;
+  }
+  .directive-tag {
+    font-size: 10px;
+    color: var(--blue);
+    font-weight: 700;
+    margin-bottom: 3px;
+  }
+  .directive-text { color: var(--off-white); line-height: 1.6; }
+
+  /* ── ACTION BUTTONS ── */
+  .btn-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 16px;
+  }
+  .btn-primary {
+    background: var(--blue);
+    color: #fff;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .btn-primary:hover { background: var(--blue-light); }
+  .btn-secondary {
+    background: transparent;
+    color: var(--text-sub);
+    border: 1px solid var(--navy-light);
+    padding: 10px 24px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-secondary:hover { color: var(--white); border-color: var(--blue); }
+
+  /* ── HISTORY TABLE ── */
+  .history-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+  }
+  .history-table th {
+    text-align: left;
+    padding: 10px 14px;
+    color: var(--text-sub);
+    font-weight: 600;
+    border-bottom: 1px solid var(--line);
+    font-size: 11px;
+  }
+  .history-table td {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--line);
+    vertical-align: middle;
+  }
+  .history-table tr:last-child td { border-bottom: none; }
+  .history-table tr:hover td { background: var(--blue-glow); }
+
+  /* ── DATE BADGE ── */
+  .date-text { color: var(--text-sub); font-size: 11px; }
+
+  /* ── GRID 2COL ── */
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+  /* ── INPUT ── */
+  .form-row { margin-bottom: 14px; }
+  .form-label { font-size: 11px; font-weight: 600; color: var(--text-sub); margin-bottom: 6px; display: block; }
+  .form-input {
+    width: 100%;
+    background: var(--navy);
+    border: 1px solid var(--navy-light);
+    border-radius: 7px;
+    padding: 9px 12px;
+    font-size: 13px;
+    color: var(--white);
+    outline: none;
+    font-family: inherit;
+    transition: border-color 0.2s;
+  }
+  .form-input:focus { border-color: var(--blue); }
+  .form-textarea {
+    resize: vertical;
+    min-height: 80px;
+    line-height: 1.6;
+  }
+
+  /* ── DIVIDER ── */
+  .divider { border: none; border-top: 1px solid var(--line); margin: 20px 0; }
+
+  /* ── ANIMATED DOTS ── */
+  .loading-dots span {
+    display: inline-block;
+    animation: blink 1.2s infinite;
+    font-size: 20px;
+    color: var(--blue);
+  }
+  .loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+  .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes blink {
+    0%, 80%, 100% { opacity: 0.2; }
+    40% { opacity: 1; }
+  }
+
+  .hidden { display: none !important; }
+
+
+        @keyframes pulse-green { 0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(16,185,129,0.4);} 50%{opacity:.6;box-shadow:0 0 0 5px rgba(16,185,129,0);} }
+        @keyframes pulse-red   { 0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(239,68,68,0.5);}  50%{opacity:.6;box-shadow:0 0 0 5px rgba(239,68,68,0);} }
+      
+@keyframes spin{to{transform:rotate(360deg)}}
+
+
+  /* HEADER */
+  header {
+    background: var(--navy-mid);
+    border-bottom: 1px solid var(--line);
+    padding: 0 32px;
+    height: 60px;
+    display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 0; z-index: 100;
+  }
+  .logo { display: flex; align-items: center; gap: 10px; }
+  .logo-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--blue); box-shadow: 0 0 8px var(--blue); }
+  .logo-text { font-size: 14px; font-weight: 700; }
+  .logo-sub { font-size: 11px; color: var(--text-sub); margin-left: 4px; }
+  .nav-tabs { display: flex; gap: 2px; background: var(--navy); border-radius: 8px; padding: 3px; }
+  .nav-tab { padding: 6px 16px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; color: var(--text-sub); border: none; background: none; transition: all 0.2s; }
+  .nav-tab.active { background: var(--blue); color: #fff; }
+  .user-info { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-sub); }
+  .avatar { width: 30px; height: 30px; border-radius: 50%; background: var(--navy-light); border: 1.5px solid var(--blue); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: var(--blue); }
+
+  /* LAYOUT */
+  .main { display: flex; flex: 1; }
+
+  /* SIDEBAR */
+  aside { width: 220px; background: var(--navy-mid); border-right: 1px solid var(--line); padding: 24px 0; flex-shrink: 0; }
+  .aside-section { margin-bottom: 28px; }
+  .aside-label { font-size: 10px; font-weight: 700; color: var(--text-sub); letter-spacing: 1.2px; text-transform: uppercase; padding: 0 20px; margin-bottom: 8px; }
+  .aside-item { display: flex; align-items: center; gap: 10px; padding: 9px 20px; font-size: 13px; color: var(--text-sub); cursor: pointer; transition: all 0.15s; border-left: 2px solid transparent; }
+  .aside-item:hover { color: var(--white); background: var(--blue-glow); }
+  .aside-item.active { color: var(--white); border-left-color: var(--blue); background: var(--blue-glow); }
+  .aside-icon { font-size: 15px; width: 20px; text-align: center; }
+  .aside-badge { margin-left: auto; background: var(--p-high); color: #fff; font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 10px; }
+  .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+  /* CONTENT */
+  .content { flex: 1; padding: 28px 32px; overflow-y: auto; }
+
+  /* SUMMARY CARDS */
+  .summary-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 24px; }
+  .sum-card { background: var(--navy-mid); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; }
+  .sum-label { font-size: 11px; color: var(--text-sub); margin-bottom: 8px; }
+  .sum-val { font-size: 26px; font-weight: 800; line-height: 1; margin-bottom: 4px; }
+  .sum-sub { font-size: 11px; color: var(--text-sub); }
+  .sum-card.urgent { border-color: rgba(239,68,68,0.4); background: rgba(239,68,68,0.06); }
+  .sum-card.urgent .sum-val { color: #F87171; }
+
+  /* FILTER BAR */
+  .filter-bar { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+  .filter-group { display: flex; gap: 4px; }
+  .filter-btn { padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; cursor: pointer; border: 1.5px solid var(--navy-light); background: transparent; color: var(--text-sub); transition: all 0.15s; }
+  .filter-btn:hover { border-color: var(--blue); color: var(--white); }
+  .filter-btn.active { background: var(--blue); border-color: var(--blue); color: #fff; }
+  .filter-btn.f-head.active { background: #1E3FA5; border-color: var(--tag-head); }
+  .filter-btn.f-vice.active { background: #3B1F7A; border-color: var(--tag-vice); }
+  .filter-btn.f-exec.active { background: #7A1F1F; border-color: var(--tag-exec); }
+  .search-box { margin-left: auto; display: flex; align-items: center; gap: 8px; background: var(--navy-mid); border: 1px solid var(--navy-light); border-radius: 8px; padding: 6px 12px; }
+  .search-box input { background: none; border: none; color: var(--white); font-size: 12px; outline: none; width: 160px; font-family: inherit; }
+  .search-box input::placeholder { color: var(--text-sub); }
+  .add-btn { background: var(--blue); color: #fff; border: none; padding: 8px 16px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 5px; transition: background 0.2s; white-space: nowrap; }
+  .add-btn:hover { background: var(--blue-light); }
+
+  /* TABLE */
+  .table-wrap { background: var(--navy-mid); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  thead { background: rgba(255,255,255,0.03); }
+  th { text-align: left; padding: 12px 14px; color: var(--text-sub); font-weight: 600; font-size: 11px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  td { padding: 13px 14px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--blue-glow); cursor: pointer; }
+
+  /* TAGS */
+  .type-tag { font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 4px; white-space: nowrap; }
+  .t-head { background: rgba(30,111,255,0.2); color: #4D8FFF; }
+  .t-vice { background: rgba(124,58,237,0.2); color: #A78BFA; }
+  .t-exec { background: rgba(220,38,38,0.2); color: #F87171; }
+
+  /* STATUS PILL */
+  .status-pill { font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 20px; white-space: nowrap; }
+  .s-none { background: rgba(55,65,81,0.5); color: #9CA3AF; }
+  .s-review { background: rgba(217,119,6,0.2); color: #FBBF24; }
+  .s-progress { background: rgba(37,99,235,0.25); color: #60A5FA; }
+  .s-done { background: rgba(5,150,105,0.2); color: #34D399; }
+  .s-hold { background: rgba(107,114,128,0.2); color: #9CA3AF; }
+
+  /* PRIORITY */
+  .priority-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 4px; }
+  .p-high { background: var(--p-high); }
+  .p-mid { background: var(--p-mid); }
+  .p-low { background: var(--p-low); }
+
+  /* DEADLINE */
+  .deadline { font-size: 11px; }
+  .deadline.over { color: #F87171; font-weight: 700; }
+  .deadline.soon { color: #FBBF24; font-weight: 600; }
+  .deadline.ok { color: var(--text-sub); }
+
+  /* DETAIL PANEL */
+  .detail-overlay { position: fixed; top: 0; right: 0; bottom: 0; width: 440px; background: var(--navy-mid); border-left: 1px solid var(--line); z-index: 200; transform: translateX(100%); transition: transform 0.3s cubic-bezier(.4,0,.2,1); display: flex; flex-direction: column; }
+  .detail-overlay.open { transform: translateX(0); }
+  .detail-header { padding: 20px 24px; border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; }
+  .detail-title { font-size: 15px; font-weight: 700; }
+  .close-btn { background: var(--navy); border: 1px solid var(--navy-light); border-radius: 6px; color: var(--text-sub); padding: 5px 10px; cursor: pointer; font-size: 13px; }
+  .detail-body { flex: 1; overflow-y: auto; padding: 20px 24px; }
+  .detail-section { margin-bottom: 20px; }
+  .detail-label { font-size: 10px; font-weight: 700; color: var(--text-sub); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px; }
+  .detail-value { font-size: 13px; line-height: 1.6; }
+  .detail-footer { padding: 16px 24px; border-top: 1px solid var(--line); display: flex; gap: 8px; }
+  .btn-primary { background: var(--blue); color: #fff; border: none; padding: 9px 18px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; flex: 1; transition: background 0.2s; }
+  .btn-primary:hover { background: var(--blue-light); }
+  .btn-secondary { background: transparent; color: var(--text-sub); border: 1px solid var(--navy-light); padding: 9px 14px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+  .btn-secondary:hover { color: var(--white); border-color: var(--blue); }
+  .progress-bar { height: 5px; background: var(--navy); border-radius: 3px; overflow: hidden; margin-top: 6px; }
+  .progress-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--blue), var(--blue-light)); }
+
+  /* STATUS EDITOR */
+  .status-select { background: var(--navy); border: 1px solid var(--navy-light); border-radius: 7px; padding: 7px 10px; font-size: 12px; color: var(--white); width: 100%; outline: none; font-family: inherit; }
+  .textarea-small { width: 100%; background: var(--navy); border: 1px solid var(--navy-light); border-radius: 7px; padding: 8px 10px; font-size: 12px; color: var(--white); font-family: inherit; resize: vertical; min-height: 70px; outline: none; line-height: 1.6; }
+  .textarea-small:focus { border-color: var(--blue); }
+
+  /* MODAL */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 300; display: none; align-items: center; justify-content: center; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: var(--navy-mid); border: 1px solid var(--line); border-radius: 14px; width: 520px; max-height: 85vh; overflow-y: auto; }
+  .modal-header { padding: 20px 24px; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; align-items: center; font-size: 15px; font-weight: 700; }
+  .modal-body { padding: 20px 24px; }
+  .modal-footer { padding: 16px 24px; border-top: 1px solid var(--line); display: flex; justify-content: flex-end; gap: 8px; }
+  .form-row { margin-bottom: 14px; }
+  .form-label { font-size: 11px; font-weight: 600; color: var(--text-sub); margin-bottom: 6px; display: block; }
+  .form-input { width: 100%; background: var(--navy); border: 1px solid var(--navy-light); border-radius: 7px; padding: 9px 12px; font-size: 13px; color: var(--white); outline: none; font-family: inherit; transition: border-color 0.2s; }
+  .form-input:focus { border-color: var(--blue); }
+  .form-textarea { resize: vertical; min-height: 80px; line-height: 1.6; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .divider { border: none; border-top: 1px solid var(--line); margin: 16px 0; }
+
+  /* EXEC LOCK */
+  .lock-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; color: #F87171; background: rgba(220,38,38,0.15); padding: 2px 8px; border-radius: 4px; font-weight: 700; }
+
+  .page-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 20px; }
+  .page-title { font-size: 22px; font-weight: 700; }
+  .page-sub { font-size: 13px; color: var(--text-sub); margin-top: 4px; }
+
+
+
+/* ════ 페이지 전환 ════ */
+.page-section { display: none; }
+.page-section.active { display: flex; flex: 1; }
+body { display: flex; flex-direction: column; min-height: 100vh; }
+.app-body { display: flex; flex: 1; overflow: hidden; position: relative; }
+</style>
+</head>
+<body>
+
+<!-- ══ 공통 헤더 ═══════════════════════════════════════════ -->
+<header>
+  <div class="logo">
+    <div class="logo-dot"></div>
+    <span class="logo-text">지시사항 이행관리 시스템</span>
+    <span class="logo-sub">미래전략운영팀</span>
+  </div>
+  <nav class="nav-tabs">
+    <button class="nav-tab active"  onclick="switchPage(1)">📝 Module 1 · 회의록 생성</button>
+    <button class="nav-tab"         onclick="switchPage(2)">📊 Module 2 · 이행관리</button>
+    <button class="nav-tab"         onclick="switchPage(3)">⚡ Module 3 · 자동 알림</button>
+  </nav>
+  <div class="user-info">
+    <div class="avatar">김</div>
+    <span>김담당 · 미래전략운영팀</span>
+  </div>
+</header>
+
+<div class="app-body">
+
+<!-- ══ PAGE 1 : 회의록 자동생성 ══════════════════════════ -->
+<div class="page-section active" id="page1">
+<div class="main">
+  <!-- SIDEBAR -->
+  <aside>
+    <div class="aside-section">
+      <div class="aside-label">회의록 생성</div>
+      <div class="aside-item active">
+        <span class="aside-icon">🎙</span> 새 회의록 생성
+      </div>
+      <div class="aside-item">
+        <span class="aside-icon">📋</span> 생성 이력
+        <span class="aside-badge">12</span>
+      </div>
+    </div>
+    <div class="aside-section">
+      <div class="aside-label">회의 유형</div>
+      <div class="aside-item" id="filter-all" onclick="filterHistory('all', this)">
+        <span class="aside-icon">🗂</span> 전체
+      </div>
+      <div class="aside-item" onclick="filterHistory('head', this)">
+        <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#1E6FFF;margin:0 6px 0 0;flex-shrink:0;"></span> 본부장 주간회의
+      </div>
+      <div class="aside-item" onclick="filterHistory('vice', this)">
+        <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#7C3AED;margin:0 6px 0 0;flex-shrink:0;"></span> 부회장 주간회의
+      </div>
+      <div class="aside-item" onclick="filterHistory('exec', this)">
+        <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#DC2626;margin:0 6px 0 0;flex-shrink:0;"></span> 최고경영층 회의
+      </div>
+    </div>
+    <div class="aside-section">
+      <div class="aside-label">최근 생성</div>
+      <div class="aside-item" style="flex-direction:column;align-items:flex-start;gap:2px;">
+        <span style="font-size:12px;color:var(--white);">본부장 주간회의</span>
+        <span style="font-size:11px;color:var(--text-sub);">2025.06.30</span>
+      </div>
+      <div class="aside-item" style="flex-direction:column;align-items:flex-start;gap:2px;">
+        <span style="font-size:12px;color:var(--white);">부회장 주간회의</span>
+        <span style="font-size:11px;color:var(--text-sub);">2025.06.26</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <div class="content">
+    <div class="page-title">📝 회의록 자동생성</div>
+    <div class="page-sub">녹음 파일 업로드 또는 임원 자기보고를 통해 회의록을 자동으로 생성합니다</div>
+
+    <!-- STEP INDICATOR -->
+    <div class="steps">
+      <div class="step">
+        <div class="step-num done" id="sn1">✓</div>
+        <div class="step-info">
+          <div class="step-name">회의 유형 선택</div>
+          <div class="step-desc">본부장 / 부회장 / 최고경영층</div>
+        </div>
+      </div>
+      <div class="step-line done" id="sl1"></div>
+      <div class="step">
+        <div class="step-num active" id="sn2">2</div>
+        <div class="step-info">
+          <div class="step-name">자료 입력</div>
+          <div class="step-desc">녹음 업로드 또는 자기보고</div>
+        </div>
+      </div>
+      <div class="step-line" id="sl2"></div>
+      <div class="step">
+        <div class="step-num idle" id="sn3">3</div>
+        <div class="step-info">
+          <div class="step-name">AI 회의록 생성</div>
+          <div class="step-desc">초안 자동완성</div>
+        </div>
+      </div>
+      <div class="step-line" id="sl3"></div>
+      <div class="step">
+        <div class="step-num idle" id="sn4">4</div>
+        <div class="step-info">
+          <div class="step-name">지시사항 추출</div>
+          <div class="step-desc">이행관리 툴 자동 연동</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 1: 회의 유형 선택 -->
+    <div class="card" id="step1-card">
+      <div class="card-title">① 회의 유형 선택</div>
+      <div class="type-grid">
+        <div class="type-card selected" id="type-head" onclick="selectType('head')">
+          <div class="type-badge badge-head">WEEKLY</div>
+          <div class="type-name">본부장 주간회의</div>
+          <div class="type-desc">녹음 파일 → STT 변환 → AI 회의록 자동생성</div>
+        </div>
+        <div class="type-card" id="type-vice" onclick="selectType('vice')">
+          <div class="type-badge badge-vice">WEEKLY</div>
+          <div class="type-name">부회장 주간회의</div>
+          <div class="type-desc">임원 자기보고 수집 → AI 통합 회의록 생성</div>
+        </div>
+        <div class="type-card" id="type-exec" onclick="selectType('exec')">
+          <div class="type-badge badge-exec">수시</div>
+          <div class="type-name">최고경영층 회의</div>
+          <div class="type-desc">수동 입력 → 지시사항 직접 등록</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 2A: 본부장 회의 - 3가지 입력 방식 -->
+    <div class="card" id="step2-head">
+      <div class="card-title">② 회의 내용 입력</div>
+
+      <!-- 회의 기본정보 -->
+      <div class="grid2" style="margin-bottom:18px;">
+        <div class="form-row" style="margin-bottom:0">
+          <label class="form-label">회의 일자</label>
+          <input class="form-input" type="date" id="meeting-date" value="2025-07-01">
+        </div>
+        <div class="form-row" style="margin-bottom:0">
+          <label class="form-label">회의 장소</label>
+          <input class="form-input" type="text" id="meeting-place" placeholder="예) 본부장실 회의실">
+        </div>
+      </div>
+
+      <!-- ── 입력 방식 탭 (4개) ── -->
+      <div style="display:flex;gap:0;background:var(--navy);border-radius:10px;padding:4px;margin-bottom:16px;">
+        <button class="input-mode-tab active" id="tab-mic"      onclick="switchInputMode('mic')"      style="flex:1;padding:9px 4px;border:none;border-radius:8px;background:var(--blue);color:#fff;font-size:11px;font-weight:700;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:5px;">
+          🎙 실시간 녹음
+        </button>
+        <button class="input-mode-tab" id="tab-file"     onclick="switchInputMode('file')"     style="flex:1;padding:9px 4px;border:none;border-radius:8px;background:transparent;color:var(--text-sub);font-size:11px;font-weight:700;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:5px;">
+          📁 녹음파일 업로드
+        </button>
+        <button class="input-mode-tab" id="tab-script"   onclick="switchInputMode('script')"   style="flex:1;padding:9px 4px;border:none;border-radius:8px;background:transparent;color:var(--text-sub);font-size:11px;font-weight:700;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:5px;">
+          📄 스크립트 업로드
+        </button>
+        <button class="input-mode-tab" id="tab-minutes"  onclick="switchInputMode('minutes')"  style="flex:1;padding:9px 4px;border:none;border-radius:8px;background:transparent;color:var(--text-sub);font-size:11px;font-weight:700;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:5px;">
+          📋 회의록 업로드
+        </button>
+      </div>
+
+      <!-- ══════════════════════════════════════════════
+           MODE A : 실시간 녹음
+      ══════════════════════════════════════════════ -->
+      <div id="mode-mic">
+        <!-- 녹음 대기 -->
+        <div id="mic-idle">
+          <div style="background:var(--navy);border:2px dashed var(--navy-light);border-radius:12px;padding:32px;text-align:center;">
+            <div style="font-size:48px;margin-bottom:12px;">🎙</div>
+            <div style="font-size:14px;font-weight:700;margin-bottom:6px;">마이크로 실시간 녹음</div>
+            <div style="font-size:12px;color:var(--text-sub);margin-bottom:20px;">브라우저 마이크를 사용해 회의를 실시간으로 녹음하고 즉시 STT 변환합니다</div>
+            <button onclick="startMicRecording()" style="background:var(--blue);color:#fff;border:none;padding:12px 32px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;">● 녹음 시작</button>
+          </div>
+          <div style="margin-top:10px;font-size:11px;color:var(--text-sub);text-align:center;">※ 브라우저에서 마이크 접근 권한을 허용해 주세요 · Chrome / Edge 권장</div>
+        </div>
+
+        <!-- 녹음 중 -->
+        <div id="mic-recording" class="hidden">
+          <!-- 상태 헤더 -->
+          <div style="display:flex;align-items:center;justify-content:space-between;background:var(--navy);border-radius:10px 10px 0 0;padding:12px 16px;border:1px solid rgba(239,68,68,0.3);border-bottom:none;">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div style="width:10px;height:10px;border-radius:50%;background:#EF4444;animation:pulse-red 1s infinite;flex-shrink:0;"></div>
+              <span style="font-size:13px;font-weight:700;color:#F87171;">● 녹음 중 · 실시간 STT 변환</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span id="mic-elapsed" style="font-size:13px;color:#F87171;font-family:monospace;font-weight:700;">00:00</span>
+              <button onclick="stopMicRecording()" style="background:rgba(239,68,68,0.2);border:1px solid rgba(239,68,68,0.5);color:#F87171;padding:5px 14px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;">■ 녹음 종료</button>
+            </div>
+          </div>
+          <!-- 파형 시각화 -->
+          <div style="background:var(--navy);border-left:1px solid rgba(239,68,68,0.3);border-right:1px solid rgba(239,68,68,0.3);padding:10px 16px;display:flex;align-items:center;gap:3px;height:44px;" id="mic-waveform">
+            <!-- JS로 동적 생성 -->
+          </div>
+          <!-- 실시간 텍스트 -->
+          <div style="background:var(--navy);border:1px solid rgba(239,68,68,0.3);border-top:none;border-radius:0 0 10px 10px;padding:14px 16px;min-height:140px;max-height:220px;overflow-y:auto;" id="mic-stt-box">
+            <div id="mic-interim" style="font-size:12px;color:var(--text-sub);font-style:italic;line-height:1.8;"></div>
+            <div id="mic-final"   style="font-size:12px;color:var(--off-white);line-height:1.9;white-space:pre-wrap;"></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:11px;color:var(--text-sub);">
+            <span>문장 수: <b id="mic-sentence-cnt" style="color:var(--blue);">0</b></span>
+            <span>글자 수: <b id="mic-char-cnt" style="color:var(--blue);">0</b>자</span>
+            <span id="mic-status" style="color:#10B981;font-weight:600;">● 대기 중</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════════════
+           MODE B : 녹음 파일 업로드
+      ══════════════════════════════════════════════ -->
+      <div id="mode-file" class="hidden">
+        <input type="file" id="audioFileInput" accept=".mp3,.wav,.m4a,.mp4,.aac,.ogg,.flac" style="display:none;" onchange="handleAudioFileSelect(this)">
+
+        <!-- 업로드 존 -->
+        <div id="audioUploadZone" style="background:var(--navy);border:2px dashed var(--navy-light);border-radius:12px;padding:32px;text-align:center;cursor:pointer;transition:all .2s;"
+             ondragover="event.preventDefault();this.style.borderColor='var(--blue)'"
+             ondragleave="this.style.borderColor='var(--navy-light)'"
+             ondrop="handleAudioDrop(event)"
+             onclick="document.getElementById('audioFileInput').click()">
+          <div style="font-size:40px;margin-bottom:10px;">🎵</div>
+          <div style="font-size:14px;font-weight:700;margin-bottom:6px;">녹음 파일을 드래그하거나 클릭하세요</div>
+          <div style="font-size:12px;color:var(--text-sub);margin-bottom:16px;">MP3 · WAV · M4A · MP4 · AAC · OGG · FLAC · 최대 500MB</div>
+          <button onclick="event.stopPropagation();document.getElementById('audioFileInput').click()" style="background:var(--blue);color:#fff;border:none;padding:9px 24px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;">📂 파일 탐색기 열기</button>
+        </div>
+
+        <!-- 파일 선택 후 정보 -->
+        <div id="audio-file-info" class="hidden" style="margin-top:12px;background:var(--navy);border:1px solid var(--navy-light);border-radius:8px;padding:12px 16px;display:flex;align-items:center;gap:12px;">
+          <span style="font-size:22px;">🎵</span>
+          <div style="flex:1;min-width:0;">
+            <div id="audio-file-name" style="font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></div>
+            <div id="audio-file-meta" style="font-size:11px;color:var(--text-sub);margin-top:2px;"></div>
+          </div>
+          <button onclick="resetAudioFile()" style="background:transparent;border:1px solid var(--navy-light);color:var(--text-sub);padding:4px 10px;border-radius:6px;font-size:11px;cursor:pointer;flex-shrink:0;">✕</button>
+          <button onclick="startAudioSTT()" style="background:var(--blue);border:none;color:#fff;padding:7px 16px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0;">🎙 STT 변환 시작</button>
+        </div>
+
+        <!-- 파일 로드 진행 -->
+        <div id="audio-load-progress" class="hidden" style="margin-top:12px;">
+          <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-sub);margin-bottom:5px;">
+            <span>📂 파일 로드 중 — <span id="audio-progress-name"></span></span>
+            <span id="audio-pct">0%</span>
+          </div>
+          <div style="height:6px;background:var(--navy);border-radius:3px;overflow:hidden;">
+            <div id="audio-pbar" style="height:100%;border-radius:3px;background:linear-gradient(90deg,var(--blue),var(--blue-light));width:0%;transition:width .2s;"></div>
+          </div>
+          <div id="audio-load-label" style="font-size:11px;color:var(--text-sub);margin-top:4px;"></div>
+        </div>
+
+        <!-- STT 진행 (파일) -->
+        <div id="audio-stt-panel" class="hidden" style="margin-top:12px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;background:var(--navy);border-radius:10px 10px 0 0;padding:12px 16px;border:1px solid var(--navy-light);border-bottom:none;">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div id="audio-stt-pulse" style="width:10px;height:10px;border-radius:50%;background:#10B981;animation:pulse-green 1.2s infinite;"></div>
+              <span style="font-size:13px;font-weight:700;">🎙 파일 STT 변환 중</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span id="audio-elapsed" style="font-size:11px;color:var(--text-sub);font-family:monospace;">00:00</span>
+              <button onclick="stopAudioSTT()" style="background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.4);color:#F87171;padding:4px 12px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;">■ 중단</button>
+            </div>
+          </div>
+          <div style="background:var(--navy);border:1px solid var(--navy-light);border-top:none;border-radius:0 0 10px 10px;padding:14px 16px;min-height:140px;max-height:220px;overflow-y:auto;" id="audio-stt-box">
+            <div id="audio-interim" style="font-size:12px;color:var(--text-sub);font-style:italic;line-height:1.8;"></div>
+            <div id="audio-final"   style="font-size:12px;color:var(--off-white);line-height:1.9;white-space:pre-wrap;"></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:11px;color:var(--text-sub);">
+            <span>문장: <b id="audio-sentence-cnt" style="color:var(--blue);">0</b></span>
+            <span>글자: <b id="audio-char-cnt" style="color:var(--blue);">0</b>자</span>
+            <span id="audio-stt-status" style="color:#10B981;font-weight:600;">● 변환 중...</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════════════
+           MODE C : 스크립트 파일 업로드
+      ══════════════════════════════════════════════ -->
+      <div id="mode-script" class="hidden">
+        <input type="file" id="scriptFileInput" accept=".txt,.md,.docx,.pdf,.csv" style="display:none;" onchange="handleScriptFileSelect(this)">
+
+        <!-- 업로드 존 -->
+        <div id="scriptUploadZone" style="background:var(--navy);border:2px dashed var(--navy-light);border-radius:12px;padding:32px;text-align:center;cursor:pointer;transition:all .2s;"
+             ondragover="event.preventDefault();this.style.borderColor='var(--blue)'"
+             ondragleave="this.style.borderColor='var(--navy-light)'"
+             ondrop="handleScriptDrop(event)"
+             onclick="document.getElementById('scriptFileInput').click()">
+          <div style="font-size:40px;margin-bottom:10px;">📄</div>
+          <div style="font-size:14px;font-weight:700;margin-bottom:6px;">회의록 스크립트 파일을 업로드하세요</div>
+          <div style="font-size:12px;color:var(--text-sub);margin-bottom:16px;">TXT · MD · DOCX · PDF · CSV 지원 · 텍스트를 바로 분석해 지시사항을 추출합니다</div>
+          <button onclick="event.stopPropagation();document.getElementById('scriptFileInput').click()" style="background:var(--blue);color:#fff;border:none;padding:9px 24px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;">📂 파일 탐색기 열기</button>
+        </div>
+
+        <!-- 직접 붙여넣기 -->
+        <div style="margin-top:14px;">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+            <div style="flex:1;height:1px;background:var(--line);"></div>
+            <span style="font-size:11px;color:var(--text-sub);">또는 직접 붙여넣기</span>
+            <div style="flex:1;height:1px;background:var(--line);"></div>
+          </div>
+          <textarea id="script-paste-area" style="width:100%;background:var(--navy);border:1px solid var(--navy-light);border-radius:8px;padding:12px;font-size:12px;color:var(--off-white);line-height:1.8;font-family:inherit;resize:vertical;min-height:140px;outline:none;" placeholder="회의록 텍스트를 여기에 붙여넣으세요...&#10;&#10;예) &#10;본부장: 이번 주 전략과제 추진 현황을 보고해 주십시오.&#10;팀장: 현재 92% 달성 중입니다.&#10;본부장: 100% 달성을 위한 개선계획을 다음주까지 제출해 주십시오." oninput="onScriptPaste()"></textarea>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;">
+            <span id="script-char-count" style="font-size:11px;color:var(--text-sub);">0자 입력됨</span>
+            <button id="script-analyze-btn" onclick="analyzeScript()" disabled style="background:var(--navy-light);color:var(--text-sub);border:none;padding:8px 20px;border-radius:7px;font-size:12px;font-weight:700;cursor:not-allowed;transition:all .2s;">✦ 분석 시작</button>
+          </div>
+        </div>
+
+        <!-- 파일 선택 후 정보 -->
+        <div id="script-file-info" class="hidden" style="margin-top:12px;background:var(--navy);border:1px solid var(--navy-light);border-radius:8px;padding:12px 16px;display:flex;align-items:center;gap:12px;">
+          <span style="font-size:22px;">📄</span>
+          <div style="flex:1;min-width:0;">
+            <div id="script-file-name" style="font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></div>
+            <div id="script-file-meta" style="font-size:11px;color:var(--text-sub);margin-top:2px;"></div>
+          </div>
+          <button onclick="resetScriptFile()" style="background:transparent;border:1px solid var(--navy-light);color:var(--text-sub);padding:4px 10px;border-radius:6px;font-size:11px;cursor:pointer;flex-shrink:0;">✕</button>
+          <button onclick="analyzeScript()" style="background:var(--blue);border:none;color:#fff;padding:7px 16px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0;">✦ 분석 시작</button>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════════════
+           MODE D : 완성 회의록 업로드 → 지시사항 추출
+      ══════════════════════════════════════════════ -->
+      <div id="mode-minutes" class="hidden">
+        <input type="file" id="minutesFileInput" accept=".txt,.md,.docx,.pdf,.hwp,.csv" style="display:none;" onchange="handleMinutesFileSelect(this)">
+
+        <!-- 업로드 존 -->
+        <div id="minutesUploadZone" style="background:var(--navy);border:2px dashed var(--navy-light);border-radius:12px;padding:28px;text-align:center;cursor:pointer;transition:all .2s;"
+             ondragover="event.preventDefault();this.style.borderColor='var(--blue)'"
+             ondragleave="this.style.borderColor='var(--navy-light)'"
+             ondrop="handleMinutesDrop(event)"
+             onclick="document.getElementById('minutesFileInput').click()">
+          <div style="font-size:40px;margin-bottom:10px;">📋</div>
+          <div style="font-size:14px;font-weight:700;margin-bottom:6px;">완성된 회의록 파일을 업로드하세요</div>
+          <div style="font-size:12px;color:var(--text-sub);margin-bottom:4px;">TXT · MD · DOCX · PDF · HWP(텍스트) · CSV</div>
+          <div style="font-size:11px;color:var(--text-sub);margin-bottom:16px;">회의록에서 지시사항만 자동으로 추출합니다 — STT 변환 없이 바로 처리</div>
+          <button onclick="event.stopPropagation();document.getElementById('minutesFileInput').click()"
+                  style="background:var(--blue);color:#fff;border:none;padding:9px 24px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;">📂 파일 탐색기 열기</button>
+        </div>
+
+        <!-- 파일 선택 후 정보 -->
+        <div id="minutes-file-info" class="hidden" style="margin-top:12px;background:var(--navy);border:1px solid var(--navy-light);border-radius:8px;padding:12px 16px;display:flex;align-items:center;gap:12px;">
+          <span style="font-size:22px;">📋</span>
+          <div style="flex:1;min-width:0;">
+            <div id="minutes-file-name" style="font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></div>
+            <div id="minutes-file-meta" style="font-size:11px;color:var(--text-sub);margin-top:2px;"></div>
+          </div>
+          <button onclick="resetMinutesFile()" style="background:transparent;border:1px solid var(--navy-light);color:var(--text-sub);padding:4px 10px;border-radius:6px;font-size:11px;cursor:pointer;flex-shrink:0;">✕</button>
+        </div>
+
+        <!-- 직접 붙여넣기 -->
+        <div style="margin-top:14px;">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+            <div style="flex:1;height:1px;background:var(--line);"></div>
+            <span style="font-size:11px;color:var(--text-sub);">또는 직접 붙여넣기</span>
+            <div style="flex:1;height:1px;background:var(--line);"></div>
+          </div>
+          <textarea id="minutes-paste-area"
+            style="width:100%;background:var(--navy);border:1px solid var(--navy-light);border-radius:8px;padding:12px;font-size:12px;color:var(--off-white);line-height:1.8;font-family:inherit;resize:vertical;min-height:160px;outline:none;transition:border-color .2s;"
+            placeholder="완성된 회의록 전체 텍스트를 붙여넣으세요...&#10;&#10;예)&#10;■ 미래전략본부 주간회의 회의록 (2025.07.01)&#10;&#10;[주요 논의사항]&#10;1. EV 인프라 유럽 추진 현황 보고&#10;2. ESS 국내 사업 계획 검토&#10;&#10;[지시사항]&#10;1. 임원1 → 프랑스 허가 지연 대응방안 다음주까지 보고&#10;2. 임원2 → 폐배터리 공급 협약 이번달 말 체결"
+            oninput="onMinutesPaste()"></textarea>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;">
+            <span id="minutes-char-count" style="font-size:11px;color:var(--text-sub);">0자 입력됨</span>
+            <button id="minutes-extract-btn" onclick="extractFromMinutes()" disabled
+              style="background:var(--navy-light);color:var(--text-sub);border:none;padding:8px 20px;border-radius:7px;font-size:12px;font-weight:700;cursor:not-allowed;transition:all .2s;">
+              🔍 지시사항 추출
+            </button>
+          </div>
+        </div>
+
+        <!-- 추출 결과 미리보기 (추출 후 표시) -->
+        <div id="minutes-result-panel" class="hidden" style="margin-top:16px;">
+          <div style="background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.3);border-radius:8px;padding:10px 14px;display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+            <span style="color:#34D399;font-size:16px;">✓</span>
+            <span style="font-size:12px;font-weight:700;color:#34D399;">지시사항 추출 완료</span>
+            <span id="minutes-result-stat" style="font-size:11px;color:var(--text-sub);margin-left:4px;"></span>
+          </div>
+
+          <!-- 추출된 지시사항 목록 (편집 가능) -->
+          <div style="font-size:11px;color:var(--text-sub);margin-bottom:8px;font-weight:600;">추출된 지시사항 — 클릭하여 수정 가능</div>
+          <div id="minutes-directive-list" style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px;"></div>
+
+          <!-- 지시사항 수동 추가 -->
+          <button onclick="addMinutesDirective()"
+            style="width:100%;background:transparent;border:1px dashed var(--navy-light);color:var(--text-sub);padding:8px;border-radius:8px;font-size:12px;cursor:pointer;margin-bottom:12px;">
+            ＋ 지시사항 수동 추가
+          </button>
+
+          <!-- 이행관리 툴 전송 -->
+          <div style="display:flex;gap:8px;">
+            <button onclick="sendMinutesToModule2()"
+              style="background:var(--blue);color:#fff;border:none;padding:10px 20px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;flex:1;">
+              ✓ 이행관리 툴로 전송 (Module 2)
+            </button>
+            <button onclick="resetMinutesResult()"
+              style="background:transparent;color:var(--text-sub);border:1px solid var(--navy-light);padding:10px 14px;border-radius:8px;font-size:12px;cursor:pointer;">
+              ↺ 다시
+            </button>
+          </div>
+        </div>
+
+        <!-- 전송 완료 -->
+        <div id="minutes-sent-panel" class="hidden" style="margin-top:16px;text-align:center;padding:24px;">
+          <div style="font-size:36px;margin-bottom:10px;">✅</div>
+          <div style="font-size:14px;font-weight:700;margin-bottom:6px;">Module 2 전송 완료</div>
+          <div id="minutes-sent-stat" style="font-size:12px;color:var(--text-sub);margin-bottom:16px;"></div>
+          <div style="display:flex;gap:8px;justify-content:center;">
+            <button onclick="goModule2()"
+              style="background:var(--blue);color:#fff;border:none;padding:9px 20px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;">
+              → Module 2 이행관리 확인
+            </button>
+            <button onclick="switchInputMode('minutes')"
+              style="background:transparent;color:var(--text-sub);border:1px solid var(--navy-light);padding:9px 14px;border-radius:8px;font-size:12px;cursor:pointer;">
+              + 새 회의록
+            </button>
+          </div>
+        </div>
+      </div>
+      <div id="phase-stt-done" class="hidden" style="margin-top:14px;">
+        <div style="background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.3);border-radius:8px;padding:10px 14px;display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+          <span style="color:#34D399;font-size:16px;">✓</span>
+          <span id="stt-done-label" style="font-size:12px;font-weight:700;color:#34D399;">변환 완료</span>
+          <span id="stt-done-stat"  style="font-size:11px;color:var(--text-sub);margin-left:4px;"></span>
+        </div>
+        <div style="font-size:11px;color:var(--text-sub);margin-bottom:6px;font-weight:600;">📄 인식된 전문 (수정 가능)</div>
+        <textarea id="stt-result-edit" style="width:100%;background:var(--navy);border:1px solid var(--navy-light);border-radius:8px;padding:12px;font-size:12px;color:var(--off-white);line-height:1.9;font-family:inherit;resize:vertical;min-height:180px;outline:none;" placeholder="변환된 텍스트가 여기에 표시됩니다..."></textarea>
+        <div style="display:flex;gap:8px;margin-top:10px;">
+          <button onclick="proceedToAI()" style="background:var(--blue);color:#fff;border:none;padding:10px 20px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;flex:1;">✦ AI 회의록 생성</button>
+          <button onclick="resetAllInput()" style="background:transparent;color:var(--text-sub);border:1px solid var(--navy-light);padding:10px 14px;border-radius:8px;font-size:12px;cursor:pointer;">↺ 처음으로</button>
+        </div>
+      </div>
+
+      <style>
+        @keyframes pulse-green { 0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(16,185,129,0.4);} 50%{opacity:.6;box-shadow:0 0 0 5px rgba(16,185,129,0);} }
+        @keyframes pulse-red   { 0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(239,68,68,0.5);}  50%{opacity:.6;box-shadow:0 0 0 5px rgba(239,68,68,0);} }
+      </style>
+    </div>
+
+    <!-- STEP 2B: 부회장 회의 - 임원 자기보고 (hidden by default) -->
+    <div class="card self-report-box" id="step2-vice">
+      <div class="card-title">② 임원 자기보고 수집 <span style="font-size:11px;color:var(--text-sub);font-weight:400;">(부회장 주간회의)</span></div>
+      <div class="grid2" style="margin-bottom:16px;">
+        <div class="form-row" style="margin-bottom:0">
+          <label class="form-label">회의 일자</label>
+          <input class="form-input" type="date" value="2025-07-01">
+        </div>
+        <div class="form-row" style="margin-bottom:0">
+          <label class="form-label">발송 채널</label>
+          <select class="form-input">
+            <option>Microsoft Teams</option>
+            <option>이메일</option>
+          </select>
+        </div>
+      </div>
+      <div style="font-size:12px;color:var(--text-sub);margin-bottom:10px;">회의 참석 임원 — 자기보고 현황</div>
+      <div class="exec-list">
+        <div class="exec-item">
+          <div>
+            <div class="exec-name">정전무 전무</div>
+            <div class="exec-role">미래전략본부</div>
+          </div>
+          <span class="status-pill pill-done">입력 완료</span>
+        </div>
+        <div class="exec-item">
+          <div>
+            <div class="exec-name">김상무 상무</div>
+            <div class="exec-role">미래전략기획팀</div>
+          </div>
+          <span class="status-pill pill-done">입력 완료</span>
+        </div>
+        <div class="exec-item">
+          <div>
+            <div class="exec-name">이상무 상무</div>
+            <div class="exec-role">미래전략사업팀</div>
+          </div>
+          <span class="status-pill pill-wait">미입력 · 리마인드 발송됨</span>
+        </div>
+        <div class="exec-item">
+          <div>
+            <div class="exec-name">박이사 이사</div>
+            <div class="exec-role">미래전략운영팀</div>
+          </div>
+          <span class="status-pill pill-sent">발송됨</span>
+        </div>
+      </div>
+      <button class="send-btn" onclick="simulateVice()">📨 미입력 임원에게 리마인드 발송</button>
+    </div>
+
+    <!-- STEP 2C: 최고경영층 - 수동 입력 (hidden) -->
+    <div class="card hidden" id="step2-exec">
+      <div class="card-title">② 지시사항 직접 입력 <span style="font-size:11px;color:var(--text-sub);font-weight:400;">(최고경영층 회의)</span></div>
+      <div class="grid2">
+        <div class="form-row">
+          <label class="form-label">회의 일자</label>
+          <input class="form-input" type="date" value="2025-07-01">
+        </div>
+        <div class="form-row">
+          <label class="form-label">회의명</label>
+          <input class="form-input" type="text" placeholder="예) 미래전략 점검회의">
+        </div>
+      </div>
+      <div class="form-row">
+        <label class="form-label">회의 주요 내용</label>
+        <textarea class="form-input form-textarea" placeholder="회의에서 논의된 주요 내용을 입력하세요"></textarea>
+      </div>
+      <div class="form-row">
+        <label class="form-label">지시사항 (항목별로 입력)</label>
+        <textarea class="form-input form-textarea" placeholder="예) 1. 하반기 전략과제 검토 - 담당: 미래전략운영팀&#10;2. 해외 사업 추진 현황 보고 - 담당: 미래전략기획팀" style="min-height:100px;"></textarea>
+      </div>
+      <button class="btn-primary" onclick="simulateExec()">→ 이행관리 툴에 등록</button>
+    </div>
+
+    <!-- STEP 3: AI 회의록 생성 결과 -->
+    <div class="card hidden" id="step3-card">
+      <div class="card-title">③ AI 회의록 초안
+        <span class="ai-label" style="margin-left:8px;">✦ Claude AI 자동생성</span>
+      </div>
+
+      <!-- AI 생성 중 로딩 -->
+      <div id="ai-loading" class="hidden" style="padding:20px 0;">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center;">
+          <div style="position:relative;width:48px;height:48px;">
+            <div style="position:absolute;inset:0;border-radius:50%;border:3px solid var(--navy-light);"></div>
+            <div style="position:absolute;inset:0;border-radius:50%;border:3px solid transparent;border-top-color:var(--blue);animation:spin 1s linear infinite;"></div>
+          </div>
+          <div>
+            <div style="font-size:13px;font-weight:700;margin-bottom:4px;" id="ai-loading-msg">Claude AI에게 회의록 작성을 요청했습니다</div>
+            <div style="font-size:11px;color:var(--text-sub);">채팅창의 AI 응답이 완료되면 아래에 붙여넣으세요</div>
+          </div>
+        </div>
+        <!-- 수동 붙여넣기 영역 -->
+        <div style="margin-top:18px;background:var(--navy);border:1px solid var(--navy-light);border-radius:10px;padding:16px;">
+          <div style="font-size:12px;font-weight:700;margin-bottom:6px;">📋 채팅창의 AI 응답을 여기에 붙여넣기</div>
+          <div style="font-size:11px;color:var(--text-sub);margin-bottom:10px;">위 채팅창에서 Claude의 JSON 응답 전체를 복사(Ctrl+C) → 아래에 붙여넣기(Ctrl+V)</div>
+          <textarea id="ai-paste-area" style="width:100%;background:var(--navy-mid);border:1px solid var(--navy-light);border-radius:7px;padding:10px;font-size:11px;color:var(--off-white);line-height:1.7;font-family:monospace;resize:vertical;min-height:100px;outline:none;transition:border-color .2s;" placeholder='{"summary":"...","directives":[...]}' oninput="this.style.borderColor=this.value.trim()?'var(--blue)':'var(--navy-light)'"></textarea>
+          <div style="display:flex;gap:8px;margin-top:8px;">
+            <button onclick="parseManualInput()" style="background:var(--blue);color:#fff;border:none;padding:8px 20px;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;flex:1;">✦ 분석하여 회의록 생성</button>
+            <button onclick="cancelAI()" style="background:transparent;color:var(--text-sub);border:1px solid var(--navy-light);padding:8px 14px;border-radius:7px;font-size:12px;cursor:pointer;">취소</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 오류 표시 -->
+      <div id="ai-error" class="hidden" style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.3);border-radius:8px;padding:14px 16px;margin-bottom:12px;">
+        <div style="font-size:13px;font-weight:700;color:#F87171;margin-bottom:4px;">⚠ AI 생성 오류</div>
+        <div id="ai-error-msg" style="font-size:12px;color:var(--text-sub);line-height:1.6;"></div>
+        <button onclick="retryAI()" style="margin-top:10px;background:var(--blue);color:#fff;border:none;padding:7px 16px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;">↺ 다시 시도</button>
+      </div>
+
+      <!-- 회의록 본문 -->
+      <div id="ai-content" class="hidden">
+        <!-- 기본 정보 -->
+        <div style="background:var(--navy);border-radius:8px;padding:12px 16px;margin-bottom:16px;border:1px solid var(--navy-light);display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
+          <div><div style="font-size:10px;color:var(--text-sub);font-weight:700;margin-bottom:3px;">회의명</div><div style="font-size:12px;" id="meta-title">본부장 주간회의</div></div>
+          <div><div style="font-size:10px;color:var(--text-sub);font-weight:700;margin-bottom:3px;">일시</div><div style="font-size:12px;" id="meta-date">2025.07.01</div></div>
+          <div><div style="font-size:10px;color:var(--text-sub);font-weight:700;margin-bottom:3px;">입력 분량</div><div style="font-size:12px;" id="meta-chars">-</div></div>
+        </div>
+
+        <!-- 주요 논의사항 -->
+        <div style="font-size:12px;font-weight:700;color:var(--text-sub);margin-bottom:8px;letter-spacing:0.5px;">📋 주요 논의사항</div>
+        <div id="ai-summary" class="ai-output" style="margin-bottom:16px;font-size:12px;line-height:1.9;white-space:pre-wrap;"></div>
+
+        <hr class="divider">
+
+        <!-- 지시사항 -->
+        <div class="card-title" style="margin-bottom:4px;">④ 지시사항 자동 추출</div>
+        <div style="font-size:11px;color:var(--text-sub);margin-bottom:12px;">Claude AI가 회의 내용에서 지시사항을 추출했습니다. 내용을 클릭해 직접 수정할 수 있습니다.</div>
+        <div class="directive-list" id="directive-list"></div>
+
+        <!-- 원문 보기 -->
+        <div style="margin-top:14px;">
+          <button onclick="toggleRaw()" style="background:transparent;border:1px solid var(--navy-light);color:var(--text-sub);padding:6px 14px;border-radius:6px;font-size:11px;cursor:pointer;width:100%;">
+            📄 원문 전체 보기 / 접기
+          </button>
+          <div id="raw-text-box" class="hidden" style="margin-top:8px;background:var(--navy);border:1px solid var(--navy-light);border-radius:8px;padding:14px;font-size:11px;color:var(--text-sub);line-height:1.8;max-height:200px;overflow-y:auto;white-space:pre-wrap;"></div>
+        </div>
+
+        <div class="btn-row" style="margin-top:16px;">
+          <button class="btn-primary" onclick="confirmDirectives()">✓ 확정 후 이행관리 툴로 전송</button>
+          <button class="btn-secondary" onclick="downloadMinutes()">↓ 회의록 저장</button>
+        </div>
+      </div>
+    </div>
+    <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
+
+    <!-- COMPLETE -->
+    <div class="card hidden" id="step-complete">
+      <div style="text-align:center;padding:20px 0;">
+        <div style="font-size:40px;margin-bottom:12px;">✅</div>
+        <div style="font-size:16px;font-weight:700;margin-bottom:6px;">이행관리 툴 전송 완료</div>
+        <div style="font-size:13px;color:var(--text-sub);margin-bottom:20px;">지시사항 3건이 Module 2에 자동 등록되었습니다</div>
+        <div style="display:flex;gap:10px;justify-content:center;">
+          <button class="btn-primary" onclick="goModule2()">→ Module 2 이행관리 확인</button>
+          <button class="btn-secondary" onclick="resetFlow()">+ 새 회의록 생성</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- HISTORY -->
+    <div class="card" id="history-card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+        <div class="card-title" style="margin-bottom:0;">📂 최근 생성 이력</div>
+        <button onclick="clearHistory()" style="background:transparent;border:1px solid var(--navy-light);color:var(--text-sub);padding:4px 12px;border-radius:6px;font-size:11px;cursor:pointer;">전체 삭제</button>
+      </div>
+      <table class="history-table">
+        <thead>
+          <tr>
+            <th>입력 방식</th>
+            <th>회의 유형</th>
+            <th>파일명 / 회의 일자</th>
+            <th>지시사항</th>
+            <th>생성일시</th>
+            <th>상태</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="history-tbody">
+          <!-- JS로 동적 렌더링 -->
+        </tbody>
+      </table>
+      <div id="history-empty" style="text-align:center;padding:24px;font-size:12px;color:var(--text-sub);display:none;">
+        아직 생성된 이력이 없습니다. 회의록을 업로드하거나 녹음을 시작해 보세요.
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<!-- ══ PAGE 2 : 이행관리 대시보드 ═══════════════════════ -->
+<div class="page-section" id="page2">
+<div class="main">
+  <!-- SIDEBAR -->
+  <aside>
+    <div class="aside-section">
+      <div class="aside-label">현황</div>
+      <div class="aside-item active" onclick="setView('all',this)">
+        <span class="aside-icon">🗂</span> 전체 현황
+      </div>
+      <div class="aside-item" onclick="setView('urgent',this)">
+        <span class="aside-icon">🔴</span> 기한 임박·초과
+        <span class="aside-badge">3</span>
+      </div>
+    </div>
+    <div class="aside-section">
+      <div class="aside-label">회의 유형</div>
+      <div class="aside-item" onclick="setView('head',this)">
+        <span class="dot" style="background:#1E6FFF;margin-right:2px;"></span> 본부장 주간회의
+      </div>
+      <div class="aside-item" onclick="setView('vice',this)">
+        <span class="dot" style="background:#7C3AED;margin-right:2px;"></span> 부회장 주간회의
+      </div>
+      <div class="aside-item" onclick="setView('exec',this)">
+        <span class="dot" style="background:#DC2626;margin-right:2px;"></span> 최고경영층 회의
+        <span style="margin-left:auto;font-size:10px;color:#F87171;">🔒</span>
+      </div>
+    </div>
+    <div class="aside-section">
+      <div class="aside-label">이행 상태</div>
+      <div class="aside-item" onclick="setView('none',this)"><span class="aside-icon">⬜</span> 미이행</div>
+      <div class="aside-item" onclick="setView('review',this)"><span class="aside-icon">🟡</span> 검토중</div>
+      <div class="aside-item" onclick="setView('progress',this)"><span class="aside-icon">🔵</span> 이행중</div>
+      <div class="aside-item" onclick="setView('done',this)"><span class="aside-icon">🟢</span> 완료</div>
+      <div class="aside-item" onclick="setView('hold',this)"><span class="aside-icon">⚫</span> 보류</div>
+    </div>
+  </aside>
+
+  <!-- CONTENT -->
+  <div class="content">
+    <div class="page-header">
+      <div>
+        <div class="page-title">📊 지시사항 이행관리</div>
+        <div class="page-sub">2025년 7월 기준 · 전체 지시사항 현황</div>
+      </div>
+      <button class="add-btn" onclick="openModal()">＋ 지시사항 수동 등록</button>
+    </div>
+
+    <!-- SUMMARY CARDS -->
+    <div class="summary-grid">
+      <div class="sum-card">
+        <div class="sum-label">전체</div>
+        <div class="sum-val" style="color:var(--white);">23</div>
+        <div class="sum-sub">이번 달 기준</div>
+      </div>
+      <div class="sum-card">
+        <div class="sum-label">🟢 완료</div>
+        <div class="sum-val" style="color:#34D399;">14</div>
+        <div class="sum-sub">이행률 60.9%</div>
+      </div>
+      <div class="sum-card">
+        <div class="sum-label">🔵 이행중</div>
+        <div class="sum-val" style="color:#60A5FA;">5</div>
+        <div class="sum-sub">진행 중</div>
+      </div>
+      <div class="sum-card">
+        <div class="sum-label">⬜ 미이행</div>
+        <div class="sum-val" style="color:#9CA3AF;">4</div>
+        <div class="sum-sub">검토중 포함</div>
+      </div>
+      <div class="sum-card urgent">
+        <div class="sum-label">⚠ 기한 임박·초과</div>
+        <div class="sum-val">3</div>
+        <div class="sum-sub">즉시 확인 필요</div>
+      </div>
+    </div>
+
+    <!-- FILTER BAR -->
+    <div class="filter-bar">
+      <div class="filter-group">
+        <button class="filter-btn active" onclick="filterType('all',this)">전체</button>
+        <button class="filter-btn f-head" onclick="filterType('head',this)">본부장</button>
+        <button class="filter-btn f-vice" onclick="filterType('vice',this)">부회장</button>
+        <button class="filter-btn f-exec" onclick="filterType('exec',this)">최고경영층 🔒</button>
+      </div>
+      <div class="filter-group">
+        <button class="filter-btn" onclick="filterStatus('all',this)">전체 상태</button>
+        <button class="filter-btn" onclick="filterStatus('none',this)">미이행</button>
+        <button class="filter-btn" onclick="filterStatus('progress',this)">이행중</button>
+        <button class="filter-btn" onclick="filterStatus('done',this)">완료</button>
+      </div>
+      <div class="search-box">
+        <span style="color:var(--text-sub);font-size:13px;">🔍</span>
+        <input type="text" placeholder="지시사항 검색...">
+      </div>
+    </div>
+
+    <!-- TABLE -->
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:32px;"><input type="checkbox" style="accent-color:var(--blue);"></th>
+            <th>출처</th>
+            <th>지시 일자</th>
+            <th style="min-width:260px;">지시사항</th>
+            <th>담당팀</th>
+            <th>기한</th>
+            <th>우선순위</th>
+            <th>이행 상태</th>
+            <th>보고</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody">
+          <!-- JS로 렌더링 -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- DETAIL PANEL -->
+<div class="detail-overlay" id="detailPanel">
+  <div class="detail-header">
+    <div class="detail-title" id="dp-title">지시사항 상세</div>
+    <button class="close-btn" onclick="closeDetail()">✕ 닫기</button>
+  </div>
+  <div class="detail-body">
+    <div class="detail-section">
+      <div class="detail-label">출처 / 일자</div>
+      <div class="detail-value" id="dp-source"></div>
+    </div>
+    <div class="detail-section">
+      <div class="detail-label">지시 내용</div>
+      <div class="detail-value" id="dp-content"></div>
+    </div>
+    <div class="detail-section">
+      <div class="detail-label">담당팀 · 담당자</div>
+      <div class="detail-value" id="dp-owner"></div>
+    </div>
+    <div class="detail-section">
+      <div class="detail-label">완료 기한</div>
+      <div class="detail-value" id="dp-deadline"></div>
+    </div>
+    <div class="detail-section">
+      <div class="detail-label">이행 현황 업데이트</div>
+      <select class="status-select" id="dp-status-sel">
+        <option value="none">미이행</option>
+        <option value="review">검토중</option>
+        <option value="progress">이행중</option>
+        <option value="done">완료</option>
+        <option value="hold">보류</option>
+      </select>
+    </div>
+    <div class="detail-section">
+      <div class="detail-label">이행 내용 기록</div>
+      <textarea class="textarea-small" id="dp-note" placeholder="진행 상황, 조치 내용 등을 기록하세요"></textarea>
+    </div>
+    <div class="detail-section">
+      <div class="detail-label">이행 진행률</div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <input type="range" id="dp-progress" min="0" max="100" value="0" style="flex:1;accent-color:var(--blue);" oninput="document.getElementById('dp-pct').textContent=this.value+'%'">
+        <span id="dp-pct" style="font-size:12px;font-weight:700;color:var(--blue);width:36px;">0%</span>
+      </div>
+      <div class="progress-bar" style="margin-top:8px;"><div class="progress-fill" id="dp-pbar" style="width:0%"></div></div>
+    </div>
+    <div class="detail-section">
+      <div class="detail-label">증빙 첨부</div>
+      <button class="btn-secondary" style="width:100%;padding:9px;">📎 파일 첨부</button>
+    </div>
+  </div>
+  <div class="detail-footer">
+    <button class="btn-primary" onclick="saveDetail()">저장</button>
+    <button class="btn-secondary" onclick="closeDetail()">취소</button>
+  </div>
+</div>
+
+<!-- ADD MODAL -->
+<div class="modal-overlay" id="addModal">
+  <div class="modal">
+    <div class="modal-header">
+      지시사항 수동 등록
+      <button class="close-btn" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <label class="form-label">출처 *</label>
+        <select class="form-input" id="m-source">
+          <option value="head">본부장 주간회의</option>
+          <option value="vice">부회장 주간회의</option>
+          <option value="exec">최고경영층 회의 🔒</option>
+        </select>
+      </div>
+      <div class="grid2">
+        <div class="form-row">
+          <label class="form-label">지시 일자 *</label>
+          <input class="form-input" type="date" id="m-date" value="2025-07-01">
+        </div>
+        <div class="form-row">
+          <label class="form-label">완료 기한 *</label>
+          <input class="form-input" type="date" id="m-deadline">
+        </div>
+      </div>
+      <div class="form-row">
+        <label class="form-label">지시사항 내용 *</label>
+        <textarea class="form-input form-textarea" id="m-content" placeholder="지시사항 내용을 입력하세요"></textarea>
+      </div>
+      <div class="grid2">
+        <div class="form-row">
+          <label class="form-label">담당팀</label>
+          <input class="form-input" type="text" id="m-team" placeholder="예) 미래전략기획팀">
+        </div>
+        <div class="form-row">
+          <label class="form-label">담당자</label>
+          <input class="form-input" type="text" id="m-person" placeholder="예) 김상무 상무">
+        </div>
+      </div>
+      <div class="form-row">
+        <label class="form-label">우선순위</label>
+        <select class="form-input" id="m-priority">
+          <option value="high">높음</option>
+          <option value="mid" selected>중간</option>
+          <option value="low">낮음</option>
+        </select>
+      </div>
+      <div id="exec-warn" class="hidden" style="background:rgba(220,38,38,0.1);border:1px solid rgba(220,38,38,0.3);border-radius:8px;padding:10px 14px;font-size:12px;color:#F87171;margin-top:4px;">
+        🔒 최고경영층 회의 지시사항은 본부장, 미래전략운영팀장·담당자, 수임 임원만 열람 가능합니다.
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal()">취소</button>
+      <button class="btn-primary" style="min-width:100px;" onclick="addDirective()">등록</button>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<!-- ══ PAGE 3 : 자동 알림·보고 ══════════════════════════ -->
+<div class="page-section" id="page3">
+<div class="main">
+
+  <!-- SIDEBAR -->
+  <aside>
+    <div class="aside-section">
+      <div class="aside-label">자동화</div>
+      <div class="aside-item active" onclick="m3Nav('auto',this)">
+        <span class="aside-icon">⚡</span> 알림 자동화
+        <span class="status-on" style="margin-left:auto;"></span>
+      </div>
+      <div class="aside-item" onclick="m3Nav('report',this)">
+        <span class="aside-icon">📊</span> 이행현황 리포트
+      </div>
+      <div class="aside-item" onclick="m3Nav('brief',this)">
+        <span class="aside-icon">📋</span> 회의 전 브리핑
+      </div>
+      <div class="aside-item" onclick="m3Nav('log',this)">
+        <span class="aside-icon">📨</span> 발송 이력
+      </div>
+    </div>
+    <div class="aside-section">
+      <div class="aside-label">채널</div>
+      <div class="aside-item">
+        <span class="aside-icon">🔵</span> MS Teams
+        <span class="status-on" style="margin-left:auto;"></span>
+      </div>
+      <div class="aside-item">
+        <span class="aside-icon">📧</span> 이메일
+        <span style="margin-left:auto;width:7px;height:7px;border-radius:50%;background:var(--text-sub);display:inline-block;"></span>
+      </div>
+    </div>
+    <!-- 이행률 요약 (사이드바) -->
+    <div class="aside-section">
+      <div class="aside-label">이번 주 현황</div>
+      <div style="padding:0 16px;">
+        <div style="margin-bottom:10px;">
+          <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px;">
+            <span style="color:var(--text-sub);">전체 이행률</span>
+            <span style="color:#34D399;font-weight:700;">60.9%</span>
+          </div>
+          <div style="height:5px;background:var(--navy);border-radius:3px;overflow:hidden;">
+            <div style="height:100%;width:60.9%;background:linear-gradient(90deg,#10B981,#34D399);border-radius:3px;"></div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+          <div style="background:var(--navy);border-radius:7px;padding:8px;text-align:center;">
+            <div style="font-size:16px;font-weight:800;color:#34D399;">14</div>
+            <div style="font-size:9px;color:var(--text-sub);margin-top:1px;">완료</div>
+          </div>
+          <div style="background:var(--navy);border-radius:7px;padding:8px;text-align:center;">
+            <div style="font-size:16px;font-weight:800;color:#60A5FA;">5</div>
+            <div style="font-size:9px;color:var(--text-sub);margin-top:1px;">이행중</div>
+          </div>
+          <div style="background:var(--navy);border-radius:7px;padding:8px;text-align:center;">
+            <div style="font-size:16px;font-weight:800;color:#9CA3AF;">4</div>
+            <div style="font-size:9px;color:var(--text-sub);margin-top:1px;">미이행</div>
+          </div>
+          <div style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:7px;padding:8px;text-align:center;">
+            <div style="font-size:16px;font-weight:800;color:#F87171;">1</div>
+            <div style="font-size:9px;color:#F87171;margin-top:1px;">기한초과</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <div class="content" style="padding:28px 28px;">
+
+    <!-- 헤더 -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
+      <div>
+        <div style="font-size:20px;font-weight:800;letter-spacing:-0.3px;">⚡ 자동 알림 · 보고</div>
+        <div style="font-size:12px;color:var(--text-sub);margin-top:3px;">미래전략본부 지시사항 이행 추심 자동화 · MS Teams 연동</div>
+      </div>
+      <button onclick="testNotif()" style="background:var(--blue);color:#fff;border:none;padding:9px 18px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;">
+        🔔 테스트 알림
+      </button>
+    </div>
+
+    <!-- ── 상단 KPI 카드 4개 ── -->
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;">
+      <div style="background:var(--navy-mid);border:1px solid var(--line);border-radius:12px;padding:16px 18px;position:relative;overflow:hidden;">
+        <div style="font-size:10px;color:var(--text-sub);font-weight:600;text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;">전체 이행률</div>
+        <div style="font-size:32px;font-weight:900;color:#34D399;line-height:1;">60.9<span style="font-size:16px;">%</span></div>
+        <div style="font-size:10px;color:#34D399;margin-top:4px;">▲ 4.2% 지난주 대비</div>
+        <div style="position:absolute;right:16px;top:50%;transform:translateY(-50%);font-size:32px;opacity:.08;">✅</div>
+      </div>
+      <div style="background:var(--navy-mid);border:1px solid var(--line);border-radius:12px;padding:16px 18px;position:relative;overflow:hidden;">
+        <div style="font-size:10px;color:var(--text-sub);font-weight:600;text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;">평균 완료 소요일</div>
+        <div style="font-size:32px;font-weight:900;color:#60A5FA;line-height:1;">8.2<span style="font-size:16px;">일</span></div>
+        <div style="font-size:10px;color:var(--text-sub);margin-top:4px;">목표: 7일 이내</div>
+        <div style="position:absolute;right:16px;top:50%;transform:translateY(-50%);font-size:32px;opacity:.08;">📅</div>
+      </div>
+      <div style="background:var(--navy-mid);border:1px solid var(--line);border-radius:12px;padding:16px 18px;position:relative;overflow:hidden;">
+        <div style="font-size:10px;color:var(--text-sub);font-weight:600;text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;">이번 주 발송 건수</div>
+        <div style="font-size:32px;font-weight:900;color:#A78BFA;line-height:1;">12<span style="font-size:16px;">건</span></div>
+        <div style="font-size:10px;color:var(--text-sub);margin-top:4px;">추심 7 · 리포트 3 · 브리핑 2</div>
+        <div style="position:absolute;right:16px;top:50%;transform:translateY(-50%);font-size:32px;opacity:.08;">📨</div>
+      </div>
+      <div style="background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.25);border-radius:12px;padding:16px 18px;position:relative;overflow:hidden;">
+        <div style="font-size:10px;color:#F87171;font-weight:600;text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;">기한 초과</div>
+        <div style="font-size:32px;font-weight:900;color:#F87171;line-height:1;">1<span style="font-size:16px;">건</span></div>
+        <div style="font-size:10px;color:#F87171;margin-top:4px;">즉시 조치 필요</div>
+        <div style="position:absolute;right:16px;top:50%;transform:translateY(-50%);font-size:32px;opacity:.08;">⚠</div>
+      </div>
+    </div>
+
+    <!-- ── ROW 1: 알림 타임라인 + 채널 설정 ── -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
+
+      <!-- 추심 알림 타임라인 -->
+      <div style="background:var(--navy-mid);border:1px solid var(--line);border-radius:12px;padding:20px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+          <div style="font-size:13px;font-weight:700;">🔔 추심 알림 자동화</div>
+          <label class="toggle" title="알림 활성화"><input type="checkbox" checked><span class="toggle-slider"></span></label>
+        </div>
+
+        <!-- 타임라인 -->
+        <div style="position:relative;padding-left:52px;">
+          <!-- 세로선 -->
+          <div style="position:absolute;left:17px;top:18px;bottom:18px;width:2px;background:linear-gradient(180deg,#10B981,#F59E0B,#EF4444,#DC2626);border-radius:1px;opacity:.4;"></div>
+
+          <!-- D-7 -->
+          <div style="position:relative;margin-bottom:20px;">
+            <div style="position:absolute;left:-44px;width:30px;height:30px;border-radius:50%;background:rgba(16,185,129,.15);border:2px solid #10B981;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;color:#10B981;">D-7</div>
+            <div style="background:rgba(16,185,129,.06);border:1px solid rgba(16,185,129,.2);border-radius:8px;padding:10px 12px;">
+              <div style="font-size:12px;font-weight:700;color:#34D399;margin-bottom:3px;">7일 전 — 사전 안내</div>
+              <div style="font-size:11px;color:var(--text-sub);line-height:1.5;">담당팀에 기한 7일 전 사전 알림 발송. 이행 착수 촉구.</div>
+              <div style="margin-top:6px;font-size:10px;font-weight:700;color:#34D399;background:rgba(16,185,129,.1);display:inline-block;padding:2px 8px;border-radius:4px;">MS Teams</div>
+            </div>
+          </div>
+
+          <!-- D-3 -->
+          <div style="position:relative;margin-bottom:20px;">
+            <div style="position:absolute;left:-44px;width:30px;height:30px;border-radius:50%;background:rgba(245,158,11,.15);border:2px solid #F59E0B;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;color:#F59E0B;">D-3</div>
+            <div style="background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.2);border-radius:8px;padding:10px 12px;">
+              <div style="font-size:12px;font-weight:700;color:#FBBF24;margin-bottom:3px;">3일 전 — 집중 알림</div>
+              <div style="font-size:11px;color:var(--text-sub);line-height:1.5;">미완료 건 담당자 + 팀장에게 동시 발송. 현황 업데이트 요청.</div>
+              <div style="margin-top:6px;font-size:10px;font-weight:700;color:#FBBF24;background:rgba(245,158,11,.1);display:inline-block;padding:2px 8px;border-radius:4px;">MS Teams</div>
+            </div>
+          </div>
+
+          <!-- D-Day -->
+          <div style="position:relative;margin-bottom:20px;">
+            <div style="position:absolute;left:-44px;width:30px;height:30px;border-radius:50%;background:rgba(239,68,68,.15);border:2px solid #EF4444;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;color:#EF4444;">D-0</div>
+            <div style="background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.2);border-radius:8px;padding:10px 12px;">
+              <div style="font-size:12px;font-weight:700;color:#F87171;margin-bottom:3px;">당일 — 최종 알림</div>
+              <div style="font-size:11px;color:var(--text-sub);line-height:1.5;">기한 당일 09:00, 미완료 건 최종 알림 및 이행내용 입력 요청.</div>
+              <div style="margin-top:6px;font-size:10px;font-weight:700;color:#F87171;background:rgba(239,68,68,.1);display:inline-block;padding:2px 8px;border-radius:4px;">MS Teams</div>
+            </div>
+          </div>
+
+          <!-- 초과 -->
+          <div style="position:relative;">
+            <div style="position:absolute;left:-44px;width:30px;height:30px;border-radius:50%;background:rgba(220,38,38,.2);border:2px solid #DC2626;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:800;color:#FCA5A5;">초과</div>
+            <div style="background:rgba(220,38,38,.08);border:1px solid rgba(220,38,38,.3);border-radius:8px;padding:10px 12px;">
+              <div style="font-size:12px;font-weight:700;color:#FCA5A5;margin-bottom:3px;">초과 — 에스컬레이션</div>
+              <div style="font-size:11px;color:var(--text-sub);line-height:1.5;">매일 1회 알림 + 본부장·팀장에게 에스컬레이션 자동 보고.</div>
+              <div style="margin-top:6px;font-size:10px;font-weight:700;color:#FCA5A5;background:rgba(220,38,38,.15);display:inline-block;padding:2px 8px;border-radius:4px;">본부장 포함 발송</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="border-top:1px solid var(--line);margin-top:16px;padding-top:14px;display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div>
+            <div style="font-size:10px;color:var(--text-sub);font-weight:600;margin-bottom:5px;">발송 시각</div>
+            <input type="time" value="09:00" style="background:var(--navy);border:1px solid var(--navy-light);border-radius:6px;padding:6px 10px;font-size:12px;color:var(--white);width:100%;outline:none;">
+          </div>
+          <div>
+            <div style="font-size:10px;color:var(--text-sub);font-weight:600;margin-bottom:5px;">에스컬레이션 대상</div>
+            <input type="text" value="본부장, 운영팀장" style="background:var(--navy);border:1px solid var(--navy-light);border-radius:6px;padding:6px 10px;font-size:12px;color:var(--white);width:100%;outline:none;">
+          </div>
+        </div>
+      </div>
+
+      <!-- 오른쪽: 채널 + 임원 자기보고 -->
+      <div style="display:flex;flex-direction:column;gap:14px;">
+
+        <!-- 채널 연결 -->
+        <div style="background:var(--navy-mid);border:1px solid var(--line);border-radius:12px;padding:18px;">
+          <div style="font-size:13px;font-weight:700;margin-bottom:14px;">🔗 알림 채널</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;background:var(--navy);border-radius:8px;padding:10px 14px;border:1px solid rgba(30,111,255,.2);">
+              <div style="display:flex;align-items:center;gap:10px;">
+                <span style="font-size:20px;">🔵</span>
+                <div>
+                  <div style="font-size:12px;font-weight:700;">Microsoft Teams</div>
+                  <div style="font-size:10px;color:var(--text-sub);margin-top:1px;">미래전략본부 채널 연동</div>
+                </div>
+              </div>
+              <span style="font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;background:rgba(16,185,129,.15);color:#34D399;">● 연결됨</span>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;background:var(--navy);border-radius:8px;padding:10px 14px;border:1px solid var(--line);">
+              <div style="display:flex;align-items:center;gap:10px;">
+                <span style="font-size:20px;">📧</span>
+                <div>
+                  <div style="font-size:12px;font-weight:700;">이메일</div>
+                  <div style="font-size:10px;color:var(--text-sub);margin-top:1px;">사내 메일 서버 연동 필요</div>
+                </div>
+              </div>
+              <span style="font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;background:rgba(107,114,128,.15);color:#9CA3AF;">○ 미연결</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 임원 자기보고 -->
+        <div style="background:var(--navy-mid);border:1px solid var(--line);border-radius:12px;padding:18px;flex:1;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+            <div style="font-size:13px;font-weight:700;">👔 임원 자기보고 자동화</div>
+            <label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label>
+          </div>
+          <div style="font-size:11px;color:var(--text-sub);margin-bottom:10px;">부회장 주간회의 종료 후 참석 임원에게 자동 발송</div>
+          <div style="background:var(--navy);border-radius:8px;padding:12px;border:1px solid var(--navy-light);font-size:11px;line-height:1.8;margin-bottom:12px;">
+            <div style="font-size:10px;color:var(--text-sub);font-weight:700;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px;">발송 메시지 미리보기</div>
+            <div style="color:var(--off-white);">[부회장 주간회의] 오늘 회의 관련 지시사항·논의사항을 아래 링크에 입력해 주시기 바랍니다.</div>
+            <div style="color:var(--blue);margin-top:4px;">👉 [입력 링크 — 30초 완료]</div>
+            <div style="color:var(--text-sub);font-size:10px;margin-top:2px;">※ 오늘 중 입력 — 본부장실</div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+            <div>
+              <div style="font-size:10px;color:var(--text-sub);font-weight:600;margin-bottom:4px;">발송 명의</div>
+              <select style="background:var(--navy);border:1px solid var(--navy-light);border-radius:6px;padding:6px 8px;font-size:11px;color:var(--white);width:100%;outline:none;">
+                <option>본부장실</option>
+                <option>미래전략운영팀장</option>
+              </select>
+            </div>
+            <div>
+              <div style="font-size:10px;color:var(--text-sub);font-weight:600;margin-bottom:4px;">리마인드</div>
+              <select style="background:var(--navy);border:1px solid var(--navy-light);border-radius:6px;padding:6px 8px;font-size:11px;color:var(--white);width:100%;outline:none;">
+                <option>1회 (당일 17:00)</option>
+                <option>2회</option>
+                <option>없음</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── ROW 2: 주간 리포트 + 이행률 차트 ── -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
+
+      <!-- 주간 이행현황 리포트 -->
+      <div style="background:var(--navy-mid);border:1px solid var(--line);border-radius:12px;padding:20px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+          <div style="font-size:13px;font-weight:700;">📊 주간 이행현황 리포트</div>
+          <label class="toggle" title="자동 발송"><input type="checkbox" checked><span class="toggle-slider"></span></label>
+        </div>
+        <div style="font-size:11px;color:var(--text-sub);margin-bottom:14px;">매주 월 08:30 자동 생성 → 본부장·팀장 발송</div>
+
+        <!-- 리포트 카드 -->
+        <div style="background:var(--navy);border-radius:10px;padding:14px;border:1px solid var(--navy-light);margin-bottom:14px;">
+          <div style="font-size:11px;font-weight:700;color:var(--off-white);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--line);">
+            📋 미래전략본부 주간 이행현황 · 2025년 7월 1주차
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+            <div style="background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2);border-radius:7px;padding:10px;text-align:center;">
+              <div style="font-size:22px;font-weight:900;color:#34D399;">14</div>
+              <div style="font-size:10px;color:#34D399;margin-top:1px;">완료 (60.9%)</div>
+            </div>
+            <div style="background:rgba(37,99,235,.08);border:1px solid rgba(37,99,235,.2);border-radius:7px;padding:10px;text-align:center;">
+              <div style="font-size:22px;font-weight:900;color:#60A5FA;">5</div>
+              <div style="font-size:10px;color:#60A5FA;margin-top:1px;">이행 중</div>
+            </div>
+            <div style="background:rgba(107,114,128,.08);border:1px solid rgba(107,114,128,.2);border-radius:7px;padding:10px;text-align:center;">
+              <div style="font-size:22px;font-weight:900;color:#9CA3AF;">4</div>
+              <div style="font-size:10px;color:#9CA3AF;margin-top:1px;">미이행</div>
+            </div>
+            <div style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:7px;padding:10px;text-align:center;">
+              <div style="font-size:22px;font-weight:900;color:#F87171;">1</div>
+              <div style="font-size:10px;color:#F87171;margin-top:1px;">기한 초과 ⚠</div>
+            </div>
+          </div>
+          <div style="margin-top:10px;display:flex;justify-content:space-between;font-size:11px;color:var(--text-sub);padding:0 2px;">
+            <span>전체 23건</span><span>신규 3건 등록</span><span>평균 소요 8.2일</span>
+          </div>
+        </div>
+
+        <!-- 이행률 추이 차트 -->
+        <div style="font-size:11px;color:var(--text-sub);font-weight:600;margin-bottom:8px;">📈 주차별 이행률 추이</div>
+        <div style="position:relative;height:80px;display:flex;align-items:flex-end;gap:6px;padding-bottom:18px;">
+          <!-- 배경 그리드 -->
+          <div style="position:absolute;inset:0;bottom:18px;display:flex;flex-direction:column;justify-content:space-between;pointer-events:none;">
+            <div style="border-top:1px dashed rgba(255,255,255,.05);"></div>
+            <div style="border-top:1px dashed rgba(255,255,255,.05);"></div>
+            <div style="border-top:1px dashed rgba(255,255,255,.05);"></div>
+          </div>
+          <!-- 바 -->
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:0;">
+            <div style="width:100%;flex:1;display:flex;align-items:flex-end;">
+              <div style="width:100%;height:45%;background:var(--blue);border-radius:4px 4px 0 0;opacity:.45;transition:height .3s;" title="4주전 45%"></div>
+            </div>
+            <div style="font-size:9px;color:var(--text-sub);margin-top:4px;">4주전</div>
+          </div>
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:0;">
+            <div style="width:100%;flex:1;display:flex;align-items:flex-end;">
+              <div style="width:100%;height:52%;background:var(--blue);border-radius:4px 4px 0 0;opacity:.55;transition:height .3s;" title="3주전 52%"></div>
+            </div>
+            <div style="font-size:9px;color:var(--text-sub);margin-top:4px;">3주전</div>
+          </div>
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:0;">
+            <div style="width:100%;flex:1;display:flex;align-items:flex-end;">
+              <div style="width:100%;height:57%;background:var(--blue);border-radius:4px 4px 0 0;opacity:.7;transition:height .3s;" title="2주전 57%"></div>
+            </div>
+            <div style="font-size:9px;color:var(--text-sub);margin-top:4px;">2주전</div>
+          </div>
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:0;">
+            <div style="width:100%;flex:1;display:flex;align-items:flex-end;">
+              <div style="width:100%;height:57%;background:var(--blue);border-radius:4px 4px 0 0;opacity:.85;transition:height .3s;" title="지난주 57%"></div>
+            </div>
+            <div style="font-size:9px;color:var(--text-sub);margin-top:4px;">지난주</div>
+          </div>
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:0;">
+            <div style="width:100%;flex:1;display:flex;align-items:flex-end;">
+              <div style="width:100%;height:100%;background:linear-gradient(180deg,var(--blue-light),var(--blue));border-radius:4px 4px 0 0;box-shadow:0 0 10px rgba(30,111,255,.4);transition:height .3s;" title="이번주 61%"></div>
+            </div>
+            <div style="font-size:9px;color:var(--blue);margin-top:4px;font-weight:700;">이번주</div>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:8px;margin-top:4px;">
+          <button onclick="showNotif('report')" style="background:var(--blue);color:#fff;border:none;padding:8px 14px;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;flex:1;">📨 즉시 발송</button>
+          <button style="background:transparent;color:var(--text-sub);border:1px solid var(--navy-light);padding:8px 14px;border-radius:7px;font-size:11px;cursor:pointer;">↓ PDF</button>
+        </div>
+      </div>
+
+      <!-- 회의 전 브리핑 + 이행 도넛 -->
+      <div style="display:flex;flex-direction:column;gap:14px;">
+
+        <!-- 회의 전 브리핑 -->
+        <div style="background:var(--navy-mid);border:1px solid var(--line);border-radius:12px;padding:18px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+            <div style="font-size:13px;font-weight:700;">📋 회의 전 브리핑</div>
+            <label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label>
+          </div>
+          <div style="font-size:11px;color:var(--text-sub);margin-bottom:12px;">각 회의 전날 오전 담당자에게 자동 발송</div>
+
+          <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:12px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;background:var(--navy);border-radius:7px;padding:9px 12px;">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <span style="font-size:10px;font-weight:800;color:var(--blue);background:rgba(30,111,255,.1);padding:2px 8px;border-radius:4px;white-space:nowrap;">월 08:00</span>
+                <span style="font-size:12px;">본부장 주간회의 전날</span>
+              </div>
+              <span style="font-size:10px;color:var(--text-sub);">담당자</span>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;background:var(--navy);border-radius:7px;padding:9px 12px;">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <span style="font-size:10px;font-weight:800;color:var(--blue);background:rgba(30,111,255,.1);padding:2px 8px;border-radius:4px;white-space:nowrap;">목 08:00</span>
+                <span style="font-size:12px;">부회장 주간회의 전날</span>
+              </div>
+              <span style="font-size:10px;color:var(--text-sub);">담당자</span>
+            </div>
+          </div>
+
+          <!-- 브리핑 미리보기 -->
+          <div style="background:var(--navy);border-radius:8px;padding:12px;border-left:3px solid #F87171;">
+            <div style="font-size:11px;font-weight:700;color:var(--off-white);margin-bottom:8px;">📋 내일 미래전략본부 주간회의 미이행 현황</div>
+            <div style="font-size:11px;line-height:1.7;">
+              <div style="color:#F87171;margin-bottom:4px;">🔴 기한 초과 1건</div>
+              <div style="color:var(--text-sub);padding-left:12px;margin-bottom:6px;">· EV인프라 유럽 추진 현황 보고 (미래전략기획팀, D+2)</div>
+              <div style="color:#FBBF24;margin-bottom:4px;">🟡 기한 임박 2건 (D-3 이내)</div>
+              <div style="color:var(--text-sub);padding-left:12px;">· 하반기 전략목표 개선계획 보고 (미래전략운영팀, D-3)<br>· 미래전략 추진 매뉴얼 개정 (미래전략운영팀, D-2)</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 이행률 도넛 차트 -->
+        <div style="background:var(--navy-mid);border:1px solid var(--line);border-radius:12px;padding:18px;flex:1;">
+          <div style="font-size:13px;font-weight:700;margin-bottom:14px;">📈 이행률 현황</div>
+          <div style="display:flex;align-items:center;gap:20px;">
+            <!-- SVG 도넛 차트 -->
+            <div style="flex-shrink:0;position:relative;width:90px;height:90px;">
+              <svg viewBox="0 0 90 90" style="width:90px;height:90px;transform:rotate(-90deg);">
+                <!-- 배경 원 -->
+                <circle cx="45" cy="45" r="34" fill="none" stroke="#1A3A6B" stroke-width="10"/>
+                <!-- 완료 (초록) 60.9% = 213.6° -->
+                <circle cx="45" cy="45" r="34" fill="none" stroke="#10B981" stroke-width="10"
+                  stroke-dasharray="213.6 349.6" stroke-dashoffset="0" stroke-linecap="round"/>
+                <!-- 이행중 (파랑) 21.7% = 75.9° -->
+                <circle cx="45" cy="45" r="34" fill="none" stroke="#3B82F6" stroke-width="10"
+                  stroke-dasharray="75.9 349.6" stroke-dashoffset="-213.6" stroke-linecap="round"/>
+                <!-- 미이행 (회색) 17.4% = 60.7° -->
+                <circle cx="45" cy="45" r="34" fill="none" stroke="#374151" stroke-width="10"
+                  stroke-dasharray="60.7 349.6" stroke-dashoffset="-289.5" stroke-linecap="round"/>
+              </svg>
+              <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;">
+                <div style="font-size:16px;font-weight:900;color:#34D399;">61%</div>
+                <div style="font-size:8px;color:var(--text-sub);">이행률</div>
+              </div>
+            </div>
+            <!-- 범례 -->
+            <div style="flex:1;display:flex;flex-direction:column;gap:8px;">
+              <div style="display:flex;align-items:center;justify-content:space-between;">
+                <div style="display:flex;align-items:center;gap:7px;">
+                  <div style="width:10px;height:10px;border-radius:50%;background:#10B981;flex-shrink:0;"></div>
+                  <span style="font-size:11px;color:var(--text-sub);">완료</span>
+                </div>
+                <span style="font-size:13px;font-weight:800;color:#34D399;">14건</span>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:space-between;">
+                <div style="display:flex;align-items:center;gap:7px;">
+                  <div style="width:10px;height:10px;border-radius:50%;background:#3B82F6;flex-shrink:0;"></div>
+                  <span style="font-size:11px;color:var(--text-sub);">이행중</span>
+                </div>
+                <span style="font-size:13px;font-weight:800;color:#60A5FA;">5건</span>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:space-between;">
+                <div style="display:flex;align-items:center;gap:7px;">
+                  <div style="width:10px;height:10px;border-radius:50%;background:#374151;flex-shrink:0;"></div>
+                  <span style="font-size:11px;color:var(--text-sub);">미이행</span>
+                </div>
+                <span style="font-size:13px;font-weight:800;color:#9CA3AF;">4건</span>
+              </div>
+              <div style="height:1px;background:var(--line);margin:2px 0;"></div>
+              <div style="display:flex;align-items:center;justify-content:space-between;">
+                <div style="display:flex;align-items:center;gap:7px;">
+                  <div style="width:10px;height:10px;border-radius:50%;background:#EF4444;flex-shrink:0;"></div>
+                  <span style="font-size:11px;color:#F87171;">기한 초과</span>
+                </div>
+                <span style="font-size:13px;font-weight:800;color:#F87171;">1건</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── ROW 3: 발송 이력 ── -->
+    <div style="background:var(--navy-mid);border:1px solid var(--line);border-radius:12px;padding:20px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+        <div style="font-size:13px;font-weight:700;">📨 최근 발송 이력</div>
+        <button style="background:transparent;color:var(--text-sub);border:1px solid var(--navy-light);padding:4px 12px;border-radius:6px;font-size:11px;cursor:pointer;">전체 보기</button>
+      </div>
+      <table style="width:100%;border-collapse:collapse;font-size:12px;">
+        <thead>
+          <tr style="background:rgba(255,255,255,.03);">
+            <th style="text-align:left;padding:9px 12px;color:var(--text-sub);font-weight:600;font-size:10px;border-bottom:1px solid var(--line);white-space:nowrap;">유형</th>
+            <th style="text-align:left;padding:9px 12px;color:var(--text-sub);font-weight:600;font-size:10px;border-bottom:1px solid var(--line);white-space:nowrap;">발송 일시</th>
+            <th style="text-align:left;padding:9px 12px;color:var(--text-sub);font-weight:600;font-size:10px;border-bottom:1px solid var(--line);">수신자</th>
+            <th style="text-align:left;padding:9px 12px;color:var(--text-sub);font-weight:600;font-size:10px;border-bottom:1px solid var(--line);">내용</th>
+            <th style="text-align:left;padding:9px 12px;color:var(--text-sub);font-weight:600;font-size:10px;border-bottom:1px solid var(--line);">채널</th>
+            <th style="text-align:left;padding:9px 12px;color:var(--text-sub);font-weight:600;font-size:10px;border-bottom:1px solid var(--line);">결과</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom:1px solid var(--line);">
+            <td style="padding:10px 12px;"><span style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:4px;background:rgba(124,58,237,.2);color:#A78BFA;white-space:nowrap;">회의 전 브리핑</span></td>
+            <td style="padding:10px 12px;color:var(--text-sub);font-size:11px;">07.01 08:00</td>
+            <td style="padding:10px 12px;">김담당</td>
+            <td style="padding:10px 12px;color:var(--text-sub);">미래전략본부 주간회의 미이행 현황 3건</td>
+            <td style="padding:10px 12px;"><span style="font-size:11px;color:var(--blue);">🔵 Teams</span></td>
+            <td style="padding:10px 12px;color:#34D399;font-weight:700;">✓ 완료</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--line);">
+            <td style="padding:10px 12px;"><span style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:4px;background:rgba(239,68,68,.2);color:#F87171;white-space:nowrap;">에스컬레이션</span></td>
+            <td style="padding:10px 12px;color:var(--text-sub);font-size:11px;">06.30 09:00</td>
+            <td style="padding:10px 12px;">본부장, 팀장</td>
+            <td style="padding:10px 12px;color:var(--text-sub);">기한 초과 1건 — EV인프라 유럽 추진 현황 보고</td>
+            <td style="padding:10px 12px;"><span style="font-size:11px;color:var(--blue);">🔵 Teams</span></td>
+            <td style="padding:10px 12px;color:#34D399;font-weight:700;">✓ 완료</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--line);">
+            <td style="padding:10px 12px;"><span style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:4px;background:rgba(30,111,255,.2);color:#4D8FFF;white-space:nowrap;">추심 알림</span></td>
+            <td style="padding:10px 12px;color:var(--text-sub);font-size:11px;">06.28 09:00</td>
+            <td style="padding:10px 12px;">미래전략운영팀 김팀장</td>
+            <td style="padding:10px 12px;color:var(--text-sub);">D-3 — 하반기 전략목표 개선계획 보고</td>
+            <td style="padding:10px 12px;"><span style="font-size:11px;color:var(--blue);">🔵 Teams</span></td>
+            <td style="padding:10px 12px;color:#34D399;font-weight:700;">✓ 완료</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--line);">
+            <td style="padding:10px 12px;"><span style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:4px;background:rgba(16,185,129,.2);color:#34D399;white-space:nowrap;">주간 리포트</span></td>
+            <td style="padding:10px 12px;color:var(--text-sub);font-size:11px;">06.23 08:30</td>
+            <td style="padding:10px 12px;">본부장, 팀장</td>
+            <td style="padding:10px 12px;color:var(--text-sub);">미래전략본부 6월 4주차 이행현황 리포트</td>
+            <td style="padding:10px 12px;"><span style="font-size:11px;color:var(--blue);">🔵 Teams</span></td>
+            <td style="padding:10px 12px;color:#34D399;font-weight:700;">✓ 완료</td>
+          </tr>
+          <tr>
+            <td style="padding:10px 12px;"><span style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:4px;background:rgba(30,111,255,.2);color:#4D8FFF;white-space:nowrap;">추심 알림</span></td>
+            <td style="padding:10px 12px;color:var(--text-sub);font-size:11px;">06.21 09:00</td>
+            <td style="padding:10px 12px;">미래전략협력팀 박팀장</td>
+            <td style="padding:10px 12px;color:var(--text-sub);">D-7 — EV ESS 국내 사업 추진계획</td>
+            <td style="padding:10px 12px;"><span style="font-size:11px;color:var(--blue);">🔵 Teams</span></td>
+            <td style="padding:10px 12px;color:#34D399;font-weight:700;">✓ 완료</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+</div>
+<!-- 알림 스택 -->
+<div class="notif-stack" id="notifStack"></div>
+
+</div>
+
+</div><!-- /app-body -->
+
+<!-- 알림 스택 (전역) -->
+<div class="notif-stack" id="notifStack"></div>
+
+<script>
+// ════ 페이지 전환 ════════════════════════════════════════
+function switchPage(n) {
+  document.querySelectorAll('.page-section').forEach((el, i) => {
+    el.classList.toggle('active', i + 1 === n);
+  });
+  document.querySelectorAll('.nav-tab').forEach((el, i) => {
+    el.classList.toggle('active', i + 1 === n);
+  });
+  if (n === 2) { try { renderTable(); } catch(e) {} }
+}
+
+// ════ Module 1 JS ════════════════════════════════════════
+
+  // ═══════════════════════════════════════════════════════
+  //  공통 상태
+  // ═══════════════════════════════════════════════════════
+  let currentType   = 'head';
+  let currentMode   = 'mic';   // 'mic' | 'file' | 'script' | 'minutes'
+
+  // ── 이력 데이터 (세션 내 유지) ──────────────────────────
+  let historyList = [
+    { mode:'녹음파일', type:'head', typeName:'본부장', label:'2025.06.30', dirCount:4, createdAt:'06.30 09:52', status:'done' },
+    { mode:'녹음파일', type:'vice', typeName:'부회장', label:'2025.06.26', dirCount:6, createdAt:'06.26 14:10', status:'done' },
+    { mode:'스크립트', type:'head', typeName:'본부장', label:'2025.06.23', dirCount:3, createdAt:'06.23 09:48', status:'done' },
+    { mode:'회의록',   type:'exec', typeName:'최고경영층', label:'2025.06.18', dirCount:2, createdAt:'06.18 16:30', status:'done' },
+  ];
+  let sttFinalText  = '';
+  let recognition   = null;
+  let audioCtx      = null;
+  let audioSource   = null;
+  let sttTimer      = null;
+  let sttStartTime  = null;
+  let sentenceCount = 0;
+  let micStream     = null;
+  let waveTimer     = null;
+  let selectedAudioFile  = null;
+  let selectedScriptFile = null;
+
+  // ═══════════════════════════════════════════════════════
+  //  회의 유형 선택
+  // ═══════════════════════════════════════════════════════
+  function selectType(type) {
+    currentType = type;
+    ['head','vice','exec'].forEach(t => {
+      document.getElementById('type-'+t).classList.toggle('selected', t === type);
+      document.getElementById('step2-'+t).style.display = t === type ? 'block' : 'none';
+    });
+    document.getElementById('step3-card').classList.add('hidden');
+    document.getElementById('step-complete').classList.add('hidden');
+    setStep(1);
+  }
+
+  function setStep(done) {
+    ['sn1','sn2','sn3','sn4'].forEach((id,i) => {
+      const el = document.getElementById(id);
+      if (i < done)      { el.textContent='✓'; el.className='step-num done'; }
+      else if (i===done) { el.textContent=String(i+1); el.className='step-num active'; }
+      else               { el.textContent=String(i+1); el.className='step-num idle'; }
+    });
+    ['sl1','sl2','sl3'].forEach((id,i) => {
+      document.getElementById(id).className = 'step-line'+(i<done?' done':'');
+    });
+  }
+
+  // ═══════════════════════════════════════════════════════
+  //  입력 방식 탭 전환
+  // ═══════════════════════════════════════════════════════
+  function switchInputMode(mode) {
+    currentMode = mode;
+    ['mic','file','script','minutes'].forEach(m => {
+      const tab   = document.getElementById('tab-'+m);
+      const panel = document.getElementById('mode-'+m);
+      const isOn  = m === mode;
+      if (tab)   { tab.style.background = isOn ? 'var(--blue)' : 'transparent'; tab.style.color = isOn ? '#fff' : 'var(--text-sub)'; }
+      if (panel) panel.classList.toggle('hidden', !isOn);
+    });
+    document.getElementById('phase-stt-done').classList.add('hidden');
+    resetAllSTT();
+  }
+
+  // ═══════════════════════════════════════════════════════
+  //  MODE A : 실시간 마이크 녹음
+  // ═══════════════════════════════════════════════════════
+  function startMicRecording() {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) { alert('Web Speech API를 지원하지 않습니다.\nChrome 또는 Edge를 사용해 주세요.'); return; }
+
+    navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+      micStream = stream;
+      document.getElementById('mic-idle').classList.add('hidden');
+      document.getElementById('mic-recording').classList.remove('hidden');
+      sttFinalText = ''; sentenceCount = 0;
+      document.getElementById('mic-final').textContent = '';
+      document.getElementById('mic-interim').textContent = '';
+      setStep(2);
+
+      // 파형 애니메이션
+      const wf = document.getElementById('mic-waveform');
+      wf.innerHTML = '';
+      const bars = Array.from({length:32}, () => {
+        const b = document.createElement('div');
+        b.style.cssText = 'flex:1;background:#EF4444;border-radius:2px;height:4px;transition:height .1s;opacity:.7;';
+        wf.appendChild(b); return b;
+      });
+      waveTimer = setInterval(() => {
+        bars.forEach(b => { b.style.height = (4 + Math.random()*28)+'px'; });
+      }, 120);
+
+      // 경과 타이머
+      sttStartTime = Date.now();
+      sttTimer = setInterval(() => {
+        const s = Math.floor((Date.now()-sttStartTime)/1000);
+        document.getElementById('mic-elapsed').textContent =
+          String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');
+      }, 1000);
+
+      // STT
+      recognition = new SR();
+      recognition.lang = 'ko-KR';
+      recognition.continuous = true;
+      recognition.interimResults = true;
+      recognition.onstart  = () => { document.getElementById('mic-status').textContent='● 인식 중...'; };
+      recognition.onresult = e => {
+        let interim = '';
+        for (let i=e.resultIndex; i<e.results.length; i++) {
+          const t = e.results[i][0].transcript;
+          if (e.results[i].isFinal) {
+            sttFinalText += t+'\n'; sentenceCount++;
+            document.getElementById('mic-final').textContent = sttFinalText;
+            document.getElementById('mic-sentence-cnt').textContent = sentenceCount;
+            document.getElementById('mic-char-cnt').textContent = sttFinalText.replace(/\n/g,'').length;
+            const box = document.getElementById('mic-stt-box');
+            box.scrollTop = box.scrollHeight;
+          } else { interim += t; }
+        }
+        document.getElementById('mic-interim').textContent = interim ? '[인식 중] '+interim : '';
+      };
+      recognition.onerror = e => {
+        if (e.error==='no-speech') { try{recognition.start();}catch(_){} }
+      };
+      recognition.onend = () => {
+        if (micStream) { try{recognition.start();}catch(_){} }
+      };
+      recognition.start();
+    }).catch(() => alert('마이크 접근이 거부되었습니다.\n브라우저 설정에서 마이크 권한을 허용해 주세요.'));
+  }
+
+  function stopMicRecording() {
+    if (waveTimer)    { clearInterval(waveTimer); waveTimer=null; }
+    if (sttTimer)     { clearInterval(sttTimer);  sttTimer=null; }
+    if (recognition)  { try{recognition.stop();}catch(_){} recognition=null; }
+    if (micStream)    { micStream.getTracks().forEach(t=>t.stop()); micStream=null; }
+    document.getElementById('mic-recording').classList.add('hidden');
+    showDonePanel('🎙 실시간 녹음 완료');
+  }
+
+  // ═══════════════════════════════════════════════════════
+  //  MODE B : 녹음 파일 업로드 + STT
+  // ═══════════════════════════════════════════════════════
+  function handleAudioFileSelect(input) {
+    const f = input.files[0]; if (!f) return;
+    selectedAudioFile = f; showAudioFileInfo(f);
+  }
+  function handleAudioDrop(e) {
+    e.preventDefault();
+    document.getElementById('audioUploadZone').style.borderColor='var(--navy-light)';
+    const f = e.dataTransfer.files[0]; if (!f) return;
+    const ext = f.name.split('.').pop().toLowerCase();
+    if (!['mp3','wav','m4a','mp4','aac','ogg','flac'].includes(ext)) {
+      alert('지원하지 않는 파일 형식입니다.'); return;
+    }
+    selectedAudioFile = f; showAudioFileInfo(f);
+  }
+  function showAudioFileInfo(f) {
+    document.getElementById('audioUploadZone').classList.add('hidden');
+    const info = document.getElementById('audio-file-info');
+    info.classList.remove('hidden'); info.style.display='flex';
+    document.getElementById('audio-file-name').textContent = f.name;
+    document.getElementById('audio-file-meta').textContent =
+      `${f.name.split('.').pop().toUpperCase()} · ${(f.size/1024/1024).toFixed(1)} MB · ${new Date(f.lastModified).toLocaleDateString('ko-KR')}`;
+  }
+  function resetAudioFile() {
+    selectedAudioFile = null;
+    document.getElementById('audioFileInput').value='';
+    document.getElementById('audioUploadZone').classList.remove('hidden');
+    document.getElementById('audio-file-info').classList.add('hidden');
+    document.getElementById('audio-load-progress').classList.add('hidden');
+    document.getElementById('audio-stt-panel').classList.add('hidden');
+    stopAudioSTT();
+  }
+
+  function startAudioSTT() {
+    if (!selectedAudioFile) return;
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) { alert('Web Speech API를 지원하지 않습니다.\nChrome 또는 Edge를 사용해 주세요.'); return; }
+
+    document.getElementById('audio-file-info').querySelectorAll('button').forEach(b=>b.disabled=true);
+    document.getElementById('audio-load-progress').classList.remove('hidden');
+    document.getElementById('audio-progress-name').textContent = selectedAudioFile.name;
+    sttFinalText=''; sentenceCount=0;
+    document.getElementById('audio-final').textContent='';
+    document.getElementById('audio-interim').textContent='';
+    setStep(2);
+
+    const reader = new FileReader();
+    reader.onprogress = e => {
+      if (e.lengthComputable) {
+        const p = Math.floor(e.loaded/e.total*100);
+        document.getElementById('audio-pbar').style.width = p+'%';
+        document.getElementById('audio-pct').textContent  = p+'%';
+        document.getElementById('audio-load-label').textContent =
+          `${(e.loaded/1024/1024).toFixed(1)} MB / ${(e.total/1024/1024).toFixed(1)} MB`;
+      }
+    };
+    reader.onload = e => {
+      document.getElementById('audio-pbar').style.width='100%';
+      document.getElementById('audio-pct').textContent='100%';
+      document.getElementById('audio-load-label').textContent='✅ 로드 완료 — STT 시작';
+      runAudioSTT(e.target.result, SR);
+    };
+    reader.onerror = () => alert('파일을 읽는 중 오류가 발생했습니다.');
+    reader.readAsArrayBuffer(selectedAudioFile);
+  }
+
+  function runAudioSTT(arrayBuffer, SR) {
+    document.getElementById('audio-stt-panel').classList.remove('hidden');
+    sttStartTime = Date.now();
+    sttTimer = setInterval(() => {
+      const s = Math.floor((Date.now()-sttStartTime)/1000);
+      document.getElementById('audio-elapsed').textContent =
+        String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');
+    }, 1000);
+
+    audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+    audioCtx.decodeAudioData(arrayBuffer, buf => {
+      const dest = audioCtx.createMediaStreamDestination();
+      audioSource = audioCtx.createBufferSource();
+      audioSource.buffer = buf;
+      const gain = audioCtx.createGain(); gain.gain.value=1.5;
+      audioSource.connect(gain);
+      gain.connect(dest);
+      gain.connect(audioCtx.destination);
+      audioSource.start(0);
+      audioSource.onended = () => setTimeout(() => stopAudioSTT(), 1500);
+
+      recognition = new SR();
+      recognition.lang='ko-KR'; recognition.continuous=true; recognition.interimResults=true;
+      recognition.onresult = e => {
+        let interim='';
+        for (let i=e.resultIndex;i<e.results.length;i++) {
+          const t=e.results[i][0].transcript;
+          if (e.results[i].isFinal) {
+            sttFinalText+=t+'\n'; sentenceCount++;
+            document.getElementById('audio-final').textContent=sttFinalText;
+            document.getElementById('audio-sentence-cnt').textContent=sentenceCount;
+            document.getElementById('audio-char-cnt').textContent=sttFinalText.replace(/\n/g,'').length;
+            const box=document.getElementById('audio-stt-box'); box.scrollTop=box.scrollHeight;
+          } else { interim+=t; }
+        }
+        document.getElementById('audio-interim').textContent=interim?'[인식 중] '+interim:'';
+      };
+      recognition.onerror = e => { if(e.error==='no-speech'){try{recognition.start();}catch(_){}} };
+      recognition.onend   = () => { if(audioCtx&&audioCtx.state!=='closed'){try{recognition.start();}catch(_){}} };
+      recognition.start();
+    }, err => { console.error(err); alert('오디오 디코딩 실패. MP3 또는 WAV 파일을 사용해 주세요.'); });
+  }
+
+  function stopAudioSTT() {
+    if (sttTimer)    { clearInterval(sttTimer); sttTimer=null; }
+    if (audioSource) { try{audioSource.stop();}catch(_){} audioSource=null; }
+    if (audioCtx)    { try{audioCtx.close();}catch(_){} audioCtx=null; }
+    if (recognition) { try{recognition.stop();}catch(_){} recognition=null; }
+    document.getElementById('audio-stt-status').textContent='● 변환 완료';
+    document.getElementById('audio-stt-status').style.color='#34D399';
+    if (sttFinalText.trim()) showDonePanel('🎵 녹음 파일 STT 완료');
+  }
+
+  // ═══════════════════════════════════════════════════════
+  //  MODE C : 스크립트 파일 업로드 / 붙여넣기
+  // ═══════════════════════════════════════════════════════
+  function handleScriptFileSelect(input) {
+    const f = input.files[0]; if (!f) return;
+    selectedScriptFile = f;
+
+    const ext = f.name.split('.').pop().toLowerCase();
+    const allowed = ['txt','md','csv','docx','pdf'];
+    if (!allowed.includes(ext)) {
+      alert('⚠ 지원하지 않는 파일 형식입니다.\nTXT · MD · CSV · DOCX · PDF만 가능합니다.');
+      input.value = '';
+      return;
+    }
+
+    // 파일 정보 표시
+    document.getElementById('scriptUploadZone').classList.add('hidden');
+    const info = document.getElementById('script-file-info');
+    info.classList.remove('hidden'); info.style.display='flex';
+    document.getElementById('script-file-name').textContent = f.name;
+    document.getElementById('script-file-meta').textContent =
+      `${ext.toUpperCase()} · ${(f.size/1024).toFixed(0)} KB`;
+
+    if (['txt','md','csv'].includes(ext)) {
+      // ── 텍스트 파일: FileReader로 바로 읽기 ──
+      const r = new FileReader();
+      r.onload = e => {
+        document.getElementById('script-paste-area').value = e.target.result;
+        onScriptPaste();
+      };
+      r.onerror = () => alert('파일을 읽는 중 오류가 발생했습니다.');
+      r.readAsText(f, 'utf-8');
+
+    } else if (ext === 'docx') {
+      // ── DOCX: mammoth.js로 텍스트 추출 ──
+      const script = document.createElement('script');
+      script.src = 'https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js';
+      script.onload = () => {
+        const r = new FileReader();
+        r.onload = e => {
+          mammoth.extractRawText({ arrayBuffer: e.target.result })
+            .then(result => {
+              const text = result.value.trim();
+              if (!text) { alert('DOCX에서 텍스트를 추출할 수 없습니다.\n텍스트를 직접 붙여넣어 주세요.'); return; }
+              document.getElementById('script-paste-area').value = text;
+              onScriptPaste();
+            })
+            .catch(() => alert('DOCX 파일 파싱 오류입니다.\nTXT 파일로 변환 후 업로드해 주세요.'));
+        };
+        r.readAsArrayBuffer(f);
+      };
+      script.onerror = () => alert('DOCX 파서 로드 실패. 네트워크를 확인해 주세요.');
+      if (!document.querySelector('script[src*="mammoth"]')) {
+        document.head.appendChild(script);
+      } else {
+        // 이미 로드된 경우
+        script.onload();
+      }
+
+    } else if (ext === 'pdf') {
+      // ── PDF: pdf.js로 텍스트 추출 ──
+      const script = document.createElement('script');
+      script.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+      script.onload = () => {
+        pdfjsLib.GlobalWorkerOptions.workerSrc =
+          'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        const r = new FileReader();
+        r.onload = async e => {
+          try {
+            const pdf = await pdfjsLib.getDocument({ data: e.target.result }).promise;
+            let fullText = '';
+            for (let i = 1; i <= pdf.numPages; i++) {
+              const page = await pdf.getPage(i);
+              const content = await page.getTextContent();
+              fullText += content.items.map(item => item.str).join(' ') + '\n';
+            }
+            const text = fullText.trim();
+            if (!text) { alert('PDF에서 텍스트를 추출할 수 없습니다.\n스캔된 PDF는 지원되지 않습니다.'); return; }
+            document.getElementById('script-paste-area').value = text;
+            onScriptPaste();
+          } catch(err) {
+            alert('PDF 파싱 오류: ' + err.message + '\nTXT 파일로 변환 후 업로드해 주세요.');
+          }
+        };
+        r.readAsArrayBuffer(f);
+      };
+      script.onerror = () => alert('PDF 파서 로드 실패. 네트워크를 확인해 주세요.');
+      if (!document.querySelector('script[src*="pdf.min"]')) {
+        document.head.appendChild(script);
+      } else {
+        script.onload();
+      }
+    }
+  }
+  function handleScriptDrop(e) {
+    e.preventDefault();
+    document.getElementById('scriptUploadZone').style.borderColor='var(--navy-light)';
+    const f = e.dataTransfer.files[0]; if (!f) return;
+    // 파일 input에 할당 후 동일 로직 실행
+    const dt = new DataTransfer();
+    dt.items.add(f);
+    const input = document.getElementById('scriptFileInput');
+    input.files = dt.files;
+    handleScriptFileSelect(input);
+  }
+  function resetScriptFile() {
+    selectedScriptFile=null;
+    document.getElementById('scriptFileInput').value='';
+    document.getElementById('scriptUploadZone').classList.remove('hidden');
+    document.getElementById('script-file-info').classList.add('hidden');
+    document.getElementById('script-paste-area').value='';
+    onScriptPaste();
+  }
+  function onScriptPaste() {
+    const text = document.getElementById('script-paste-area').value;
+    const len  = text.trim().length;
+    document.getElementById('script-char-count').textContent = text.length + '자 입력됨';
+
+    // 붙여넣기 영역 하단 버튼
+    const btn = document.getElementById('script-analyze-btn');
+    if (len > 10) {
+      btn.disabled = false;
+      btn.style.background = 'var(--blue)';
+      btn.style.color      = '#fff';
+      btn.style.cursor     = 'pointer';
+      btn.textContent      = '✦ 분석 시작';
+    } else {
+      btn.disabled = true;
+      btn.style.background = 'var(--navy-light)';
+      btn.style.color      = 'var(--text-sub)';
+      btn.style.cursor     = 'not-allowed';
+    }
+
+    // script-file-info 패널의 분석 버튼도 동기화
+    const infoBtns = document.querySelectorAll('#script-file-info button');
+    infoBtns.forEach(b => {
+      if (b.textContent.includes('분석')) {
+        if (len > 10) {
+          b.disabled = false;
+          b.style.background = 'var(--blue)';
+          b.style.color = '#fff';
+          b.style.cursor = 'pointer';
+        } else {
+          b.disabled = true;
+          b.style.background = 'var(--navy-light)';
+          b.style.color = 'var(--text-sub)';
+        }
+      }
+    });
+  }
+  function analyzeScript() {
+    // 파일에서 읽은 텍스트 또는 붙여넣기 텍스트
+    const text = document.getElementById('script-paste-area').value.trim();
+    if (!text || text.length < 10) {
+      alert('분석할 텍스트가 없습니다.\n파일이 아직 로드 중이거나 텍스트를 직접 입력해 주세요.');
+      return;
+    }
+    sttFinalText = text;
+    sentenceCount = text.split(/[.!?。\n]/).filter(s => s.trim()).length;
+
+    // 분석 버튼 로딩 표시
+    const btn = document.getElementById('script-analyze-btn');
+    btn.textContent = '분석 중...';
+    btn.disabled = true;
+
+    setTimeout(() => {
+      btn.textContent = '✦ 분석 시작';
+      showDonePanel('📄 스크립트 분석 완료');
+      setStep(2);
+    }, 600);
+  }
+
+  // ═══════════════════════════════════════════════════════
+  //  공통: 완료 패널 표시
+  // ═══════════════════════════════════════════════════════
+  function showDonePanel(label) {
+    const panel = document.getElementById('phase-stt-done');
+    panel.classList.remove('hidden');
+    document.getElementById('stt-done-label').textContent = label;
+    const charLen = sttFinalText.replace(/\n/g,'').length;
+    document.getElementById('stt-done-stat').textContent =
+      `${sentenceCount}문장 · ${charLen}자`;
+    document.getElementById('stt-result-edit').value = sttFinalText;
+    panel.scrollIntoView({ behavior:'smooth', block:'nearest' });
+  }
+
+  function resetAllSTT() {
+    // 마이크 모드 초기화
+    if (waveTimer)    { clearInterval(waveTimer); waveTimer=null; }
+    if (sttTimer)     { clearInterval(sttTimer);  sttTimer=null; }
+    if (recognition)  { try{recognition.stop();}catch(_){} recognition=null; }
+    if (micStream)    { micStream.getTracks().forEach(t=>t.stop()); micStream=null; }
+    if (audioSource)  { try{audioSource.stop();}catch(_){} audioSource=null; }
+    if (audioCtx)     { try{audioCtx.close();}catch(_){} audioCtx=null; }
+    sttFinalText=''; sentenceCount=0;
+    // 마이크 UI
+    const micIdle = document.getElementById('mic-idle');
+    const micRec  = document.getElementById('mic-recording');
+    if(micIdle) micIdle.classList.remove('hidden');
+    if(micRec)  micRec.classList.add('hidden');
+    // 파일 UI
+    ['audio-load-progress','audio-stt-panel'].forEach(id=>{
+      const el=document.getElementById(id); if(el) el.classList.add('hidden');
+    });
+  }
+
+  function resetAllInput() {
+    resetAllSTT();
+    document.getElementById('phase-stt-done').classList.add('hidden');
+    switchInputMode('mic');
+    setStep(1);
+  }
+
+  // ═══════════════════════════════════════════════════════
+  //  AI 회의록 생성 — sendPrompt 방식 (claude.ai 공식 지원)
+  // ═══════════════════════════════════════════════════════
+  let lastRawText = '';
+
+  function proceedToAI() {
+    const text = document.getElementById('stt-result-edit').value.trim();
+    if (!text) { alert('텍스트가 없습니다. 다시 입력해 주세요.'); return; }
+    lastRawText = text;
+
+    // 메타 정보 세팅
+    const modeLabel = { mic:'실시간 녹음', file:'녹음파일 STT', script:'스크립트 업로드' };
+    document.getElementById('meta-chars').textContent =
+      `${text.replace(/\n/g,'').length}자 (${modeLabel[currentMode]||''})`;
+    document.getElementById('meta-date').textContent =
+      (document.getElementById('meeting-date').value || '').replace(/-/g,'.');
+    document.getElementById('raw-text-box').textContent = text;
+
+    // step3 표시
+    document.getElementById('step3-card').classList.remove('hidden');
+    document.getElementById('ai-loading').classList.remove('hidden');
+    document.getElementById('ai-content').classList.add('hidden');
+    document.getElementById('ai-error').classList.add('hidden');
+    document.getElementById('ai-paste-area').value = '';
+    setStep(3);
+    document.getElementById('step3-card').scrollIntoView({ behavior:'smooth' });
+
+    // sendPrompt로 채팅창에 프롬프트 전송
+    const prompt = `아래 회의 텍스트를 분석해서 JSON 형식으로만 응답해주세요. 마크다운 코드블록(\`\`\`)이나 설명 없이 JSON만 출력하세요.
+
+회의 텍스트:
+${text.slice(0, 5000)}
+
+응답 형식:
+{"summary":"주요 논의사항 요약 (번호 목록, \\n으로 구분)","directives":[{"content":"지시사항 내용","assignee":"담당자 또는 팀","deadline":"기한 (없으면 미정)"}]}`;
+
+    try {
+      if (typeof window.sendPrompt === 'function') {
+        window.sendPrompt(prompt);
+        document.getElementById('ai-loading-msg').textContent =
+          '✅ 채팅창에 요청 전송 완료 — AI 응답을 아래에 붙여넣어 주세요';
+      } else {
+        // sendPrompt 불가 시 클립보드에 복사
+        copyPromptToClipboard(prompt);
+      }
+    } catch(e) {
+      copyPromptToClipboard(prompt);
+    }
+  }
+
+  function copyPromptToClipboard(prompt) {
+    navigator.clipboard.writeText(prompt).then(() => {
+      document.getElementById('ai-loading-msg').textContent =
+        '📋 프롬프트가 클립보드에 복사됐습니다 — 채팅창에 붙여넣기(Ctrl+V) 후 전송하세요';
+    }).catch(() => {
+      document.getElementById('ai-loading-msg').textContent =
+        '아래 텍스트 영역에 AI 응답을 붙여넣어 주세요';
+    });
+  }
+
+  // 채팅창에서 받은 AI 응답을 수동으로 붙여넣어 파싱
+  function parseManualInput() {
+    const raw = document.getElementById('ai-paste-area').value.trim();
+    if (!raw) { alert('AI 응답을 붙여넣어 주세요.'); return; }
+
+    // JSON 추출 — 코드블록, 앞뒤 텍스트 제거
+    let jsonStr = raw.replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim();
+
+    // { } 사이만 추출
+    const start = jsonStr.indexOf('{');
+    const end   = jsonStr.lastIndexOf('}');
+    if (start !== -1 && end !== -1 && end > start) {
+      jsonStr = jsonStr.slice(start, end + 1);
+    }
+
+    let parsed;
+    try {
+      parsed = JSON.parse(jsonStr);
+    } catch(e) {
+      // JSON 파싱 실패 시 텍스트 전체를 summary로
+      parsed = { summary: raw, directives: [] };
+    }
+
+    document.getElementById('ai-loading').classList.add('hidden');
+    renderMinutes(parsed, lastRawText);
+  }
+
+  function cancelAI() {
+    document.getElementById('ai-loading').classList.add('hidden');
+    document.getElementById('step3-card').classList.add('hidden');
+    setStep(2);
+  }
+
+  function retryAI() {
+    document.getElementById('ai-error').classList.add('hidden');
+    proceedToAI();
+  }
+
+  function renderMinutes(parsed, rawText) {
+    const summary = (parsed.summary || '').trim() ||
+      '(요약을 생성할 수 없습니다. 원문을 확인해 주세요.)';
+    document.getElementById('ai-summary').textContent = summary;
+
+    const directives = Array.isArray(parsed.directives) ? parsed.directives : [];
+    const list = document.getElementById('directive-list');
+    if (directives.length === 0) {
+      list.innerHTML = `
+        <div style="font-size:12px;color:var(--text-sub);padding:14px;text-align:center;background:var(--navy);border-radius:8px;">
+          추출된 지시사항이 없습니다. 원문을 확인하거나 아래에서 수동 추가해 주세요.
+        </div>
+        <button onclick="addDirectiveManual()" style="margin-top:8px;width:100%;background:transparent;border:1px dashed var(--navy-light);color:var(--text-sub);padding:8px;border-radius:8px;font-size:12px;cursor:pointer;">＋ 지시사항 수동 추가</button>`;
+    } else {
+      list.innerHTML = directives.map((d, i) => `
+        <div class="directive-item">
+          <div class="directive-tag">지시사항 ${String(i+1).padStart(2,'0')}
+            &nbsp;·&nbsp;담당: <span style="color:var(--white);">${d.assignee||'미정'}</span>
+            &nbsp;·&nbsp;기한: <span style="color:var(--white);">${d.deadline||'미정'}</span>
+          </div>
+          <div class="directive-text" contenteditable="true" style="outline:none;margin-top:4px;">${d.content||''}</div>
+        </div>`).join('') +
+        `<button onclick="addDirectiveManual()" style="margin-top:8px;width:100%;background:transparent;border:1px dashed var(--navy-light);color:var(--text-sub);padding:8px;border-radius:8px;font-size:12px;cursor:pointer;">＋ 지시사항 추가</button>`;
+    }
+
+    document.getElementById('raw-text-box').textContent = rawText;
+    document.getElementById('ai-loading').classList.add('hidden');
+    document.getElementById('ai-content').classList.remove('hidden');
+    setStep(3);
+    document.getElementById('sn4').className = 'step-num active';
+    document.getElementById('ai-content').scrollIntoView({ behavior:'smooth', block:'start' });
+  }
+
+  function addDirectiveManual() {
+    const list = document.getElementById('directive-list');
+    const n = list.querySelectorAll('.directive-item').length + 1;
+    const item = document.createElement('div');
+    item.className = 'directive-item';
+    item.innerHTML = `
+      <div class="directive-tag">지시사항 ${String(n).padStart(2,'0')} · 수동 입력</div>
+      <div class="directive-text" contenteditable="true" style="outline:none;margin-top:4px;min-height:24px;" placeholder="내용을 입력하세요"></div>`;
+    const addBtn = list.querySelector('button');
+    if (addBtn) list.insertBefore(item, addBtn);
+    else list.appendChild(item);
+    item.querySelector('.directive-text').focus();
+  }
+
+  function generateMinutes(rawText) { proceedToAI(); }
+
+  function toggleRaw() {
+    document.getElementById('raw-text-box').classList.toggle('hidden');
+  }
+  function downloadMinutes() {
+    const summary = document.getElementById('ai-summary').textContent;
+    const dirItems = document.querySelectorAll('#directive-list .directive-text');
+    let dirText='';
+    dirItems.forEach((el,i)=>{ dirText+=`${i+1}. ${el.textContent}\n`; });
+    const date = document.getElementById('meta-date').textContent;
+    const place = document.getElementById('meeting-place').value || '-';
+    const content = `미래전략본부 주간회의 회의록\n일시: ${date}\n장소: ${place}\n\n[주요 논의사항]\n${summary}\n\n[지시사항]\n${dirText}`;
+    const blob = new Blob([content],{type:'text/plain;charset=utf-8'});
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+    a.download=`회의록_${date.replace(/\./g,'')}.txt`; a.click();
+  }
+  function showStep3() { proceedToAI(); }
+
+  // ═══════════════════════════════════════════════════════
+  //  MODE D : 완성 회의록 업로드 → 지시사항 추출
+  // ═══════════════════════════════════════════════════════
+  let selectedMinutesFile = null;
+  let extractedDirectives = [];
+
+  function handleMinutesFileSelect(input) {
+    const f = input.files[0]; if (!f) return;
+    const ext = f.name.split('.').pop().toLowerCase();
+    const allowed = ['txt','md','csv','docx','pdf','hwp'];
+    if (!allowed.includes(ext)) {
+      alert('지원하지 않는 형식입니다.\nTXT · MD · DOCX · PDF · HWP · CSV만 가능합니다.');
+      input.value = ''; return;
+    }
+    selectedMinutesFile = f;
+    showMinutesFileInfo(f);
+
+    // 텍스트 파일은 바로 읽기
+    if (['txt','md','csv'].includes(ext)) {
+      const r = new FileReader();
+      r.onload = e => {
+        document.getElementById('minutes-paste-area').value = e.target.result;
+        onMinutesPaste();
+      };
+      r.readAsText(f, 'utf-8');
+    } else if (ext === 'docx') {
+      loadMammothAndExtract(f);
+    } else if (ext === 'pdf') {
+      loadPdfJsAndExtract(f);
+    } else if (ext === 'hwp') {
+      alert('HWP 파일은 텍스트 추출이 제한됩니다.\n한글에서 "다른 이름으로 저장 → TXT"로 변환 후 업로드해 주세요.');
+    }
+  }
+
+  function handleMinutesDrop(e) {
+    e.preventDefault();
+    document.getElementById('minutesUploadZone').style.borderColor = 'var(--navy-light)';
+    const f = e.dataTransfer.files[0]; if (!f) return;
+    const dt = new DataTransfer(); dt.items.add(f);
+    const input = document.getElementById('minutesFileInput');
+    input.files = dt.files;
+    handleMinutesFileSelect(input);
+  }
+
+  function showMinutesFileInfo(f) {
+    document.getElementById('minutesUploadZone').classList.add('hidden');
+    const info = document.getElementById('minutes-file-info');
+    info.classList.remove('hidden'); info.style.display = 'flex';
+    document.getElementById('minutes-file-name').textContent = f.name;
+    document.getElementById('minutes-file-meta').textContent =
+      `${f.name.split('.').pop().toUpperCase()} · ${(f.size/1024).toFixed(0)} KB · ${new Date(f.lastModified).toLocaleDateString('ko-KR')}`;
+  }
+
+  function resetMinutesFile() {
+    selectedMinutesFile = null;
+    document.getElementById('minutesFileInput').value = '';
+    document.getElementById('minutesUploadZone').classList.remove('hidden');
+    document.getElementById('minutes-file-info').classList.add('hidden');
+    document.getElementById('minutes-paste-area').value = '';
+    document.getElementById('minutes-result-panel').classList.add('hidden');
+    document.getElementById('minutes-sent-panel').classList.add('hidden');
+    onMinutesPaste();
+  }
+
+  function resetMinutesResult() {
+    document.getElementById('minutes-result-panel').classList.add('hidden');
+    document.getElementById('minutes-sent-panel').classList.add('hidden');
+  }
+
+  function loadMammothAndExtract(f) {
+    if (typeof mammoth !== 'undefined') { extractDocx(f); return; }
+    const s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js';
+    s.onload = () => extractDocx(f);
+    s.onerror = () => alert('DOCX 파서 로드 실패. 네트워크를 확인해 주세요.');
+    document.head.appendChild(s);
+  }
+  function extractDocx(f) {
+    const r = new FileReader();
+    r.onload = e => {
+      mammoth.extractRawText({ arrayBuffer: e.target.result }).then(res => {
+        document.getElementById('minutes-paste-area').value = res.value.trim();
+        onMinutesPaste();
+      }).catch(() => alert('DOCX 텍스트 추출 실패. TXT로 변환 후 시도해 주세요.'));
+    };
+    r.readAsArrayBuffer(f);
+  }
+
+  function loadPdfJsAndExtract(f) {
+    if (typeof pdfjsLib !== 'undefined') { extractPdf(f); return; }
+    const s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+    s.onload = () => {
+      pdfjsLib.GlobalWorkerOptions.workerSrc =
+        'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+      extractPdf(f);
+    };
+    s.onerror = () => alert('PDF 파서 로드 실패. 네트워크를 확인해 주세요.');
+    document.head.appendChild(s);
+  }
+  async function extractPdf(f) {
+    try {
+      const buf = await f.arrayBuffer();
+      const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
+      let text = '';
+      for (let i = 1; i <= pdf.numPages; i++) {
+        const page = await pdf.getPage(i);
+        const content = await page.getTextContent();
+        text += content.items.map(item => item.str).join(' ') + '\n';
+      }
+      document.getElementById('minutes-paste-area').value = text.trim();
+      onMinutesPaste();
+    } catch(err) { alert('PDF 파싱 실패: ' + err.message); }
+  }
+
+  function onMinutesPaste() {
+    const text = document.getElementById('minutes-paste-area').value;
+    document.getElementById('minutes-char-count').textContent = text.length + '자 입력됨';
+    const btn = document.getElementById('minutes-extract-btn');
+    const hasText = text.trim().length > 20;
+    btn.disabled = !hasText;
+    btn.style.background = hasText ? 'var(--blue)' : 'var(--navy-light)';
+    btn.style.color = hasText ? '#fff' : 'var(--text-sub)';
+    btn.style.cursor = hasText ? 'pointer' : 'not-allowed';
+  }
+
+  // ── 핵심: sendPrompt로 Claude에게 지시사항 추출 요청 ──
+  function extractFromMinutes() {
+    const text = document.getElementById('minutes-paste-area').value.trim();
+    if (!text || text.length < 20) { alert('회의록 텍스트를 입력해 주세요.'); return; }
+
+    // 로딩 표시
+    const btn = document.getElementById('minutes-extract-btn');
+    btn.textContent = '🔍 추출 중...'; btn.disabled = true;
+
+    // sendPrompt로 채팅창에 지시사항 추출 프롬프트 전송
+    const prompt = `아래 회의록에서 지시사항만 추출해서 JSON 형식으로만 응답하세요. 마크다운 코드블록(\`\`\`)이나 설명 없이 JSON만 출력하세요.
+
+회의록:
+${text.slice(0, 6000)}
+
+응답 형식:
+{"directives":[{"content":"지시사항 내용","assignee":"담당자 또는 팀명 (불명확하면 미정)","deadline":"완료 기한 (없으면 미정)","priority":"high 또는 mid 또는 low"}]}
+
+규칙:
+- 지시사항: 누군가에게 액션이 필요한 항목만 (보고, 제출, 검토, 수립, 작성, 확인 등)
+- 담당자가 명시된 경우 정확히 기재, 불명확하면 "미정"
+- 기한이 언급된 경우 기재, 없으면 "미정"
+- 중요도는 긴급/상위 지시는 high, 일반은 mid, 참고사항은 low`;
+
+    try {
+      if (typeof window.sendPrompt === 'function') {
+        window.sendPrompt(prompt);
+        // sendPrompt 후 붙여넣기 UI로 전환
+        showMinutesAIWait();
+      } else {
+        navigator.clipboard.writeText(prompt).then(() => {
+          showMinutesAIWait(true);
+        }).catch(() => showMinutesAIWait(true));
+      }
+    } catch(e) { showMinutesAIWait(true); }
+  }
+
+  // AI 응답 대기 UI
+  function showMinutesAIWait(clipboardOnly = false) {
+    const btn = document.getElementById('minutes-extract-btn');
+    btn.textContent = '🔍 지시사항 추출'; btn.disabled = false;
+
+    // 붙여넣기 패널 삽입 (이미 있으면 스킵)
+    if (document.getElementById('minutes-ai-wait')) {
+      document.getElementById('minutes-ai-wait').classList.remove('hidden');
+      return;
+    }
+    const panel = document.createElement('div');
+    panel.id = 'minutes-ai-wait';
+    panel.style.cssText = 'margin-top:14px;background:var(--navy);border:1px solid var(--navy-light);border-radius:10px;padding:16px;';
+    panel.innerHTML = `
+      <div style="font-size:12px;font-weight:700;margin-bottom:6px;">
+        ${clipboardOnly ? '📋 프롬프트가 복사됐습니다 — 채팅창에 붙여넣기 후 전송' : '✅ 채팅창에 요청 전송 완료'}
+      </div>
+      <div style="font-size:11px;color:var(--text-sub);margin-bottom:10px;">Claude의 JSON 응답이 오면 아래에 붙여넣고 "적용" 버튼을 클릭하세요.</div>
+      <textarea id="minutes-ai-response" style="width:100%;background:var(--navy-mid);border:1px solid var(--navy-light);border-radius:7px;padding:10px;font-size:11px;color:var(--off-white);line-height:1.7;font-family:monospace;resize:vertical;min-height:80px;outline:none;transition:border-color .2s;" placeholder='{"directives":[...]}' oninput="this.style.borderColor=this.value.trim()?'var(--blue)':'var(--navy-light)'"></textarea>
+      <div style="display:flex;gap:8px;margin-top:8px;">
+        <button onclick="applyMinutesAI()" style="background:var(--blue);color:#fff;border:none;padding:8px 20px;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;flex:1;">✦ 적용</button>
+        <button onclick="document.getElementById('minutes-ai-wait').classList.add('hidden')" style="background:transparent;color:var(--text-sub);border:1px solid var(--navy-light);padding:8px 14px;border-radius:7px;font-size:12px;cursor:pointer;">닫기</button>
+      </div>`;
+    document.getElementById('minutes-extract-btn').parentElement.after(panel);
+  }
+
+  function applyMinutesAI() {
+    const raw = document.getElementById('minutes-ai-response').value.trim();
+    if (!raw) { alert('AI 응답을 붙여넣어 주세요.'); return; }
+
+    let jsonStr = raw.replace(/```json\s*/gi,'').replace(/```\s*/g,'').trim();
+    const s = jsonStr.indexOf('{'), e = jsonStr.lastIndexOf('}');
+    if (s !== -1 && e > s) jsonStr = jsonStr.slice(s, e+1);
+
+    let parsed;
+    try { parsed = JSON.parse(jsonStr); }
+    catch { alert('JSON 파싱 실패. AI 응답 전체를 그대로 붙여넣었는지 확인해 주세요.'); return; }
+
+    extractedDirectives = Array.isArray(parsed.directives) ? parsed.directives : [];
+    renderMinutesDirectives(extractedDirectives);
+    document.getElementById('minutes-ai-wait').classList.add('hidden');
+  }
+
+  // 키워드 기반 로컬 추출 (AI 없이)
+  function extractDirectivesLocal(text) {
+    const keywords = ['하십시오','해주십시오','보고해','보고하','제출해','제출하십시오',
+      '검토해','검토하십시오','수립해','작성해','공유해','확인해','마련해','진행해',
+      '조치해','실시해','완료해','추진해'];
+    const lines = text.split('\n').filter(l => l.trim());
+    const directives = [];
+    lines.forEach(line => {
+      const t = line.trim();
+      if (keywords.some(k => t.includes(k))) {
+        // 담당자 패턴 추출 (임원명 → 내용)
+        const assigneeMatch = t.match(/^([가-힣\s]{2,8}(?:팀장|상무|이사|전무|본부장|팀))\s*[→:]/);
+        const deadlineMatch = t.match(/(\d+월\s*\d+일|\d+주차|다음\s*주|이번\s*달\s*말|금요일|월요일)/);
+        directives.push({
+          content: t,
+          assignee: assigneeMatch ? assigneeMatch[1].trim() : '미정',
+          deadline: deadlineMatch ? deadlineMatch[1] : '미정',
+          priority: 'mid'
+        });
+      }
+    });
+    return directives;
+  }
+
+  function renderMinutesDirectives(directives) {
+    const list = document.getElementById('minutes-directive-list');
+
+    if (directives.length === 0) {
+      list.innerHTML = `<div style="font-size:12px;color:var(--text-sub);padding:12px;text-align:center;background:var(--navy);border-radius:8px;">
+        추출된 지시사항이 없습니다. 수동으로 추가해 주세요.</div>`;
+    } else {
+      const priorityColors = { high:'#F87171', mid:'#FBBF24', low:'#8A9BB5' };
+      const priorityLabel  = { high:'높음', mid:'중간', low:'낮음' };
+      list.innerHTML = directives.map((d, i) => `
+        <div class="directive-item" id="md-item-${i}" style="position:relative;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;">
+            <div class="directive-tag" style="margin-bottom:0;">
+              지시사항 ${String(i+1).padStart(2,'0')}
+              &nbsp;·&nbsp;담당: <span style="color:var(--white);">
+                <span contenteditable="true" style="outline:none;min-width:30px;display:inline-block;" id="md-assignee-${i}">${d.assignee||'미정'}</span>
+              </span>
+              &nbsp;·&nbsp;기한: <span style="color:var(--white);">
+                <span contenteditable="true" style="outline:none;min-width:30px;display:inline-block;" id="md-deadline-${i}">${d.deadline||'미정'}</span>
+              </span>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
+              <select onchange="updateMinutesPriority(${i}, this.value)"
+                style="background:var(--navy);border:1px solid var(--navy-light);color:${priorityColors[d.priority||'mid']};font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;cursor:pointer;outline:none;">
+                <option value="high" ${d.priority==='high'?'selected':''}>● 높음</option>
+                <option value="mid"  ${(d.priority||'mid')==='mid'?'selected':''}>● 중간</option>
+                <option value="low"  ${d.priority==='low'?'selected':''}>● 낮음</option>
+              </select>
+              <button onclick="removeMinutesDirective(${i})"
+                style="background:transparent;border:none;color:var(--text-sub);font-size:14px;cursor:pointer;padding:0 2px;line-height:1;">✕</button>
+            </div>
+          </div>
+          <div class="directive-text" contenteditable="true" style="outline:none;" id="md-content-${i}">${d.content||''}</div>
+        </div>`).join('');
+    }
+
+    const stat = `${directives.length}건 추출`;
+    document.getElementById('minutes-result-stat').textContent = stat;
+    document.getElementById('minutes-result-panel').classList.remove('hidden');
+    document.getElementById('minutes-result-panel').scrollIntoView({ behavior:'smooth', block:'nearest' });
+  }
+
+  function updateMinutesPriority(idx, val) {
+    if (extractedDirectives[idx]) extractedDirectives[idx].priority = val;
+  }
+
+  function removeMinutesDirective(idx) {
+    const item = document.getElementById('md-item-'+idx);
+    if (item) item.remove();
+  }
+
+  function addMinutesDirective() {
+    const list = document.getElementById('minutes-directive-list');
+    const n = list.querySelectorAll('.directive-item').length + 1;
+    const item = document.createElement('div');
+    item.className = 'directive-item';
+    item.innerHTML = `
+      <div class="directive-tag">지시사항 ${String(n).padStart(2,'0')} · 수동 입력</div>
+      <div class="directive-text" contenteditable="true" style="outline:none;margin-top:4px;min-height:24px;"></div>`;
+    const addBtn = document.querySelector('#mode-minutes button[onclick="addMinutesDirective()"]');
+    if (addBtn) list.after(item);
+    else list.appendChild(item);
+    item.querySelector('.directive-text').focus();
+  }
+
+  function sendMinutesToModule2() {
+    const items = document.querySelectorAll('#minutes-directive-list .directive-item');
+    const count = items.length;
+    if (count === 0) { alert('전송할 지시사항이 없습니다.'); return; }
+
+    const meetingDate = document.getElementById('meeting-date').value.replace(/-/g,'.') || getNow().split(' ')[0];
+    const typeNames = { head:'본부장', vice:'부회장', exec:'최고경영층' };
+    const typeName  = typeNames[currentType] || '본부장';
+
+    // ── 각 지시사항 → Module2 directives 배열에 추가 ──
+    items.forEach(item => {
+      const contentEl = item.querySelector('.directive-text');
+      const content   = contentEl ? contentEl.textContent.trim() : '';
+      if (!content) return;
+
+      // 담당자·기한·우선순위 읽기
+      const assigneeEl = item.querySelector('[id^="md-assignee-"]');
+      const deadlineEl = item.querySelector('[id^="md-deadline-"]');
+      const prioEl     = item.querySelector('select');
+      const assignee   = assigneeEl ? assigneeEl.textContent.trim() : '미정';
+      const deadline   = deadlineEl ? deadlineEl.textContent.trim() : '미정';
+      const priority   = prioEl ? prioEl.value : 'mid';
+
+      directives.unshift({
+        id       : Date.now() + Math.random(),
+        type     : currentType,
+        typeName : typeName,
+        date     : meetingDate,
+        content  : content,
+        team     : assignee !== '미정' ? assignee : '-',
+        person   : assignee,
+        deadline : deadline,
+        priority : priority,
+        status   : 'none',
+        reported : false,
+        restricted: currentType === 'exec'
+      });
+    });
+
+    // ── 이력 추가 ──
+    const fileName = selectedMinutesFile ? selectedMinutesFile.name
+                   : (document.getElementById('minutes-paste-area').value.slice(0,30).trim() + '...') || '붙여넣기';
+    addHistory({
+      mode     : '회의록 업로드',
+      type     : currentType,
+      typeName : typeName,
+      label    : fileName,
+      dirCount : count,
+      createdAt: getNow(),
+      status   : 'done'
+    });
+
+    document.getElementById('minutes-result-panel').classList.add('hidden');
+    document.getElementById('minutes-sent-panel').classList.remove('hidden');
+    document.getElementById('minutes-sent-stat').textContent =
+      `지시사항 ${count}건이 Module 2 이행관리 대시보드에 등록되었습니다.`;
+    document.getElementById('minutes-sent-panel').scrollIntoView({ behavior:'smooth', block:'nearest' });
+  }
+
+  // ═══════════════════════════════════════════════════════
+  //  이력 관리
+  // ═══════════════════════════════════════════════════════
+  const MODE_LABEL = { mic:'실시간 녹음', file:'녹음파일', script:'스크립트', minutes:'회의록 업로드' };
+  const TYPE_CLASS = { head:'badge-head', vice:'badge-vice', exec:'badge-exec' };
+
+  function getNow() {
+    const d = new Date();
+    const mm = String(d.getMonth()+1).padStart(2,'0');
+    const dd = String(d.getDate()).padStart(2,'0');
+    const hh = String(d.getHours()).padStart(2,'0');
+    const mi = String(d.getMinutes()).padStart(2,'0');
+    return `${mm}.${dd} ${hh}:${mi}`;
+  }
+
+  function addHistory(entry) {
+    historyList.unshift(entry);        // 최신 항목을 맨 위에
+    renderHistory();
+    // 이력 카드로 부드럽게 스크롤
+    setTimeout(() => {
+      document.getElementById('history-card')
+        .scrollIntoView({ behavior:'smooth', block:'nearest' });
+    }, 300);
+  }
+
+  function renderHistory() {
+    const tbody  = document.getElementById('history-tbody');
+    const empty  = document.getElementById('history-empty');
+    const table  = tbody.closest('table');
+
+    if (historyList.length === 0) {
+      table.style.display = 'none';
+      empty.style.display = 'block';
+      return;
+    }
+    table.style.display = '';
+    empty.style.display = 'none';
+
+    const modeIconMap = { '실시간 녹음':'🎙', '녹음파일':'🎵', '스크립트':'📄', '회의록 업로드':'📋' };
+
+    tbody.innerHTML = historyList.map((h, i) => {
+      const badgeClass = TYPE_CLASS[h.type] || 'badge-head';
+      const icon = modeIconMap[h.mode] || '📄';
+      const statusHTML = h.status === 'done'
+        ? '<span class="status-pill pill-done">이행관리 등록</span>'
+        : '<span class="status-pill pill-wait">대기 중</span>';
+      return `<tr>
+        <td style="font-size:12px;">${icon} ${h.mode}</td>
+        <td><span class="type-badge ${badgeClass}">${h.typeName}</span></td>
+        <td style="font-size:12px;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${h.label}">${h.label}</td>
+        <td style="font-size:12px;font-weight:700;color:var(--blue);">${h.dirCount}건</td>
+        <td class="date-text">${h.createdAt}</td>
+        <td>${statusHTML}</td>
+        <td>
+          <button onclick="deleteHistory(${i})"
+            style="background:transparent;border:1px solid var(--navy-light);color:var(--text-sub);padding:3px 8px;border-radius:5px;font-size:11px;cursor:pointer;">✕</button>
+        </td>
+      </tr>`;
+    }).join('');
+  }
+
+  function deleteHistory(idx) {
+    historyList.splice(idx, 1);
+    renderHistory();
+  }
+
+  function clearHistory() {
+    if (!confirm('이력을 모두 삭제하시겠습니까?')) return;
+    historyList = [];
+    renderHistory();
+  }
+
+  // ═══════════════════════════════════════════════════════
+  //  기타 공통 함수
+  // ═══════════════════════════════════════════════════════
+  function simulateVice() {
+    alert('리마인드 메시지가 발송되었습니다.\n이상무 상무, 박이사 이사에게 MS Teams 메시지 발송 완료.');
+  }
+  function simulateExec() {
+    alert('지시사항이 이행관리 툴(Module 2)에 등록되었습니다.');
+  }
+  function confirmDirectives() {
+    // ── directive-list 항목 수집 → Module2 directives 배열에 추가 ──
+    const dirItems = document.querySelectorAll('#directive-list .directive-item');
+    const meetingDate = document.getElementById('meeting-date').value.replace(/-/g,'.') || getNow().split(' ')[0];
+    const typeNames = { head:'본부장', vice:'부회장', exec:'최고경영층' };
+    const typeName  = typeNames[currentType] || '본부장';
+
+    dirItems.forEach(item => {
+      const contentEl  = item.querySelector('.directive-text');
+      const tagEl      = item.querySelector('.directive-tag');
+      const content    = contentEl ? contentEl.textContent.trim() : '';
+      if (!content) return;
+
+      // 태그에서 담당자·기한 파싱 (있는 경우)
+      const tagText   = tagEl ? tagEl.textContent : '';
+      const assignee  = (tagText.match(/담당:\s*([^\s·&]+)/) || [])[1] || '미정';
+      const deadline  = (tagText.match(/기한:\s*([^\s·&]+)/) || [])[1] || '미정';
+
+      directives.unshift({
+        id       : Date.now() + Math.random(),
+        type     : currentType,
+        typeName : typeName,
+        date     : meetingDate,
+        content  : content,
+        team     : assignee !== '미정' ? assignee : '-',
+        person   : assignee,
+        deadline : deadline,
+        priority : 'mid',
+        status   : 'none',
+        reported : false,
+        restricted: currentType === 'exec'
+      });
+    });
+
+    // ── 이력 추가 ──
+    const fileName = selectedAudioFile ? selectedAudioFile.name
+                   : selectedScriptFile ? selectedScriptFile.name
+                   : meetingDate;
+    addHistory({
+      mode     : MODE_LABEL[currentMode] || currentMode,
+      type     : currentType,
+      typeName : typeName,
+      label    : fileName,
+      dirCount : dirItems.length,
+      createdAt: getNow(),
+      status   : 'done'
+    });
+
+    document.getElementById('step3-card').classList.add('hidden');
+    document.getElementById('step-complete').classList.remove('hidden');
+    document.getElementById('sn4').textContent = '✓';
+    document.getElementById('sn4').className = 'step-num done';
+    document.getElementById('step-complete').scrollIntoView({ behavior:'smooth' });
+  }
+  function goModule2() {
+    switchPage(2);
+    // Module2 테이블 갱신
+    try { renderTable(); } catch(e) {}
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+  function resetFlow() {
+    resetAllInput();
+    document.getElementById('step3-card').classList.add('hidden');
+    document.getElementById('step-complete').classList.add('hidden');
+    window.scrollTo({ top:0, behavior:'smooth' });
+  }
+  function filterHistory(type, el) {
+    document.querySelectorAll('.aside-item').forEach(i=>i.classList.remove('active'));
+    el.classList.add('active');
+  }
+
+  // 초기화
+  document.getElementById('step2-head').style.display='block';
+  document.getElementById('step2-vice').style.display='none';
+  document.getElementById('step2-exec').style.display='none';
+  renderHistory();
+
+
+// ════ Module 2 JS ════════════════════════════════════════
+
+const directives = [
+  { id:1, type:'exec', typeName:'최고경영층', date:'2025.06.18', content:'미래전략본부 하반기 전략과제 추진계획 보고', team:'미래전략본부', person:'정전무 전무', deadline:'2025.07.31', priority:'high', status:'progress', reported:false, restricted:true },
+  { id:2, type:'vice', typeName:'부회장', date:'2025.06.26', content:'북미 시장 리콜 후속조치 현황 및 완료 예정일 보고', team:'미래전략기획팀', person:'김상무 상무', deadline:'2025.07.08', priority:'high', status:'progress', reported:false, restricted:false },
+  { id:3, type:'head', typeName:'본부장', date:'2025.06.30', content:'3분기 하반기 전략목표 달성 현황 분석 및 개선계획 보고', team:'미래전략운영팀', person:'김기획 팀장', deadline:'2025.07.15', priority:'high', status:'review', reported:false, restricted:false },
+  { id:4, type:'vice', typeName:'부회장', date:'2025.06.26', content:'EV ESS 국내 사업 추진계획 수립 및 공유', team:'미래전략협력팀', person:'박협력 팀장', deadline:'2025.07.31', priority:'mid', status:'none', reported:false, restricted:false },
+  { id:5, type:'head', typeName:'본부장', date:'2025.06.23', content:'미래전략 추진 프로세스 표준화 매뉴얼 작성', team:'미래전략운영팀', person:'김기획 팀장', deadline:'2025.07.10', priority:'mid', status:'progress', reported:false, restricted:false },
+  { id:6, type:'vice', typeName:'부회장', date:'2025.06.19', content:'유럽 EV인프라 규제 대응 체크리스트 업데이트', team:'미래전략사업팀', person:'이사업 팀장', deadline:'2025.07.05', priority:'high', status:'done', reported:true, restricted:false },
+  { id:7, type:'head', typeName:'본부장', date:'2025.06.16', content:'신규 협력사 발굴 및 파트너십 체결 방안 검토', team:'미래전략협력팀', person:'박협력 팀장', deadline:'2025.06.30', priority:'low', status:'done', reported:true, restricted:false },
+  { id:8, type:'head', typeName:'본부장', date:'2025.06.09', content:'미래전략 데이터 분석 플랫폼 도입 검토', team:'미래전략운영팀', person:'김기획 팀장', deadline:'2025.06.27', priority:'mid', status:'done', reported:true, restricted:false },
+];
+
+const userRole = 'team_manager'; // head_manager, vice_manager, exec_manager, team_manager, team_member
+
+function canSee(d) {
+  if (d.restricted) {
+    return ['head_manager','exec_manager','team_manager','team_member'].includes(userRole);
+  }
+  return true;
+}
+
+function deadlineClass(dl, status) {
+  if (status === 'done') return 'ok';
+  const today = new Date('2025-07-01');
+  const d = new Date(dl);
+  const diff = Math.ceil((d - today) / 86400000);
+  if (diff < 0) return 'over';
+  if (diff <= 3) return 'soon';
+  return 'ok';
+}
+
+function deadlineLabel(dl, status) {
+  if (status === 'done') return dl;
+  const today = new Date('2025-07-01');
+  const d = new Date(dl);
+  const diff = Math.ceil((d - today) / 86400000);
+  if (diff < 0) return dl + ' <span style="color:#F87171;">(D+' + Math.abs(diff) + ' 초과)</span>';
+  if (diff === 0) return dl + ' <span style="color:#FBBF24;">(D-Day)</span>';
+  if (diff <= 3) return dl + ' <span style="color:#FBBF24;">(D-' + diff + ')</span>';
+  return dl;
+}
+
+function statusPill(s) {
+  const map = { none:'s-none미이행', review:'s-review검토중', progress:'s-progress이행중', done:'s-done완료', hold:'s-hold보류' };
+  const [cls, label] = map[s].split(/(?=[가-힣])/);
+  const m = { none:['s-none','미이행'], review:['s-review','검토중'], progress:['s-progress','이행중'], done:['s-done','완료'], hold:['s-hold','보류'] };
+  return `<span class="status-pill ${m[s][0]}">${m[s][1]}</span>`;
+}
+
+function priorityDot(p) {
+  const m = { high:['p-high','높음'], mid:['p-mid','중간'], low:['p-low','낮음'] };
+  return `<span class="priority-dot ${m[p][0]}"></span>${m[p][1]}`;
+}
+
+function renderTable(filter = {}) {
+  const tbody = document.getElementById('tableBody');
+  let data = directives.filter(d => canSee(d));
+  if (filter.type && filter.type !== 'all') data = data.filter(d => d.type === filter.type);
+  if (filter.status && filter.status !== 'all') data = data.filter(d => d.status === filter.status);
+  if (filter.urgent) data = data.filter(d => {
+    if (d.status === 'done') return false;
+    const today = new Date('2025-07-01');
+    const diff = Math.ceil((new Date(d.deadline) - today) / 86400000);
+    return diff <= 3;
+  });
+
+  tbody.innerHTML = data.map(d => {
+    const typeClass = { head:'t-head', vice:'t-vice', exec:'t-exec' }[d.type];
+    const dlClass = deadlineClass(d.deadline, d.status);
+    return `<tr onclick="openDetail(${d.id})">
+      <td><input type="checkbox" onclick="event.stopPropagation()" style="accent-color:var(--blue);"></td>
+      <td>
+        <span class="type-tag ${typeClass}">${d.typeName}</span>
+        ${d.restricted ? '<span class="lock-badge" style="margin-top:4px;display:inline-flex;">🔒 보안</span>' : ''}
+      </td>
+      <td style="color:var(--text-sub);font-size:11px;">${d.date}</td>
+      <td style="max-width:260px;">
+        <div style="font-size:12px;line-height:1.5;white-space:normal;">${d.content}</div>
+        <div style="font-size:11px;color:var(--text-sub);margin-top:3px;">${d.team}</div>
+      </td>
+      <td style="font-size:12px;">${d.person}</td>
+      <td class="deadline ${dlClass}">${deadlineLabel(d.deadline, d.status)}</td>
+      <td style="font-size:12px;">${priorityDot(d.priority)}</td>
+      <td>${statusPill(d.status)}</td>
+      <td style="text-align:center;">${d.reported ? '<span style="color:#34D399;font-size:13px;">✓</span>' : '<span style="color:var(--text-sub);font-size:13px;">–</span>'}</td>
+    </tr>`;
+  }).join('');
+}
+
+let currentFilter = {};
+function filterType(t, el) {
+  document.querySelectorAll('.filter-btn').forEach(b => { if(['전체','본부장','부회장','최고경영층 🔒'].some(l=>b.textContent.includes(l.split(' ')[0]))) b.classList.remove('active','f-head','f-vice','f-exec'); });
+  el.classList.add('active', t !== 'all' ? 'f-'+t : '');
+  currentFilter.type = t;
+  renderTable(currentFilter);
+}
+function filterStatus(s, el) {
+  document.querySelectorAll('.filter-group:nth-child(2) .filter-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  currentFilter.status = s;
+  renderTable(currentFilter);
+}
+function setView(v, el) {
+  document.querySelectorAll('.aside-item').forEach(i => i.classList.remove('active'));
+  el.classList.add('active');
+  currentFilter = {};
+  if (v === 'urgent') currentFilter.urgent = true;
+  else if (['head','vice','exec'].includes(v)) currentFilter.type = v;
+  else if (['none','review','progress','done','hold'].includes(v)) currentFilter.status = v;
+  renderTable(currentFilter);
+}
+
+let selectedId = null;
+function openDetail(id) {
+  const d = directives.find(x => x.id === id);
+  if (!d) return;
+  selectedId = id;
+  document.getElementById('dp-title').textContent = d.typeName + ' 지시사항';
+  document.getElementById('dp-source').textContent = d.typeName + ' · ' + d.date;
+  document.getElementById('dp-content').textContent = d.content;
+  document.getElementById('dp-owner').textContent = d.team + ' · ' + d.person;
+  document.getElementById('dp-deadline').innerHTML = deadlineLabel(d.deadline, d.status);
+  document.getElementById('dp-status-sel').value = d.status;
+  const pct = d.status === 'done' ? 100 : d.status === 'progress' ? 60 : d.status === 'review' ? 20 : 0;
+  document.getElementById('dp-progress').value = pct;
+  document.getElementById('dp-pct').textContent = pct + '%';
+  document.getElementById('dp-pbar').style.width = pct + '%';
+  document.getElementById('detailPanel').classList.add('open');
+}
+function closeDetail() { document.getElementById('detailPanel').classList.remove('open'); }
+function saveDetail() {
+  const d = directives.find(x => x.id === selectedId);
+  if (d) { d.status = document.getElementById('dp-status-sel').value; renderTable(currentFilter); }
+  closeDetail();
+}
+
+function openModal() {
+  document.getElementById('addModal').classList.add('open');
+  document.getElementById('m-source').onchange = function() {
+    document.getElementById('exec-warn').classList.toggle('hidden', this.value !== 'exec');
+  };
+}
+function closeModal() { document.getElementById('addModal').classList.remove('open'); }
+function addDirective() {
+  const src = document.getElementById('m-source').value;
+  const content = document.getElementById('m-content').value.trim();
+  if (!content) { alert('지시사항 내용을 입력하세요.'); return; }
+  const typeNames = { head:'본부장', vice:'부회장', exec:'최고경영층' };
+  directives.unshift({
+    id: Date.now(), type: src, typeName: typeNames[src],
+    date: document.getElementById('m-date').value.replace(/-/g,'.'),
+    content, team: document.getElementById('m-team').value,
+    person: document.getElementById('m-person').value,
+    deadline: document.getElementById('m-deadline').value || '미정',
+    priority: document.getElementById('m-priority').value,
+    status: 'none', reported: false, restricted: src === 'exec'
+  });
+  renderTable(currentFilter);
+  closeModal();
+}
+
+document.getElementById('dp-progress').addEventListener('input', function() {
+  document.getElementById('dp-pbar').style.width = this.value + '%';
+});
+
+renderTable();
+
+
+// ════ Module 3 JS ════════════════════════════════════════
+
+let notifCount = 0;
+
+function showNotif(type) {
+  const configs = {
+    d3: { icon: '🟡', title: 'D-3 추심 알림 발송', text: '미래전략본부 MS Teams 채널에 발송되었습니다.' },
+    report: { icon: '📊', title: '주간 리포트 발송 완료', text: '본부장, 미래전략운영팀장에게 이번 주차 리포트가 발송되었습니다.' },
+    exec: { icon: '🔒', title: '최고경영층 지시사항 알림', text: '수임 임원 정전무 전무에게 이행 독려 메시지가 발송되었습니다.' },
+    brief: { icon: '📋', title: '회의 전 브리핑 발송', text: '내일 미래전략본부 주간회의 미이행 현황 3건이 담당자에게 발송되었습니다.' },
+    escalate: { icon: '🔴', title: '에스컬레이션 알림', text: '기한 초과 1건에 대해 본부장·팀장에게 에스컬레이션 발송 완료.' },
+  };
+  const c = configs[type] || configs.d3;
+  const id = 'notif-' + notifCount++;
+  const el = document.createElement('div');
+  el.className = 'notif';
+  el.id = id;
+  el.innerHTML = `<span class="notif-icon">${c.icon}</span>
+    <div class="notif-body">
+      <div class="notif-title">${c.title}</div>
+      <div class="notif-text">${c.text}</div>
+    </div>
+    <span class="notif-close" onclick="closeNotif('${id}')">✕</span>`;
+  document.getElementById('notifStack').appendChild(el);
+  setTimeout(() => closeNotif(id), 4000);
+}
+
+function closeNotif(id) {
+  const el = document.getElementById(id);
+  if (el) { el.classList.add('hide'); setTimeout(() => el.remove(), 300); }
+}
+
+function testNotif() {
+  const types = ['d3','report','brief','escalate'];
+  let i = 0;
+  const iv = setInterval(() => {
+    showNotif(types[i++]);
+    if (i >= types.length) clearInterval(iv);
+  }, 600);
+}
+
+</script>
+</body>
+</html>

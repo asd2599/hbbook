@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>내 AI 앱</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 40px 24px;
+    font-family: "맑은 고딕", "Malgun Gothic", system-ui, sans-serif;
+    background: #F4F6FA; color: #22262D;
+  }
+  .wrap { max-width: 860px; margin: 0 auto; }
+  h1 { margin: 0 0 6px; font-size: 26px; color: #164194; letter-spacing: -.02em; }
+  .sub { margin: 0 0 24px; font-size: 15px; color: #6B7480; }
+
+  .card {
+    background: #fff; border: 1px solid #E3E8F0; border-radius: 12px;
+    padding: 22px; box-shadow: 0 2px 10px rgba(20, 40, 80, .05);
+  }
+  textarea {
+    width: 100%; min-height: 96px; padding: 12px 14px; resize: vertical;
+    font: inherit; font-size: 16px; line-height: 1.6;
+    border: 1px solid #D5DCE8; border-radius: 8px; outline: none;
+  }
+  textarea:focus { border-color: #164194; }
+
+  .row { display: flex; align-items: center; gap: 10px; margin-top: 12px; }
+  button {
+    padding: 11px 22px; font: inherit; font-size: 16px; font-weight: 700;
+    color: #fff; background: #164194; border: 0; border-radius: 8px; cursor: pointer;
+  }
+  button:disabled { background: #A8B4C8; cursor: default; }
+  .state { font-size: 14px; color: #6B7480; }
+
+  .answer {
+    margin-top: 18px; padding: 18px 20px; min-height: 60px;
+    background: #F7F9FC; border-left: 4px solid #70AD47; border-radius: 0 8px 8px 0;
+    font-size: 16px; line-height: 1.75; white-space: pre-wrap;
+  }
+  .answer.is-error { border-left-color: #FF0000; background: #FFF5F5; color: #B00000; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <h1>내 AI 앱</h1>
+  <p class="sub">무엇이든 물어보세요. 답은 아래에 나옵니다.</p>
+
+  <div class="card">
+    <textarea id="q" placeholder="예) 이번 주 회의 안건을 세 줄로 정리해 줘"></textarea>
+    <div class="row">
+      <button id="send" type="button">보내기</button>
+      <span class="state" id="state"></span>
+    </div>
+    <div class="answer" id="answer"></div>
+  </div>
+</div>
+
+<script>
+  var q = document.getElementById('q');
+  var send = document.getElementById('send');
+  var state = document.getElementById('state');
+  var answer = document.getElementById('answer');
+
+  function show(text, isError) {
+    answer.textContent = text;
+    answer.classList.toggle('is-error', !!isError);
+  }
+
+  send.addEventListener('click', function () {
+    var text = q.value.trim();
+    if (!text) { q.focus(); return; }
+
+    send.disabled = true;
+    state.textContent = '생각하는 중…';
+    show('');
+
+    fetch('/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ messages: [{ role: 'user', content: text }] })
+    })
+      .then(function (r) { return r.text().then(function (t) { return { code: r.status, text: t }; }); })
+      .then(function (res) {
+        var data = {};
+        try { data = JSON.parse(res.text); } catch (e) {}
+        if (res.code >= 400) {
+          show('오류 ' + res.code + '\n' + (data.error && data.error.message || data.error || res.text), true);
+          return;
+        }
+        var out = (data.content || []).map(function (c) { return c.text || ''; }).join('');
+        show(out || res.text);
+      })
+      .catch(function (err) { show('연결하지 못했습니다: ' + err.message, true); })
+      .finally(function () {
+        send.disabled = false;
+        state.textContent = '';
+      });
+  });
+
+  q.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) send.click();
+  });
+</script>
+
+</body>
+</html>

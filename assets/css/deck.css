@@ -16,6 +16,9 @@
 
   --slide-w: 1280px;
   --slide-h: 720px;        /* 16:9 */
+
+  --side-open-w: 282px;    /* 왼쪽 챕터 서랍 폭 */
+  --side-w: 0px;           /* 열려 있는 동안만 위 값이 들어간다 (deck.js) */
 }
 
 * { box-sizing: border-box; }
@@ -29,14 +32,22 @@ html, body {
   font-family: "Pretendard", "Pretendard Variable", -apple-system, BlinkMacSystemFont,
                "Malgun Gothic", "맑은 고딕", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
   -webkit-font-smoothing: antialiased;
+
+  /* 한글은 낱말 단위로만 줄을 바꾼다.
+     기본값은 글자 아무 데서나 끊어서 "웹페이 / 지" 처럼 어설프게 잘린다.
+     띄어쓰기 없는 긴 문자열(경로 · 주소)만 예외로 끊어 넘침을 막는다. */
+  word-break: keep-all;
+  overflow-wrap: break-word;
 }
 
 /* ---------- 슬라이드 무대 ---------------------------------------------- */
 
-/* 상단 바(56px) 아래 남은 영역의 정중앙에 슬라이드를 놓는다 */
+/* 상단 바(56px) 아래 남은 영역의 정중앙에 슬라이드를 놓는다.
+   왼쪽 챕터 서랍이 열려 있으면 그 폭(--side-w)만큼 비켜 준다 — 슬라이드를 가리지 않는다. */
 .stage {
   position: fixed;
-  inset: 56px 0 0 0;
+  inset: 56px 0 0 var(--side-w, 0px);
+  transition: left .18s ease;
   display: grid;
   place-items: center;
   overflow: hidden;
@@ -209,7 +220,7 @@ html, body {
   left: -22px;
   color: var(--ink-soft);
 }
-.dash-list > li small { display: block; font-size: 18px; color: var(--ink-soft); margin-top: 3px; }
+.dash-list > li small { display: block; font-size: 19px; color: var(--ink-soft); margin-top: 3px; }
 
 /* ---------- 이미지 ------------------------------------------------------ */
 
@@ -227,7 +238,7 @@ html, body {
 
 .shot-cap {
   margin: 8px 0 0;
-  font-size: 15px;
+  font-size: 17px;
   color: var(--ink-soft);
   text-align: center;
   letter-spacing: -.01em;
@@ -417,6 +428,167 @@ html, body {
   }
 }
 
+/* ---------- 챕터 표지 슬라이드 ------------------------------------------ */
+/* 모듈 안의 큰 마디를 나눈다. 왼쪽 챕터 서랍은 이 슬라이드를 목차로 삼는다
+   (deck.js 가 data-chapter 를 읽는다).                                     */
+
+.slide--chapter {
+  display: grid;
+  place-items: center;
+  background: var(--navy);
+}
+
+.chapter { width: 940px; text-align: center; }
+
+.ch-eyebrow {
+  margin: 0 0 16px;
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: .24em;
+  color: #9FC0F2;
+}
+
+.ch-title {
+  margin: 0;
+  font-size: 54px;
+  font-weight: 800;
+  letter-spacing: -.03em;
+  line-height: 1.24;
+  color: #fff;
+}
+
+.ch-rule {
+  width: 76px; height: 5px;
+  margin: 26px auto;
+  border-radius: 3px;
+  background: var(--green);
+}
+
+.ch-desc {
+  margin: 0;
+  font-size: 25px;
+  line-height: 1.6;
+  letter-spacing: -.02em;
+  color: #D7E3F7;
+}
+
+.ch-keys {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin: 30px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ch-keys li {
+  padding: 9px 18px;
+  border: 1px solid rgba(255, 255, 255, .34);
+  border-radius: 999px;
+  font-size: 19px;
+  color: #EAF1FC;
+}
+
+.slide--chapter .slide-no { color: rgba(255, 255, 255, .45); }
+
+/* ---------- 왼쪽 챕터 서랍 ---------------------------------------------- */
+/* 상단 바의 [챕터] 버튼으로 열고 닫는다. 항목을 누르면 그 챕터로 바로 간다. */
+
+.deck-chapters {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font: inherit;
+  font-size: 15px;
+  color: var(--navy);
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  padding: 8px 13px;
+  cursor: pointer;
+  white-space: nowrap;
+  letter-spacing: -.01em;
+}
+.deck-chapters:hover { background: #F0F4FA; border-color: #B9C6DC; }
+.deck-chapters.is-open { background: var(--navy); border-color: var(--navy); color: #fff; }
+.deck-chapters .dc-bars { display: grid; gap: 3px; }
+.deck-chapters .dc-bars i {
+  display: block; width: 15px; height: 2px; border-radius: 2px; background: currentColor;
+}
+
+.deck-side {
+  position: fixed;
+  left: 0; top: 56px; bottom: 0;
+  width: var(--side-open-w);
+  z-index: 45;
+  padding: 14px 12px 26px;
+  overflow-y: auto;
+  background: #fff;
+  border-right: 1px solid var(--line);
+  box-shadow: 8px 0 28px rgba(20, 40, 80, .10);
+  transform: translateX(-101%);
+  transition: transform .18s ease;
+}
+.deck-side.is-open { transform: none; }
+
+.ds-head {
+  margin: 2px 8px 10px;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: .16em;
+  color: #8A94A6;
+}
+
+.ds-list { margin: 0; padding: 0; list-style: none; }
+
+.ds-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  width: 100%;
+  padding: 9px 10px;
+  border: 0;
+  border-radius: 9px;
+  background: none;
+  font: inherit;
+  font-size: 16px;
+  line-height: 1.45;
+  letter-spacing: -.02em;
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+}
+.ds-item:hover { background: #F0F4FA; }
+.ds-item.is-now { background: #E9F0FD; color: var(--navy); font-weight: 700; }
+
+.ds-no {
+  flex: 0 0 24px;
+  height: 24px;
+  margin-top: 1px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #EDF1F8;
+  color: var(--navy);
+  font-size: 13px;
+  font-weight: 700;
+}
+.ds-item.is-now .ds-no { background: var(--navy); color: #fff; }
+.ds-no--end { background: transparent; color: #A7B2C4; }
+
+.ds-t { flex: 1 1 auto; }
+
+.ds-page {
+  flex: 0 0 auto;
+  margin-top: 3px;
+  font-size: 13px;
+  color: #9AA6B8;
+  font-variant-numeric: tabular-nums;
+}
+
+@media print { .deck-side, .deck-chapters { display: none; } }
+
 /* ---------- 일정 표 ----------------------------------------------------- */
 
 .agenda {
@@ -450,7 +622,7 @@ html, body {
   position: absolute;
   right: 40px; top: 50%;
   transform: translateY(-50%);
-  font-size: 15px;
+  font-size: 16px;
   color: #A9C0E8;
   letter-spacing: -.01em;
   white-space: nowrap;
@@ -471,9 +643,9 @@ html, body {
 }
 .flow-step.is-now { background: #EAF0FA; border-color: #A9BCDD; border-top-color: var(--green); }
 
-.flow-no   { font-size: 13px; font-weight: 700; letter-spacing: .08em; color: var(--green); }
+.flow-no   { font-size: 16px; font-weight: 700; letter-spacing: .06em; color: var(--green); }
 .flow-name { margin: 5px 0 0; font-size: 22px; font-weight: 700; color: var(--navy); letter-spacing: -.02em; line-height: 1.35; }
-.flow-desc { margin: 12px 0 0; font-size: 18px; line-height: 1.58; color: var(--ink-soft); letter-spacing: -.01em; }
+.flow-desc { margin: 11px 0 0; font-size: 19px; line-height: 1.58; color: var(--ink-soft); letter-spacing: -.01em; }
 
 .flow-arrow {
   flex: 0 0 52px;
@@ -497,9 +669,57 @@ html, body {
   padding: 20px 20px 22px;
 }
 .kv-name { margin: 0; font-size: 21px; font-weight: 700; color: var(--navy); letter-spacing: -.02em; }
-.kv-like { margin: 9px 0 0; font-size: 18px; line-height: 1.52; color: var(--ink); letter-spacing: -.01em; }
+.kv-like { margin: 9px 0 0; font-size: 19px; line-height: 1.52; color: var(--ink); letter-spacing: -.01em; }
 .kv-like b { color: var(--green); }
-.kv-when { margin: 12px 0 0; padding-top: 11px; border-top: 1px dashed #DCE3EE; font-size: 16px; line-height: 1.48; color: #7C8698; letter-spacing: -.01em; }
+.kv-when { margin: 11px 0 0; padding-top: 10px; border-top: 1px dashed #DCE3EE; font-size: 17px; line-height: 1.48; color: #7C8698; letter-spacing: -.01em; }
+
+/* ---------- 오늘 만드는 것들 (모듈 2p 진행 맵) ----------------------------- */
+/* 도구 이름이 아니라 '무엇이 손에 남는지'를 썸네일로 보여준다.
+   .is-done 지나옴 · .is-now 지금 · .is-next 아직 (흐리게) */
+
+.roadmap { display: flex; align-items: flex-start; justify-content: center; gap: 4px; }
+
+.rm-step { flex: 0 0 192px; text-align: center; }
+
+.rm-pic {
+  position: relative;
+  height: 134px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 2px solid var(--line);
+  background: #F5F7FB;
+}
+.rm-pic img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: 50% 0; }
+
+.rm-mod { margin: 11px 0 0; font-size: 17px; font-weight: 700; color: #9AA6B8; letter-spacing: .05em; }
+.rm-out {
+  margin: 3px 0 0; font-size: 19px; font-weight: 700;
+  color: var(--navy); line-height: 1.35; letter-spacing: -.02em;
+}
+.rm-here { margin: 5px 0 0; font-size: 17px; font-weight: 700; color: var(--green); }
+
+.rm-arrow {
+  flex: 0 0 30px;
+  margin-top: 52px;
+  font-size: 28px;
+  color: #C3CBD8;
+  line-height: 1;
+}
+
+.rm-step.is-done .rm-pic::after {
+  content: "✓";
+  position: absolute; right: 7px; top: 7px;
+  width: 25px; height: 25px; border-radius: 50%;
+  background: var(--green); color: #fff;
+  font-size: 15px; font-weight: 700;
+  display: grid; place-items: center;
+}
+.rm-step.is-next .rm-pic { filter: grayscale(1); opacity: .4; }
+.rm-step.is-next .rm-out { color: #A9B4C4; }
+.rm-step.is-next .rm-mod { color: #C3CBD8; }
+
+.rm-step.is-now .rm-pic { border-color: var(--navy); box-shadow: 0 0 0 3px #DCE6F7; }
+.rm-step.is-now .rm-mod { color: var(--green); }
 
 /* ---------- 번호 절차 목록 ------------------------------------------------ */
 
@@ -528,7 +748,7 @@ html, body {
   font-size: 15px;
   font-weight: 700;
 }
-.steps small { display: block; margin-top: 4px; font-size: 18px; color: var(--ink-soft); }
+.steps small { display: block; margin-top: 4px; font-size: 19px; color: var(--ink-soft); }
 
 /* ---------- 본문 2단 (절차 | 옆 상자) ------------------------------------- */
 
@@ -547,13 +767,13 @@ html, body {
 
 .side-t {
   margin: 0 0 6px;
-  font-size: 13px;
+  font-size: 16px;
   font-weight: 700;
-  letter-spacing: .07em;
+  letter-spacing: .04em;
   color: var(--navy);
 }
 .side-box--warn .side-t { color: var(--red); }
-.side-d { margin: 0; font-size: 17px; line-height: 1.58; color: var(--ink); letter-spacing: -.01em; }
+.side-d { margin: 0; font-size: 19px; line-height: 1.58; color: var(--ink); letter-spacing: -.01em; }
 .side-d + .side-d { margin-top: 7px; }
 
 /* ---------- Before → After ------------------------------------------------ */
@@ -573,7 +793,7 @@ html, body {
   border-left: 3px solid #C3CBD8;
   padding: 12px 16px;
   margin: 0 0 14px;
-  font-size: 18px;
+  font-size: 19px;
   color: var(--ink-soft);
 }
 .ba--after .ba-quote { border-left-color: var(--green); }
@@ -591,7 +811,7 @@ html, body {
 }
 .costar-cell--sum { background: #EAF0FA; border-left-color: var(--green); }
 .costar-t { margin: 0; font-size: 19px; font-weight: 700; color: var(--navy); letter-spacing: -.02em; }
-.costar-d { margin: 6px 0 0; font-size: 16px; line-height: 1.48; color: var(--ink-soft); letter-spacing: -.01em; }
+.costar-d { margin: 6px 0 0; font-size: 17px; line-height: 1.48; color: var(--ink-soft); letter-spacing: -.01em; }
 
 /* ---------- 채워 넣는 표 --------------------------------------------------- */
 
@@ -599,7 +819,7 @@ html, body {
 .agenda--fill td, .agenda--fill th { font-size: 19px; }
 
 /* 조밀한 표 — 슬라이드에 다른 요소가 많을 때 */
-.agenda--sm td, .agenda--sm th { padding: 9px 16px; font-size: 18px; }
+.agenda--sm td, .agenda--sm th { padding: 9px 16px; font-size: 19px; }
 
 /* ---------- 핵심 한 줄 요약 ------------------------------------------------ */
 
@@ -641,7 +861,7 @@ html, body {
   border-radius: 50%;
   background: var(--red);
   color: #fff;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 700;
   line-height: 1;
 }
@@ -666,13 +886,13 @@ html, body {
   border-radius: 50%;
   background: var(--red);
   color: #fff;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 700;
 }
 .numbered-name { margin: 0; font-size: 21px; font-weight: 700; color: var(--navy); letter-spacing: -.02em; }
-.numbered-desc { margin: 6px 0 0; font-size: 17px; line-height: 1.5; color: var(--ink); letter-spacing: -.01em; }
+.numbered-desc { margin: 6px 0 0; font-size: 19px; line-height: 1.5; color: var(--ink); letter-spacing: -.01em; }
 .numbered-desc b { color: var(--green); }
-.numbered-where { margin: 7px 0 0; font-size: 15px; color: #7C8698; letter-spacing: -.01em; }
+.numbered-where { margin: 7px 0 0; font-size: 17px; color: #7C8698; letter-spacing: -.01em; }
 
 /* ---------- 모델 목록 ------------------------------------------------------ */
 
@@ -736,14 +956,14 @@ html, body {
 }
 .pbox-t {
   margin: 0 0 10px;
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 700;
   letter-spacing: .06em;
   color: var(--green);
 }
 .pbox p {
   margin: 0 0 7px;
-  font-size: 19px;
+  font-size: 20px;
   line-height: 1.55;
   color: var(--ink);
   letter-spacing: -.01em;
