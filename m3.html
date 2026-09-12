@@ -5,8 +5,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>M3. Claude Code로 익히는 바이브코딩 — AX 중급과정</title>
 <link rel="stylesheet" href="assets/css/deck.css">
+<style>
+  /* 실리콘밸리 영상 (3p) — mp4 는 이 HTML 과 같은 폴더에 둔다 */
+  .m3-video {
+    display: block; width: 770px; height: 433px; margin: 0 auto;
+    border-radius: 12px; background: #1A1A1A;
+  }
+</style>
 </head>
-<body>
+<body data-app="Claude Code">
 
 <div class="stage">
 
@@ -17,7 +24,6 @@
       <h1 class="cover-title">Claude Code로 익히는 바이브코딩</h1>
     </div>
   </section>
-
   <!-- 2. 오늘 만드는 것들 -------------------------------------- -->
   <section class="slide">
     <div class="slide-head"><h2>오늘 만드는 것들</h2><span class="head-tag">전체 흐름</span></div>
@@ -60,8 +66,24 @@
       <div class="note" style="margin-top:26px">지침(CLAUDE.md)과 레시피(Skill)를 <strong class="navy">직접 만들어</strong> 씁니다.</div>
     </div>
   </section>
+  <!-- 3. 실리콘밸리는 이미 이렇게 일합니다 -------------------- -->
+  <section class="slide">
+    <div class="slide-head"><h2>실리콘밸리는 이미 이렇게 일합니다</h2></div>
+    <div class="slide-body">
+      <p class="lead" style="margin-bottom:12px; text-align:center">
+        실리콘밸리에서는 AI와 <strong class="navy">어떻게 협업</strong>하고 있는지<br>
+        약 3분 가량 영상을 통해 알아보겠습니다.
+      </p>
 
-  <!-- 3. 이번 시간에 만들 것 ---------------------------------- -->
+      <div class="figure" style="margin:0">
+        <video class="m3-video" controls preload="metadata" playsinline
+               src="실리콘밸리_AI에이전트.mp4">
+          이 브라우저에서는 영상을 재생할 수 없습니다.
+        </video>
+      </div>
+    </div>
+  </section>
+  <!-- 4. 이번 시간에 만들 것 ---------------------------------- -->
   <section class="slide">
     <div class="slide-head"><h2>이번 시간에 만들 것</h2><span class="head-tag">결과물 미리보기</span></div>
     <div class="slide-body">
@@ -85,8 +107,7 @@
       <div class="note" style="margin-top:16px">양식만 우리 팀 것으로 바꾸면, <strong class="navy">그대로 내 업무가 됩니다.</strong></div>
     </div>
   </section>
-
-  <!-- 4. [챕터] Claude Code 시작하기 -------------- -->
+  <!-- 5. [챕터] Claude Code 시작하기 -------------- -->
   <section class="slide slide--chapter" data-chapter="Claude Code 시작하기">
     <div class="chapter">
       <p class="ch-eyebrow">CHAPTER 1</p>
@@ -96,8 +117,7 @@
       <ul class="ch-keys"><li>작업 폴더</li><li>첫 실행</li><li>모델 · Effort</li><li>권한</li></ul>
     </div>
   </section>
-
-  <!-- 5. 클로드 코드, 준비 다들 해오셨나요? ---------------- -->
+  <!-- 6. 클로드 코드, 준비 다들 해오셨나요? ---------------- -->
   <section class="slide">
     <div class="slide-head"><h2>클로드 코드, 준비 다들 해오셨나요?</h2><span class="head-tag">M3 · 확인</span></div>
     <div class="slide-body">
@@ -132,8 +152,7 @@
       </div>
     </div>
   </section>
-
-  <!-- 6. 왜 Claude Code를 써야 하나? -------------- -->
+  <!-- 7. 왜 Claude Code를 써야 하나? -------------- -->
   <section class="slide">
     <div class="slide-head"><h2>왜 Claude Code를 써야 하나?</h2><span class="head-tag">M3-1 · 개념</span></div>
     <div class="slide-body">
@@ -171,8 +190,7 @@
       </div>
     </div>
   </section>
-
-  <!-- 7. 오늘 쓸 작업대는 두 개뿐입니다 ---------------------- -->
+  <!-- 8. 오늘 쓸 작업대는 두 개뿐입니다 ---------------------- -->
   <section class="slide">
     <div class="slide-head"><h2>오늘 쓸 작업대는 두 개뿐입니다</h2><span class="head-tag">M3-1 · 개념</span></div>
     <div class="slide-body">
@@ -199,8 +217,7 @@
       </div>
     </div>
   </section>
-
-  <!-- 8. [실습] 받은 폴더를 자리에 놓고 시작합니다 -------- -->
+  <!-- 9. [실습] 받은 폴더를 자리에 놓고 시작합니다 -------- -->
   <section class="slide">
     <div class="slide-head"><h2>[실습] 받은 폴더를 자리에 놓고 시작합니다</h2><span class="head-tag">M3-1 · 실습</span></div>
     <div class="slide-body" style="padding-top:22px">
@@ -224,8 +241,7 @@
       </div>
     </div>
   </section>
-
-  <!-- 9. 터미널 열기 · 복사 붙여넣기 ------------------------ -->
+  <!-- 10. 터미널 열기 · 복사 붙여넣기 ------------------------ -->
   <section class="slide">
     <div class="slide-head"><h2>터미널 열기 · 복사 붙여넣기</h2><span class="head-tag">M3-1 · 준비</span></div>
     <div class="slide-body">
@@ -255,8 +271,7 @@
       </div>
     </div>
   </section>
-
-  <!-- 10. Claude Code 첫 실행 ------------------------ -->
+  <!-- 11. Claude Code 첫 실행 ------------------------ -->
   <section class="slide">
     <div class="slide-head"><h2>Claude Code 첫 실행</h2><span class="head-tag">M3-1 · 준비</span></div>
     <div class="slide-body" style="padding-top:22px">
@@ -279,8 +294,7 @@
       </div>
     </div>
   </section>
-
-  <!-- 11. 모델과 Effort 고르기 ---------------------------- -->
+  <!-- 12. 모델과 Effort 고르기 ---------------------------- -->
   <section class="slide">
     <div class="slide-head"><h2>모델과 Effort 고르기</h2><span class="head-tag">M3-1 · 준비</span></div>
     <div class="slide-body">
@@ -307,8 +321,7 @@
       </div>
     </div>
   </section>
-
-  <!-- 12. 권한 — 매번 물어보지 않게 -------------------------- -->
+  <!-- 13. 권한 — 매번 물어보지 않게 -------------------------- -->
   <section class="slide">
     <div class="slide-head"><h2>권한 — 매번 물어보지 않게</h2><span class="head-tag">M3-1 · 준비</span></div>
     <div class="slide-body">
@@ -340,8 +353,7 @@
       </div>
     </div>
   </section>
-
-  <!-- 13. [챕터] 오늘 만들 것 - 회의 메모 ---------------- -->
+  <!-- 14. [챕터] 오늘 만들 것 - 회의 메모 ---------------- -->
   <section class="slide slide--chapter" data-chapter="오늘 만들 것 &mdash; 회의 메모">
     <div class="chapter">
       <p class="ch-eyebrow">CHAPTER 2</p>
@@ -351,8 +363,7 @@
       <ul class="ch-keys"><li>회의 메모</li><li>회의록 PDF</li></ul>
     </div>
   </section>
-
-  <!-- 14. 오늘 만들 것 — 메모 한 장에서 회의록 PDF까지 ---- -->
+  <!-- 15. 오늘 만들 것 — 메모 한 장에서 회의록 PDF까지 ---- -->
   <section class="slide">
     <div class="slide-head"><h2>오늘 만들 것 — 메모 한 장에서 회의록 PDF까지</h2><span class="head-tag">M3-2 · 개념</span></div>
     <div class="slide-body" style="padding-top:22px">
@@ -380,8 +391,7 @@
       </div>
     </div>
   </section>
-
-  <!-- 15. 재료 — 회의 중에 적은 메모 한 장 ---------------- -->
+  <!-- 16. 재료 — 회의 중에 적은 메모 한 장 ---------------- -->
   <section class="slide">
     <div class="slide-head"><h2>재료 — 회의 중에 적은 메모 한 장</h2><span class="head-tag">M3-2 · 개념</span></div>
     <div class="slide-body" style="padding-top:18px">
@@ -411,73 +421,19 @@
       </div>
     </div>
   </section>
-
-  <!-- 16. [챕터] 토큰과 사용료 -------------------------------- -->
-  <section class="slide slide--chapter" data-chapter="토큰과 사용료">
-    <div class="chapter">
-      <p class="ch-eyebrow">CHAPTER 3</p>
-      <h2 class="ch-title">토큰과 사용료</h2>
-      <div class="ch-rule"></div>
-      <p class="ch-desc">AI를 쓰면 무엇을 기준으로 요금이 나가는지 알아 둡니다.</p>
-      <ul class="ch-keys"><li>토큰</li><li>입력 · 출력</li><li>사용료</li></ul>
-    </div>
-  </section>
-
-  <!-- 17. AI 사용료는 '토큰'으로 나갑니다 ------------------ -->
-  <section class="slide">
-    <div class="slide-head"><h2>AI 사용료는 &lsquo;토큰&rsquo;으로 나갑니다</h2><span class="head-tag">M3-3 · 개념</span></div>
-    <div class="slide-body">
-      <p class="lead" style="margin-bottom:6px">
-        AI를 쓰면 <strong class="navy">주고받은 글의 양만큼</strong> 사용료가 나갑니다.
-      </p>
-      <p class="sub" style="margin-bottom:20px">
-        그 양을 세는 단위가 <strong>토큰</strong>입니다.
-      </p>
-
-      <div class="kv kv--2" style="margin-bottom:20px">
-        <div class="kv-item">
-          <p class="kv-name">한글</p>
-          <p class="kv-like">한 <b>글자</b>가 1 토큰</p>
-          <p class="kv-when">&lsquo;회의록&rsquo; &rarr; 3 토큰</p>
-        </div>
-        <div class="kv-item">
-          <p class="kv-name">영어</p>
-          <p class="kv-like">한 <b>단어</b>가 1 토큰</p>
-          <p class="kv-when">report &middot; meeting &rarr; 각각 1 토큰</p>
-        </div>
-      </div>
-
-      <table class="agenda agenda--fill">
-        <thead>
-          <tr><th style="width:300px">무엇에</th><th>100만 토큰당</th></tr>
-        </thead>
-        <tbody>
-          <tr><td class="m">내가 넣는 글 (입력)</td><td><strong>$3</strong> &mdash; 프롬프트 · 붙여넣은 자료</td></tr>
-          <tr><td class="m">Agent가 쓰는 글 (출력)</td><td><strong>$15</strong> &mdash; 답변 · 만들어 준 문서 <strong class="grn">(입력의 5배)</strong></td></tr>
-        </tbody>
-      </table>
-
-      <div class="note" style="margin-top:18px">
-        같은 양이라도 <strong class="navy">Agent가 쓴 글이 다섯 배</strong>입니다.
-        길게 답하라고 할수록 요금이 더 나갑니다.
-      </div>
-    </div>
-  </section>
-
-  <!-- 18. [챕터] CLAUDE.md - 항상 적용되는 기준 ---- -->
+  <!-- 17. [챕터] CLAUDE.md - 항상 적용되는 기준 ---- -->
   <section class="slide slide--chapter" data-chapter="CLAUDE.md &mdash; 항상 적용되는 기준">
     <div class="chapter">
-      <p class="ch-eyebrow">CHAPTER 4</p>
+      <p class="ch-eyebrow">CHAPTER 3</p>
       <h2 class="ch-title">CLAUDE.md &mdash; 항상 적용되는 기준</h2>
       <div class="ch-rule"></div>
       <p class="ch-desc">매번 설명하지 않도록, 공통 기준을 문서 한 장에 적어 둡니다.</p>
       <ul class="ch-keys"><li>목적</li><li>참석자 · 용어</li><li>규칙</li><li>책상과 캐비닛</li></ul>
     </div>
   </section>
-
-  <!-- 19. 왜 CLAUDE.md를 써야 하나요? ---------------- -->
+  <!-- 18. 왜 CLAUDE.md를 써야 하나요? ---------------- -->
   <section class="slide">
-    <div class="slide-head"><h2>왜 CLAUDE.md를 써야 하나요?</h2><span class="head-tag">M3-4 · 개념</span></div>
+    <div class="slide-head"><h2>왜 CLAUDE.md를 써야 하나요?</h2><span class="head-tag">M3-3 · 개념</span></div>
     <div class="slide-body">
       <p class="lead" style="margin-bottom:6px">
         대화가 길어지면 <strong class="navy">처음에 한 말일수록 흐려집니다.</strong>
@@ -512,10 +468,9 @@
       </div>
     </div>
   </section>
-
-  <!-- 20. 지침은 왜 md 파일에 적을까 ------------------------ -->
+  <!-- 19. 지침은 왜 md 파일에 적을까 ------------------------ -->
   <section class="slide">
-    <div class="slide-head"><h2>지침은 왜 <span class="mono">md</span> 파일에 적을까</h2><span class="head-tag">M3-4 · 개념</span></div>
+    <div class="slide-head"><h2>지침은 왜 <span class="mono">md</span> 파일에 적을까</h2><span class="head-tag">M3-3 · 개념</span></div>
     <div class="slide-body">
       <p class="lead" style="margin-bottom:20px">
         M2에서 <strong class="navy">폴더 지침</strong>으로 저장한 것도 사실 <span class="mono">CLAUDE.md</span> 파일이었습니다.워드가 아니라 <strong class="navy">md 파일</strong>인 데는 이유가 있습니다.
@@ -547,10 +502,9 @@
       </div>
     </div>
   </section>
-
-  <!-- 21. CLAUDE.md 만들기 — 목적부터 적습니다 ------ -->
+  <!-- 20. CLAUDE.md 만들기 — 목적부터 적습니다 ------ -->
   <section class="slide">
-    <div class="slide-head"><h2>CLAUDE.md 만들기 — 목적부터 적습니다</h2><span class="head-tag">M3-4 · 개념</span></div>
+    <div class="slide-head"><h2>CLAUDE.md 만들기 — 목적부터 적습니다</h2><span class="head-tag">M3-3 · 개념</span></div>
     <div class="slide-body" style="padding-top:20px">
       <div class="split" style="gap:26px">
         <div class="split-main">
@@ -574,10 +528,9 @@
       </div>
     </div>
   </section>
-
-  <!-- 22. 참석자와 부서 용어를 적습니다 ------------------------ -->
+  <!-- 21. 참석자와 부서 용어를 적습니다 ------------------------ -->
   <section class="slide">
-    <div class="slide-head"><h2>참석자와 부서 용어를 적습니다</h2><span class="head-tag">M3-4 · 개념</span></div>
+    <div class="slide-head"><h2>참석자와 부서 용어를 적습니다</h2><span class="head-tag">M3-3 · 개념</span></div>
     <div class="slide-body" style="padding-top:20px">
       <div class="split" style="gap:26px">
         <div class="split-main">
@@ -600,10 +553,9 @@
       </div>
     </div>
   </section>
-
-  <!-- 23. 지켜야 할 규칙을 더합니다 ---------------------------- -->
+  <!-- 22. 지켜야 할 규칙을 더합니다 ---------------------------- -->
   <section class="slide">
-    <div class="slide-head"><h2>지켜야 할 규칙을 더합니다</h2><span class="head-tag">M3-4 · 개념</span></div>
+    <div class="slide-head"><h2>지켜야 할 규칙을 더합니다</h2><span class="head-tag">M3-3 · 개념</span></div>
     <div class="slide-body" style="padding-top:20px">
       <div class="split" style="gap:26px">
         <div class="split-main">
@@ -626,10 +578,9 @@
       </div>
     </div>
   </section>
-
-  <!-- 24. [실습] CLAUDE.md 완성하기 ------------------ -->
+  <!-- 23. [실습] CLAUDE.md 완성하기 ------------------ -->
   <section class="slide">
-    <div class="slide-head"><h2>[실습] CLAUDE.md 완성하기</h2><span class="head-tag">M3-4 · 실습</span></div>
+    <div class="slide-head"><h2>[실습] CLAUDE.md 완성하기</h2><span class="head-tag">M3-3 · 실습</span></div>
     <div class="slide-body" style="padding-top:22px">
       <p class="lead" style="margin-bottom:20px">
         앞에서 본 네 가지를 순서대로 넣어 <strong class="navy">내 CLAUDE.md 한 개</strong>를 완성합니다.
@@ -672,10 +623,9 @@
       </div>
     </div>
   </section>
-
-  <!-- 25. 정답은 — 참석자와 용어입니다 ------------------------ -->
+  <!-- 24. 정답은 — 참석자와 용어입니다 ------------------------ -->
   <section class="slide">
-    <div class="slide-head"><h2>정답은 — 참석자와 용어입니다</h2><span class="head-tag">M3-4 · 개념</span></div>
+    <div class="slide-head"><h2>정답은 — 참석자와 용어입니다</h2><span class="head-tag">M3-3 · 개념</span></div>
     <div class="slide-body">
       <p class="lead" style="margin-bottom:4px">
         CLAUDE.md는 <strong class="navy">모든 질문 앞에 매번 붙습니다.</strong>
@@ -711,20 +661,19 @@
       </div>
     </div>
   </section>
-
-  <!-- 26. [챕터] 양식 문서와 회의록 정리 -------------------- -->
+  <!-- 25. [챕터] 양식 문서와 회의록 정리 -------------------- -->
   <section class="slide slide--chapter" data-chapter="양식 문서와 회의록 정리">
     <div class="chapter">
-      <p class="ch-eyebrow">CHAPTER 5</p>
+      <p class="ch-eyebrow">CHAPTER 4</p>
       <h2 class="ch-title">양식 문서와 회의록 정리</h2>
       <div class="ch-rule"></div>
       <p class="ch-desc">자주 바뀌는 내용은 밖으로 빼고, 양식을 문서로 적어 메모를 회의록으로 정리합니다.</p>
       <ul class="ch-keys"><li>내용은 밖으로</li><li>양식 지침</li><li>회의록 정리</li><li>/btw</li></ul>
     </div>
   </section>
-  <!-- 27. 자주 바뀔 내용은 따로 뺍니다 ------------------------ -->
+  <!-- 26. 자주 바뀔 내용은 따로 뺍니다 ------------------------ -->
   <section class="slide">
-    <div class="slide-head"><h2>자주 바뀔 내용은 따로 뺍니다</h2><span class="head-tag">M3-5 · 개념</span></div>
+    <div class="slide-head"><h2>자주 바뀔 내용은 따로 뺍니다</h2><span class="head-tag">M3-4 · 개념</span></div>
     <div class="slide-body" style="padding-top:20px">
       <div class="split" style="gap:26px">
         <div class="split-main">
@@ -752,10 +701,9 @@
       </div>
     </div>
   </section>
-
-  <!-- 28. 책상과 캐비닛 — 내용은 밖에, 경로만 안에 -------- -->
+  <!-- 27. 책상과 캐비닛 — 내용은 밖에, 경로만 안에 -------- -->
   <section class="slide">
-    <div class="slide-head"><h2>책상과 캐비닛 — 내용은 밖에, 경로만 안에</h2><span class="head-tag">M3-5 · 개념</span></div>
+    <div class="slide-head"><h2>책상과 캐비닛 — 내용은 밖에, 경로만 안에</h2><span class="head-tag">M3-4 · 개념</span></div>
     <div class="slide-body">
       <p class="lead" style="margin-bottom:4px">
         CLAUDE.md에는 <strong class="navy">어디에 있는지만</strong> 적고, 내용은 docs 폴더에 둡니다.
@@ -807,10 +755,9 @@
       </div>
     </div>
   </section>
-
-  <!-- 29. 양식을 파일이 아니라 문서로 적습니다 ---------------- -->
+  <!-- 28. 양식을 파일이 아니라 문서로 적습니다 ---------------- -->
   <section class="slide">
-    <div class="slide-head"><h2>양식을 파일이 아니라 문서로 적습니다</h2><span class="head-tag">M3-5 · 개념</span></div>
+    <div class="slide-head"><h2>양식을 파일이 아니라 문서로 적습니다</h2><span class="head-tag">M3-4 · 개념</span></div>
     <div class="slide-body" style="padding-top:18px">
       <div class="split" style="gap:26px">
         <div class="split-main">
@@ -837,10 +784,9 @@
       </div>
     </div>
   </section>
-
-  <!-- 30. [실습] 메모를 회의록으로 정리합니다 ---------------- -->
+  <!-- 29. [실습] 메모를 회의록으로 정리합니다 ---------------- -->
   <section class="slide">
-    <div class="slide-head"><h2>[실습] 메모를 회의록으로 정리합니다</h2><span class="head-tag">M3-5 · 실습</span></div>
+    <div class="slide-head"><h2>[실습] 메모를 회의록으로 정리합니다</h2><span class="head-tag">M3-4 · 실습</span></div>
     <div class="slide-body" style="padding-top:18px">
       <div class="split" style="gap:26px">
         <div class="split-main">
@@ -865,10 +811,9 @@
       </div>
     </div>
   </section>
-
-  <!-- 31. [실습] 내 업무 자료를 문서로 만듭니다 ------------ -->
+  <!-- 30. [실습] 내 업무 자료를 문서로 만듭니다 ------------ -->
   <section class="slide">
-    <div class="slide-head"><h2>[실습] 내 업무 자료를 문서로 만듭니다</h2><span class="head-tag">M3-5 · 실습</span></div>
+    <div class="slide-head"><h2>[실습] 내 업무 자료를 문서로 만듭니다</h2><span class="head-tag">M3-4 · 실습</span></div>
     <div class="slide-body">
       <p class="lead" style="margin-bottom:18px">
         지금까지 한 방식 그대로, 이번에는 <strong class="navy">내 업무 자료</strong>를 문서로 만들어 둡니다.
@@ -915,8 +860,7 @@
       </div>
     </div>
   </section>
-
-  <!-- 32. 잠깐 물어보기 — /btw ---------------------------- -->
+  <!-- 31. 잠깐 물어보기 — /btw ---------------------------- -->
   <section class="slide">
     <div class="slide-head"><h2>잠깐 물어보기 — /btw</h2><span class="head-tag">M3 · 참고</span></div>
     <div class="slide-body">
@@ -966,21 +910,19 @@
       </div>
     </div>
   </section>
-
-  <!-- 33. [챕터] Skill - 반복업무 레시피 -------------- -->
+  <!-- 32. [챕터] Skill - 반복업무 레시피 -------------- -->
   <section class="slide slide--chapter" data-chapter="Skill &mdash; 반복업무 레시피">
     <div class="chapter">
-      <p class="ch-eyebrow">CHAPTER 6</p>
+      <p class="ch-eyebrow">CHAPTER 5</p>
       <h2 class="ch-title">Skill &mdash; 반복업무 레시피</h2>
       <div class="ch-rule"></div>
       <p class="ch-desc">자주 쓰는 지시를 명령 한 줄로 묶습니다.</p>
       <ul class="ch-keys"><li>/회의록작성</li><li>공유</li></ul>
     </div>
   </section>
-
-  <!-- 34. Skill — 자주 쓰는 지시를 명령으로 ------------ -->
+  <!-- 33. Skill — 자주 쓰는 지시를 명령으로 ------------ -->
   <section class="slide">
-    <div class="slide-head"><h2>Skill — 자주 쓰는 지시를 명령으로</h2><span class="head-tag">M3-6 · 개념</span></div>
+    <div class="slide-head"><h2>Skill — 자주 쓰는 지시를 명령으로</h2><span class="head-tag">M3-5 · 개념</span></div>
     <div class="slide-body">
       <p class="lead" style="margin-bottom:6px">
         매번 길게 설명하던 것을 <strong class="navy">명령 하나</strong>로 만들어 둘 수 있습니다.
@@ -1007,10 +949,9 @@
       </div>
     </div>
   </section>
-
-  <!-- 35. [실습] 나만의 Skill을 만들고 써 봅니다 ------ -->
+  <!-- 34. [실습] 나만의 Skill을 만들고 써 봅니다 ------ -->
   <section class="slide">
-    <div class="slide-head"><h2>[실습] 나만의 Skill을 만들고 써 봅니다</h2><span class="head-tag">M3-6 · 실습</span></div>
+    <div class="slide-head"><h2>[실습] 나만의 Skill을 만들고 써 봅니다</h2><span class="head-tag">M3-5 · 실습</span></div>
     <div class="slide-body" style="padding-top:18px">
       <p class="lead" style="margin-bottom:14px">
         <strong class="navy">메모 파일 이름만 넣으면</strong> 회의록 <strong class="navy">PDF</strong>가 나오는 명령을 만듭니다.
@@ -1018,7 +959,7 @@
 
       <div class="split" style="gap:26px">
         <div class="split-main">
-          <div class="pbox">
+          <div class="pbox pbox--tight">
             <p class="pbox-t">① 스킬 만들기</p>
             <p><b>회의록작성</b> 스킬을 이 프로젝트에서만 쓰도록 만들어줘.</p>
             <p>뒤에 회의메모 파일 이름을 적으면 그 메모를 읽고,</p>
@@ -1038,15 +979,15 @@
         </div>
 
         <div class="split-side" style="flex:0 0 366px">
-          <div class="pbox" style="margin:0 0 10px">
+          <div class="pbox pbox--tight" style="margin:0 0 10px">
             <p class="pbox-t">② 스킬 인식시키기</p>
             <p>/reload-skills</p>
           </div>
-          <div class="pbox" style="margin:0 0 10px">
+          <div class="pbox pbox--tight" style="margin:0 0 10px">
             <p class="pbox-t">③ 목록에 있는지 확인</p>
             <p>/skills</p>
           </div>
-          <div class="pbox" style="margin:0 0 10px">
+          <div class="pbox pbox--tight" style="margin:0 0 10px">
             <p class="pbox-t">④ 다른 메모로 실행</p>
             <p>/회의록작성 회의메모_신입온보딩</p>
           </div>
@@ -1058,42 +999,39 @@
       </div>
     </div>
   </section>
-
-  <!-- 36. [공유] 만든 문서를 올리고, 서로 봅니다 ---------- -->
+  <!-- 35. [공유] 만든 문서를 올리고, 서로 봅니다 ---------- -->
   <section class="slide">
-    <div class="slide-head"><h2>[공유] 만든 문서를 올리고, 서로 봅니다</h2><span class="head-tag">M3-6 · 공유</span></div>
-    <div class="slide-body" style="padding-top:24px">
-      <div class="split" style="gap:30px">
+    <div class="slide-head"><h2>[공유] 만든 문서를 올리고, 서로 봅니다</h2><span class="head-tag">M3-5 · 공유</span></div>
+    <div class="slide-body">
+      <p class="lead" style="margin-bottom:14px">
+        M1에서 한 것과 <strong class="navy">똑같은 순서</strong>입니다. 항목 이름만 다릅니다.
+      </p>
+
+      <div class="split" style="gap:26px">
         <div class="split-main">
           <ol class="steps">
-            <li><span class="mono">hyundai.mincoding.co.kr</span> 강의장 접속</li>
-            <li>상단 <strong class="navy">[질문있어요]</strong> 메뉴 클릭</li>
-            <li>공지글 열기</li>
-            <li>댓글 작성창의 <strong class="navy">파일 업로드</strong>로 방금 만든 문서를 첨부하고,
-              <strong>어떤 스킬로 만들었는지</strong> 한 줄 쓴 뒤 <strong>[입력]</strong></li>
+            <li><span class="mono">hyundai.mincoding.co.kr</span> 접속 &mdash; 상단 <strong class="navy">[문제목록]</strong></li>
+            <li><strong class="navy">[Claude Code 실습] 회의록 만들기</strong> 열기<small>목록의 <span class="mono">Hyundai_04</span> 입니다</small></li>
+            <li>도구모음 <strong class="navy">[파일 업로드]</strong>로 만든 <strong>회의록 PDF</strong>를 첨부<small>어떤 스킬로 만들었는지 한 줄 쓰고 <strong>[등록]</strong></small></li>
           </ol>
 
           <div class="note" style="margin-top:16px">
-            올리고 나면 다른 사람 댓글에서 서로의 문서를 열어볼 수 있습니다.
-            <strong class="navy">세 개만 열어 보고</strong>, 내 업무에 바로 쓸 만한 양식이 있는지 찾아보세요.
+            올린 뒤에는 다른 사람 것을 <strong class="navy">세 개만 열어 보고</strong>,
+            내 업무에 바로 쓸 만한 양식이 있는지 찾아보세요.
           </div>
         </div>
 
-        <div class="split-side" style="flex:0 0 468px">
-          <div>
-            <div class="shot"><img src="assets/img/m1-board-list.png" alt="강의장 상단 질문있어요 메뉴와 공지글 목록"></div>
-            <p class="shot-cap">②③ 질문있어요 &gt; 공지글 열기</p>
+        <div class="split-side" style="flex:0 0 430px">
+          <div class="sub-shot">
+            <img src="assets/img/m1-submit-list.png" alt="챕터1 실습 결과물 제출 목록">
+            <span class="sub-mark" style="left:5%; top:70%; width:90%; height:14%"></span>
           </div>
-          <div style="margin-top:14px">
-            <div class="shot"><img src="assets/img/m1-board-comment.png" alt="댓글 작성창의 파일 업로드 버튼"></div>
-            <p class="shot-cap">④ 댓글 작성창 &gt; 파일 업로드</p>
-          </div>
+          <p class="sub-cap">목록에서 <strong>Hyundai_04</strong> 를 고릅니다</p>
         </div>
       </div>
     </div>
   </section>
-
-  <!-- 37. M3 정리 ---------------------------------------------- -->
+  <!-- 36. M3 정리 ---------------------------------------------- -->
   <section class="slide" data-chapter="M3 정리">
     <div class="slide-head"><h2>M3 정리</h2><span class="head-tag">M3 · 정리</span></div>
     <div class="slide-body">
@@ -1126,8 +1064,7 @@
       </div>
     </div>
   </section>
-
-  <!-- 38. 감사합니다. -------------------------------------------- -->
+  <!-- 37. 감사합니다. -------------------------------------------- -->
   <section class="slide slide--cover">
     <div class="cover-text">
       <h1 class="cover-title" style="font-size:64px">감사합니다.</h1>
@@ -1150,7 +1087,7 @@
 
     <div class="deck-meta">
       <span class="deck-title">M3. Claude Code로 익히는 바이브코딩</span>
-      <span class="deck-count" id="count">1 / 38</span>
+      <span class="deck-count" id="count">1 / 37</span>
     </div>
 
     <button class="deck-arrow" id="next" type="button" aria-label="다음 슬라이드" title="다음 (→)">

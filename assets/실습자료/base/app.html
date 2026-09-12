@@ -154,7 +154,7 @@
 <body>
 <div class="container">
   <h1>Claude API 연결 테스트</h1>
-  <div class="sub">중계 서버(localhost:8787) 경유 · server.js 필요</div>
+  <div class="sub" id="subLine">중계 서버 경유 · server.js 필요</div>
 
   <div class="card" id="setupSection">
     <label for="apiKey">Claude API Key</label>
@@ -175,7 +175,15 @@
 </div>
 
 <script>
-const API_URL = "http://localhost:8787/v1/messages";
+// 이 화면을 server.js 가 열어 줬다면 같은 주소(포트까지)로 API를 부른다.
+// 파일을 직접 더블클릭해서 연 경우(file://)에만 8787 로 되돌아간다.
+const SERVER_ORIGIN = location.protocol.startsWith("http")
+  ? location.origin
+  : "http://localhost:8787";
+const API_URL = SERVER_ORIGIN + "/v1/messages";
+
+document.getElementById("subLine").textContent =
+  "중계 서버(" + SERVER_ORIGIN.replace(/^https?:\/\//, "") + ") 경유 · server.js 필요";
 
 const apiKeyInput = document.getElementById("apiKey");
 const testBtn = document.getElementById("testBtn");
@@ -213,7 +221,8 @@ async function callClaude(apiKey, messages) {
     throw new Error(
       `프록시 서버(${API_URL}) 요청 실패: ${networkErr.name || "Error"}: ${networkErr.message || String(networkErr)}\n` +
       (networkErr.stack ? "스택 트레이스:\n" + networkErr.stack + "\n" : "") +
-      "가능한 원인: server.js가 실행 중이 아님, 포트가 8787이 아닌 다른 포트로 열림, 방화벽 차단 등."
+      "가능한 원인: server.js가 실행 중이 아님, 이 화면을 server.js가 아니라 파일로 직접 열었음, 방화벽 차단 등.\n" +
+      "확인: 검은 창(터미널)에 표시된 주소를 브라우저 주소창에 그대로 넣어 이 화면을 다시 여세요."
     );
   }
 

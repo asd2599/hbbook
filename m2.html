@@ -5,8 +5,92 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>M2. H Chat 데스크탑으로 내 PC 다루기 — AX 중급과정</title>
 <link rel="stylesheet" href="assets/css/deck.css">
+<style>
+  /* 바뀐 폴더 지침 — 더해진 줄만 표시 (22p) */
+  .chg { display: flex; justify-content: center; }
+  .chg-shot { position: relative; width: 690px; }
+  .chg-shot img { display: block; width: 100%;
+                  border: 1px solid var(--line); border-radius: 8px; }
+  .chg-mark { position: absolute; left: 2%; top: 66.5%; width: 43%; height: 8%;
+              border: 3px solid var(--green); border-radius: 6px; }
+  .chg-tag { position: absolute; left: 47%; top: 70.5%; transform: translateY(-50%);
+             font-size: 19px; color: var(--green); letter-spacing: -.01em; white-space: nowrap; }
+  .chg-tag b { color: var(--green); }
+
+  /* H Chat 장점 — 그림 한 장 + 짧은 4항목 (28p) */
+  .gd { display: flex; align-items: center; justify-content: center; gap: 26px; }
+  .gd-shot { flex: 0 0 762px; }
+  .gd-shot img { display: block; width: 100%; border-radius: 10px; }
+  .gd-list { flex: 1 1 auto; }
+  .gd-item { display: flex; align-items: flex-start; gap: 12px; margin-top: 24px; }
+  .gd-item:first-child { margin-top: 0; }
+  .gd-no { flex: 0 0 30px; height: 30px; border-radius: 50%; background: var(--navy);
+           color: #fff; font-size: 16px; font-weight: 700; line-height: 30px; text-align: center; }
+  .gd-t { margin: 1px 0 0; font-size: 20px; font-weight: 700; color: var(--navy); letter-spacing: -.02em; }
+  .gd-d { margin: 5px 0 0; font-size: 17px; line-height: 1.45; color: #7C8698; letter-spacing: -.01em; }
+
+  /* 오늘 만든 결과물 세 장 (29p) */
+  .use { display: flex; align-items: flex-start; justify-content: center; gap: 22px; }
+  .use-item { flex: 1 1 0; min-width: 0; }
+  .use-item .shot { width: 100%; height: 212px; }
+  .use-item .shot img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 0; }
+  .use-t { margin: 12px 0 0; text-align: center; font-size: 21px; font-weight: 700;
+           color: var(--navy); letter-spacing: -.02em; }
+  .use-d { margin: 7px 0 0; text-align: center; font-size: 17px; line-height: 1.5;
+           color: #7C8698; letter-spacing: -.01em; }
+  .use-d strong { color: var(--ink); }
+
+  /* 커넥터 두 단계 (27p) */
+  .conn { display: flex; align-items: center; justify-content: center; gap: 18px; }
+  .conn-step { flex: 0 0 auto; }
+  .conn-step .shot { width: 380px; }
+  .conn-cap { margin: 10px 0 0; text-align: center; font-size: 17px; color: #7C8698; letter-spacing: -.01em; }
+  .conn-cap strong { color: var(--navy); }
+  .conn-ar { margin: 0 0 26px; font-size: 34px; color: #C3CBD8; }
+
+  /* Pro 프로젝트 → 데스크탑 폴더 (17p) */
+  .proj { display: flex; align-items: flex-start; justify-content: center; gap: 20px; }
+  .proj-side { flex: 0 0 372px; }
+  .proj-side .shot { width: 372px; height: 212px; overflow: hidden; }
+  .proj-side .shot img { display: block; width: 100%; height: 100%;
+                         object-fit: cover; object-position: 50% 0; }
+  .proj-cap { margin: 10px 0 0; text-align: center; font-size: 17px; line-height: 1.45;
+              color: #7C8698; letter-spacing: -.01em; }
+  .proj-cap strong { color: var(--navy); font-size: 18px; }
+  .proj-mid { flex: 0 0 132px; text-align: center; padding-top: 58px; }
+  .proj-ar { margin: 0; font-size: 38px; line-height: 1; color: #C3CBD8; }
+  .proj-txt { margin: 8px 0 0; font-size: 17px; line-height: 1.45; color: #4A5262; }
+
+  /* 권한 요청 그림 — 그림 옆으로 화살표를 빼서 설명한다 (15p) */
+  .perm { position: relative; display: flex; align-items: center; gap: 22px; }
+  .perm-img { position: relative; flex: 0 0 388px; }
+  .perm-img img { display: block; width: 100%; border: 1px solid var(--line); border-radius: 8px; }
+  .perm-mark {
+    position: absolute; left: 1.5%; right: 1.5%; top: 32.4%; height: 13.6%;
+    border: 3px solid var(--red); border-radius: 6px;
+  }
+  .perm-notes { position: relative; flex: 1 1 auto; align-self: stretch; }
+  .perm-note {
+    position: absolute; left: 0; right: 0; transform: translateY(-50%);
+    display: flex; align-items: flex-start; gap: 9px;
+  }
+  .perm-note .ar { flex: 0 0 auto; color: #A7B2C4; font-size: 21px; line-height: 1.2; }
+  .perm-note p { margin: 0; font-size: 18px; line-height: 1.45; letter-spacing: -.01em; color: #4A5262; }
+  .perm-note p b { color: var(--navy); }
+  .perm-note.is-now .ar { color: var(--red); }
+  .perm-note.is-now p { color: var(--ink); }
+  .perm-done { flex: 0 0 100px; text-align: center; }
+  .perm-done img { display: block; width: 100%; border: 1px solid var(--line); border-radius: 6px; }
+  .perm-done p { margin: 8px 0 0; font-size: 15px; color: #7C8698; line-height: 1.4; }
+
+  /* 그림 아래 좌우 두 칸 캡션 (10p) */
+  .two-cap { display: flex; margin: 14px auto 0; width: 770px; }
+  .two-cap p { flex: 1 1 0; margin: 0; text-align: center; font-size: 19px;
+               line-height: 1.5; color: #4A5262; letter-spacing: -.01em; }
+  .two-cap p strong { color: var(--navy); font-size: 20px; }
+</style>
 </head>
-<body>
+<body data-app="H Chat 데스크탑">
 
 <div class="stage">
 
@@ -17,7 +101,6 @@
       <h1 class="cover-title">H&nbsp;Chat 데스크탑으로<br>내 PC 다루기</h1>
     </div>
   </section>
-
   <!-- 2. 오늘 만드는 것들 -------------------------------------- -->
   <section class="slide">
     <div class="slide-head"><h2>오늘 만드는 것들</h2><span class="head-tag">전체 흐름</span></div>
@@ -60,7 +143,6 @@
       <div class="note" style="margin-top:26px">같은 일을 계속 맡기는 법을 익히고, <strong class="navy">내 PC의 파일까지</strong> 다루는 곳으로 옮겨 갑니다.</div>
     </div>
   </section>
-
   <!-- 3. 이번 시간에 만들 것 ---------------------------------- -->
   <section class="slide">
     <div class="slide-head"><h2>이번 시간에 만들 것</h2><span class="head-tag">결과물 미리보기</span></div>
@@ -81,18 +163,16 @@
       <div class="note" style="margin-top:16px">Pro는 <strong class="navy">답을 주고</strong>, 데스크탑은 <strong class="navy">내 폴더에 파일로 남겨 줍니다.</strong></div>
     </div>
   </section>
-
-  <!-- 4. [챕터] H Chat 데스크탑 준비 ------------------ -->
-  <section class="slide slide--chapter" data-chapter="H Chat 데스크탑 준비">
+  <!-- 4. [챕터] 데스크탑 준비 -------------------------------- -->
+  <section class="slide slide--chapter" data-chapter="데스크탑 준비">
     <div class="chapter">
       <p class="ch-eyebrow">CHAPTER 1</p>
-      <h2 class="ch-title">H Chat 데스크탑 준비</h2>
+      <h2 class="ch-title">데스크탑 준비</h2>
       <div class="ch-rule"></div>
       <p class="ch-desc">데스크탑을 설치하고, 제대로 켜지는지 먼저 확인합니다.</p>
       <ul class="ch-keys"><li>설치</li><li>실행 확인</li></ul>
     </div>
   </section>
-
   <!-- 5. H Chat 데스크탑 실습 세팅하기 ------------------ -->
   <section class="slide">
     <div class="slide-head"><h2>H&nbsp;Chat 데스크탑 실습 세팅하기</h2><span class="head-tag">M2-1 · 안내</span></div>
@@ -124,7 +204,6 @@
       </div>
     </div>
   </section>
-
   <!-- 6. 설치됐는지 먼저 확인합니다 ---------------------------- -->
   <section class="slide">
     <div class="slide-head"><h2>설치됐는지 먼저 확인합니다</h2><span class="head-tag">M2-1 · 확인</span></div>
@@ -153,7 +232,6 @@
       </div>
     </div>
   </section>
-
   <!-- 7. [챕터] Agent를 이루는 세 가지 ---------------- -->
   <section class="slide slide--chapter" data-chapter="Agent를 이루는 세 가지">
     <div class="chapter">
@@ -161,10 +239,9 @@
       <h2 class="ch-title">Agent를 이루는 세 가지</h2>
       <div class="ch-rule"></div>
       <p class="ch-desc">같은 요청인데 결과가 다른 이유를 눈 · 두뇌 · 손으로 풀어 봅니다.</p>
-      <ul class="ch-keys"><li>눈 · 두뇌 · 손</li><li>모델</li><li>Effort</li></ul>
+      <ul class="ch-keys"><li>눈 · 두뇌 · 손</li><li>내 PC까지</li><li>Effort</li></ul>
     </div>
   </section>
-
   <!-- 8. 같은 요청인데, 왜 결과가 다를까요? ---------------- -->
   <section class="slide">
     <div class="slide-head"><h2>같은 요청인데, 왜 결과가 다를까요?</h2><span class="head-tag">M2-2 · 개념</span></div>
@@ -191,144 +268,60 @@
       </div>
     </div>
   </section>
-
   <!-- 9. Agent는 세 가지로 이루어집니다 ------------------ -->
   <section class="slide">
     <div class="slide-head"><h2>Agent는 세 가지로 이루어집니다</h2><span class="head-tag">M2-2 · 개념</span></div>
     <div class="slide-body">
-      <p class="lead" style="margin-bottom:8px">
-        <strong class="navy">Agent란?</strong> 내 일을 대신 해 주는 <strong class="navy">아르바이트생 한 명</strong>입니다.
-      </p>
-      <p class="sub" style="margin-bottom:10px">
-        <strong>눈</strong>으로 보고, <strong>두뇌</strong>로 정하고, <strong>손</strong>으로 해냅니다.
-        Pro와 데스크탑의 차이도 여기서 갈립니다.
-      </p>
-
-      <div class="figure" style="margin:0 0 10px">
-        <svg viewBox="0 0 1020 290" width="960" height="273" role="img"
-             aria-label="아르바이트생 한 명이 Agent — 눈은 환경인식, 머리 안의 두뇌는 모델, 손은 도구를 뜻하는 그림">
-          <!-- 알바생 -->
-          <rect x="100" y="30" width="100" height="96" rx="20" fill="#F2F2F2" stroke="#204273" stroke-width="3"/>
-          <circle cx="126" cy="60" r="6" fill="#204273"/>
-          <circle cx="174" cy="60" r="6" fill="#204273"/>
-          <rect x="115" y="82" width="70" height="26" rx="7" fill="#164194"/>
-          <text x="150" y="100" text-anchor="middle" font-size="16" font-weight="700" fill="#fff">두뇌</text>
-          <rect x="140" y="124" width="20" height="14" fill="#204273"/>
-          <rect x="98" y="136" width="104" height="96" rx="14" fill="#204273"/>
-          <path d="M98 158 L56 196" stroke="#204273" stroke-width="12" stroke-linecap="round" fill="none"/>
-          <path d="M202 158 L244 196" stroke="#204273" stroke-width="12" stroke-linecap="round" fill="none"/>
-          <circle cx="50" cy="202" r="13" fill="#164194"/>
-          <circle cx="250" cy="202" r="13" fill="#164194"/>
-          <rect x="118" y="232" width="20" height="36" rx="6" fill="#204273"/>
-          <rect x="162" y="232" width="20" height="36" rx="6" fill="#204273"/>
-
-          <!-- 연결선 -->
-          <path d="M204 56 L326 50" stroke="#7C8698" stroke-width="2" stroke-dasharray="5 4" fill="none"/>
-          <path d="M190 95 L326 138" stroke="#7C8698" stroke-width="2" stroke-dasharray="5 4" fill="none"/>
-          <path d="M252 214 L326 226" stroke="#7C8698" stroke-width="2" stroke-dasharray="5 4" fill="none"/>
-
-          <!-- 눈 = 환경인식 -->
-          <rect x="330" y="20" width="670" height="72" rx="10" fill="#F2F2F2"/>
-          <rect x="330" y="20" width="6" height="72" rx="3" fill="#7C8698"/>
-          <text x="356" y="48" font-size="19" font-weight="700" fill="#164194">눈 — 환경인식</text>
-          <text x="524" y="48" font-size="16" fill="#1A1A1A">무엇을 보는가</text>
-          <text x="356" y="76" font-size="16" fill="#7C8698">대화창에 올린 파일 · 내 PC의 폴더</text>
-
-          <!-- 두뇌 = 모델 -->
-          <rect x="330" y="104" width="670" height="72" rx="10" fill="#F2F2F2"/>
-          <rect x="330" y="104" width="6" height="72" rx="3" fill="#164194"/>
-          <text x="356" y="132" font-size="19" font-weight="700" fill="#164194">두뇌 — 모델</text>
-          <text x="524" y="132" font-size="16" fill="#1A1A1A">무엇을 할지 정한다</text>
-          <text x="356" y="160" font-size="16" fill="#7C8698">M1에서 고른 그 두뇌 —</text>
-          <text x="546" y="160" font-size="16" font-weight="700" fill="#70AD47">똑똑할수록 비싸다</text>
-          <circle cx="704" cy="155" r="7" fill="#70AD47"/>
-          <circle cx="722" cy="155" r="7" fill="#70AD47"/>
-          <circle cx="740" cy="155" r="7" fill="#70AD47"/>
-
-          <!-- 손 = 도구 -->
-          <rect x="330" y="188" width="670" height="72" rx="10" fill="#F2F2F2"/>
-          <rect x="330" y="188" width="6" height="72" rx="3" fill="#7C8698"/>
-          <text x="356" y="216" font-size="19" font-weight="700" fill="#164194">손 — 도구</text>
-          <text x="524" y="216" font-size="16" fill="#1A1A1A">무엇을 할 수 있는가</text>
-          <text x="356" y="244" font-size="16" fill="#7C8698">글쓰기 · 그림 생성 · PDF 만들기</text>
-
-          <text x="330" y="282" font-size="16" fill="#7C8698">두뇌는 골라 끼우고, 눈과 손은 <tspan font-weight="700" fill="#204273">어떤 알바생이냐</tspan>에 따라 다릅니다</text>
-        </svg>
-      </div>
-
-      <div class="note">
-        <strong class="navy">앞에서 PDF가 갈린 이유</strong> — 파일을 만든 것은 모델이 아니라
-        <strong class="navy">도구(스킬)</strong>입니다.<br>
-        데스크탑에는 그 도구가 있고, 브라우저 Pro에는 없습니다.
-        같은 모델이라도 <strong class="navy">가진 도구가 다르면 할 수 있는 일이 달라집니다.</strong>
-      </div>
-    </div>
-  </section>
-
-  <!-- 10. 데스크탑은 할 수 있는 일이 더 많습니다 ------------ -->
-  <section class="slide">
-    <div class="slide-head"><h2>데스크탑은 할 수 있는 일이 더 많습니다</h2><span class="head-tag">M2-2 · 개념</span></div>
-    <div class="slide-body">
       <p class="lead" style="margin-bottom:16px">
-        <strong class="navy">두뇌는 같습니다.</strong> 넓어진 것은 <strong class="navy">눈과 손</strong>입니다.
+        <strong class="navy">Agent</strong>는 내 일을 대신 해 주는 <strong class="navy">아르바이트생 한 명</strong>입니다.
       </p>
 
-      <div class="ba">
-        <div class="ba-col ba--before">
-          <p class="ba-head">H Chat Pro — 브라우저</p>
-          <div class="ba-body">
-            <div class="figure" style="margin:0 0 10px">
-              <svg viewBox="0 0 420 96" width="420" height="96" role="img" aria-label="브라우저 알바생 — 눈은 대화창까지, 손은 답만 써 준다">
-                <rect x="18" y="6" width="62" height="58" rx="14" fill="#F2F2F2" stroke="#204273" stroke-width="2.6"/>
-                <circle cx="35" cy="24" r="4.4" fill="#204273"/><circle cx="63" cy="24" r="4.4" fill="#204273"/>
-                <rect x="23" y="35" width="52" height="21" rx="6" fill="#164194"/>
-                <text x="49" y="51" text-anchor="middle" font-size="16" font-weight="700" fill="#fff">두뇌</text>
-                <rect x="24" y="68" width="50" height="22" rx="8" fill="#204273"/>
-                <path d="M92 30 L128 30" stroke="#7C8698" stroke-width="2.5" stroke-dasharray="5 4" fill="none"/>
-                <path d="M128 24 L140 30 L128 36 Z" fill="#7C8698"/>
-                <text x="148" y="27" font-size="16" font-weight="700" fill="#164194">눈</text>
-                <text x="172" y="27" font-size="16" fill="#1A1A1A">대화창에 올린 파일만</text>
-                <path d="M92 74 L128 74" stroke="#7C8698" stroke-width="2.5" stroke-dasharray="5 4" fill="none"/>
-                <path d="M128 68 L140 74 L128 80 Z" fill="#7C8698"/>
-                <text x="148" y="71" font-size="16" font-weight="700" fill="#164194">손</text>
-                <text x="172" y="71" font-size="16" fill="#1A1A1A">읽고 · 답한다</text>
-              </svg>
-            </div>
-            <p class="ba-quote">답을 받아 <strong>내가 옮겨 적습니다.</strong></p>
-          </div>
+      <div class="split" style="gap:30px">
+        <div class="split-side" style="flex:0 0 390px">
+          <div class="shot" style="width:390px; height:326px; border:none"><img src="assets/img/m2-agent-parts.png" alt="눈에 센서, 머리에 두뇌, 손에 도구를 든 알바생 그림" style="width:100%; height:100%; object-fit:cover; object-position:50% 58%"></div>
         </div>
-        <div class="ba-col ba--after">
-          <p class="ba-head">H Chat 데스크탑</p>
-          <div class="ba-body">
-            <div class="figure" style="margin:0 0 10px">
-              <svg viewBox="0 0 420 96" width="420" height="96" role="img" aria-label="데스크탑 알바생 — 눈은 내 PC 폴더까지, 손은 파일을 만든다">
-                <rect x="18" y="6" width="62" height="58" rx="14" fill="#F2F2F2" stroke="#204273" stroke-width="2.6"/>
-                <circle cx="35" cy="24" r="4.4" fill="#204273"/><circle cx="63" cy="24" r="4.4" fill="#204273"/>
-                <rect x="23" y="35" width="52" height="21" rx="6" fill="#164194"/>
-                <text x="49" y="51" text-anchor="middle" font-size="16" font-weight="700" fill="#fff">두뇌</text>
-                <rect x="24" y="68" width="50" height="22" rx="8" fill="#204273"/>
-                <path d="M92 30 L128 30" stroke="#70AD47" stroke-width="2.5" stroke-dasharray="5 4" fill="none"/>
-                <path d="M128 24 L140 30 L128 36 Z" fill="#70AD47"/>
-                <text x="148" y="27" font-size="16" font-weight="700" fill="#164194">눈</text>
-                <text x="172" y="27" font-size="16" fill="#1A1A1A">내 PC의 폴더까지</text>
-                <path d="M92 74 L128 74" stroke="#70AD47" stroke-width="2.5" stroke-dasharray="5 4" fill="none"/>
-                <path d="M128 68 L140 74 L128 80 Z" fill="#70AD47"/>
-                <text x="148" y="71" font-size="16" font-weight="700" fill="#164194">손</text>
-                <text x="172" y="71" font-size="16" fill="#1A1A1A">파일을 만들고 고친다</text>
-              </svg>
+        <div class="split-main">
+          <div class="kv" style="grid-template-columns:1fr; gap:12px">
+            <div class="kv-item" style="padding:14px 18px 16px">
+              <p class="kv-name">눈 &mdash; 무엇을 보는가</p>
+              <p class="kv-like">대화창에 올린 파일 · <b>내 PC의 폴더</b></p>
             </div>
-            <p class="ba-quote">결과물이 <strong>내 폴더에 남습니다.</strong></p>
+            <div class="kv-item" style="padding:14px 18px 16px">
+              <p class="kv-name">두뇌 &mdash; 무엇을 할지 정한다</p>
+              <p class="kv-like">M1에서 고른 그 <b>IQ</b> — 똑똑할수록 비싸다</p>
+            </div>
+            <div class="kv-item" style="padding:14px 18px 16px">
+              <p class="kv-name">손 &mdash; 무엇을 할 수 있는가</p>
+              <p class="kv-like">글쓰기 · 그림 생성 · <b>PDF 만들기</b></p>
+            </div>
           </div>
         </div>
       </div>
 
-      <div class="note" style="margin-top:20px">
-        그래서 데스크탑은 <strong class="navy">묻고 답하는 상대</strong>가 아니라 <strong class="navy">일을 맡기는 상대</strong>가 됩니다.<br>
-        여러 파일을 한꺼번에, 이어서 처리합니다. 여기서부터 <strong class="navy">업무가 실제로 줄어듭니다.</strong>
+      <div class="note" style="margin-top:16px">
+        <strong class="navy">앞에서 PDF가 갈린 이유</strong> &mdash; 파일을 만든 것은 두뇌가 아니라 <strong class="navy">손(도구)</strong>입니다.<br>
+        같은 두뇌라도 <strong class="navy">손에 든 도구가 다르면 할 수 있는 일이 달라집니다.</strong>
       </div>
     </div>
   </section>
+  <!-- 10. 데스크탑은 내 PC까지 다룹니다 ---------------------- -->
+  <section class="slide">
+    <div class="slide-head"><h2>데스크탑은 내 PC까지 다룹니다</h2><span class="head-tag">M2-2 · 개념</span></div>
+    <div class="slide-body">
+      <p class="lead" style="margin-bottom:14px; text-align:center">
+        두뇌는 같습니다. 달라진 것은 <strong class="navy">손이 닿는 범위</strong>입니다.
+      </p>
 
+      <div class="figure" style="margin:0">
+        <div class="shot" style="width:770px; margin:0 auto; border:none"><img src="assets/img/m2-desktop-pc.png" alt="왼쪽은 말로만 답하는 H Chat Pro, 오른쪽은 PC 앞에 앉아 폴더와 파일을 직접 다루는 H Chat 데스크탑"></div>
+      </div>
+
+      <div class="two-cap">
+        <p><strong>H&nbsp;Chat Pro</strong><br>답을 말해 줍니다 &mdash; 옮겨 적는 건 나</p>
+        <p><strong>H&nbsp;Chat 데스크탑</strong><br>폴더를 열고 파일을 만듭니다</p>
+      </div>
+    </div>
+  </section>
   <!-- 11. Effort — 얼마나 깊이 생각할지 ---------------- -->
   <section class="slide">
     <div class="slide-head"><h2>Effort — 얼마나 깊이 생각할지</h2><span class="head-tag">M2-2 · 개념</span></div>
@@ -368,66 +361,17 @@
       </div>
     </div>
   </section>
-
-  <!-- 12. [챕터] 작업 폴더 - AI가 보는 범위 ------------ -->
-  <section class="slide slide--chapter" data-chapter="작업 폴더 &mdash; AI가 보는 범위">
+  <!-- 12. [챕터] 작업 폴더 정하기 ---------------------------- -->
+  <section class="slide slide--chapter" data-chapter="작업 폴더 정하기">
     <div class="chapter">
       <p class="ch-eyebrow">CHAPTER 3</p>
-      <h2 class="ch-title">작업 폴더 &mdash; AI가 보는 범위</h2>
+      <h2 class="ch-title">작업 폴더 정하기</h2>
       <div class="ch-rule"></div>
-      <p class="ch-desc">AI가 볼 수 있는 범위를 정하고, 폴더의 업무파일을 한 번에 정리해 봅니다.</p>
-      <ul class="ch-keys"><li>작업 폴더</li><li>파일 정리</li></ul>
+      <p class="ch-desc">AI가 볼 폴더를 정하고, 그 안의 파일을 표로 정리한 뒤 날짜별로 옮깁니다.</p>
+      <ul class="ch-keys"><li>폴더 지정</li><li>표로 정리</li><li>권한 허용</li></ul>
     </div>
   </section>
-
-  <!-- 13. 작업 폴더 - AI가 볼 수 있는 범위 -------------- -->
-  <section class="slide">
-    <div class="slide-head"><h2>작업 폴더 &mdash; AI가 볼 수 있는 범위</h2><span class="head-tag">M2-3 · 개념</span></div>
-    <div class="slide-body">
-      <p class="lead" style="margin-bottom:8px">
-        데스크탑은 <strong class="navy">내가 지정한 폴더 안</strong>만 봅니다.
-      </p>
-      <p class="sub" style="margin-bottom:14px">
-        알바생에게 <strong>&ldquo;이 서랍만 보세요&rdquo;</strong> 하고 열어 주는 것과 같습니다.
-        지정하지 않은 폴더는 열지 못합니다.
-      </p>
-
-      <div class="figure" style="margin:0">
-        <svg viewBox="0 0 1020 250" width="960" height="235" role="img"
-             aria-label="작업 폴더 안의 파일만 AI가 볼 수 있고, 폴더 밖의 파일은 보지 못한다는 그림">
-          <rect x="30" y="26" width="470" height="196" rx="12" fill="#F2F2F2" stroke="#164194" stroke-width="2.5"/>
-          <text x="52" y="56" font-size="18" font-weight="700" fill="#164194">지정한 작업 폴더 — 볼 수 있다</text>
-          <rect x="52" y="74" width="200" height="34" rx="6" fill="#fff" stroke="#D8DEE9"/>
-          <text x="66" y="96" font-size="16" fill="#1A1A1A">주간보고_9월.docx</text>
-          <rect x="52" y="118" width="200" height="34" rx="6" fill="#fff" stroke="#D8DEE9"/>
-          <text x="66" y="140" font-size="16" fill="#1A1A1A">지점실적_강남.csv</text>
-          <rect x="52" y="162" width="200" height="34" rx="6" fill="#fff" stroke="#D8DEE9"/>
-          <text x="66" y="184" font-size="16" fill="#1A1A1A">회의메모.txt</text>
-          <text x="276" y="98" font-size="16" font-weight="700" fill="#70AD47">읽는다</text>
-          <text x="276" y="142" font-size="16" font-weight="700" fill="#70AD47">고친다</text>
-          <text x="276" y="186" font-size="16" font-weight="700" fill="#70AD47">만든다</text>
-
-          <rect x="550" y="26" width="440" height="196" rx="12" fill="#fff" stroke="#7C8698"
-                stroke-width="2.5" stroke-dasharray="7 5"/>
-          <text x="572" y="56" font-size="18" font-weight="700" fill="#7C8698">지정하지 않은 폴더 — 못 본다</text>
-          <rect x="572" y="74" width="200" height="34" rx="6" fill="#F2F2F2"/>
-          <text x="586" y="96" font-size="16" fill="#7C8698">인사자료</text>
-          <rect x="572" y="118" width="200" height="34" rx="6" fill="#F2F2F2"/>
-          <text x="586" y="140" font-size="16" fill="#7C8698">개인 사진</text>
-          <text x="796" y="98" font-size="16" font-weight="700" fill="#FF0000">보이지 않음</text>
-          <text x="796" y="142" font-size="16" font-weight="700" fill="#FF0000">보이지 않음</text>
-          <text x="572" y="192" font-size="16" fill="#7C8698">폴더를 바꾸면 그때부터 보입니다</text>
-        </svg>
-      </div>
-
-      <div class="note" style="margin-top:12px">
-        그래서 <strong class="navy">폴더를 정하는 것이 첫 단추</strong>입니다.
-        기밀이 든 폴더는 <strong class="navy">아예 지정하지 않는 것</strong>이 가장 확실합니다.
-      </div>
-    </div>
-  </section>
-
-  <!-- 14. 폴더는 이렇게 지정합니다 ------------------------------ -->
+  <!-- 13. 폴더는 이렇게 지정합니다 ------------------------------ -->
   <section class="slide">
     <div class="slide-head"><h2>폴더는 이렇게 지정합니다</h2><span class="head-tag">M2-3 · 개념</span></div>
     <div class="slide-body">
@@ -458,111 +402,142 @@
       </div>
     </div>
   </section>
-
-  <!-- 15. [실습] 내 PC 폴더의 업무파일 한 번에 정리 ---- -->
+  <!-- 14. [실습] 폴더의 파일을 표로 정리합니다 -------------- -->
   <section class="slide">
-    <div class="slide-head"><h2>[실습] 내 PC 폴더의 업무파일 한 번에 정리</h2><span class="head-tag">M2-3 · 실습</span></div>
-    <div class="slide-body" style="padding-top:26px">
+    <div class="slide-head"><h2>[실습] 폴더의 파일을 표로 정리합니다</h2><span class="head-tag">M2-3 · 실습</span></div>
+    <div class="slide-body">
       <div class="split">
         <div class="split-main">
           <ol class="steps">
-            <li>정리하고 싶은 <strong class="navy">내 폴더</strong> 하나 고르기
-              <small>다운로드 · 내 문서처럼 파일이 쌓여 있는 곳</small></li>
-            <li>마땅한 폴더가 없으면 <strong class="navy">배포된 실습 폴더</strong> 사용</li>
-            <li>데스크탑에서 <strong class="navy">그 폴더를 지정</strong>하기</li>
+            <li>정리하고 싶은 <strong class="navy">내 폴더</strong> 하나 고르기<small>다운로드 · 내 문서처럼 파일이 쌓여 있는 곳</small></li>
+            <li>마땅한 폴더가 없으면 <strong class="navy">배포된 실습 폴더</strong><small>강의자료의 <span class="mono">주간업무메모</span> 폴더를 쓰면 됩니다</small></li>
+            <li>앞 장처럼 <strong class="navy">그 폴더를 작업 폴더로 지정</strong>하기</li>
           </ol>
 
-          <div class="pbox" style="margin-top:16px">
-            <p class="pbox-t">① 먼저 — 표로 정리하기</p>
+          <div class="pbox" style="margin-top:18px">
+            <p class="pbox-t">① 먼저 &mdash; 표로 정리하기</p>
             <p>이 폴더의 파일들을 <b>표</b>로 정리해줘. 파일명 · 주제 · 중요도 · 날짜 순서로.</p>
           </div>
 
-          <div class="pbox" style="margin-top:14px">
-            <p class="pbox-t">② 이어서 — 날짜별 폴더로 정리하기</p>
-            <p>날짜별로 <b>폴더를 만들어서</b> 파일들을 각 폴더로 옮겨줘.</p>
+          <div class="note" style="margin-top:16px">
+            파일을 하나도 열지 않았습니다. <strong class="navy">폴더만 지정했을 뿐</strong>입니다.
           </div>
         </div>
 
-        <div class="split-side">
-          <div class="side-box">
-            <p class="side-t">왜 하는가</p>
-            <p class="side-d">앞에서 배운 <strong>‘환경인식 = 내 PC 폴더’</strong>를 눈으로 확인합니다.</p>
-          </div>
-          <div class="side-box">
-            <p class="side-t">무엇이 남는가</p>
-            <p class="side-d">열어보지 않고도 만든 <strong>내 폴더 요약표</strong></p>
-            <p class="side-d"><strong>날짜별로 정리된 폴더</strong> — 내가 손대지 않고</p>
-          </div>
+        <div class="split-side" style="flex:0 0 330px">
+          <div class="shot" style="width:330px"><img src="assets/img/m2-filelist-result.png" alt="30개 파일을 읽어 파일명·주제·중요도·날짜 표로 정리한 화면"></div>
+          <p class="shot-cap">30개 파일을 <strong>한 표로</strong></p>
         </div>
       </div>
     </div>
   </section>
+  <!-- 15. [실습] 날짜별 폴더로 옮깁니다 ---------------------- -->
+  <section class="slide">
+    <div class="slide-head"><h2>[실습] 날짜별 폴더로 옮깁니다</h2><span class="head-tag">M2-3 · 실습</span></div>
+    <div class="slide-body">
+      <p class="lead" style="margin-bottom:8px">
+        이번에는 읽기만 하는 게 아니라 <strong class="navy">파일을 실제로 움직입니다.</strong>
+      </p>
 
-  <!-- 16. [챕터] 주간 실적 보고서 만들기 -------------------- -->
-  <section class="slide slide--chapter" data-chapter="주간 실적 보고서 만들기">
-    <div class="chapter">
-      <p class="ch-eyebrow">CHAPTER 4</p>
-      <h2 class="ch-title">주간 실적 보고서 만들기</h2>
-      <div class="ch-rule"></div>
-      <p class="ch-desc">지점별 실적 파일을 폴더 지침대로 한 문장에 합칩니다.</p>
-      <ul class="ch-keys"><li>폴더 지침</li><li>통합표</li><li>이름 규칙</li></ul>
+      <div class="pbox pbox--tight" style="margin:10px 0 10px">
+        <p class="pbox-t">② 이어서 &mdash; 날짜별 폴더로 정리하기</p>
+        <p>날짜별로 <b>폴더를 만들어서</b> 파일들을 각 폴더로 옮겨줘.</p>
+      </div>
+
+      <div class="perm">
+        <div class="perm-img">
+          <img src="assets/img/m2-permission-ask.png" alt="명령 실행 권한 요청 — 세션에서 허용 · 디렉터리에서 허용 · 한 번만 허용 · 거부">
+          <span class="perm-mark" aria-hidden="true"></span>
+        </div>
+
+        <div class="perm-notes">
+          <div class="perm-note is-now" style="top:39.4%">
+            <span class="ar">&larr;</span>
+            <p><b>오늘은 이것</b> &mdash; 지금 대화가 끝날 때까지 자동 허용.<br>실습 폴더만 건드리니 위험한 작업이 없습니다</p>
+          </div>
+          <div class="perm-note" style="top:57%">
+            <span class="ar">&larr;</span>
+            <p>이 폴더에서는 <b>앞으로 계속</b> 허용 &mdash; 늘 쓰는 작업 폴더라면</p>
+          </div>
+          <div class="perm-note" style="top:74.5%">
+            <span class="ar">&larr;</span>
+            <p>이번 <b>한 번만</b> &mdash; 회사 원본 자료라면 이쪽으로</p>
+          </div>
+          <div class="perm-note" style="top:92%">
+            <span class="ar">&larr;</span>
+            <p>시키지 않는다</p>
+          </div>
+        </div>
+
+        <div class="perm-done">
+          <img src="assets/img/m2-datefolders.png" alt="날짜별로 만들어진 폴더들">
+          <p>날짜별 폴더로<br>정리 완료</p>
+        </div>
+      </div>
     </div>
   </section>
-
-  <!-- 17. 지금부터 데스크탑으로 작은 프로젝트를 만듭니다 ------ -->
+  <!-- 16. [챕터] 폴더 지침으로 실적 합치기 ------------------ -->
+  <section class="slide slide--chapter" data-chapter="폴더 지침으로 실적 합치기">
+    <div class="chapter">
+      <p class="ch-eyebrow">CHAPTER 4</p>
+      <h2 class="ch-title">폴더 지침으로 실적 합치기</h2>
+      <div class="ch-rule"></div>
+      <p class="ch-desc">제각각인 지점 파일을, 규칙을 한 번 적어 두는 것만으로 통합표 하나에 담습니다.</p>
+      <ul class="ch-keys"><li>작업 폴더</li><li>폴더 지침</li><li>통합표</li></ul>
+    </div>
+  </section>
+  <!-- 17. Pro의 프로젝트를, 이번엔 데스크탑에서 ------------ -->
   <section class="slide">
-    <div class="slide-head"><h2>지금부터 데스크탑으로 작은 프로젝트를 만듭니다</h2><span class="head-tag">M2-4 · 개념</span></div>
+    <div class="slide-head"><h2>Pro의 프로젝트를, 이번엔 데스크탑에서</h2><span class="head-tag">M2-4 · 개념</span></div>
     <div class="slide-body">
-      <p class="lead" style="margin-bottom:6px">
-        기능을 하나씩 눌러 보는 게 아니라, <strong class="navy">일 한 건을 끝까지</strong> 해 봅니다.
-      </p>
-      <p class="sub" style="margin-bottom:18px">
-        지점에서 온 주간 실적을 받아 <strong>보고서로 내는 일</strong> — 네 단계로 끝납니다.
+      <p class="lead" style="margin-bottom:16px; text-align:center">
+        M1에서 만든 <strong class="navy">프로젝트</strong> &mdash; 데스크탑에서는 그 자리를 <strong class="navy">폴더 하나</strong>가 대신합니다.
       </p>
 
-      <div class="flow" style="margin-bottom:20px">
-        <div class="flow-step">
+      <div class="proj">
+        <div class="proj-side">
+          <div class="shot"><img src="assets/img/m2-project-list.png" alt="H Chat Pro 의 프로젝트 화면"></div>
+          <p class="proj-cap"><strong>H&nbsp;Chat Pro</strong><br>프로젝트 안에 자료와 규칙을</p>
+        </div>
+
+        <div class="proj-mid">
+          <p class="proj-ar">&rarr;</p>
+          <p class="proj-txt">같은 일을<br><strong class="navy">내 폴더</strong>에서</p>
+        </div>
+
+        <div class="proj-side">
+          <div class="shot"><img src="assets/img/m2-report-pdf.png" alt="네 지점 실적을 합쳐 만든 주간 실적 보고서 PDF"></div>
+          <p class="proj-cap"><strong>H&nbsp;Chat 데스크탑</strong><br>결과가 <strong class="navy">파일로</strong> 남습니다</p>
+        </div>
+      </div>
+
+      <div class="flow" style="margin-top:18px">
+        <div class="flow-step is-now">
           <p class="flow-no">①</p>
           <p class="flow-name">작업 폴더</p>
-          <p class="flow-desc">받은 <strong>‘9월 2주차 실적’ 폴더</strong>를 놓고 AI가 볼 범위를 정한다</p>
+          <p class="flow-desc">실적 폴더를 놓는다</p>
         </div>
         <div class="flow-arrow">›</div>
         <div class="flow-step">
           <p class="flow-no">②</p>
           <p class="flow-name">폴더 지침</p>
-          <p class="flow-desc">합치는 <strong>규칙을 한 번</strong> 적어 둔다</p>
+          <p class="flow-desc">합치는 규칙을 한 번</p>
         </div>
         <div class="flow-arrow">›</div>
         <div class="flow-step">
           <p class="flow-no">③</p>
           <p class="flow-name">합치기</p>
-          <p class="flow-desc">제각각인 네 파일이 <strong>통합표 하나</strong>로</p>
+          <p class="flow-desc">네 파일이 표 하나로</p>
         </div>
         <div class="flow-arrow">›</div>
         <div class="flow-step">
           <p class="flow-no">④</p>
           <p class="flow-name">보고서</p>
-          <p class="flow-desc">그대로 <strong>주간 실적 보고서 PDF</strong>까지</p>
-        </div>
-      </div>
-
-      <div class="kv kv--3">
-        <div class="kv-item">
-          <p class="kv-name">무엇을 배우나</p>
-          <p class="kv-like">폴더를 정하고 · 규칙을 걸고 · 결과를 문서로 남기는 <b>한 바퀴</b></p>
-        </div>
-        <div class="kv-item">
-          <p class="kv-name">무엇이 남나</p>
-          <p class="kv-like"><b>통합표.csv</b> 와 <b>보고서 PDF</b> — 내 폴더에 파일로</p>
-        </div>
-        <div class="kv-item">
-          <p class="kv-name">Pro와 무엇이 다른가</p>
-          <p class="kv-like">Pro는 <b>답만</b> 줍니다. 데스크탑은 <b>내 폴더에 직접</b> 씁니다</p>
+          <p class="flow-desc">그대로 PDF까지</p>
         </div>
       </div>
     </div>
   </section>
-
   <!-- 18. [실습] 내 작업 폴더를 정합니다 -------------------- -->
   <section class="slide">
     <div class="slide-head"><h2>[실습] 내 작업 폴더를 정합니다</h2><span class="head-tag">M2-4 · 실습</span></div>
@@ -595,7 +570,6 @@
       </div>
     </div>
   </section>
-
   <!-- 19. 이렇게 나오면 성공 — 지침은 여기서 엽니다 -------- -->
   <section class="slide">
     <div class="slide-head"><h2>이렇게 나오면 성공 — 지침은 여기서 엽니다</h2><span class="head-tag">M2-4 · 확인</span></div>
@@ -621,15 +595,14 @@
       </div>
     </div>
   </section>
-
   <!-- 20. [실습] 합치는 규칙을 폴더 지침에 적어 둡니다 ---- -->
   <section class="slide">
     <div class="slide-head"><h2>[실습] 합치는 규칙을 폴더 지침에 적어 둡니다</h2><span class="head-tag">M2-4 · 실습</span></div>
     <div class="slide-body">
-      <p class="lead" style="margin-bottom:8px">
+      <p class="lead" style="margin-bottom:6px">
         네 지점이 보낸 파일은 <strong class="navy">단위도 날짜도 머리글도 제각각</strong>입니다.
       </p>
-      <p class="sub" style="margin-bottom:14px">
+      <p class="sub" style="margin-bottom:10px">
         이걸 매번 말로 설명하면 <strong>그때그때 다르게 합쳐집니다.</strong>
         <strong>폴더 지침</strong>에 한 번 적어 두면 매번 같게 나옵니다.
       </p>
@@ -646,7 +619,7 @@
             </tbody>
           </table>
 
-          <ol class="steps" style="margin-top:16px">
+          <ol class="steps" style="margin-top:4px">
             <li>오른쪽 <strong class="navy">작업 폴더</strong> 칸의 <strong class="navy">[지침]</strong> 클릭</li>
             <li>열린 창에 옆의 내용 <strong class="navy">붙여넣기</strong></li>
             <li><strong class="navy">[저장]</strong> — 이제 매번 적용됩니다</li>
@@ -654,7 +627,7 @@
         </div>
 
         <div class="split-main">
-          <div class="pbox">
+          <div class="pbox pbox--tight" data-app="폴더 지침">
             <p>지점실적 파일을 합칠 때는 항상 아래 규칙을 지킨다.</p>
             <p>· 열은 지점 · 일자 · 매출(원) · 목표(원) · 달성률 · 비고 로 맞춘다</p>
             <p>· 일자는 YYYY-MM-DD 형식으로 통일한다</p>
@@ -666,102 +639,76 @@
         </div>
       </div>
 
-      <div class="note" style="margin-top:14px">
+      <div class="note" style="margin-top:10px">
         M1의 <strong class="navy">프로젝트 지시사항</strong>과 같습니다 —
         저장하면 그 폴더에 <span class="mono">CLAUDE.md</span> 로 남습니다.
       </div>
     </div>
   </section>
-
   <!-- 21. [실습] 이제 한 문장이면 됩니다 -------------------- -->
   <section class="slide">
     <div class="slide-head"><h2>[실습] 이제 한 문장이면 됩니다</h2><span class="head-tag">M2-4 · 실습</span></div>
     <div class="slide-body">
-      <p class="lead" style="margin-bottom:16px">
-        규칙은 파일에 있으니, 요청에는 <strong class="navy">무엇을 할지만</strong> 적습니다.
+      <p class="lead" style="margin-bottom:14px">
+        규칙은 지침에 적어 뒀으니, 요청에는 <strong class="navy">무엇을 할지만</strong> 적습니다.
       </p>
 
-      <div class="pbox">
-        <p class="pbox-t">① 합치기 — 엑셀 파일(xlsx) 말고 csv 로. 엑셀에서 그냥 열리고 훨씬 빠릅니다</p>
-        <p><b>9월 2주차 실적</b> 폴더의 지점실적 파일을 <b>폴더 지침</b>대로 합쳐서 <b>통합표.csv</b> 로 저장해줘.</p>
-        <p>지점 · 일자 순으로 정렬하고, 규칙 때문에 뺀 행이 있으면 무엇을 왜 뺐는지 알려줘.</p>
-      </div>
+      <div class="split" style="gap:26px">
+        <div class="split-main">
+          <div class="pbox">
+            <p class="pbox-t">① 합치기 &mdash; 엑셀 파일(xlsx) 말고 csv 로. 엑셀에서 그냥 열리고 훨씬 빠릅니다</p>
+            <p><b>9월 2주차 실적</b> 폴더의 지점실적 파일을 <b>폴더 지침</b>대로 합쳐서 <b>통합표.csv</b> 로 저장해줘.</p>
+            <p>지점 · 일자 순으로 정렬하고, 규칙 때문에 뺀 행이 있으면 무엇을 왜 뺐는지 알려줘.</p>
+          </div>
 
-      <div class="pbox" style="margin-top:12px">
+          <p class="sub" style="margin:18px 0 10px">결과에서 <strong class="navy">이 세 가지</strong>를 확인합니다.</p>
+          <ul class="dash-list" style="margin-bottom:0">
+            <li>수원 <strong class="navy">합계 행</strong>과 대구 <strong class="navy">중복 행</strong>이 빠졌는지</li>
+            <li>단위가 <strong class="navy">전부 원</strong>으로 맞춰졌는지</li>
+            <li>수원 <strong class="navy">9/11</strong>이 &lsquo;확인 필요&rsquo;로 남았는지</li>
+          </ul>
+        </div>
+
+        <div class="split-side" style="flex:0 0 398px">
+          <div class="shot" style="width:398px"><img src="assets/img/m2-merged-csv.png" alt="네 지점 파일이 합쳐진 통합표.csv — 지점·일자 순으로 정렬된 20행"></div>
+          <p class="shot-cap">네 파일이 <strong>통합표.csv</strong> 한 장으로</p>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- 22. [실습] 규칙 한 줄만 바꿔 다시 -------------------- -->
+  <section class="slide">
+    <div class="slide-head"><h2>[실습] 규칙 한 줄만 바꿔 다시</h2><span class="head-tag">M2-4 · 실습</span></div>
+    <div class="slide-body">
+      <div class="pbox">
         <p class="pbox-t">② 규칙을 하나 바꿔 다시</p>
         <p>폴더 지침에 &lsquo;달성률이 90% 미만이면 비고에 미달로 표시&rsquo; 규칙을 한 줄 더 넣고, 다시 합쳐줘.</p>
       </div>
 
-      <div class="kv kv--3" style="margin-top:16px">
-        <div class="kv-item">
-          <p class="kv-name">확인할 것</p>
-          <p class="kv-like">수원 <b>합계 행</b>과 대구 <b>중복 행</b>이 빠졌는지</p>
-        </div>
-        <div class="kv-item">
-          <p class="kv-name">확인할 것</p>
-          <p class="kv-like">단위가 <b>전부 원</b>으로 맞춰졌는지</p>
-        </div>
-        <div class="kv-item">
-          <p class="kv-name">확인할 것</p>
-          <p class="kv-like">수원 <b>9/11</b>이 &lsquo;확인 필요&rsquo;로 남았는지</p>
+      <div class="chg">
+        <div class="chg-shot">
+          <img src="assets/img/m2-guide-changed.png" alt="폴더 지침 창 — 마지막 줄에 달성률 90% 미만이면 미달로 표시한다는 규칙이 더해진 화면">
+          <span class="chg-mark" aria-hidden="true"></span>
+          <span class="chg-tag">&larr; 이 <b>한 줄</b>만 더해졌습니다</span>
         </div>
       </div>
 
-      <div class="note" style="margin-top:14px">
-        요청은 짧아졌는데 결과는 더 정확합니다 —
-        <strong class="navy">달라진 건 규칙을 지침으로 옮긴 것뿐입니다.</strong>
+      <div class="note" style="margin-top:16px">
+        고친 건 <strong class="navy">지침 한 줄</strong>뿐입니다 &mdash;
+        요청은 그대로인데 이번엔 <strong class="navy">비고에 &lsquo;미달&rsquo;</strong>이 붙어 나옵니다.
       </div>
     </div>
   </section>
-
-  <!-- 22. [실습] 파일 이름을 규칙대로 한 번에 바꿉니다 ---- -->
-  <section class="slide">
-    <div class="slide-head"><h2>[실습] 파일 이름을 규칙대로 한 번에 바꿉니다</h2><span class="head-tag">M2-4 · 실습</span></div>
-    <div class="slide-body">
-      <p class="lead" style="margin-bottom:16px">
-        파일 이름이 제각각이면 <strong class="navy">나중에 찾지 못합니다.</strong>
-        하나씩 고치던 일을 한 문장으로 끝냅니다.
-      </p>
-
-      <div class="ba">
-        <div class="ba-col ba--before">
-          <p class="ba-head">지금</p>
-          <div class="ba-body">
-            <p>지점실적_강남.csv</p>
-            <p>수원지점최종(2).csv</p>
-            <p>busan_sales_rev.csv</p>
-            <p class="ba-quote">사람마다 다르게 붙인 이름</p>
-          </div>
-        </div>
-        <div class="ba-col ba--after">
-          <p class="ba-head">바꾼 뒤</p>
-          <div class="ba-body">
-            <p>2026-09_영업_강남지점.csv</p>
-            <p>2026-09_영업_수원지점.csv</p>
-            <p>2026-09_영업_부산지점.csv</p>
-            <p class="ba-quote">정렬만 해도 순서가 맞는다</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="pbox" style="margin-top:16px">
-        <p>이 폴더의 파일 이름을 <b>연월_부서_지점</b> 형식으로 바꿔줘.</p>
-        <p>바꾸기 전에 <b>바꿀 목록을 먼저 보여주고</b>, 내가 좋다고 하면 그때 바꿔줘.</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- 23. [챕터] 스킬 · PDF · 안전하게 쓰기 ---------- -->
-  <section class="slide slide--chapter" data-chapter="스킬 · PDF · 안전하게 쓰기">
+  <!-- 23. [챕터] 보고서 PDF 만들기 ------------------------ -->
+  <section class="slide slide--chapter" data-chapter="보고서 PDF 만들기">
     <div class="chapter">
       <p class="ch-eyebrow">CHAPTER 5</p>
-      <h2 class="ch-title">스킬 · PDF · 안전하게 쓰기</h2>
+      <h2 class="ch-title">보고서 PDF 만들기</h2>
       <div class="ch-rule"></div>
-      <p class="ch-desc">반복 작업을 레시피로 만들고, 정리한 내용을 PDF로 내보냅니다.</p>
-      <ul class="ch-keys"><li>스킬</li><li>PDF</li><li>조심할 것</li><li>현업 적용</li></ul>
+      <p class="ch-desc">자주 쓰는 지시를 스킬로 만들고, 정리한 내용을 보고서 PDF로 내보냅니다.</p>
+      <ul class="ch-keys"><li>스킬</li><li>PDF 보고서</li></ul>
     </div>
   </section>
-
   <!-- 24. 스킬 — 필요할 때 불러 쓰는 레시피 ---------------- -->
   <section class="slide">
     <div class="slide-head"><h2>스킬 — 필요할 때 불러 쓰는 레시피</h2><span class="head-tag">M2-5 · 개념</span></div>
@@ -790,7 +737,6 @@
       </div>
     </div>
   </section>
-
   <!-- 25. [실습] 정리한 내용을 PDF로 뽑습니다 ------------ -->
   <section class="slide">
     <div class="slide-head"><h2>[실습] 정리한 내용을 PDF로 뽑습니다</h2><span class="head-tag">M2-5 · 실습</span></div>
@@ -821,106 +767,215 @@
       </div>
     </div>
   </section>
-
-  <!-- 26. 데스크탑에서 조심할 것 -------------------------------- -->
+  <!-- 26. [제출] 만든 PDF 보고서를 올립니다 -------------- -->
   <section class="slide">
-    <div class="slide-head"><h2>데스크탑에서 조심할 것</h2><span class="head-tag">M2-5 · 개념</span></div>
+    <div class="slide-head"><h2>[제출] 만든 PDF 보고서를 올립니다</h2><span class="head-tag">M2-5 · 제출</span></div>
     <div class="slide-body">
-      <p class="lead" style="margin-bottom:22px">
-        <strong class="navy">파일을 실제로 고치는</strong> 도구입니다.
-        Pro와 달리 <strong class="navy">되돌리기 버튼이 없습니다.</strong>
+      <p class="lead" style="margin-bottom:14px">
+        M1에서 하던 것과 <strong class="navy">똑같은 순서</strong>입니다. 항목 이름만 다릅니다.
       </p>
 
-      <div class="kv kv--3">
-        <div class="kv-item">
-          <p class="kv-name">기밀은 아예 열지 않는다</p>
-          <p class="kv-like">인사·계약·개인정보가 든 폴더는 <b>작업 폴더로 지정하지 않습니다.</b></p>
-          <p class="kv-when">지정하지 않으면 보이지 않는다</p>
-        </div>
-        <div class="kv-item">
-          <p class="kv-name">먼저 복사해 두고 시킨다</p>
-          <p class="kv-like">원본 폴더를 <b>복사해 사본에서</b> 실습합니다.</p>
-          <p class="kv-when">잘못돼도 원본은 그대로</p>
-        </div>
-        <div class="kv-item">
-          <p class="kv-name">바꾸기 전에 목록을 본다</p>
-          <p class="kv-like">&ldquo;<b>바꿀 목록을 먼저 보여줘</b>&rdquo;를 붙이면 확인하고 진행합니다.</p>
-          <p class="kv-when">사람이 마지막에 판단</p>
-        </div>
-      </div>
+      <div class="split" style="gap:26px">
+        <div class="split-main">
+          <ol class="steps">
+            <li><span class="mono">hyundai.mincoding.co.kr</span> 접속 &mdash; 상단 <strong class="navy">[문제목록]</strong></li>
+            <li><strong class="navy">[H&nbsp;Chat Desktop 실습] 주간 실적 보고서 만들기</strong> 열기<small>목록의 <span class="mono">Hyundai_03</span> 입니다</small></li>
+            <li>도구모음 <strong class="navy">[파일 업로드]</strong>로 방금 만든 <strong>보고서 PDF</strong>를 첨부하고 <strong>[등록]</strong><small>폴더 지침에 어떤 규칙을 적었는지 한 줄 함께 적습니다</small></li>
+          </ol>
 
-      <div class="note" style="margin-top:22px">
-        내가 볼 수 있는 자료만 AI도 봅니다.
-        <strong class="navy">권한이 없는 문서는 지정해도 열리지 않습니다.</strong>
+          <div class="note note--warn" style="margin-top:16px">
+            올리는 것은 <strong class="hl">통합표 csv 가 아니라 보고서 PDF</strong> 입니다.
+          </div>
+        </div>
+
+        <div class="split-side" style="flex:0 0 430px">
+          <div class="sub-shot">
+            <img src="assets/img/m1-submit-list.png" alt="챕터1 실습 결과물 제출 목록">
+            <span class="sub-mark" style="left:5%; top:54.5%; width:90%; height:13.5%"></span>
+          </div>
+          <p class="sub-cap">목록에서 <strong>Hyundai_03</strong> 를 고릅니다</p>
+        </div>
       </div>
     </div>
   </section>
-
-  <!-- 27. H Chat이 좋은 점 -------------------------------- -->
+  <!-- 27. [챕터] 현업에 쓰기 ---------------------------------- -->
+  <section class="slide slide--chapter" data-chapter="현업에 쓰기">
+    <div class="chapter">
+      <p class="ch-eyebrow">CHAPTER 6</p>
+      <h2 class="ch-title">현업에 쓰기</h2>
+      <div class="ch-rule"></div>
+      <p class="ch-desc">문서 보안과 커넥터를 짚고, 내 업무에 어떻게 쓸지 정합니다.</p>
+      <ul class="ch-keys"><li>문서 보안</li><li>커넥터</li><li>내 업무로</li></ul>
+    </div>
+  </section>
+  <!-- 28. 문서 보안이 걸려 있으면 못 읽습니다 ---------------- -->
   <section class="slide">
-    <div class="slide-head"><h2>H&nbsp;Chat이 좋은 점</h2><span class="head-tag">M2-5 · 개념</span></div>
+    <div class="slide-head"><h2>문서 보안이 걸려 있으면 못 읽습니다</h2><span class="head-tag">M2-6 · 개념</span></div>
     <div class="slide-body">
-      <p class="lead" style="margin-bottom:6px">
-        <strong class="navy">판단(모델)</strong>과 <strong class="navy">도구</strong>를
-        내가 골라 조합할 수 있는 환경입니다.
-      </p>
-      <p class="sub" style="margin-bottom:20px">
-        바깥의 AI 서비스는 대개 <strong>자기 회사 모델 + 자기 도구</strong>로 묶여 있습니다.
+      <p class="lead" style="margin-bottom:22px; text-align:center">
+        사내에서 받은 문서는 대부분 <strong class="navy">문서 보안(DRM)</strong>이 걸려 있습니다.
       </p>
 
-      <div class="kv kv--3">
-        <div class="kv-item">
-          <p class="kv-name">모델을 골라 쓴다</p>
-          <p class="kv-like">한 곳에서 <b>OpenAI · Claude · Gemini</b></p>
-          <p class="kv-when">업무 성격에 맞춰 두뇌만 바꿔 끼운다</p>
-        </div>
-        <div class="kv-item">
-          <p class="kv-name">도구까지 함께 쓴다</p>
-          <p class="kv-like">같은 화면에서 <b>파일 만들기 · 스킬 · 이미지 생성</b></p>
-          <p class="kv-when">모델과 도구를 따로 고를 수 있다</p>
-        </div>
-        <div class="kv-item">
-          <p class="kv-name">사내 자료에 붙는다</p>
-          <p class="kv-like">커넥터로 <b>Confluence · Jira</b> 연결</p>
-          <p class="kv-when">권한 안에서, 최신 자료 기준으로</p>
-        </div>
+      <div class="figure" style="margin:0">
+        <svg viewBox="0 0 1000 250" width="1020" height="255" role="img"
+             aria-label="보안이 걸린 문서는 AI가 못 읽고, 보안을 풀면 읽을 수 있다는 그림">
+          <!-- 보안 걸린 문서 -->
+          <rect x="70" y="30" width="150" height="180" rx="10" fill="#F2F2F2" stroke="#7C8698" stroke-width="3"/>
+          <rect x="98" y="70" width="94" height="9" rx="4" fill="#C9D2E0"/>
+          <rect x="98" y="94" width="94" height="9" rx="4" fill="#C9D2E0"/>
+          <rect x="98" y="118" width="66" height="9" rx="4" fill="#C9D2E0"/>
+          <rect x="118" y="150" width="54" height="40" rx="7" fill="#FF0000"/>
+          <rect x="131" y="134" width="28" height="22" rx="12" fill="none" stroke="#FF0000" stroke-width="6"/>
+          <circle cx="145" cy="170" r="5" fill="#fff"/>
+          <text x="145" y="238" text-anchor="middle" font-size="19" font-weight="700" fill="#7C8698">보안이 걸린 문서</text>
+
+          <text x="330" y="72" text-anchor="middle" font-size="19" font-weight="700" fill="#FF0000">AI가 못 읽습니다</text>
+          <path d="M262 120 L400 120" stroke="#C9D2E0" stroke-width="4" fill="none"/>
+          <path d="M316 98 L344 142" stroke="#FF0000" stroke-width="5" stroke-linecap="round"/>
+          <path d="M344 98 L316 142" stroke="#FF0000" stroke-width="5" stroke-linecap="round"/>
+
+          <!-- 보안 해제 -->
+          <rect x="420" y="88" width="184" height="62" rx="31" fill="#164194"/>
+          <text x="512" y="127" text-anchor="middle" font-size="23" font-weight="800" fill="#fff">문서 보안 해제</text>
+          <path d="M620 119 L676 119" stroke="#7C8698" stroke-width="4" fill="none"/>
+          <path d="M676 108 L696 119 L676 130 Z" fill="#7C8698"/>
+
+          <!-- 풀린 문서 -->
+          <rect x="740" y="30" width="150" height="180" rx="10" fill="#fff" stroke="#164194" stroke-width="3"/>
+          <rect x="768" y="70" width="94" height="9" rx="4" fill="#164194"/>
+          <rect x="768" y="94" width="94" height="9" rx="4" fill="#164194"/>
+          <rect x="768" y="118" width="66" height="9" rx="4" fill="#164194"/>
+          <circle cx="815" cy="170" r="24" fill="#70AD47"/>
+          <path d="M804 170 L812 179 L827 161" stroke="#fff" stroke-width="5" fill="none"
+                stroke-linecap="round" stroke-linejoin="round"/>
+          <text x="815" y="238" text-anchor="middle" font-size="19" font-weight="700" fill="#164194">AI가 읽습니다</text>
+        </svg>
       </div>
 
-      <div class="note">
-        회사가 이 환경을 <strong class="navy">먼저 갖춰 두었습니다.</strong>
-        개인이 따로 가입하거나 결제하지 않고, <strong class="navy">승인된 환경 안에서</strong> 씁니다.
+      <div class="note" style="margin-top:20px">
+        작업 폴더에 넣기 <strong class="navy">전에</strong> 보안부터 풉니다.<br>
+        풀 수 없는 문서는 <strong class="navy">애초에 맡기지 않습니다.</strong>
       </div>
     </div>
   </section>
-
-  <!-- 28. 내 업무에는 어떻게 쓸까 ------------------------------ -->
+  <!-- 29. 커넥터 - 사내 문서에 바로 연결 -------------------- -->
   <section class="slide">
-    <div class="slide-head"><h2>내 업무에는 어떻게 쓸까</h2><span class="head-tag">M2-5 · 현업 적용</span></div>
+    <div class="slide-head"><h2>커넥터 &mdash; 사내 문서에 바로 연결</h2><span class="head-tag">M2-6 · 개념</span></div>
     <div class="slide-body">
-      <p class="lead" style="margin-bottom:22px">
-        오늘 해 본 네 가지는 <strong class="navy">이름만 바꾸면 그대로 내 업무</strong>가 됩니다.
+      <p class="lead" style="margin-bottom:16px; text-align:center">
+        파일을 내려받지 않고, <strong class="navy">Confluence</strong>에 직접 연결해 양식을 받아올 수도 있습니다.
       </p>
 
-      <table class="agenda agenda--fill">
-        <thead>
-          <tr><th style="width:210px">오늘 해 본 것</th><th>내 업무에서는</th></tr>
-        </thead>
-        <tbody>
-          <tr><td class="m">폴더 정리</td><td>매주 쌓이는 부서 자료를 <strong>열어보지 않고 요약표로</strong> — 읽는 시간이 줄어든다</td></tr>
-          <tr><td class="m">표 합치기</td><td>협력사·지점에서 <strong>양식 다르게 온 자료</strong>를 정산표 하나로</td></tr>
-          <tr><td class="m">이름 규칙</td><td>공용 폴더의 파일명을 <strong>팀 규칙대로</strong> 맞춰 나중에 찾을 수 있게</td></tr>
-          <tr><td class="m">문서 만들기</td><td>정리한 내용을 <strong>보고서 PDF</strong>로 바로 — 옮겨 적지 않고</td></tr>
-        </tbody>
-      </table>
+      <div class="conn">
+        <div class="conn-step">
+          <div class="shot"><img src="assets/img/m2-connector-btn.png" alt="입력창 옆 폴더 아이콘을 눌러 나오는 커넥터 메뉴"></div>
+          <p class="conn-cap">① <span class="mono">+</span> 옆 폴더 아이콘 &gt; <strong>커넥터</strong></p>
+        </div>
+        <p class="conn-ar">&rarr;</p>
+        <div class="conn-step">
+          <div class="shot"><img src="assets/img/m2-connector-list.png" alt="Atlassian(Jira & Confluence) 과 Figma 를 연결하는 화면"></div>
+          <p class="conn-cap">② <strong>Atlassian</strong> 연결 &mdash; Jira &middot; Confluence</p>
+        </div>
+      </div>
 
-      <div class="note" style="margin-top:22px">
-        고를 때 기준은 하나입니다 —
+      <div class="ba" style="margin-top:18px">
+        <div class="ba-col ba--after">
+          <p class="ba-head">이럴 때 좋습니다</p>
+          <div class="ba-body">
+            <p>양식을 <strong>매번 내려받지 않아도</strong> 됩니다</p>
+            <p>늘 <strong>최신 문서</strong>를 보고 씁니다</p>
+          </div>
+        </div>
+        <div class="ba-col ba--before">
+          <p class="ba-head">대신 이런 점이</p>
+          <div class="ba-body">
+            <p><strong>느립니다</strong> — 문서를 찾아 읽는 시간이 더 듭니다</p>
+            <p><strong>토큰을 많이 씁니다</strong> — 읽은 만큼 요금이 나갑니다</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- 30. H Chat이 좋은 점 -------------------------------- -->
+  <section class="slide">
+    <div class="slide-head"><h2>H&nbsp;Chat이 좋은 점</h2><span class="head-tag">M2-6 · 개념</span></div>
+    <div class="slide-body">
+      <p class="lead" style="margin-bottom:16px; text-align:center">
+        바깥의 AI 서비스는 <strong>모델과 도구가 한 세트</strong>입니다.
+        H&nbsp;Chat은 <strong class="navy">골라서 조합</strong>합니다.
+      </p>
+
+      <div class="gd">
+        <div class="gd-shot">
+          <img src="assets/img/m2-hchat-good.png" alt="여러 모델과 도구가 H Chat 한 곳으로 모이고, 거기서 Jira · Confluence 와 그림 · PDF · 엑셀로 이어지는 그림">
+        </div>
+
+        <div class="gd-list">
+          <div class="gd-item">
+            <span class="gd-no">1</span>
+            <div>
+              <p class="gd-t">두뇌를 골라 씁니다</p>
+              <p class="gd-d">OpenAI &middot; Claude &middot; Gemini</p>
+            </div>
+          </div>
+          <div class="gd-item">
+            <span class="gd-no">2</span>
+            <div>
+              <p class="gd-t">도구까지 한 화면에</p>
+              <p class="gd-d">이미지 생성 &middot; 번역 &middot; 파일 만들기</p>
+            </div>
+          </div>
+          <div class="gd-item">
+            <span class="gd-no">3</span>
+            <div>
+              <p class="gd-t">사내 자료에 연결됩니다</p>
+              <p class="gd-d">커넥터로 Confluence &middot; Jira</p>
+            </div>
+          </div>
+          <div class="gd-item">
+            <span class="gd-no">4</span>
+            <div>
+              <p class="gd-t">누구나 바로 씁니다</p>
+              <p class="gd-d">설치도 결제도 없이,<br>사내 계정으로 로그인만</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- 31. 내 업무에는 어떻게 쓸까 ------------------------------ -->
+  <section class="slide">
+    <div class="slide-head"><h2>내 업무에는 어떻게 쓸까</h2><span class="head-tag">M2-6 · 현업 적용</span></div>
+    <div class="slide-body">
+      <p class="lead" style="margin-bottom:18px; text-align:center">
+        오늘 만든 결과물 <strong class="navy">세 개</strong> &mdash; 이름만 바꾸면 그대로 <strong class="navy">내 업무</strong>입니다.
+      </p>
+
+      <div class="use">
+        <div class="use-item">
+          <div class="shot"><img src="assets/img/m2-filelist-result.png" alt="폴더의 파일들을 표로 정리한 결과"></div>
+          <p class="use-t">폴더 정리</p>
+          <p class="use-d">매주 쌓이는 부서 자료를<br><strong>열어보지 않고 요약표로</strong></p>
+        </div>
+        <div class="use-item">
+          <div class="shot"><img src="assets/img/m2-merged-result.png" alt="네 지점 실적을 합친 통합표"></div>
+          <p class="use-t">표 합치기</p>
+          <p class="use-d">양식이 제각각인 협력사 &middot; 지점 자료를<br><strong>정산표 하나로</strong></p>
+        </div>
+        <div class="use-item">
+          <div class="shot"><img src="assets/img/m2-report-pdf.png" alt="주간 실적 보고서 PDF"></div>
+          <p class="use-t">문서 만들기</p>
+          <p class="use-d">정리한 내용을 옮겨 적지 않고<br><strong>보고서 PDF로 바로</strong></p>
+        </div>
+      </div>
+
+      <div class="note" style="margin-top:18px">
+        고를 때 기준은 하나입니다 &mdash;
         <strong class="navy">매번 같은 방식으로, 손으로 하던 일.</strong>
       </div>
     </div>
   </section>
-
-  <!-- 29. M2 정리 ---------------------------------------------- -->
+  <!-- 32. M2 정리 ---------------------------------------------- -->
   <section class="slide" data-chapter="M2 정리">
     <div class="slide-head"><h2>M2 정리</h2><span class="head-tag">M2 · 정리</span></div>
     <div class="slide-body">
@@ -935,7 +990,7 @@
         </div>
         <div class="recap-row">
           <span class="recap-k">Agent</span>
-          <span class="recap-v"><strong>환경인식 · 판단 · 행동</strong> — 판단은 모델, 나머지는 Agent마다 다르다</span>
+          <span class="recap-v"><strong>눈 · 두뇌 · 손</strong> — 두뇌는 골라 끼우고, 눈과 손은 Agent마다 다르다</span>
         </div>
         <div class="recap-row">
           <span class="recap-k">데스크탑</span>
@@ -949,8 +1004,7 @@
       </div>
     </div>
   </section>
-
-  <!-- 30. 감사합니다. -------------------------------------------- -->
+  <!-- 33. 감사합니다. -------------------------------------------- -->
   <section class="slide slide--cover">
     <div class="cover-text">
       <h1 class="cover-title" style="font-size:64px">감사합니다.</h1>
@@ -973,7 +1027,7 @@
 
     <div class="deck-meta">
       <span class="deck-title">M2. H&nbsp;Chat 데스크탑으로 내 PC 다루기</span>
-      <span class="deck-count" id="count">1 / 30</span>
+      <span class="deck-count" id="count">1 / 33</span>
     </div>
 
     <button class="deck-arrow" id="next" type="button" aria-label="다음 슬라이드" title="다음 (→)">

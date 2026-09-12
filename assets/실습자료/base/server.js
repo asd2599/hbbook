@@ -1,12 +1,20 @@
-// Node 기본 모듈(http, https)만 사용하는 Claude API 중계 서버.
+// Node 기본 모듈(http, https, fs, path)만 사용하는 Claude API 중계 서버.
 // 사내망 -> 이 프록시(8787) -> h-chat-api.autoever.com 내부 게이트웨이 -> Claude API
+//
+// 화면(app.html)도 이 서버가 함께 열어 준다. 브라우저로 http://localhost:8787 에 접속하면
+// 화면이 뜨고, 화면은 자기가 열린 주소로 API를 부르므로 포트가 바뀌어도 어긋나지 않는다.
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 const http = require('http');
 const https = require('https');
+const fs = require('fs');
+const path = require('path');
 
 const START_PORT = 8787;
+// node server.js --open 으로 실행하면, 실제로 열린 주소를 브라우저로 띄워 준다.
+// (실행.bat 이 이 옵션을 쓴다. 실습 중에는 그냥 node server.js 로 띄운다.)
+const OPEN_BROWSER = process.argv.includes('--open');
 const UPSTREAM_HOST = 'h-chat-api.autoever.com';
 const UPSTREAM_PATH = '/claude-code/v2/v1/messages';
 const FORCED_MODEL = 'claude-sonnet-5';
@@ -14,6 +22,20 @@ const DEFAULT_MAX_TOKENS = 2048;
 
 function log(...args) {
   console.log(`[${new Date().toISOString()}]`, ...args);
+}
+
+function openBrowser(url) {
+  const { spawn } = require('child_process');
+  try {
+    if (process.platform === 'win32') {
+      spawn('cmd', ['/c', 'start', '', url], { detached: true, stdio: 'ignore' }).unref();
+    } else {
+      spawn(process.platform === 'darwin' ? 'open' : 'xdg-open', [url],
+        { detached: true, stdio: 'ignore' }).unref();
+    }
+  } catch (e) {
+    log('브라우저를 자동으로 열지 못했습니다. 주소창에 직접 넣어 주세요:', url);
+  }
 }
 
 function withCors(res) {
@@ -45,6 +67,47 @@ function extractCleanKey(headers) {
   return raw.replace(/\s+/g, '');
 }
 
+const MIME = {
+  '.html': 'text/html; charset=utf-8',
+  '.css': 'text/css; charset=utf-8',
+  '.js': 'text/javascript; charset=utf-8',
+  '.json': 'application/json; charset=utf-8',
+  '.pdf': 'application/pdf',
+  '.png': 'image/png',
+  '.jpg': 'image/jpeg',
+  '.jpeg': 'image/jpeg',
+  '.gif': 'image/gif',
+  '.svg': 'image/svg+xml',
+  '.csv': 'text/csv; charset=utf-8',
+  '.txt': 'text/plain; charset=utf-8'
+};
+
+// 이 폴더 안의 파일만 그대로 내보낸다. (/ 로 들어오면 app.html)
+function serveFile(req, res) {
+  let rel = decodeURIComponent(req.url.split('?')[0]);
+  if (rel === '/') rel = '/app.html';
+
+  const root = __dirname;
+  const target = path.join(root, path.normalize(rel).replace(/^([/\\])+/, ''));
+  if (!target.startsWith(root)) {
+    sendJson(res, 403, { error: { type: 'forbidden', message: '폴더 밖의 파일은 열 수 없습니다.' } });
+    return;
+  }
+
+  fs.readFile(target, (err, data) => {
+    if (err) {
+      sendJson(res, 404, { error: { type: 'not_found', message: `${rel} 를 찾을 수 없습니다.` } });
+      return;
+    }
+    res.writeHead(200, {
+      'Content-Type': MIME[path.extname(target).toLowerCase()] || 'application/octet-stream',
+      'Content-Length': data.length,
+      'Cache-Control': 'no-store'
+    });
+    res.end(data);
+  });
+}
+
 const server = http.createServer((req, res) => {
   withCors(res);
 
@@ -54,7 +117,14 @@ const server = http.createServer((req, res) => {
     return;
   }
 
-  if (req.method !== 'POST' || req.url.split('?')[0] !== '/v1/messages') {
+  const pathname = req.url.split('?')[0];
+
+  if (req.method === 'GET' || req.method === 'HEAD') {
+    serveFile(req, res);
+    return;
+  }
+
+  if (req.method !== 'POST' || pathname !== '/v1/messages') {
     sendJson(res, 404, { error: { type: 'not_found', message: 'POST /v1/messages 만 지원합니다.' } });
     return;
   }
@@ -142,20 +212,38 @@ const server = http.createServer((req, res) => {
   });
 });
 
+// 이미 쓰는 포트면 다음 번호로 넘어간다.
+// 성공/실패 처리는 반드시 once 로 달고 매번 걷어낸다. on 으로 쌓으면
+// 나중에 성공했을 때 실패한 포트의 안내까지 한꺼번에 찍혀서 엉뚱한 주소를 알려 주게 된다.
 function tryListen(port) {
   server.removeAllListeners('error');
-  server.on('error', (err) => {
+  server.removeAllListeners('listening');
+
+  server.once('error', (err) => {
     if (err.code === 'EADDRINUSE') {
-      log(`포트 ${port} 사용 중, ${port + 1} 로 재시도`);
+      log(`포트 ${port} 은 이미 쓰고 있어서 ${port + 1} 로 넘어갑니다.`);
       tryListen(port + 1);
     } else {
       log('서버 오류:', err.message);
       process.exit(1);
     }
   });
-  server.listen(port, () => {
-    log(`Claude proxy 실행 중: http://localhost:${port}  (upstream: https://${UPSTREAM_HOST}${UPSTREAM_PATH})`);
+
+  server.once('listening', () => {
+    const real = server.address().port;      // 실제로 열린 포트만 알린다
+    const url = `http://localhost:${real}`;
+    log(`Claude proxy 실행 중: ${url}  (upstream: https://${UPSTREAM_HOST}${UPSTREAM_PATH})`);
+    log(`화면을 열려면 브라우저에서 ${url} 로 들어가세요.`);
+    console.log(`READY ${url}`);
+    // 검은 창이 여러 개 떠 있어도 어느 앱인지 보이도록 창 제목에 주소를 넣는다.
+    // 출력이 파일이나 다른 프로그램으로 넘어갈 때는 글자가 깨지므로 진짜 콘솔에서만 보낸다.
+    if (process.stdout.isTTY) {
+      process.stdout.write(`]0;AI App ${url} - 닫으면 꺼집니다`);
+    }
+    if (OPEN_BROWSER) openBrowser(url);
   });
+
+  server.listen(port);
 }
 
 tryListen(START_PORT);

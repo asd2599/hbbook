@@ -60,7 +60,17 @@ def inline_images(html):
 
 
 def body_of(html):
-    return html.split('<body>', 1)[1].rsplit('</body>', 1)[0]
+    m = re.search(r'<body[^>]*>', html)
+    return html[m.end():].rsplit('</body>', 1)[0]
+
+
+def body_attrs(html):
+    """<body data-app="…"> 처럼 body 에 달린 속성을 그대로 돌려준다.
+
+    배포본은 body 가 하나뿐이라, 덱을 감싸는 div 로 옮겨야 덱마다 값이 산다.
+    """
+    m = re.search(r'<body([^>]*)>', html)
+    return (m.group(1) or '').strip()
 
 
 def style_of(html):
@@ -87,7 +97,9 @@ def build_deck(fname, deck_id):
     body = body.replace('class="deck-count" id="count"', 'class="deck-count js-count"')
 
     body = inline_images(body)
-    deck = '<div class="deck" data-deck="%s" hidden>\n%s\n</div>\n' % (deck_id, body.strip())
+    attrs = body_attrs(html)
+    deck = '<div class="deck" data-deck="%s"%s hidden>\n%s\n</div>\n' % (
+        deck_id, (' ' + attrs) if attrs else '', body.strip())
     return css, deck
 
 

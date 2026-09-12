@@ -36,6 +36,23 @@
     return ok;
   }
 
+  /* 상자마다 '어느 도구에 넣는 프롬프트인지' 이름표를 붙인다.
+     상자에 data-app 이 있으면 그것을, 없으면 <body data-app> 의 값을 쓴다. */
+  [].forEach.call(document.querySelectorAll('.pbox'), function (box) {
+    var holder = box.closest ? box.closest('[data-app]') : null;   // 배포본은 덱마다 다르다
+    var app = (holder && holder.getAttribute('data-app'))
+              || document.body.getAttribute('data-app') || '';
+    if (app) {
+      var tag = document.createElement('span');
+      tag.className = 'pbox-app';
+      tag.textContent = app;
+      box.appendChild(tag);          // 위치는 absolute — 맨 앞에 넣으면 p:first-child 가 깨진다
+      if (!box.getAttribute('data-kind')) {
+        box.setAttribute('data-kind', /claude\s*code/i.test(app) ? 'code' : 'chat');
+      }
+    }
+  });
+
   [].forEach.call(document.querySelectorAll('.pbox'), function (box) {
     var btn = document.createElement('button');
     btn.type = 'button';
@@ -177,6 +194,13 @@
         } else if (e.key === 'Escape') {
           jumpEl.value = idx + 1;
           jumpEl.blur();
+          e.preventDefault();
+        } else if (e.key === 'ArrowRight' || e.key === 'ArrowLeft' ||
+                   e.key === 'PageDown'   || e.key === 'PageUp') {
+          /* 숫자만 넣는 칸이라 화살표를 쓸 일이 없다.
+             이 칸을 한 번 눌렀다는 이유로 넘김이 막히지 않도록 그대로 넘긴다. */
+          jumpEl.blur();
+          go(idx + (e.key === 'ArrowLeft' || e.key === 'PageUp' ? -1 : 1));
           e.preventDefault();
         }
       });
@@ -361,8 +385,10 @@
   /* 휠 한 번에 여러 장이 넘어가지 않도록 잠금을 건다.
      관성 스크롤(트랙패드)은 이벤트가 연속으로 오므로, 잠금이 풀리는 동안
      계속 들어오는 이벤트는 무시하고 타이머를 연장한다.                        */
-  var WHEEL_LOCK_MS = 450;   // 이동 후 잠금 시간
-  var WHEEL_MIN     = 12;    // 무시할 미세 델타
+  var LOCK_INERTIA = 450;    // 트랙패드 관성 — 길게 잠그고, 계속 들어오면 연장한다
+  var LOCK_STEP    = 150;    // 마우스 휠 한 칸 — 짧게만 잠근다 (연달아 굴려도 넘어가게)
+  var WHEEL_MIN    = 12;     // 무시할 미세 델타
+  var STEP_DELTA   = 80;     // 이만큼 크면 '뚜렷한 한 칸' 으로 본다
   var wheelLocked = false;
   var wheelTimer  = null;
 
@@ -372,16 +398,22 @@
     if (Math.abs(d) < WHEEL_MIN) return;
     e.preventDefault();
 
-    if (wheelLocked) {                       // 관성 구간 — 타이머만 연장
-      clearTimeout(wheelTimer);
-      wheelTimer = setTimeout(function () { wheelLocked = false; }, WHEEL_LOCK_MS);
+    /* 마우스 휠 한 칸은 델타가 크고 뚝뚝 끊긴다. 트랙패드 관성은 작은 델타가 연달아 온다. */
+    var step = e.deltaMode !== 0 || Math.abs(d) >= STEP_DELTA;
+
+    if (wheelLocked) {
+      if (!step) {                           // 관성 구간 — 타이머만 연장하고 흘려보낸다
+        clearTimeout(wheelTimer);
+        wheelTimer = setTimeout(function () { wheelLocked = false; }, LOCK_INERTIA);
+      }
       return;
     }
 
     active.go(d > 0 ? active.at() + 1 : active.at() - 1);
     wheelLocked = true;
     clearTimeout(wheelTimer);
-    wheelTimer = setTimeout(function () { wheelLocked = false; }, WHEEL_LOCK_MS);
+    wheelTimer = setTimeout(function () { wheelLocked = false; },
+                            step ? LOCK_STEP : LOCK_INERTIA);
   }, { passive: false });
 
   /* ---- 터치 스와이프 ------------------------------------------------------ */
