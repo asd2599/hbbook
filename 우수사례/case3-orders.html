@@ -668,7 +668,7 @@ body { display: flex; flex-direction: column; min-height: 100vh; }
   <div class="logo">
     <div class="logo-dot"></div>
     <span class="logo-text">지시사항 이행관리 시스템</span>
-    <span class="logo-sub">미래전략운영팀</span>
+    <span class="logo-sub">○○운영팀</span>
   </div>
   <nav class="nav-tabs">
     <button class="nav-tab active"  onclick="switchPage(1)">📝 Module 1 · 회의록 생성</button>
@@ -677,7 +677,7 @@ body { display: flex; flex-direction: column; min-height: 100vh; }
   </nav>
   <div class="user-info">
     <div class="avatar">김</div>
-    <span>김담당 · 미래전략운영팀</span>
+    <span>김○○ · ○○운영팀</span>
   </div>
 </header>
 
@@ -1013,7 +1013,7 @@ body { display: flex; flex-direction: column; min-height: 100vh; }
           </div>
           <textarea id="minutes-paste-area"
             style="width:100%;background:var(--navy);border:1px solid var(--navy-light);border-radius:8px;padding:12px;font-size:12px;color:var(--off-white);line-height:1.8;font-family:inherit;resize:vertical;min-height:160px;outline:none;transition:border-color .2s;"
-            placeholder="완성된 회의록 전체 텍스트를 붙여넣으세요...&#10;&#10;예)&#10;■ 미래전략본부 주간회의 회의록 (2025.07.01)&#10;&#10;[주요 논의사항]&#10;1. EV 인프라 유럽 추진 현황 보고&#10;2. ESS 국내 사업 계획 검토&#10;&#10;[지시사항]&#10;1. 임원1 → 프랑스 허가 지연 대응방안 다음주까지 보고&#10;2. 임원2 → 폐배터리 공급 협약 이번달 말 체결"
+            placeholder="완성된 회의록 전체 텍스트를 붙여넣으세요...&#10;&#10;예)&#10;■ ○○본부 주간회의 회의록 (2025.07.01)&#10;&#10;[주요 논의사항]&#10;1. EV 인프라 유럽 추진 현황 보고&#10;2. ESS 국내 사업 계획 검토&#10;&#10;[지시사항]&#10;1. 임원1 → 프랑스 허가 지연 대응방안 다음주까지 보고&#10;2. 임원2 → 폐배터리 공급 협약 이번달 말 체결"
             oninput="onMinutesPaste()"></textarea>
           <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;">
             <span id="minutes-char-count" style="font-size:11px;color:var(--text-sub);">0자 입력됨</span>
@@ -1113,28 +1113,28 @@ body { display: flex; flex-direction: column; min-height: 100vh; }
         <div class="exec-item">
           <div>
             <div class="exec-name">정전무 전무</div>
-            <div class="exec-role">미래전략본부</div>
+            <div class="exec-role">○○본부</div>
           </div>
           <span class="status-pill pill-done">입력 완료</span>
         </div>
         <div class="exec-item">
           <div>
             <div class="exec-name">김상무 상무</div>
-            <div class="exec-role">미래전략기획팀</div>
+            <div class="exec-role">○○기획팀</div>
           </div>
           <span class="status-pill pill-done">입력 완료</span>
         </div>
         <div class="exec-item">
           <div>
             <div class="exec-name">이상무 상무</div>
-            <div class="exec-role">미래전략사업팀</div>
+            <div class="exec-role">○○사업팀</div>
           </div>
           <span class="status-pill pill-wait">미입력 · 리마인드 발송됨</span>
         </div>
         <div class="exec-item">
           <div>
             <div class="exec-name">박이사 이사</div>
-            <div class="exec-role">미래전략운영팀</div>
+            <div class="exec-role">○○운영팀</div>
           </div>
           <span class="status-pill pill-sent">발송됨</span>
         </div>
@@ -1161,7 +1161,7 @@ body { display: flex; flex-direction: column; min-height: 100vh; }
       </div>
       <div class="form-row">
         <label class="form-label">지시사항 (항목별로 입력)</label>
-        <textarea class="form-input form-textarea" placeholder="예) 1. 하반기 전략과제 검토 - 담당: 미래전략운영팀&#10;2. 해외 사업 추진 현황 보고 - 담당: 미래전략기획팀" style="min-height:100px;"></textarea>
+        <textarea class="form-input form-textarea" placeholder="예) 1. 하반기 전략과제 검토 - 담당: ○○운영팀&#10;2. 해외 사업 추진 현황 보고 - 담당: ○○기획팀" style="min-height:100px;"></textarea>
       </div>
       <button class="btn-primary" onclick="simulateExec()">→ 이행관리 툴에 등록</button>
     </div>
@@ -1493,7 +1493,7 @@ body { display: flex; flex-direction: column; min-height: 100vh; }
       <div class="grid2">
         <div class="form-row">
           <label class="form-label">담당팀</label>
-          <input class="form-input" type="text" id="m-team" placeholder="예) 미래전략기획팀">
+          <input class="form-input" type="text" id="m-team" placeholder="예) ○○기획팀">
         </div>
         <div class="form-row">
           <label class="form-label">담당자</label>
@@ -1509,7 +1509,7 @@ body { display: flex; flex-direction: column; min-height: 100vh; }
         </select>
       </div>
       <div id="exec-warn" class="hidden" style="background:rgba(220,38,38,0.1);border:1px solid rgba(220,38,38,0.3);border-radius:8px;padding:10px 14px;font-size:12px;color:#F87171;margin-top:4px;">
-        🔒 최고경영층 회의 지시사항은 본부장, 미래전략운영팀장·담당자, 수임 임원만 열람 가능합니다.
+        🔒 최고경영층 회의 지시사항은 본부장, ○○운영팀장·담당자, 수임 임원만 열람 가능합니다.
       </div>
     </div>
     <div class="modal-footer">
@@ -1596,7 +1596,7 @@ body { display: flex; flex-direction: column; min-height: 100vh; }
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
       <div>
         <div style="font-size:20px;font-weight:800;letter-spacing:-0.3px;">⚡ 자동 알림 · 보고</div>
-        <div style="font-size:12px;color:var(--text-sub);margin-top:3px;">미래전략본부 지시사항 이행 추심 자동화 · MS Teams 연동</div>
+        <div style="font-size:12px;color:var(--text-sub);margin-top:3px;">○○본부 지시사항 이행 추심 자동화 · MS Teams 연동</div>
       </div>
       <button onclick="testNotif()" style="background:var(--blue);color:#fff;border:none;padding:9px 18px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;">
         🔔 테스트 알림
@@ -1711,7 +1711,7 @@ body { display: flex; flex-direction: column; min-height: 100vh; }
                 <span style="font-size:20px;">🔵</span>
                 <div>
                   <div style="font-size:12px;font-weight:700;">Microsoft Teams</div>
-                  <div style="font-size:10px;color:var(--text-sub);margin-top:1px;">미래전략본부 채널 연동</div>
+                  <div style="font-size:10px;color:var(--text-sub);margin-top:1px;">○○본부 채널 연동</div>
                 </div>
               </div>
               <span style="font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;background:rgba(16,185,129,.15);color:#34D399;">● 연결됨</span>
@@ -1747,7 +1747,7 @@ body { display: flex; flex-direction: column; min-height: 100vh; }
               <div style="font-size:10px;color:var(--text-sub);font-weight:600;margin-bottom:4px;">발송 명의</div>
               <select style="background:var(--navy);border:1px solid var(--navy-light);border-radius:6px;padding:6px 8px;font-size:11px;color:var(--white);width:100%;outline:none;">
                 <option>본부장실</option>
-                <option>미래전략운영팀장</option>
+                <option>○○운영팀장</option>
               </select>
             </div>
             <div>
@@ -1777,7 +1777,7 @@ body { display: flex; flex-direction: column; min-height: 100vh; }
         <!-- 리포트 카드 -->
         <div style="background:var(--navy);border-radius:10px;padding:14px;border:1px solid var(--navy-light);margin-bottom:14px;">
           <div style="font-size:11px;font-weight:700;color:var(--off-white);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--line);">
-            📋 미래전략본부 주간 이행현황 · 2025년 7월 1주차
+            📋 ○○본부 주간 이행현황 · 2025년 7월 1주차
           </div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
             <div style="background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2);border-radius:7px;padding:10px;text-align:center;">
@@ -1880,12 +1880,12 @@ body { display: flex; flex-direction: column; min-height: 100vh; }
 
           <!-- 브리핑 미리보기 -->
           <div style="background:var(--navy);border-radius:8px;padding:12px;border-left:3px solid #F87171;">
-            <div style="font-size:11px;font-weight:700;color:var(--off-white);margin-bottom:8px;">📋 내일 미래전략본부 주간회의 미이행 현황</div>
+            <div style="font-size:11px;font-weight:700;color:var(--off-white);margin-bottom:8px;">📋 내일 ○○본부 주간회의 미이행 현황</div>
             <div style="font-size:11px;line-height:1.7;">
               <div style="color:#F87171;margin-bottom:4px;">🔴 기한 초과 1건</div>
-              <div style="color:var(--text-sub);padding-left:12px;margin-bottom:6px;">· EV인프라 유럽 추진 현황 보고 (미래전략기획팀, D+2)</div>
+              <div style="color:var(--text-sub);padding-left:12px;margin-bottom:6px;">· EV인프라 유럽 추진 현황 보고 (○○기획팀, D+2)</div>
               <div style="color:#FBBF24;margin-bottom:4px;">🟡 기한 임박 2건 (D-3 이내)</div>
-              <div style="color:var(--text-sub);padding-left:12px;">· 하반기 전략목표 개선계획 보고 (미래전략운영팀, D-3)<br>· 미래전략 추진 매뉴얼 개정 (미래전략운영팀, D-2)</div>
+              <div style="color:var(--text-sub);padding-left:12px;">· 하반기 전략목표 개선계획 보고 (○○운영팀, D-3)<br>· 미래전략 추진 매뉴얼 개정 (○○운영팀, D-2)</div>
             </div>
           </div>
         </div>
@@ -1972,8 +1972,8 @@ body { display: flex; flex-direction: column; min-height: 100vh; }
           <tr style="border-bottom:1px solid var(--line);">
             <td style="padding:10px 12px;"><span style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:4px;background:rgba(124,58,237,.2);color:#A78BFA;white-space:nowrap;">회의 전 브리핑</span></td>
             <td style="padding:10px 12px;color:var(--text-sub);font-size:11px;">07.01 08:00</td>
-            <td style="padding:10px 12px;">김담당</td>
-            <td style="padding:10px 12px;color:var(--text-sub);">미래전략본부 주간회의 미이행 현황 3건</td>
+            <td style="padding:10px 12px;">김○○</td>
+            <td style="padding:10px 12px;color:var(--text-sub);">○○본부 주간회의 미이행 현황 3건</td>
             <td style="padding:10px 12px;"><span style="font-size:11px;color:var(--blue);">🔵 Teams</span></td>
             <td style="padding:10px 12px;color:#34D399;font-weight:700;">✓ 완료</td>
           </tr>
@@ -1988,7 +1988,7 @@ body { display: flex; flex-direction: column; min-height: 100vh; }
           <tr style="border-bottom:1px solid var(--line);">
             <td style="padding:10px 12px;"><span style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:4px;background:rgba(30,111,255,.2);color:#4D8FFF;white-space:nowrap;">추심 알림</span></td>
             <td style="padding:10px 12px;color:var(--text-sub);font-size:11px;">06.28 09:00</td>
-            <td style="padding:10px 12px;">미래전략운영팀 김팀장</td>
+            <td style="padding:10px 12px;">○○운영팀 김팀장</td>
             <td style="padding:10px 12px;color:var(--text-sub);">D-3 — 하반기 전략목표 개선계획 보고</td>
             <td style="padding:10px 12px;"><span style="font-size:11px;color:var(--blue);">🔵 Teams</span></td>
             <td style="padding:10px 12px;color:#34D399;font-weight:700;">✓ 완료</td>
@@ -1997,14 +1997,14 @@ body { display: flex; flex-direction: column; min-height: 100vh; }
             <td style="padding:10px 12px;"><span style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:4px;background:rgba(16,185,129,.2);color:#34D399;white-space:nowrap;">주간 리포트</span></td>
             <td style="padding:10px 12px;color:var(--text-sub);font-size:11px;">06.23 08:30</td>
             <td style="padding:10px 12px;">본부장, 팀장</td>
-            <td style="padding:10px 12px;color:var(--text-sub);">미래전략본부 6월 4주차 이행현황 리포트</td>
+            <td style="padding:10px 12px;color:var(--text-sub);">○○본부 6월 4주차 이행현황 리포트</td>
             <td style="padding:10px 12px;"><span style="font-size:11px;color:var(--blue);">🔵 Teams</span></td>
             <td style="padding:10px 12px;color:#34D399;font-weight:700;">✓ 완료</td>
           </tr>
           <tr>
             <td style="padding:10px 12px;"><span style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:4px;background:rgba(30,111,255,.2);color:#4D8FFF;white-space:nowrap;">추심 알림</span></td>
             <td style="padding:10px 12px;color:var(--text-sub);font-size:11px;">06.21 09:00</td>
-            <td style="padding:10px 12px;">미래전략협력팀 박팀장</td>
+            <td style="padding:10px 12px;">○○협력팀 박팀장</td>
             <td style="padding:10px 12px;color:var(--text-sub);">D-7 — EV ESS 국내 사업 추진계획</td>
             <td style="padding:10px 12px;"><span style="font-size:11px;color:var(--blue);">🔵 Teams</span></td>
             <td style="padding:10px 12px;color:#34D399;font-weight:700;">✓ 완료</td>
@@ -2674,7 +2674,7 @@ ${text.slice(0, 5000)}
     dirItems.forEach((el,i)=>{ dirText+=`${i+1}. ${el.textContent}\n`; });
     const date = document.getElementById('meta-date').textContent;
     const place = document.getElementById('meeting-place').value || '-';
-    const content = `미래전략본부 주간회의 회의록\n일시: ${date}\n장소: ${place}\n\n[주요 논의사항]\n${summary}\n\n[지시사항]\n${dirText}`;
+    const content = `○○본부 주간회의 회의록\n일시: ${date}\n장소: ${place}\n\n[주요 논의사항]\n${summary}\n\n[지시사항]\n${dirText}`;
     const blob = new Blob([content],{type:'text/plain;charset=utf-8'});
     const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
     a.download=`회의록_${date.replace(/\./g,'')}.txt`; a.click();
@@ -3197,14 +3197,14 @@ ${text.slice(0, 6000)}
 // ════ Module 2 JS ════════════════════════════════════════
 
 const directives = [
-  { id:1, type:'exec', typeName:'최고경영층', date:'2025.06.18', content:'미래전략본부 하반기 전략과제 추진계획 보고', team:'미래전략본부', person:'정전무 전무', deadline:'2025.07.31', priority:'high', status:'progress', reported:false, restricted:true },
-  { id:2, type:'vice', typeName:'부회장', date:'2025.06.26', content:'북미 시장 리콜 후속조치 현황 및 완료 예정일 보고', team:'미래전략기획팀', person:'김상무 상무', deadline:'2025.07.08', priority:'high', status:'progress', reported:false, restricted:false },
-  { id:3, type:'head', typeName:'본부장', date:'2025.06.30', content:'3분기 하반기 전략목표 달성 현황 분석 및 개선계획 보고', team:'미래전략운영팀', person:'김기획 팀장', deadline:'2025.07.15', priority:'high', status:'review', reported:false, restricted:false },
-  { id:4, type:'vice', typeName:'부회장', date:'2025.06.26', content:'EV ESS 국내 사업 추진계획 수립 및 공유', team:'미래전략협력팀', person:'박협력 팀장', deadline:'2025.07.31', priority:'mid', status:'none', reported:false, restricted:false },
-  { id:5, type:'head', typeName:'본부장', date:'2025.06.23', content:'미래전략 추진 프로세스 표준화 매뉴얼 작성', team:'미래전략운영팀', person:'김기획 팀장', deadline:'2025.07.10', priority:'mid', status:'progress', reported:false, restricted:false },
-  { id:6, type:'vice', typeName:'부회장', date:'2025.06.19', content:'유럽 EV인프라 규제 대응 체크리스트 업데이트', team:'미래전략사업팀', person:'이사업 팀장', deadline:'2025.07.05', priority:'high', status:'done', reported:true, restricted:false },
-  { id:7, type:'head', typeName:'본부장', date:'2025.06.16', content:'신규 협력사 발굴 및 파트너십 체결 방안 검토', team:'미래전략협력팀', person:'박협력 팀장', deadline:'2025.06.30', priority:'low', status:'done', reported:true, restricted:false },
-  { id:8, type:'head', typeName:'본부장', date:'2025.06.09', content:'미래전략 데이터 분석 플랫폼 도입 검토', team:'미래전략운영팀', person:'김기획 팀장', deadline:'2025.06.27', priority:'mid', status:'done', reported:true, restricted:false },
+  { id:1, type:'exec', typeName:'최고경영층', date:'2025.06.18', content:'○○본부 하반기 전략과제 추진계획 보고', team:'○○본부', person:'정전무 전무', deadline:'2025.07.31', priority:'high', status:'progress', reported:false, restricted:true },
+  { id:2, type:'vice', typeName:'부회장', date:'2025.06.26', content:'북미 시장 리콜 후속조치 현황 및 완료 예정일 보고', team:'○○기획팀', person:'김상무 상무', deadline:'2025.07.08', priority:'high', status:'progress', reported:false, restricted:false },
+  { id:3, type:'head', typeName:'본부장', date:'2025.06.30', content:'3분기 하반기 전략목표 달성 현황 분석 및 개선계획 보고', team:'○○운영팀', person:'김○○ 팀장', deadline:'2025.07.15', priority:'high', status:'review', reported:false, restricted:false },
+  { id:4, type:'vice', typeName:'부회장', date:'2025.06.26', content:'EV ESS 국내 사업 추진계획 수립 및 공유', team:'○○협력팀', person:'박○○ 팀장', deadline:'2025.07.31', priority:'mid', status:'none', reported:false, restricted:false },
+  { id:5, type:'head', typeName:'본부장', date:'2025.06.23', content:'미래전략 추진 프로세스 표준화 매뉴얼 작성', team:'○○운영팀', person:'김○○ 팀장', deadline:'2025.07.10', priority:'mid', status:'progress', reported:false, restricted:false },
+  { id:6, type:'vice', typeName:'부회장', date:'2025.06.19', content:'유럽 EV인프라 규제 대응 체크리스트 업데이트', team:'○○사업팀', person:'이○○ 팀장', deadline:'2025.07.05', priority:'high', status:'done', reported:true, restricted:false },
+  { id:7, type:'head', typeName:'본부장', date:'2025.06.16', content:'신규 협력사 발굴 및 파트너십 체결 방안 검토', team:'○○협력팀', person:'박○○ 팀장', deadline:'2025.06.30', priority:'low', status:'done', reported:true, restricted:false },
+  { id:8, type:'head', typeName:'본부장', date:'2025.06.09', content:'미래전략 데이터 분석 플랫폼 도입 검토', team:'○○운영팀', person:'김○○ 팀장', deadline:'2025.06.27', priority:'mid', status:'done', reported:true, restricted:false },
 ];
 
 const userRole = 'team_manager'; // head_manager, vice_manager, exec_manager, team_manager, team_member
@@ -3369,10 +3369,10 @@ let notifCount = 0;
 
 function showNotif(type) {
   const configs = {
-    d3: { icon: '🟡', title: 'D-3 추심 알림 발송', text: '미래전략본부 MS Teams 채널에 발송되었습니다.' },
-    report: { icon: '📊', title: '주간 리포트 발송 완료', text: '본부장, 미래전략운영팀장에게 이번 주차 리포트가 발송되었습니다.' },
+    d3: { icon: '🟡', title: 'D-3 추심 알림 발송', text: '○○본부 MS Teams 채널에 발송되었습니다.' },
+    report: { icon: '📊', title: '주간 리포트 발송 완료', text: '본부장, ○○운영팀장에게 이번 주차 리포트가 발송되었습니다.' },
     exec: { icon: '🔒', title: '최고경영층 지시사항 알림', text: '수임 임원 정전무 전무에게 이행 독려 메시지가 발송되었습니다.' },
-    brief: { icon: '📋', title: '회의 전 브리핑 발송', text: '내일 미래전략본부 주간회의 미이행 현황 3건이 담당자에게 발송되었습니다.' },
+    brief: { icon: '📋', title: '회의 전 브리핑 발송', text: '내일 ○○본부 주간회의 미이행 현황 3건이 담당자에게 발송되었습니다.' },
     escalate: { icon: '🔴', title: '에스컬레이션 알림', text: '기한 초과 1건에 대해 본부장·팀장에게 에스컬레이션 발송 완료.' },
   };
   const c = configs[type] || configs.d3;

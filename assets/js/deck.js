@@ -355,9 +355,10 @@
     var w = parseFloat(cs.getPropertyValue('--slide-w'));
     var h = parseFloat(cs.getPropertyValue('--slide-h'));
     var side = parseFloat(cs.getPropertyValue('--side-w')) || 0;
+    var below = parseFloat(cs.getPropertyValue('--chrome-extra')) || 0;   // 강사용 타이머 막대
     var scale = Math.min(
       (window.innerWidth  - CHROME_W - side) / w,
-      (window.innerHeight - CHROME_H) / h
+      (window.innerHeight - CHROME_H - below) / h
     );
     document.documentElement.style.setProperty('--scale', Math.min(scale, 1.35));
   }

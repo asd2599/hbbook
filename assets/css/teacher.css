@@ -1,0 +1,401 @@
+/* ==========================================================================
+   강사용 전용 스타일 — 실습 타이머 · 쉬는 시간
+   이 파일은 **강사용 배포본에만** 실린다 (tools/build-single.py).
+   교육생용 파일에는 아래 클래스가 하나도 들어가지 않는다.
+   색은 deck.css 의 팔레트 토큰만 쓴다.
+   ========================================================================== */
+
+/* ---------- 상단 바 버튼 ------------------------------------------------- */
+/* .deck-home · .deck-chapters 와 같은 생김새로 맞춘다 */
+
+.tt-open {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex: 0 0 auto;
+  font: inherit;
+  font-size: 15px;
+  color: var(--navy);
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  padding: 8px 13px;
+  cursor: pointer;
+  white-space: nowrap;
+  letter-spacing: -.01em;
+}
+.tt-open:hover     { background: #F0F4FA; border-color: #B9C6DC; }
+.tt-open.is-on     { background: var(--navy); border-color: var(--navy); color: #fff; }
+.tt-open .tt-ico   { display: block; width: 15px; height: 15px; }
+.tt-open .tt-ico svg { display: block; width: 100%; height: 100%; }
+
+/* ---------- 입력 팝오버 -------------------------------------------------- */
+
+.tt-pop {
+  position: fixed;
+  top: 62px;
+  z-index: 140;                       /* 타이머 카드(120) 보다 위 */
+  width: 296px;
+  padding: 16px 16px 14px;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  box-shadow: 0 14px 40px rgba(20, 40, 80, .20);
+}
+.tt-pop[hidden] { display: none; }
+
+.tt-pop h3 {
+  margin: 0 0 3px;
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--navy);
+  letter-spacing: -.02em;
+}
+.tt-pop .tt-sub {
+  margin: 0 0 12px;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+  letter-spacing: -.01em;
+}
+
+.tt-row { display: flex; align-items: center; gap: 8px; }
+
+.tt-in {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 9px 11px;
+  font: inherit;
+  font-size: 19px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  color: var(--navy);
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  outline: none;
+}
+.tt-in:focus { border-color: var(--navy); box-shadow: 0 0 0 3px rgba(22, 65, 148, .12); }
+.tt-unit { font-size: 14px; color: var(--ink-soft); flex: 0 0 auto; }
+
+.tt-quick { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 0; }
+.tt-quick button {
+  font: inherit;
+  font-size: 13px;
+  color: var(--ink-soft);
+  background: #F5F7FB;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 5px 11px;
+  cursor: pointer;
+  letter-spacing: -.01em;
+}
+.tt-quick button:hover { background: #E8EEF8; border-color: #B9C6DC; color: var(--navy); }
+
+.tt-go {
+  width: 100%;
+  margin: 12px 0 0;
+  padding: 11px 0;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  color: #fff;
+  background: var(--navy);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  letter-spacing: -.01em;
+}
+.tt-go:hover { background: #12357A; }
+
+.tt-check {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 11px 0 0;
+  font-size: 13px;
+  color: var(--ink-soft);
+  cursor: pointer;
+  letter-spacing: -.01em;
+}
+.tt-check input { width: 15px; height: 15px; accent-color: var(--navy); cursor: pointer; }
+
+.tt-err {
+  margin: 9px 0 0;
+  font-size: 12.5px;
+  color: var(--red);
+  letter-spacing: -.01em;
+}
+.tt-err[hidden] { display: none; }
+
+/* ---------- 실습 타이머 — 화면 위쪽 팝업 -------------------------- */
+/* 상단 바 바로 아래, 가운데에 떠 있는 카드다.
+   슬라이드를 가리지 않는다 — 카드가 뜨면 --chrome-extra 만큼
+   무대가 아래로 내려가고 슬라이드 스케일도 그만큼 줄어든다. */
+
+body.tt-run .stage { top: calc(56px + var(--chrome-extra, 0px)); bottom: 0; }
+
+.tt-bar {
+  position: fixed;
+  top: 66px;
+  left: calc(50% + var(--side-w, 0px) / 2);
+  transform: translateX(-50%);
+  width: max-content;                 /* fixed 요소는 이게 없으면 반쪽 폭에서 접힌다 */
+  max-width: calc(100vw - 28px);
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px 16px;
+  padding: 11px 20px 12px;
+  border-radius: 16px;
+  background: var(--navy);
+  color: #fff;
+  box-shadow: 0 18px 46px rgba(20, 40, 80, .34);
+  z-index: 120;
+  animation: tt-drop .22s ease-out;
+}
+.tt-bar[hidden] { display: none; }
+.tt-bar.is-paused { background: #5A6478; }
+.tt-bar.is-done   { background: var(--green); }
+
+@keyframes tt-drop {
+  from { opacity: 0; transform: translate(-50%, -14px); }
+  to   { opacity: 1; transform: translate(-50%, 0); }
+}
+
+.tt-bar .tt-state {
+  flex: 0 0 auto;
+  padding: 4px 11px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .18);
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: -.01em;
+}
+
+.tt-track {
+  flex: 0 0 210px;
+  height: 9px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .22);
+  overflow: hidden;
+}
+.tt-fill {
+  display: block;
+  height: 100%;
+  width: 100%;
+  border-radius: 999px;
+  background: #fff;
+  transition: width .25s linear;
+}
+
+.tt-bar .tt-left {
+  flex: 0 0 auto;
+  font-size: 40px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -.02em;
+  min-width: 140px;
+  text-align: right;
+  line-height: 1.1;
+}
+.tt-bar .tt-of {
+  flex: 0 0 auto;
+  font-size: 14px;
+  color: rgba(255, 255, 255, .78);
+  letter-spacing: -.01em;
+}
+
+.tt-bar .tt-btn {
+  flex: 0 0 auto;
+  font: inherit;
+  font-size: 13.5px;
+  color: #fff;
+  background: rgba(255, 255, 255, .14);
+  border: 1px solid rgba(255, 255, 255, .34);
+  border-radius: 7px;
+  padding: 7px 12px;
+  cursor: pointer;
+  white-space: nowrap;
+  letter-spacing: -.01em;
+}
+.tt-bar .tt-btn:hover { background: rgba(255, 255, 255, .26); }
+
+/* 끝나면 눈에 띄도록 남은 시간이 한 번씩 밝아진다 */
+.tt-bar.is-done .tt-left { animation: tt-pulse 1.4s ease-in-out infinite; }
+
+/* ---------- 음악 크기 조절 ----------------------------------------------- */
+/* 아래 막대와 쉬는 시간 화면 두 곳에 같은 모양으로 붙는다 (둘 다 어두운 바탕) */
+
+.tt-vol, .tb-vol { flex: 0 0 auto; display: flex; align-items: center; gap: 9px; }
+
+.tt-range, .tb-range {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 92px;
+  height: 20px;
+  background: none;
+  cursor: pointer;
+}
+.tb-range { width: 118px; }
+
+.tt-range::-webkit-slider-runnable-track,
+.tb-range::-webkit-slider-runnable-track {
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .28);
+}
+.tt-range::-moz-range-track,
+.tb-range::-moz-range-track {
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .28);
+}
+.tt-range::-webkit-slider-thumb,
+.tb-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px; height: 16px;
+  margin-top: -5px;
+  border: none;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, .3);
+}
+.tt-range::-moz-range-thumb,
+.tb-range::-moz-range-thumb {
+  width: 16px; height: 16px;
+  border: none;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, .3);
+}
+.tt-range:focus-visible, .tb-range:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+
+/* 유튜브로 재생 중이면 크기를 못 바꾼다 */
+.tt-range:disabled, .tb-range:disabled { opacity: .38; cursor: not-allowed; }
+
+.tt-pct, .tb-pct {
+  min-width: 26px;
+  font-size: 13px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  color: rgba(255, 255, 255, .82);
+  letter-spacing: -.01em;
+}
+.tb-pct { min-width: 30px; font-size: 15px; }
+
+/* ---------- 쉬는 시간 전체 화면 ------------------------------------------ */
+
+.tt-break {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: grid;
+  place-items: center;
+  background: var(--navy);
+  color: #fff;
+  text-align: center;
+  padding: 40px;
+}
+.tt-break[hidden] { display: none; }
+.tt-break.is-done { background: var(--green); }
+
+/* 왼쪽 위 밝은 도형 — 표지와 같은 결 */
+.tt-break::before {
+  content: "";
+  position: absolute;
+  left: -40px; top: -60px;
+  width: 420px; height: 120px;
+  background: rgba(255, 255, 255, .09);
+  border-radius: 0 0 48px 48px;
+}
+
+.tt-break-in { position: relative; z-index: 1; }
+
+.tt-break .tb-eyebrow {
+  margin: 0;
+  font-size: clamp(14px, 2vh, 19px);
+  font-weight: 700;
+  letter-spacing: .18em;
+  color: rgba(255, 255, 255, .72);
+}
+.tt-break .tb-title {
+  margin: clamp(6px, 1.2vh, 14px) 0 0;
+  font-size: clamp(34px, 6.4vh, 68px);
+  font-weight: 800;
+  letter-spacing: -.03em;
+  line-height: 1.15;
+}
+.tt-break .tb-clock {
+  margin: clamp(10px, 2.6vh, 30px) 0 0;
+  font-size: clamp(88px, 22vh, 230px);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -.04em;
+  line-height: 1;
+}
+/* 「14:00 에 수업을 시작합니다」 — 뒷자리에서도 읽혀야 하므로 크게 둔다 */
+.tt-break .tb-note {
+  margin: clamp(12px, 2.6vh, 30px) 0 0;
+  font-size: clamp(24px, 4.6vh, 50px);
+  font-weight: 800;
+  letter-spacing: -.025em;
+  line-height: 1.25;
+  color: #fff;
+}
+.tt-break .tb-now {
+  margin: clamp(6px, 1.2vh, 14px) 0 0;
+  font-size: clamp(13px, 1.8vh, 17px);
+  font-variant-numeric: tabular-nums;
+  color: rgba(255, 255, 255, .62);
+  letter-spacing: -.01em;
+}
+
+.tt-break .tb-acts {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin: clamp(16px, 3.2vh, 38px) 0 0;
+}
+.tt-break .tb-btn {
+  font: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  color: #fff;
+  background: rgba(255, 255, 255, .14);
+  border: 1px solid rgba(255, 255, 255, .38);
+  border-radius: 9px;
+  padding: 11px 22px;
+  cursor: pointer;
+  letter-spacing: -.01em;
+}
+.tt-break .tb-btn:hover { background: rgba(255, 255, 255, .28); }
+.tt-break .tb-btn--go { background: #fff; color: var(--navy); border-color: #fff; }
+.tt-break .tb-btn--go:hover { background: #E8EEF8; }
+
+/* 시간이 다 되면 부드럽게 한 번씩 밝아진다 */
+@keyframes tt-pulse { 0%, 100% { opacity: 1; } 50% { opacity: .55; } }
+.tt-break.is-done .tb-clock { animation: tt-pulse 1.4s ease-in-out infinite; }
+
+/* 소리를 내는 숨은 재생기 — display:none 이면 브라우저가 재생을 막는다 */
+.tt-yt {
+  position: fixed;
+  left: -9999px; top: 0;
+  width: 320px; height: 180px;
+  border: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ---------- 실습 진행 순서 (M5) ------------------------------------------ */
+/* 강사용에서만 스텝을 눌러 「현재 실습 중」 표시를 옮길 수 있다 */
+
+.plan-step.is-clickable { cursor: pointer; transition: background .12s ease, border-color .12s ease; }
+.plan-step.is-clickable:hover { background: #EAF0FA; border-left-color: #A9BCDD; }
+.plan-step.is-clickable.is-now:hover { background: #FFECEC; border-left-color: var(--red); }
+
+@media print { .tt-open, .tt-pop, .tt-bar, .tt-break, .tt-yt { display: none !important; } }

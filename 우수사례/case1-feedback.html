@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>성과 인사이트 콘솔 · 전자편의제어시험1팀</title>
+<title>성과 인사이트 콘솔 · ○○팀</title>
 <link rel="preconnect" href="https://fastly.jsdelivr.net" crossorigin>
 <link rel="stylesheet" href="https://fastly.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -494,10 +494,10 @@
       </div>
     </div>
     <div class="ctx">
-      <div class="item"><span>소속</span><b>전자편의제어시험1팀</b></div>
+      <div class="item"><span>소속</span><b>○○팀</b></div>
       <div class="who">
         <div class="av">엄</div>
-        <div class="item"><span>팀 리더</span><b>엄기태</b></div>
+        <div class="item"><span>팀 리더</span><b>엄○○</b></div>
       </div>
     </div>
   </header>
@@ -615,7 +615,7 @@
       </section>
 
       <p class="poc-note">
-        <b>PoC 데모</b> · 현대자동차 AX Visioning Workshop · 모든 인물·업무 데이터는 시연용 가상 데이터입니다.<br>
+        <b>PoC 데모</b> · AX Visioning Workshop · 모든 인물·업무 데이터는 시연용 가상 데이터입니다.<br>
         실 운영 시 인사·기밀 데이터는 사내 인프라(nadia 엔진) 내 RAG 패턴으로 처리되어 외부 LLM으로 유출되지 않습니다.
       </p>
     </div>
@@ -631,7 +631,7 @@
       </div>
       <div>
         <h3 id="modalTitle">1 on 1 · 수시 보고 기록 추가</h3>
-        <p><b id="modalMember">김도현 연구원</b> 님의 상시 데이터에 적재됩니다</p>
+        <p><b id="modalMember">김○○ 연구원</b> 님의 상시 데이터에 적재됩니다</p>
       </div>
       <button class="x" id="modalClose" aria-label="닫기">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
@@ -789,7 +789,7 @@
    ========================================================= */
 const MEMBERS = {
   kim: {
-    id:'kim', name:'김도현', initial:'김', rank:'연구원',
+    id:'kim', name:'김○○', initial:'김', rank:'연구원',
     cycle:'연 2회 · 역량/성과 평가', cycleShort:'연구원 (연 2회)',
     tenure:'입사 2년 4개월', role:'BCM·CAN 통신 검증 담당',
     kpis:[
@@ -800,7 +800,7 @@ const MEMBERS = {
     ],
     timeline:[
       {type:'1on1', date:'2026-01-20', title:'신규 EV 편의기능 시험 절차 표준화 제안',
-       body:'스마트 파워 테일게이트 시험 절차를 표준 템플릿화해 타 차종 재사용이 가능하도록 제안. 섀시팀과 협업이 적극적이었음.',
+       body:'스마트 파워 테일게이트 시험 절차를 표준 템플릿화해 타 차종 재사용이 가능하도록 제안. △△팀과 협업이 적극적이었음.',
        tags:['협업','프로세스 개선']},
       {type:'rep', date:'2026-01-08', title:'회귀시험 자동화 스크립트 v2 배포',
        body:'Python 기반 자동화로 회귀시험 소요 시간 40% 단축(8.0h → 4.8h). 야간 무인 실행 파이프라인 구성.',
@@ -830,7 +830,7 @@ const MEMBERS = {
     }
   },
   lee: {
-    id:'lee', name:'이서준', initial:'이', rank:'책임',
+    id:'lee', name:'이○○', initial:'이', rank:'책임',
     cycle:'연 1회 · 성과 평가', cycleShort:'책임급 (연 1회)',
     tenure:'입사 9년 1개월', role:'양산 검증 프로젝트 리딩 · 멘토',
     kpis:[
@@ -864,7 +864,7 @@ const MEMBERS = {
   },
 
   park: {
-    id:'park', name:'박지훈', initial:'박', rank:'연구원',
+    id:'park', name:'박○○', initial:'박', rank:'연구원',
     cycle:'연 2회 · 역량/성과 평가', cycleShort:'연구원 (연 2회)',
     tenure:'입사 1년 8개월', role:'인포테인먼트·HMI 시험 담당',
     kpis:[
@@ -898,7 +898,7 @@ const MEMBERS = {
   },
 
   jung: {
-    id:'jung', name:'정유진', initial:'정', rank:'연구원',
+    id:'jung', name:'정○○', initial:'정', rank:'연구원',
     cycle:'연 2회 · 역량/성과 평가', cycleShort:'연구원 (연 2회)',
     tenure:'입사 3년', role:'공조·시트 편의기능 시험 담당',
     kpis:[
@@ -935,7 +935,7 @@ const MEMBERS = {
   },
 
   han: {
-    id:'han', name:'한승우', initial:'한', rank:'연구원',
+    id:'han', name:'한○○', initial:'한', rank:'연구원',
     cycle:'연 2회 · 역량/성과 평가', cycleShort:'연구원 (연 2회)',
     tenure:'입사 4년 2개월', role:'도어·윈도우 제어 시험 담당',
     kpis:[
@@ -972,7 +972,7 @@ const MEMBERS = {
   },
 
   choi: {
-    id:'choi', name:'최유나', initial:'최', rank:'책임',
+    id:'choi', name:'최○○', initial:'최', rank:'책임',
     cycle:'연 1회 · 성과 평가', cycleShort:'책임급 (연 1회)',
     tenure:'입사 11년', role:'ADAS·주차보조 검증 리딩 · 멘토',
     kpis:[
@@ -1009,7 +1009,7 @@ const MEMBERS = {
   },
 
   oh: {
-    id:'oh', name:'오세린', initial:'오', rank:'책임',
+    id:'oh', name:'오○○', initial:'오', rank:'책임',
     cycle:'연 1회 · 성과 평가', cycleShort:'책임급 (연 1회)',
     tenure:'입사 8년 6개월', role:'전장 신뢰성·환경시험 리딩 · 멘토',
     kpis:[
@@ -1275,7 +1275,7 @@ function buildPrompt(m, tone, depth){
   const depthInstr = depth==='light'
     ? '분량: 3~4문장의 짧은 수시 피드백. 따뜻하고 간결하게.'
     : '분량: 정식 평가서 양식. (1) 핵심 성과와 근거 (2) 보완 역량 (3) 차기 육성/교육 방향 순서로 단락 구성. 6~9문장.';
-  return `당신은 현대자동차 전자편의제어시험1팀 리더를 돕는 인사평가 어시스턴트입니다.
+  return `당신은 ○○팀 리더를 돕는 인사평가 어시스턴트입니다.
 아래는 팀원 "${m.name} ${m.rank}"(평가주기: ${m.cycle})에 대한 상시 축적 데이터와, 자가 성과서를 객관 데이터로 교차검증한 결과입니다.
 
 [상시 축적 데이터]

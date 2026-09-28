@@ -18,7 +18,9 @@ const OPEN_BROWSER = process.argv.includes('--open');
 const UPSTREAM_HOST = 'h-chat-api.autoever.com';
 const UPSTREAM_PATH = '/claude-code/v2/v1/messages';
 const FORCED_MODEL = 'claude-sonnet-5';
-const DEFAULT_MAX_TOKENS = 2048;
+// 응답 길이 한도의 최소값. 화면이 더 작은 값을 보내도 이 값까지 올려 잡는다.
+// 2048 로 두면 대시보드용 JSON 이 중간에 잘려서 JSON.parse 가 터진다.
+const DEFAULT_MAX_TOKENS = 8192;
 
 function log(...args) {
   console.log(`[${new Date().toISOString()}]`, ...args);
@@ -157,9 +159,10 @@ const server = http.createServer((req, res) => {
 
     payload.model = FORCED_MODEL;
     payload.stream = false;
-    if (!payload.max_tokens) {
-      payload.max_tokens = DEFAULT_MAX_TOKENS;
-    }
+    // 화면이 보낸 값이 더 작으면 올려 잡는다. max_tokens 는 API 필수 필드라 화면 쪽 코드가
+    // 거의 항상 직접 적는데, 그 값이 작으면 대시보드용 JSON 이 중간에 잘려 JSON.parse 가 터진다.
+    // 한도를 키운다고 답이 길어지지는 않는다 — 잘리지만 않게 해 주는 값이다.
+    payload.max_tokens = Math.max(Number(payload.max_tokens) || 0, DEFAULT_MAX_TOKENS);
 
     const cleanKey = extractCleanKey(req.headers);
     const outBody = Buffer.from(JSON.stringify(payload), 'utf8');

@@ -11,6 +11,48 @@
     display: block; width: 770px; height: 433px; margin: 0 auto;
     border-radius: 12px; background: #1A1A1A;
   }
+
+  /* 같은 자리에 들어가는 안내판 — 교육생용 배포본에는 영상 대신 이것만 보인다.
+     (mp4 를 교육생에게 나눠 주지 않으므로 빈 재생기가 뜨지 않게 한다)
+     기본은 숨김이고, tools/build-single.py 가 교육생용 파일에서만 서로 바꾼다. */
+  .m3-screen {
+    display: none;
+    width: 770px; height: 433px; margin: 0 auto;
+    flex-direction: column; align-items: center; justify-content: center; gap: 14px;
+    border-radius: 12px;
+    background: #F5F7FB;
+    border: 2px dashed #C3CEE2;
+  }
+  .m3-screen svg { width: 74px; height: 74px; color: var(--navy); opacity: .55; }
+  .m3-screen-t {
+    margin: 0; font-size: 27px; font-weight: 800;
+    color: var(--navy); letter-spacing: -.02em;
+  }
+  .m3-screen-s {
+    margin: 0; font-size: 17px; color: var(--ink-soft); letter-spacing: -.01em;
+  }
+
+  /* 46p 정리 — 줄이 늘어 한 칸씩 조인다 */
+  .recap--tight { gap: 10px; }
+  .recap--tight .recap-row { padding: 12px 22px; }
+
+  /* 43p — 사내 MCP 공유소 링크 */
+  .hub-link { color: var(--navy); font-weight: 700; text-decoration: none; border-bottom: 2px solid #A9BCDD; }
+  .hub-link:hover { border-bottom-color: var(--navy); }
+  .hub-url { font-size: 17px; color: #8A94A6; letter-spacing: -.01em; }
+
+  /* 42p — 사외망 · 사내망 두 칸 (M4 17p 과 같은 모양) */
+  .why2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  .why2-box { padding: 13px 18px 15px; border-radius: 8px;
+              background: var(--gray-shape); border-left: 5px solid var(--green); }
+  .why2-box.is-in { background: #F5F7FB; border-left-color: var(--navy); }
+  .why2-t { margin: 0 0 6px; font-size: 17px; font-weight: 700; letter-spacing: .04em; color: var(--green); }
+  .why2-box.is-in .why2-t { color: var(--navy); }
+  .why2-d { margin: 0; font-size: 20px; line-height: 1.5; color: var(--ink); letter-spacing: -.01em; }
+  .why2-d b { color: var(--navy); font-weight: 700; }
+
+  /* 9p — 주소창에 code . 을 치는 장면. 캡처 대신 직접 그린다 */
+  .shot svg { display: block; width: 100%; height: auto; }
 </style>
 </head>
 <body data-app="Claude Code">
@@ -32,9 +74,9 @@
 
       <div class="roadmap">
         <div class="rm-step is-done">
-          <div class="rm-pic"><img src="assets/img/m1-web-after.png" alt="말로 만들어 고친 웹페이지"></div>
+          <div class="rm-pic rm-pic--duo"><img src="assets/img/m1-mypage.png" alt="말로 만들어 고친 나만의 웹페이지"><img src="assets/img/m1-report-done.png" alt="프로젝트에서 만든 업무보고서"></div>
           <p class="rm-mod">M1</p>
-          <p class="rm-out">나만의 웹페이지</p>
+          <p class="rm-out">웹페이지 &middot; 업무보고서</p>
         </div>
         <div class="rm-arrow">›</div>
         <div class="rm-step is-done">
@@ -59,7 +101,7 @@
         <div class="rm-step is-next">
           <div class="rm-pic"><img src="assets/img/m5-poc-card.png" alt="내 업무로 가져갈 개선안"></div>
           <p class="rm-mod">M5</p>
-          <p class="rm-out">아이디어 기획서 한 장</p>
+          <p class="rm-out">아이디어 기획서 &middot; 목업 앱</p>
         </div>
       </div>
 
@@ -77,9 +119,20 @@
 
       <div class="figure" style="margin:0">
         <video class="m3-video" controls preload="metadata" playsinline
-               src="실리콘밸리_AI에이전트.mp4">
+               src="AI실리콘밸리.mp4">
           이 브라우저에서는 영상을 재생할 수 없습니다.
         </video>
+
+        <!-- 교육생용 배포본에서만 위 영상 대신 이 안내판이 보인다 -->
+        <div class="m3-screen">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
+               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="2" y="3" width="20" height="14" rx="2"></rect>
+            <path d="M8 21h8M12 17v4"></path>
+          </svg>
+          <p class="m3-screen-t">앞 화면을 함께 봐 주세요</p>
+          <p class="m3-screen-s">이 영상은 강사 화면으로 재생합니다 — 약 3분 30초</p>
+        </div>
       </div>
     </div>
   </section>
@@ -163,7 +216,7 @@
 
       <div class="ba">
         <div class="ba-col ba--before">
-          <p class="ba-head">H Chat 데스크탑</p>
+          <p class="ba-head">H Chat Desktop</p>
           <div class="ba-body">
             <span class="ba-quote">진입장벽을 낮추려고 기능을 줄여 둔 도구</span>
             <ul>
@@ -185,8 +238,8 @@
       </div>
 
       <div class="note">
-        H Chat 데스크탑도 <strong class="navy">점차 개선될 예정</strong>입니다.<br>
-        오늘은 기능을 다 갖춘 쪽에서 익혀 두고, 데스크탑에서는 되는 것만 골라 쓰면 됩니다.
+        H Chat Desktop도 <strong class="navy">점차 개선될 예정</strong>입니다.<br>
+        오늘은 기능을 다 갖춘 쪽에서 익혀 두고, Desktop에서는 되는 것만 골라 쓰면 됩니다.
       </div>
     </div>
   </section>
@@ -220,48 +273,85 @@
   <!-- 9. [실습] 받은 폴더를 자리에 놓고 시작합니다 -------- -->
   <section class="slide">
     <div class="slide-head"><h2>[실습] 받은 폴더를 자리에 놓고 시작합니다</h2><span class="head-tag">M3-1 · 실습</span></div>
-    <div class="slide-body" style="padding-top:22px">
-      <div class="split" style="gap:28px">
+    <div class="slide-body" style="padding-top:18px">
+      <div class="split" style="gap:26px">
         <div class="split-main">
           <ol class="steps">
             <li>폴더를 만듭니다 <span class="mono">C:\work\basic</span></li>
-            <li>강의자료와 함께 받은 <strong class="navy">회의메모 3개</strong>를 그 안에 넣습니다<small>회의 중에 급하게 적은 자료입니다. 오늘 이것을 회의록으로 만듭니다 — <strong>받는 파일은 이 셋뿐입니다</strong></small></li>
-            <li>탐색기 <strong class="navy">주소창에</strong> <span class="mono">code .</span> 을 입력해 VS Code로 엽니다<small>점 하나까지 그대로 — “지금 이 폴더를 VS Code로 열어라”라는 뜻입니다</small></li>
+            <li>강의자료의 <span class="mono">M3 &gt; 회의메모</span> 폴더를 <strong class="navy">통째로 복사해</strong> 그 안에 붙여넣습니다<small>회의 중에 급하게 적은 메모 3개가 들어 있습니다. 오늘 이것을 회의록으로 만듭니다 — <strong>받는 자료는 이 폴더뿐입니다</strong></small></li>
+            <li><span class="mono">basic</span> 폴더 <strong class="navy">주소창</strong>에 <span class="mono">code .</span> 을 입력해 VS Code로 엽니다<small>주소창을 한 번 클릭하면 경로가 파랗게 선택됩니다 — 그 자리에 그대로 칩니다. <strong>회의메모 폴더 안이 아니라 <span class="mono">C:\workasic</span> 에서</strong> 쳐야 합니다</small></li>
           </ol>
 
-          <div class="note" style="margin-top:18px">
+          <div class="pbox pbox--tight" style="margin-top:14px" data-app="탐색기 주소창"><p>code .</p></div>
+
+          <div class="note" style="margin-top:14px">
             AI는 <strong class="navy">이 폴더 안만</strong> 봅니다. 폴더를 정하는 것이 첫 단추입니다.
           </div>
         </div>
 
-        <div class="split-side" style="flex:0 0 420px">
-          <div class="shot" style="width:400px"><img src="assets/img/m3-folder-files.png" alt="C:\work\basic 폴더 안에 회의메모 세 개가 들어 있는 화면"></div>
-          <p class="shot-cap" style="text-align:left">이 상태가 되면 준비 끝 — 메모 3개</p>
+        <div class="split-side" style="flex:0 0 470px">
+          <div class="shot" style="width:470px"><img src="assets/img/m3-folder-files.png" alt="C:\work\basic 폴더 안에 회의메모 폴더가 들어 있는 화면"></div>
+          <p class="shot-cap" style="text-align:left">이 상태가 되면 준비 끝 — 회의메모 폴더 하나</p>
+
+          <div class="shot" style="width:470px; margin-top:12px">
+            <svg viewBox="0 0 520 164" role="img" aria-label="탐색기 주소창을 한 번 클릭해 경로가 파랗게 선택되면, 그 자리에 code . 을 치고 Enter 하는 그림">
+              <rect width="520" height="164" fill="#fff"/>
+              <rect x="0" y="0" width="520" height="44" fill="#F7F8FA"/>
+              <line x1="0" y1="44" x2="520" y2="44" stroke="#D8DEE9"/>
+              <text x="15" y="28" font-size="15" fill="#8A94A6">&#8249;</text>
+              <text x="35" y="28" font-size="15" fill="#8A94A6">&#8250;</text>
+              <text x="55" y="28" font-size="14" fill="#8A94A6">&#8593;</text>
+              <rect x="78" y="10" width="426" height="24" rx="4" fill="#fff" stroke="#C3CBD8"/>
+              <rect x="82" y="13" width="156" height="18" rx="2" fill="#164194"/>
+              <text x="88" y="26" font-size="12.5" fill="#fff" font-family="Consolas, monospace">C:\work\basic</text>
+              <circle cx="10" cy="62" r="8.5" fill="#164194"/>
+              <text x="10" y="66" font-size="11" font-weight="700" fill="#fff" text-anchor="middle">1</text>
+              <text x="26" y="66" font-size="13.5" fill="#4A5262">주소창을 한 번 클릭 &mdash; 경로가 파랗게 선택됩니다</text>
+              <rect x="0" y="82" width="520" height="44" fill="#F7F8FA"/>
+              <line x1="0" y1="126" x2="520" y2="126" stroke="#D8DEE9"/>
+              <text x="15" y="110" font-size="15" fill="#8A94A6">&#8249;</text>
+              <text x="35" y="110" font-size="15" fill="#8A94A6">&#8250;</text>
+              <text x="55" y="110" font-size="14" fill="#8A94A6">&#8593;</text>
+              <rect x="78" y="92" width="426" height="24" rx="4" fill="#fff" stroke="#164194"/>
+              <text x="88" y="108" font-size="13" font-weight="700" fill="#1A1A1A" font-family="Consolas, monospace">code .</text>
+              <rect x="136" y="97" width="2" height="15" fill="#164194"/>
+              <circle cx="10" cy="144" r="8.5" fill="#164194"/>
+              <text x="10" y="148" font-size="11" font-weight="700" fill="#fff" text-anchor="middle">2</text>
+              <text x="26" y="148" font-size="13.5" fill="#4A5262">지워진 자리에 code . 을 치고 Enter</text>
+            </svg>
+          </div>
         </div>
       </div>
     </div>
   </section>
-  <!-- 10. 터미널 열기 · 복사 붙여넣기 ------------------------ -->
+  <!-- 10. 터미널 열기 · claude 실행 ------------------------ -->
   <section class="slide">
-    <div class="slide-head"><h2>터미널 열기 · 복사 붙여넣기</h2><span class="head-tag">M3-1 · 준비</span></div>
-    <div class="slide-body">
-      <p class="lead" style="margin-bottom:18px">
+    <div class="slide-head"><h2>터미널 열기 · claude 실행</h2><span class="head-tag">M3-1 · 준비</span></div>
+    <div class="slide-body" style="padding-top:20px">
+      <p class="lead" style="margin-bottom:16px">
         터미널은 <strong class="navy">AI에게 말을 거는 창</strong>입니다. 그 이상은 몰라도 됩니다.
       </p>
 
       <div class="split" style="gap:28px">
         <div class="split-main">
           <ol class="steps">
-            <li>VS Code에서 <span class="mono">Ctrl</span> + <span class="mono">`</span> 누르기
-              <small>백틱 ` 키 — ESC 키 바로 아래에 있습니다</small></li>
-            <li>아래쪽에 검은 창이 열리면 준비 끝</li>
-            <li>여러 개를 띄워 나눠 시킬 수도 있습니다</li>
+            <li>VS Code에서 <span class="mono">Ctrl</span> + <span class="mono">`</span> 또는 <span class="mono">Ctrl</span> + <span class="mono">J</span> 누르기
+              <small>백틱 ` 키 — ESC 키 바로 아래에 있습니다. 안 눌리면 <strong>Ctrl + J</strong> 를 쓰세요</small></li>
+            <li>아래쪽에 검은 창이 열리면 준비 끝<small>여러 개를 띄워 나눠 시킬 수도 있습니다</small></li>
+            <li>그 창에 <span class="mono">claude</span> 를 입력합니다<small>앞에 보이는 경로가 <strong>내 작업 폴더</strong>인지 먼저 봅니다</small></li>
           </ol>
 
-          <div class="note note--warn" style="margin-top:18px">
-            터미널에서 <span class="mono">Ctrl</span>+<span class="mono">C</span> 는 복사가 아니라 <strong class="hl">중지</strong>입니다.<br>
-        복사·붙여넣기는 <strong>마우스 오른쪽 버튼</strong>으로 하세요.
+          <div class="shot" style="margin-top:14px">
+            <svg viewBox="0 0 520 78" role="img" aria-label="터미널에 PS C:\work\basic&gt; claude 를 입력하는 그림">
+              <rect width="520" height="78" fill="#17181C"/>
+              <text x="18" y="46" font-size="15" fill="#C9CDD4" font-family="Consolas, monospace">PS C:\work\basic&gt;</text>
+              <text x="182" y="46" font-size="15" font-weight="700" fill="#F2C14E" font-family="Consolas, monospace">claude</text>
+              <rect x="242" y="33" width="2" height="17" fill="#F2C14E"/>
+              <text x="506" y="46" font-size="11.5" text-anchor="end" fill="#6F7681">앞의 경로가 내 작업 폴더인지 봅니다</text>
+            </svg>
           </div>
+
+          <div class="pbox pbox--tight" style="margin-top:12px" data-app="VS Code 터미널"><p>claude</p></div>
         </div>
 
         <div class="split-side" style="flex:0 0 430px">
@@ -274,22 +364,26 @@
   <!-- 11. Claude Code 첫 실행 ------------------------ -->
   <section class="slide">
     <div class="slide-head"><h2>Claude Code 첫 실행</h2><span class="head-tag">M3-1 · 준비</span></div>
-    <div class="slide-body" style="padding-top:22px">
-      <div class="split" style="gap:28px">
+    <div class="slide-body" style="padding-top:18px">
+      <div class="split" style="gap:26px">
         <div class="split-main">
           <ol class="steps">
-            <li>터미널에 <span class="mono">claude</span> 입력</li>
-            <li>“이 폴더에서 작업해도 되나” 물으면 <strong class="navy">Yes</strong>
-              <small>AI가 마음대로 고쳐도 되는 폴더인지 확인하는 질문입니다</small></li>
-            <li>화면 색(테마) 고르기
-              <small>중요하지 않습니다. 나중에 /theme 로 바꿉니다</small></li>
+            <li>제일 먼저 <strong class="navy">이 폴더를 믿어도 되냐</strong>고 묻습니다<small>여기 있는 파일을 <strong>읽고 · 고치고 · 실행</strong>해도 되는지 확인하는 질문입니다</small></li>
+            <li><span class="mono">&darr;</span> 로 <strong class="navy">Yes, I trust this folder</strong> 에 두고 <span class="mono">Enter</span><small>내가 만든 <strong class="mono">C:\work\basic</strong> 폴더이니 믿어도 됩니다 — <strong>No, exit</strong> 를 고르면 그냥 나갑니다</small></li>
+            <li>화면 색(테마) 고르기<small>중요하지 않습니다. 나중에 /theme 로 바꿉니다</small></li>
             <li>환영 화면에 <strong class="navy">지금 폴더 경로</strong>가 보이면 성공</li>
           </ol>
         </div>
 
-        <div class="split-side" style="flex:0 0 400px">
-          <div class="shot" style="width:350px"><img src="assets/img/m3-cc-start.png" alt="Claude Code 첫 실행 화면 — 화면 색 테마를 고르는 목록"></div>
-          <p class="shot-cap" style="text-align:left">첫 실행에서 한 번만 물어봅니다</p>
+        <div class="split-side" style="flex:0 0 560px">
+          <div class="sub-shot">
+            <img src="assets/img/m3-trust-folder.png" alt="이 폴더를 믿어도 되냐고 묻는 첫 화면 — No, exit 와 Yes, I trust this folder 중에서 고른다">
+            <span class="sub-mark" style="left:0.3%; top:73.3%; width:36.5%; height:7.6%"></span>
+          </div>
+          <p class="sub-cap"><strong>Yes, I trust this folder</strong> 에 두고 <strong>Enter</strong></p>
+
+          <div class="shot" style="width:220px; margin-top:10px"><img src="assets/img/m3-cc-start.png" alt="Claude Code 첫 실행 화면 — 화면 색 테마를 고르는 목록"></div>
+          <p class="shot-cap" style="text-align:left">그다음은 화면 색 — 한 번만 물어봅니다</p>
         </div>
       </div>
     </div>
@@ -334,7 +428,7 @@
           <ol class="steps">
             <li><span class="mono">/config</span> 입력</li>
             <li><span class="mono">per</span> 라고 쳐서 permission mode 찾기</li>
-            <li>방향키로 옮긴 뒤 <span class="mono">Tab</span> 을 눌러 <strong class="navy">Auto</strong> 로</li>
+            <li>방향키로 옮긴 뒤 <span class="mono">Enter</span> 를 눌러 <strong class="navy">Auto</strong> 로<small>화면 아래 안내에도 <span class="mono">Enter/Space to change</span> 라고 적혀 있습니다</small></li>
             <li><span class="mono">ESC</span> 를 누르면 저장되고 원래 화면으로</li>
           </ol>
 
@@ -431,78 +525,125 @@
       <ul class="ch-keys"><li>목적</li><li>참석자 · 용어</li><li>규칙</li><li>책상과 캐비닛</li></ul>
     </div>
   </section>
-  <!-- 18. 왜 CLAUDE.md를 써야 하나요? ---------------- -->
+  <!-- 18. CLAUDE.md 란? — 알바생 지침서 ------------------ -->
+  <section class="slide">
+    <div class="slide-head"><h2>CLAUDE.md 란? — 알바생 지침서</h2><span class="head-tag">M3-3 · 개념</span></div>
+    <div class="slide-body">
+      <div class="split" style="gap:34px; align-items:center">
+        <div class="split-side" style="flex:0 0 342px">
+          <div class="shot" style="width:342px">
+            <img src="assets/img/m3-parttime-rules.jpg" alt="「알바생 지침」 이라고 적힌 종이 — 1. 지각하지 말 것, 2. 업무시간 휴대폰 금지, 3. 퇴근시간 준수, 4. 빈칸">
+          </div>
+        </div>
+
+        <div class="split-main">
+          <p class="lead">새로 온 알바생에게 <strong class="navy">적어서 건네는 지침서</strong> 입니다.</p>
+
+          <div class="side-box" style="margin-top:22px">
+            <p class="side-t" style="font-size:18px">① 어떤 일을 하는 곳인지</p>
+            <p class="side-d" style="font-size:24px">이 프로젝트의 <b>목적</b>을 적어 줍니다.</p>
+          </div>
+          <div class="side-box" style="margin-top:14px">
+            <p class="side-t" style="font-size:18px">② 무엇을 지켜야 하는지</p>
+            <p class="side-d" style="font-size:24px">Agent 가 <b>지켜야 할 지침</b>을 적어 줍니다.</p>
+          </div>
+
+          <div class="note" style="margin-top:20px; font-size:23px">
+            이 파일에 적어만 두면 <strong class="navy">Claude Code 가 알아서 읽고</strong> 그대로 따릅니다.
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- 19. .md 가 뭔가요 ------------------------------------ -->
+  <section class="slide">
+    <div class="slide-head"><h2>그런데 .md 가 뭔가요</h2><span class="head-tag">M3-3 · 개념</span></div>
+    <div class="slide-body">
+      <div class="split" style="gap:32px; align-items:center">
+        <div class="split-side" style="flex:0 0 620px">
+          <div class="shot" style="width:620px"><img src="assets/img/m3-what-is-md.png" alt="알바생이 .md = Markdown 이라고 적힌 문서를 들고 설명하고, 아래에 .txt = .md 라고 적혀 있는 그림"></div>
+        </div>
+
+        <div class="split-main">
+          <p class="lead">AI 와 일할 때는 <strong class="navy">txt 보다 md</strong> 를 더 많이 씁니다.</p>
+
+          <div class="side-box" style="margin-top:20px">
+            <p class="side-t" style="font-size:18px">.md 가 뭔가요</p>
+            <p class="side-d" style="font-size:24px"><b>Markdown</b> &mdash; 「마크다운」 이라고 읽습니다.</p>
+          </div>
+          <div class="side-box" style="margin-top:14px">
+            <p class="side-t" style="font-size:18px">어렵지 않나요</p>
+            <p class="side-d" style="font-size:24px"><b>txt 처럼 쓰면 됩니다.</b> 메모장에 글 적듯 그대로 적으면 됩니다.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- 20. 무거운 문서는 느리고 토큰도 많이 씁니다 ------------ -->
+  <section class="slide">
+    <div class="slide-head"><h2>무거운 문서는 느리고, 토큰도 더 씁니다</h2><span class="head-tag">M3-3 · 개념</span></div>
+    <div class="slide-body" style="padding-top:14px">
+      <div style="width:765px;margin:0 auto">
+        <div class="shot"><img src="assets/img/m3-file-weight.png" alt="왼쪽은 docx·hwp 문서 더미에 눌린 알바생, 오른쪽은 txt·md 종이 한 장을 들고 웃는 알바생"></div>
+
+        <div class="split" style="gap:18px;margin-top:16px;align-items:stretch">
+          <div class="side-box" style="flex:1 1 0;padding:16px 20px;text-align:center">
+            <p class="side-d" style="font-size:24px"><span class="mono">.docx</span> · <span class="mono">.hwp</span> — <strong class="navy">느리고 토큰도 더</strong></p>
+            <p class="side-d" style="font-size:21px;margin-top:5px">읽기 전에 한 번 풀어야 합니다</p>
+          </div>
+          <div class="side-box" style="flex:1 1 0;margin-top:0;padding:16px 20px;text-align:center">
+            <p class="side-d" style="font-size:24px"><span class="mono">.txt</span> · <span class="mono">.md</span> — <strong class="navy">빠르고 토큰도 적게</strong></p>
+            <p class="side-d" style="font-size:21px;margin-top:5px">지침은 여기에 적습니다</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- 21. 그럼 왜 txt 가 아니라 md 일까 ------------------ -->
+  <section class="slide">
+    <div class="slide-head"><h2>그럼 왜 <span class="mono">txt</span> 가 아니라 <span class="mono">md</span> 일까</h2><span class="head-tag">M3-3 · 개념</span></div>
+    <div class="slide-body" style="padding-top:14px">
+      <div style="width:700px;margin:0 auto">
+        <div class="shot"><img src="assets/img/m3-txt-vs-md.png" alt="줄글만 이어진 txt 화면 앞에서 갸웃하는 알바생과, 제목·목록·강조가 드러난 md 화면을 AI가 읽어 가는 모습"></div>
+
+        <div class="split" style="gap:18px;margin-top:16px;align-items:stretch">
+          <div class="side-box" style="flex:1 1 0;padding:16px 20px;text-align:center">
+            <p class="side-d" style="font-size:24px"><span class="mono">txt</span> — <strong class="navy">줄글만 남는다</strong></p>
+            <p class="side-d" style="font-size:21px;margin-top:5px">제목인지 목록인지 알 수 없어요</p>
+          </div>
+          <div class="side-box" style="flex:1 1 0;margin-top:0;padding:16px 20px;text-align:center">
+            <p class="side-d" style="font-size:24px"><span class="mono">md</span> — <strong class="navy">글의 뼈대가 보인다</strong></p>
+            <p class="side-d" style="font-size:21px;margin-top:5px"><span class="mono"># 제목</span> · <span class="mono">- 목록</span> · <span class="mono">**강조**</span></p>
+          </div>
+        </div>
+
+        <p class="shot-cap" style="margin-top:13px;font-size:20px;text-align:center">
+          AI가 <strong class="navy">딥러닝</strong>으로 배운 글에 md 가 유난히 많았습니다 — 그래서 더 잘 알아듣습니다
+        </p>
+      </div>
+    </div>
+  </section>
+  <!-- 22. 왜 CLAUDE.md를 써야 하나요? ---------------- -->
   <section class="slide">
     <div class="slide-head"><h2>왜 CLAUDE.md를 써야 하나요?</h2><span class="head-tag">M3-3 · 개념</span></div>
-    <div class="slide-body">
-      <p class="lead" style="margin-bottom:6px">
-        대화가 길어지면 <strong class="navy">처음에 한 말일수록 흐려집니다.</strong>
-      </p>
-      <p class="sub" style="margin-bottom:22px">
-        CLAUDE.md는 그때에도 <strong>기준을 잡아 주는 파일</strong>입니다.
-      </p>
+    <div class="slide-body" style="padding-top:14px">
+      <div style="width:750px;margin:0 auto">
+        <div class="shot"><img src="assets/img/m3-claudemd-why.png" alt="대화가 쌓이자 처음 한 말이 묻혀 갸웃하는 알바생과, CLAUDE.md 가 대화마다 기준을 다시 붙여 주어 환하게 웃는 알바생"></div>
 
-      <div class="flow" style="margin-bottom:22px">
-        <div class="flow-step">
-          <p class="flow-no">원리</p>
-          <p class="flow-name">항상 앞에 붙는다</p>
-          <p class="flow-desc">무엇을 묻든 이 파일이 <strong>내 질문 앞에 자동으로</strong> 얹혀 전달된다</p>
-        </div>
-        <div class="flow-arrow">›</div>
-        <div class="flow-step">
-          <p class="flow-no">한계</p>
-          <p class="flow-name">바구니는 찬다</p>
-          <p class="flow-desc">앞의 대화는 덜 보게 되고, 가득 차면 <strong>요약되며 뭉개진다</strong></p>
-        </div>
-        <div class="flow-arrow">›</div>
-        <div class="flow-step is-now">
-          <p class="flow-no">그래서</p>
-          <p class="flow-name">기준은 남는다</p>
-          <p class="flow-desc">앞의 대화가 흐려져도 이 파일은 <strong>매번 다시 붙는다</strong></p>
-        </div>
-      </div>
-
-      <div class="note">
-        그래서 여기에는 <strong class="navy">매번 지켜야 할 것만</strong> 적습니다.
-        작업 폴더 <strong class="navy">맨 위(루트)</strong>에 한 개 두면 그 폴더 전체에 적용됩니다.
-      </div>
-    </div>
-  </section>
-  <!-- 19. 지침은 왜 md 파일에 적을까 ------------------------ -->
-  <section class="slide">
-    <div class="slide-head"><h2>지침은 왜 <span class="mono">md</span> 파일에 적을까</h2><span class="head-tag">M3-3 · 개념</span></div>
-    <div class="slide-body">
-      <p class="lead" style="margin-bottom:20px">
-        M2에서 <strong class="navy">폴더 지침</strong>으로 저장한 것도 사실 <span class="mono">CLAUDE.md</span> 파일이었습니다.워드가 아니라 <strong class="navy">md 파일</strong>인 데는 이유가 있습니다.
-      </p>
-
-      <div class="ba">
-        <div class="ba-col ba--before">
-          <p class="ba-head">워드 · 한글 — 무겁다</p>
-          <div class="ba-body">
-            <p>글자 말고도 <strong>서식 · 표 · 이미지 · 글꼴</strong>이 한 상자에 압축되어 들어 있습니다.</p>
-            <p>메모장으로 열면 <span class="mono">PK…</span> 같은 기호만 보입니다.</p>
-            <p class="ba-quote">먼저 <strong>풀어야</strong> 글자가 나온다</p>
+        <div class="split" style="gap:18px;margin-top:16px;align-items:stretch">
+          <div class="side-box" style="flex:1 1 0;padding:16px 20px;text-align:center">
+            <p class="side-d" style="font-size:24px"><strong class="navy">앞에 말한 중요한 내용</strong>도</p>
+            <p class="side-d" style="font-size:21px;margin-top:5px">대화가 쌓일수록 <strong>흐려집니다</strong></p>
           </div>
-        </div>
-        <div class="ba-col ba--after">
-          <p class="ba-head">txt · md — 가볍다</p>
-          <div class="ba-body">
-            <p>파일 안이 <strong>적힌 글자 그대로</strong>입니다. 메모장으로 열어도 전부 보입니다.</p>
-            <p>기호 몇 개가 전부 —
-              <span class="mono"># 제목</span> · <span class="mono">- 목록</span> · <span class="mono">**강조**</span></p>
-            <p class="ba-quote">푸는 단계 없이 <strong>바로 읽힌다</strong></p>
+          <div class="side-box" style="flex:1 1 0;margin-top:0;padding:16px 20px;text-align:center">
+            <p class="side-d" style="font-size:24px"><strong class="navy">CLAUDE.md 는</strong> 모든 대화 앞에</p>
+            <p class="side-d" style="font-size:21px;margin-top:5px"><strong>매번 다시 붙어</strong> 기준이 됩니다</p>
           </div>
         </div>
       </div>
-
-      <div class="note" style="margin-top:22px">
-        게다가 <strong class="navy">AI가 배운 글에는 md로 쓰인 문서가 유난히 많습니다.</strong>설명서 · 안내문 · 개발 문서가 대부분 이 형식이라, AI에게는 <strong class="navy">가장 손에 익은 서식</strong>입니다.
-        <span class="mono">CLAUDE.md</span> 의 <span class="mono">.md</span> 가 그 뜻입니다.
-      </div>
     </div>
   </section>
-  <!-- 20. CLAUDE.md 만들기 — 목적부터 적습니다 ------ -->
+  <!-- 23. CLAUDE.md 만들기 — 목적부터 적습니다 ------ -->
   <section class="slide">
     <div class="slide-head"><h2>CLAUDE.md 만들기 — 목적부터 적습니다</h2><span class="head-tag">M3-3 · 개념</span></div>
     <div class="slide-body" style="padding-top:20px">
@@ -516,26 +657,26 @@
           <div class="pbox" style="margin-top:14px">
             <p class="pbox-t">② 이 프로젝트의 목적 적기</p>
             <p>CLAUDE.md에 아래 목적을 적어줘.</p>
-            <p>1) 회의 중에 급하게 적은 메모를 읽고, 안건·결정·할 일을 가려낸다.</p>
+            <p>1) <b>회의메모 폴더</b>의 메모를 읽고, 안건·결정·할 일을 가려낸다.</p>
             <p>2) 그 내용을 docs/회의록_양식.md 에 적힌 항목과 순서대로 정리해 회의록을 만든다.</p>
           </div>
         </div>
 
-        <div class="split-side" style="flex:0 0 400px">
-          <div class="shot" style="width:370px"><img src="assets/img/m3-md-goal.png" alt="CLAUDE.md 파일에 프로젝트 목적이 적힌 모습"></div>
-          <p class="shot-cap" style="text-align:left">VS Code로 열어 <strong>내용이 들어갔는지</strong> 확인합니다</p>
+        <div class="split-side" style="flex:0 0 570px">
+          <div class="shot"><img src="assets/img/m3-md-goal.png" alt="CLAUDE.md 파일에 프로젝트 목적이 적힌 모습"></div>
+          <p class="shot-cap" style="text-align:left;font-size:22px;margin-top:12px">VS Code로 열어 <strong class="navy">내용이 들어갔는지</strong> 확인합니다</p>
         </div>
       </div>
     </div>
   </section>
-  <!-- 21. 참석자와 부서 용어를 적습니다 ------------------------ -->
+  <!-- 24. 참석자와 부서 용어를 적습니다 ------------------------ -->
   <section class="slide">
     <div class="slide-head"><h2>참석자와 부서 용어를 적습니다</h2><span class="head-tag">M3-3 · 개념</span></div>
     <div class="slide-body" style="padding-top:20px">
       <div class="split" style="gap:26px">
         <div class="split-main">
           <div class="pbox">
-            <p>회의메모_품질개선.txt 에 나오는 사람들의</p>
+            <p>회의메모/회의메모_품질개선.txt 에 나오는 사람들의</p>
             <p>이름·소속·역할을 CLAUDE.md에 정리해줘.</p>
             <p>라인3, 야간조, 정례처럼 우리 부서에서만 쓰는 말도</p>
             <p>뜻과 함께 적어줘.</p>
@@ -553,7 +694,7 @@
       </div>
     </div>
   </section>
-  <!-- 22. 지켜야 할 규칙을 더합니다 ---------------------------- -->
+  <!-- 25. 지켜야 할 규칙을 더합니다 ---------------------------- -->
   <section class="slide">
     <div class="slide-head"><h2>지켜야 할 규칙을 더합니다</h2><span class="head-tag">M3-3 · 개념</span></div>
     <div class="slide-body" style="padding-top:20px">
@@ -564,12 +705,14 @@
             <p>· 논의 내용은 한 건당 <b>3줄을 넘기지 않게</b></p>
             <p>· Action Item에는 <b>담당자와 기한</b>을 반드시</p>
             <p>· 메모에 없는 내용은 지어내지 말고 <b>'해당 없음'</b>으로</p>
+            <p>· 결과물은 <b>output 폴더</b>에 <b>회의록_(메모이름).html</b> 로</p>
+            <p>&nbsp;&nbsp;(메모이름은 <b>회의메모_</b> 를 뗀 뒤 &mdash; 예) 회의록_품질개선.html)</p>
           </div>
         </div>
 
         <div class="split-side" style="flex:0 0 400px">
           <div class="shot" style="width:370px"><img src="assets/img/m3-md-minrule.png" alt="CLAUDE.md 에 회의록 작성 규칙이 추가된 모습"></div>
-          <p class="shot-cap" style="text-align:left;margin-bottom:14px">규칙이 문서에 쌓입니다</p>
+          <p class="shot-cap" style="text-align:left;margin-bottom:14px">적은 규칙이 문서에 쌓입니다</p>
           <div class="side-box">
             <p class="side-t">무엇이 남는가</p>
             <p class="side-d">말로 부탁하던 조건이 <strong>지켜지는 기준</strong>이 됩니다.</p>
@@ -578,7 +721,7 @@
       </div>
     </div>
   </section>
-  <!-- 23. [실습] CLAUDE.md 완성하기 ------------------ -->
+  <!-- 26. [실습] CLAUDE.md 완성하기 ------------------ -->
   <section class="slide">
     <div class="slide-head"><h2>[실습] CLAUDE.md 완성하기</h2><span class="head-tag">M3-3 · 실습</span></div>
     <div class="slide-body" style="padding-top:22px">
@@ -596,7 +739,7 @@
             <li><strong class="navy">참석자와 부서 용어</strong> 적기
               <small>이름 · 소속 · 역할 / 라인3 · 야간조 · 정례</small></li>
             <li><strong class="navy">회의록 작성 규칙</strong> 더하기
-              <small>3줄 이내 · 담당과 기한 · 지어내지 않기</small></li>
+              <small>3줄 이내 · 담당과 기한 · 지어내지 않기 · 결과는 output 에 html</small></li>
           </ol>
 
           <div class="note" style="margin-top:20px">
@@ -623,7 +766,7 @@
       </div>
     </div>
   </section>
-  <!-- 24. 정답은 — 참석자와 용어입니다 ------------------------ -->
+  <!-- 27. 정답은 — 참석자와 용어입니다 ------------------------ -->
   <section class="slide">
     <div class="slide-head"><h2>정답은 — 참석자와 용어입니다</h2><span class="head-tag">M3-3 · 개념</span></div>
     <div class="slide-body">
@@ -661,7 +804,7 @@
       </div>
     </div>
   </section>
-  <!-- 25. [챕터] 양식 문서와 회의록 정리 -------------------- -->
+  <!-- 28. [챕터] 양식 문서와 회의록 정리 -------------------- -->
   <section class="slide slide--chapter" data-chapter="양식 문서와 회의록 정리">
     <div class="chapter">
       <p class="ch-eyebrow">CHAPTER 4</p>
@@ -671,7 +814,34 @@
       <ul class="ch-keys"><li>내용은 밖으로</li><li>양식 지침</li><li>회의록 정리</li><li>/btw</li></ul>
     </div>
   </section>
-  <!-- 26. 자주 바뀔 내용은 따로 뺍니다 ------------------------ -->
+  <!-- 29. 책상과 캐비닛 — 내용은 밖에, 경로만 안에 -------- -->
+  <section class="slide">
+    <div class="slide-head"><h2>책상과 캐비닛 — 내용은 밖에, 경로만 안에</h2><span class="head-tag">M3-4 · 개념</span></div>
+    <div class="slide-body" style="padding-top:14px">
+      <div class="split" style="gap:24px">
+        <div class="split-main">
+          <div class="shot"><img src="assets/img/m3-desk-cabinet.png" alt="서류가 책상에 쌓여 허둥대는 알바생과, 책상에는 목적·규칙과 경로 쪽지만 두고 나머지는 캐비닛에 넣은 알바생"></div>
+        </div>
+        <div class="split-side" style="flex:0 0 360px">
+          <div class="side-box" style="padding:18px 20px">
+            <p class="side-d" style="font-size:23px"><strong class="navy">다 적어 두면</strong> 책상이 차요</p>
+            <p class="side-d" style="font-size:20px;margin-top:5px">매번 전부 읽느라 느려집니다</p>
+          </div>
+          <div class="side-box" style="padding:18px 20px">
+            <p class="side-d" style="font-size:23px"><strong class="navy">CLAUDE.md 엔 경로만</strong></p>
+            <p class="side-d" style="font-size:20px;margin-top:5px"><span class="mono">docs/참석자.md</span></p>
+            <p class="side-d" style="font-size:20px;margin-top:2px"><span class="mono">docs/용어집.md</span></p>
+            <p class="side-d" style="font-size:20px;margin-top:7px"><strong>필요할 때만</strong> 꺼내 옵니다</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="note note--warn" style="margin-top:16px;font-size:21px">
+        경로를 빼먹으면 — 캐비닛에 서류가 있어도 <strong class="hl">못 찾습니다.</strong>
+      </div>
+    </div>
+  </section>
+  <!-- 30. 자주 바뀔 내용은 따로 뺍니다 ------------------------ -->
   <section class="slide">
     <div class="slide-head"><h2>자주 바뀔 내용은 따로 뺍니다</h2><span class="head-tag">M3-4 · 개념</span></div>
     <div class="slide-body" style="padding-top:20px">
@@ -701,61 +871,7 @@
       </div>
     </div>
   </section>
-  <!-- 27. 책상과 캐비닛 — 내용은 밖에, 경로만 안에 -------- -->
-  <section class="slide">
-    <div class="slide-head"><h2>책상과 캐비닛 — 내용은 밖에, 경로만 안에</h2><span class="head-tag">M3-4 · 개념</span></div>
-    <div class="slide-body">
-      <p class="lead" style="margin-bottom:4px">
-        CLAUDE.md에는 <strong class="navy">어디에 있는지만</strong> 적고, 내용은 docs 폴더에 둡니다.
-      </p>
-      <p class="sub" style="margin-bottom:10px">
-        책상 위에는 <strong>쪽지</strong>만 두고, 서류는 <strong>캐비닛</strong>에 넣어 두는 것과 같습니다.
-      </p>
-
-      <div class="figure" style="margin:0 0 -4px">
-        <svg viewBox="0 0 1040 312" width="940" height="282" role="img"
-             aria-label="왼쪽 책상 위의 CLAUDE.md 에는 파일 경로만 적혀 있고, 오른쪽 캐비닛 서랍에 실제 내용 파일이 들어 있는 그림">
-          <text x="40" y="24" font-size="17" font-weight="700" fill="#164194">책상 — Claude Code가 지금 보는 곳</text>
-
-          <rect x="40" y="40" width="330" height="192" rx="10" fill="#fff" stroke="#164194" stroke-width="2"/>
-          <rect x="42" y="42" width="326" height="34" rx="8" fill="#164194"/>
-          <text x="58" y="65" font-size="18" font-weight="700" fill="#fff">CLAUDE.md</text>
-          <text x="58" y="106" font-size="18" fill="#7C8698">참석자 &middot; 용어는 아래 파일에</text>
-          <text x="58" y="150" font-size="17" fill="#204273">docs/참석자.md</text>
-          <text x="58" y="188" font-size="17" fill="#204273">docs/용어집.md</text>
-
-          <rect x="20" y="242" width="370" height="14" rx="4" fill="#204273"/>
-          <rect x="46"  y="256" width="12" height="46" fill="#204273"/>
-          <rect x="352" y="256" width="12" height="46" fill="#204273"/>
-
-          <text x="660" y="24" font-size="17" font-weight="700" fill="#164194">캐비닛 — docs 폴더</text>
-          <rect x="660" y="40" width="340" height="262" rx="10" fill="#F2F2F2" stroke="#164194" stroke-width="2"/>
-
-          <rect x="676" y="86"  width="308" height="64" rx="6" fill="#fff" stroke="#C6D0E2"/>
-          <text x="700" y="125" font-size="17" font-weight="700" fill="#164194">참석자.md</text>
-          <rect x="920" y="112" width="44" height="9" rx="4" fill="#C6D0E2"/>
-
-          <rect x="676" y="192" width="308" height="64" rx="6" fill="#fff" stroke="#C6D0E2"/>
-          <text x="700" y="231" font-size="17" font-weight="700" fill="#164194">용어집.md</text>
-          <rect x="920" y="218" width="44" height="9" rx="4" fill="#C6D0E2"/>
-
-          <path d="M648 156 L412 156" stroke="#70AD47" stroke-width="2.5" fill="none" stroke-dasharray="8 6"/>
-          <path d="M400 156 L416 148 L416 164 Z" fill="#70AD47"/>
-          <text x="528" y="142" text-anchor="middle" font-size="18" font-weight="700" fill="#70AD47">필요할 때만 꺼내 온다</text>
-        </svg>
-      </div>
-
-      <div class="note">
-        <strong class="navy">경로만 남겨 두면</strong> 필요할 때만 꺼내 오므로 책상이 넓게 유지됩니다.
-      </div>
-
-      <div class="note note--warn" style="margin-top:12px">
-        <strong class="hl">경로를 안 적으면</strong> — 캐비닛에 서류는 있는데 <strong class="hl">어디 있는지 모르는</strong> 상태가 됩니다.<br>
-        파일을 밖으로 뺐다면 경로를 <strong>꼭</strong> 남기세요.
-      </div>
-    </div>
-  </section>
-  <!-- 28. 양식을 파일이 아니라 문서로 적습니다 ---------------- -->
+  <!-- 31. 양식을 파일이 아니라 문서로 적습니다 ---------------- -->
   <section class="slide">
     <div class="slide-head"><h2>양식을 파일이 아니라 문서로 적습니다</h2><span class="head-tag">M3-4 · 개념</span></div>
     <div class="slide-body" style="padding-top:18px">
@@ -784,83 +900,67 @@
       </div>
     </div>
   </section>
-  <!-- 29. [실습] 메모를 회의록으로 정리합니다 ---------------- -->
+  <!-- 32. [실습] 메모를 회의록 HTML 로 뽑습니다 ---------- -->
   <section class="slide">
-    <div class="slide-head"><h2>[실습] 메모를 회의록으로 정리합니다</h2><span class="head-tag">M3-4 · 실습</span></div>
-    <div class="slide-body" style="padding-top:18px">
+    <div class="slide-head"><h2>[실습] 메모를 회의록 HTML 로 뽑습니다</h2><span class="head-tag">M3-4 · 실습</span></div>
+    <div class="slide-body" style="padding-top:16px">
       <div class="split" style="gap:26px">
         <div class="split-main">
           <div class="pbox">
-            <p><b>회의메모_품질개선.txt</b> 를 읽고,</p>
-            <p><b>docs/회의록_양식.md</b> 에 적힌 항목과 순서 그대로 회의록을 정리해줘.</p>
-            <p>CLAUDE.md에 적은 규칙을 지키고,</p>
-            <p>메모에 없는 내용은 <b>해당 없음</b>으로 둬.</p>
-            <p>다 되면 어느 칸을 무엇으로 채웠는지 알려줘.</p>
+            <p><b>회의메모/회의메모_품질개선.txt</b> 로 <b>회의록을 만들어줘.</b></p>
           </div>
 
-          <div class="note" style="margin-top:16px">
-            <strong class="navy">지각 · 불참 · 보류된 안건</strong>까지 제자리에 들어갔는지 보세요.<br>
-        메모에서 가장 놓치기 쉬운 칸입니다.
+          <div class="note" style="margin-top:16px;font-size:21px">
+            지시가 <strong class="navy">한 줄로 줌었습니다</strong> &mdash; 양식도 규칙도 결과물 위치도
+            <strong class="navy">CLAUDE.md 가 이미 말해 줍니다.</strong>
+          </div>
+
+          <div class="note" style="margin-top:12px;font-size:21px">
+            VS Code 왼쪽에 <span class="mono">output</span> 폴더가 생기면,
+            그 안의 html 을 <strong class="navy">오른쪽 클릭</strong>해 폴더를 엽니다.
           </div>
         </div>
 
-        <div class="split-side" style="flex:0 0 330px">
-          <div class="shot" style="width:250px"><img src="assets/img/m3-minutes-pdf.png" alt="항목이 모두 채워진 회의록"></div>
-          <p class="shot-cap" style="text-align:left">이 내용이 나오면 성공 — PDF는 다음 단계에서</p>
+        <div class="split-side" style="flex:0 0 420px">
+          <div class="sub-shot">
+            <img src="assets/img/m3-reveal-explorer.png" alt="VS Code 탐색기에서 output 폴더의 회의록_품질개선.html 을 오른쪽 클릭해 Reveal in File Explorer 를 고르는 화면">
+            <span class="sub-mark" style="left:2%; top:54%; width:43.5%; height:7.3%"></span>
+            <span class="sub-mark" style="left:48.5%; top:76.3%; width:38%; height:8%"></span>
+          </div>
+          <p class="sub-cap" style="font-size:19px;text-align:left;margin-top:10px">
+            <span class="sub-no">1</span> <span class="mono">output</span> 안의 <strong>html 을 오른쪽 클릭</strong><br>
+            <span class="sub-no">2</span> 메뉴에서 <strong>Reveal in File Explorer</strong>
+          </p>
         </div>
       </div>
     </div>
   </section>
-  <!-- 30. [실습] 내 업무 자료를 문서로 만듭니다 ------------ -->
+  <!-- 33. 열어서 확인합니다 ---------------------------- -->
   <section class="slide">
-    <div class="slide-head"><h2>[실습] 내 업무 자료를 문서로 만듭니다</h2><span class="head-tag">M3-4 · 실습</span></div>
-    <div class="slide-body">
-      <p class="lead" style="margin-bottom:18px">
-        지금까지 한 방식 그대로, 이번에는 <strong class="navy">내 업무 자료</strong>를 문서로 만들어 둡니다.
-      </p>
-
-      <div class="kv" style="margin-bottom:22px">
-        <div class="kv-item">
-          <p class="kv-name">업무 용어집</p>
-          <p class="kv-like">우리 팀에서만 쓰는 <b>말과 줄임말</b></p>
-          <p class="kv-when">매번 풀어서 설명하던 것</p>
-        </div>
-        <div class="kv-item">
-          <p class="kv-name">보고서 기준</p>
-          <p class="kv-like">형식 · 톤 · <b>쓰지 않는 표현</b></p>
-          <p class="kv-when">초안 품질이 고르게 나온다</p>
-        </div>
-        <div class="kv-item">
-          <p class="kv-name">업무 분장</p>
-          <p class="kv-like">누가 <b>무엇을 맡는지</b></p>
-          <p class="kv-when">담당자를 매번 알려주지 않아도</p>
-        </div>
-        <div class="kv-item">
-          <p class="kv-name">자주 쓰는 문구</p>
-          <p class="kv-like">인사말 · <b>마무리 문장</b></p>
-          <p class="kv-when">복사해 두던 것을 한곳에</p>
-        </div>
-      </div>
-
-      <div class="split" style="gap:26px">
+    <div class="slide-head"><h2>탐색기에서 열어 확인합니다</h2><span class="head-tag">M3-4 · 실습</span></div>
+    <div class="slide-body" style="padding-top:16px">
+      <div class="split" style="gap:24px;align-items:flex-start">
         <div class="split-main">
-          <ol class="steps steps--lg">
-            <li>위에서 <strong class="navy">하나 고르기</strong></li>
-            <li><strong class="navy">docs 폴더</strong>에 파일을 만들고 내용 채우기</li>
-            <li>CLAUDE.md에 <strong class="navy">경로와 한 줄 설명</strong> 남기기</li>
-          </ol>
+          <div class="sub-shot">
+            <img src="assets/img/m3-output-folder.png" alt="탐색기가 work › basic › output 폴더를 열어 회의록_품질개선 파일을 보여 주는 화면">
+            <span class="sub-mark" style="left:34%; top:79%; width:24%; height:17%"></span>
+          </div>
+          <p class="sub-cap" style="font-size:19px;text-align:left;margin-top:10px">
+            <span class="sub-no">3</span> 탐색기가 <span class="mono">work › basic › output</span> 을 엽니다 &mdash;
+            그 파일을 <strong>더블클릭</strong>
+          </p>
         </div>
 
-        <div class="split-side side-lg">
-          <div class="side-box">
-            <p class="side-t">무엇이 남는가</p>
-            <p class="side-d">내 업무용 <strong>docs 폴더</strong>와, 어디에 무엇이 있는지 적힌 <strong>CLAUDE.md</strong></p>
-          </div>
+        <div class="split-side" style="flex:0 0 300px">
+          <div class="shot"><img src="assets/img/m3-minutes-pdf.png" alt="항목이 모두 채워진 회의록"></div>
+          <p class="sub-cap" style="font-size:19px;text-align:left;margin-top:10px">
+            <span class="sub-no">4</span> 브라우저에 <strong>이 회의록</strong>이 나오면 성공 &mdash; PDF 는 다음 단계에서
+          </p>
         </div>
       </div>
     </div>
   </section>
-  <!-- 31. 잠깐 물어보기 — /btw ---------------------------- -->
+  <!-- 34. 잠깐 물어보기 — /btw ---------------------------- -->
   <section class="slide">
     <div class="slide-head"><h2>잠깐 물어보기 — /btw</h2><span class="head-tag">M3 · 참고</span></div>
     <div class="slide-body">
@@ -910,17 +1010,17 @@
       </div>
     </div>
   </section>
-  <!-- 32. [챕터] Skill - 반복업무 레시피 -------------- -->
+  <!-- 35. [챕터] Skill - 반복업무 레시피 -------------- -->
   <section class="slide slide--chapter" data-chapter="Skill &mdash; 반복업무 레시피">
     <div class="chapter">
       <p class="ch-eyebrow">CHAPTER 5</p>
       <h2 class="ch-title">Skill &mdash; 반복업무 레시피</h2>
       <div class="ch-rule"></div>
       <p class="ch-desc">자주 쓰는 지시를 명령 한 줄로 묶습니다.</p>
-      <ul class="ch-keys"><li>/회의록작성</li><li>공유</li></ul>
+      <ul class="ch-keys"><li>/minutes</li><li>공유</li></ul>
     </div>
   </section>
-  <!-- 33. Skill — 자주 쓰는 지시를 명령으로 ------------ -->
+  <!-- 36. Skill — 자주 쓰는 지시를 명령으로 ------------ -->
   <section class="slide">
     <div class="slide-head"><h2>Skill — 자주 쓰는 지시를 명령으로</h2><span class="head-tag">M3-5 · 개념</span></div>
     <div class="slide-body">
@@ -945,36 +1045,39 @@
       </div>
 
       <div class="note">
-        M2에서 데스크탑의 스킬을 <strong class="navy">골라 썼다면</strong>, 여기서는 <strong class="navy">직접 만들어</strong> 씁니다.
+        M2에서 Desktop의 스킬을 <strong class="navy">골라 썼다면</strong>, 여기서는 <strong class="navy">직접 만들어</strong> 씁니다.
       </div>
     </div>
   </section>
-  <!-- 34. [실습] 나만의 Skill을 만들고 써 봅니다 ------ -->
+  <!-- 37. [실습] 나만의 Skill을 만들고 써 봅니다 ------ -->
   <section class="slide">
     <div class="slide-head"><h2>[실습] 나만의 Skill을 만들고 써 봅니다</h2><span class="head-tag">M3-5 · 실습</span></div>
-    <div class="slide-body" style="padding-top:18px">
-      <p class="lead" style="margin-bottom:14px">
-        <strong class="navy">메모 파일 이름만 넣으면</strong> 회의록 <strong class="navy">PDF</strong>가 나오는 명령을 만듭니다.
+    <div class="slide-body" style="padding-top:14px">
+      <p class="lead" style="margin-bottom:10px">
+        손으로 한 일을 <strong class="navy">명령 한 줄로</strong> 묶습니다.
       </p>
 
       <div class="split" style="gap:26px">
         <div class="split-main">
           <div class="pbox pbox--tight">
             <p class="pbox-t">① 스킬 만들기</p>
-            <p><b>회의록작성</b> 스킬을 이 프로젝트에서만 쓰도록 만들어줘.</p>
-            <p>뒤에 회의메모 파일 이름을 적으면 그 메모를 읽고,</p>
-            <p>docs/회의록_양식.md 와 CLAUDE.md 의 규칙을 지켜 정리해줘.</p>
-            <p>정리한 내용을 <b>회의록_(메모이름).html</b> 로 만들고,</p>
-            <p>이미 깔려 있는 <b>엣지(msedge.exe)를 headless 로 인쇄</b>해서</p>
-            <p><b>회의록_(메모이름).pdf</b> 까지 만들어줘.</p>
-            <p><b>파이썬이나 새로 설치하는 프로그램은 쓰지 마.</b></p>
-            <p>.claude/skills/회의록작성/SKILL.md 파일로 만들어줘.</p>
+            <p>뒤에 <b>메모 이름</b>을 적으면 <b>CLAUDE.md 규칙대로 회의록을 만들고,</b></p>
+            <p>그 html 을 <b>엣지(msedge.exe) headless 로 인쇄</b>해</p>
+            <p><b>같은 이름의 pdf 까지 내주는 스킬</b>을</p>
+            <p><b>.claude/skills/minutes/SKILL.md</b> 파일로 만들어줘. <b>(이름은 영어로)</b></p>
+            <p><b>새로 설치하는 프로그램은 쓰지 마.</b></p>
+            <p>지금은 <b>SKILL.md 파일만 만들고, 회의록은 만들지 마.</b></p>
           </div>
 
-          <div class="note" style="margin-top:14px">
-            HTML은 <strong class="navy">중간 단계</strong>입니다.<br>
-        폴더에 <strong class="navy">PDF가 남고,</strong>
-            <strong class="navy">새로 설치한 것은 하나도 없습니다.</strong>
+          <div class="note" style="margin-top:10px">
+            양식 · 규칙 · 결과물 위치는 <strong class="navy">CLAUDE.md 가 이미 가지고 있습니다</strong> &mdash;
+            스킬에 새로 적는 것은 <strong class="navy">PDF 한 단계</strong>뿐입니다.<br>
+            그래서 앞으로는 <strong class="navy">/minutes &lt;메모이름&gt;</strong> 한 줄이면
+            메모 → 정리 → HTML → <strong class="navy">PDF</strong> 까지 나옵니다.
+          </div>
+
+          <div class="note note--warn" style="margin-top:10px;font-size:20px">
+            스킬 이름은 <strong class="hl">영어로</strong> 짓습니다 — 한글 이름은 빨간색으로 뜨고 불리지 않습니다.
           </div>
         </div>
 
@@ -988,8 +1091,8 @@
             <p>/skills</p>
           </div>
           <div class="pbox pbox--tight" style="margin:0 0 10px">
-            <p class="pbox-t">④ 다른 메모로 실행</p>
-            <p>/회의록작성 회의메모_신입온보딩</p>
+            <p class="pbox-t">④ 다른 메모로 실행 &mdash; 이때 PDF 까지</p>
+            <p>/minutes 회의메모_신입온보딩</p>
           </div>
           <div class="side-box">
             <p class="side-t">이어서 — 내 업무로</p>
@@ -999,7 +1102,7 @@
       </div>
     </div>
   </section>
-  <!-- 35. [공유] 만든 문서를 올리고, 서로 봅니다 ---------- -->
+  <!-- 38. [공유] 만든 문서를 올리고, 서로 봅니다 ---------- -->
   <section class="slide">
     <div class="slide-head"><h2>[공유] 만든 문서를 올리고, 서로 봅니다</h2><span class="head-tag">M3-5 · 공유</span></div>
     <div class="slide-body">
@@ -1024,22 +1127,222 @@
         <div class="split-side" style="flex:0 0 430px">
           <div class="sub-shot">
             <img src="assets/img/m1-submit-list.png" alt="챕터1 실습 결과물 제출 목록">
-            <span class="sub-mark" style="left:5%; top:70%; width:90%; height:14%"></span>
+            <span class="sub-mark" style="left:5%; top:52.5%; width:90%; height:13.5%"></span>
           </div>
           <p class="sub-cap">목록에서 <strong>Hyundai_04</strong> 를 고릅니다</p>
         </div>
       </div>
     </div>
   </section>
-  <!-- 36. M3 정리 ---------------------------------------------- -->
+  <!-- 39. Skill 은 이런 것도 됩니다 ------------------- -->
+  <section class="slide">
+    <div class="slide-head"><h2>Skill 은 이런 것도 됩니다</h2><span class="head-tag">M3-5 · 참고</span></div>
+    <div class="slide-body" style="padding-top:14px">
+      <div class="split" style="gap:24px">
+        <div class="split-main">
+          <div class="shot"><img src="assets/img/m3-skill-more.png" alt="스킬 상자에서 PPT·Excel·디자인이 나오는 모습과, 남이 만든 스킬을 끼워 쓰는 모습"></div>
+        </div>
+        <div class="split-side" style="flex:0 0 400px">
+          <div class="side-box" style="padding:16px 20px">
+            <p class="side-t" style="font-size:20px">짜잔 &mdash; 오늘 안 다룬 것도</p>
+            <p class="side-d" style="font-size:21px">PPT 만들기 · Excel 만들기 · 디자인 시안 뽑기</p>
+          </div>
+          <div class="side-box" style="padding:16px 20px">
+            <p class="side-t" style="font-size:20px">업무에 쓴다면</p>
+            <p class="side-d" style="font-size:20px"><strong class="navy">보고서 작성</strong> &mdash; 회사 양식대로 쓰고 검토까지</p>
+            <p class="side-d" style="font-size:20px"><strong class="navy">자료조사 비교</strong> &mdash; 조사 → 요약·비교 → 인사이트</p>
+            <p class="side-d" style="font-size:20px"><strong class="navy">문서 검토</strong> &mdash; 누락 · 논리 · 표현 · 보안 점검</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="note" style="margin-top:14px;font-size:21px">
+        남이 만든 스킬도 <strong class="navy">오늘 한 것처럼</strong> — 폴더에 넣고 <span class="mono">/reload-skills</span>,
+        그다음엔 <strong class="navy">이름만 부르면</strong> 바로 쓸 수 있습니다.
+      </div>
+    </div>
+  </section>
+  <!-- 40. [챕터] MCP - 도구를 더 붙이기 ------------------ -->
+  <section class="slide slide--chapter" data-chapter="MCP &mdash; 도구를 더 붙이기">
+    <div class="chapter">
+      <p class="ch-eyebrow">CHAPTER 6</p>
+      <h2 class="ch-title">MCP &mdash; 도구를 더 붙이기</h2>
+      <div class="ch-rule"></div>
+      <p class="ch-desc">Skill 이 레시피라면, MCP 는 알바생이 손에 쥐는 도구입니다.</p>
+      <ul class="ch-keys"><li>MCP 란</li><li>사외망 · 사내망</li><li>사내 MCP 공유소</li></ul>
+    </div>
+  </section>
+  <!-- 41. Claude Code 에서는 커넥터를 못 쓰나요 --------- -->
+  <section class="slide">
+    <div class="slide-head"><h2>Claude Code 에서는 커넥터를 못 쓰나요?</h2><span class="head-tag">M3-6 · 개념</span></div>
+    <div class="slide-body" style="padding-top:16px">
+      <div class="figure" style="margin:0">
+        <img style="display:block; width:620px; margin:0 auto"
+             src="assets/img/m3-connector.png"
+             alt="왼쪽 — H Chat 은 커넥터로 Confluence · Jira 에 바로 이어진다. 오른쪽 — Claude Code 앞에서는 그 버튼이 없어 갸웃한다">
+      </div>
+
+      <div class="why2" style="margin-top:14px">
+        <div class="why2-box is-in">
+          <p class="why2-t">H Chat 에서는</p>
+          <p class="why2-d"><b>커넥터</b>를 켜면 Confluence &middot; Jira 에 바로 붙었습니다.</p>
+        </div>
+        <div class="why2-box">
+          <p class="why2-t">Claude Code 에서는</p>
+          <p class="why2-d">그 <b>버튼이 없습니다</b>. 대신 <b>MCP</b> 로 같은 일을 합니다.</p>
+        </div>
+      </div>
+
+      <div class="note" style="margin-top:12px">
+        이름만 다릅니다 &mdash; <strong class="navy">커넥터가 하던 일을 Claude Code 에서는 MCP 가 합니다.</strong>
+      </div>
+    </div>
+  </section>
+  <!-- 42. MCP - 더 다양한 서비스를 씁니다 ---------------- -->
+  <section class="slide">
+    <div class="slide-head"><h2>Claude Code 에서는 더 다양한 서비스를 씁니다</h2><span class="head-tag">M3-6 · 개념</span></div>
+    <div class="slide-body" style="padding-top:18px">
+      <div class="figure" style="margin:0">
+        <img style="display:block; width:640px; margin:0 auto"
+             src="assets/img/m3-mcp-more.png"
+             alt="Claude Code 알바생 옆에 MCP 를 가운데 두고 Confluence · Jira · Teams · Outlook · 브라우저가 이어져 있고, 더 붙일 수 있다는 + 표시가 있다">
+      </div>
+
+      <div class="why2" style="margin-top:12px">
+        <div class="why2-box is-in">
+          <p class="why2-t">쓸 수 있는 서비스가 많습니다</p>
+          <p class="why2-d">Confluence &middot; Jira &middot; Teams &middot; Outlook &middot; 브라우저 &hellip; <b>필요한 것을 계속 더할 수 있습니다.</b></p>
+        </div>
+        <div class="why2-box">
+          <p class="why2-t">한 번 붙여 두면</p>
+          <p class="why2-d">그다음부터는 <b>말로만</b> 시키면 됩니다. 도구가 늘수록 <b>맡길 수 있는 일</b>도 늘어납니다.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- 43. MCP 는 어디서 받나요 --------------------------- -->
+  <section class="slide">
+    <div class="slide-head"><h2>MCP 는 어디서 받나요</h2><span class="head-tag">M3-6 · 개념</span></div>
+    <div class="slide-body" style="padding-top:20px">
+      <div class="why2">
+        <div class="why2-box">
+          <p class="why2-t">사외망 &mdash; 집 · 카페</p>
+          <p class="why2-d"><b>마켓플레이스</b>에서 골라 받습니다. 클릭 몇 번이면 붙습니다.<br>
+            <b>사내망에서는 이 길이 막혀 있습니다.</b></p>
+        </div>
+        <div class="why2-box is-in">
+          <p class="why2-t">사내망 &mdash; 회사 안</p>
+          <p class="why2-d"><b>사내 MCP 공유소</b>에서 받습니다 &mdash; 연구소가 운영하는 <b>Confluence</b> 페이지입니다.</p>
+        </div>
+      </div>
+
+      <div class="side-box" style="margin-top:18px; padding:16px 20px">
+        <p class="side-t">사내 MCP 공유소</p>
+        <p class="side-d" style="font-size:23px">
+          <a class="hub-link" href="https://ade-conf.hmckmc.co.kr/spaces/CCCL/pages/586054736/%F0%9F%93%A6+%EC%82%AC%EB%82%B4+MCP+%EA%B3%B5%EC%9C%A0%EC%86%8C" target="_blank" rel="noopener">Agentic AI Hub for Engineers</a> &mdash;
+          <span class="mono">[Claude Code Lab]</span> &middot; Confluence
+        </p>
+        <p class="side-d hub-url" style="margin-top:5px">
+          ade-conf.hmckmc.co.kr &rsaquo; spaces &rsaquo; CCCL &rsaquo; 📦 사내 MCP 공유소
+        </p>
+        <p class="side-d" style="font-size:20px; margin-top:6px">
+          연구소에서 <strong>Skill 과 MCP 를 함께 모아</strong> 두고 있습니다.
+          <strong class="navy">제목을 누르면 열립니다</strong> &mdash; 사내망에서만 들어갑니다.
+        </p>
+      </div>
+
+      <div class="note" style="margin-top:16px">
+        다음은 그중 하나 &mdash; <strong class="navy">Playwright MCP</strong> 를 실제로 붙여 봅니다.
+      </div>
+    </div>
+  </section>
+  <!-- 44. [실습] MCP 를 붙입니다 - .mcp.json ------------- -->
+  <section class="slide">
+    <div class="slide-head"><h2>[실습] MCP 를 붙입니다 &mdash; .mcp.json</h2><span class="head-tag">M3-6 · 실습</span></div>
+    <div class="slide-body" style="padding-top:14px">
+      <div class="split" style="gap:24px">
+        <div class="split-main">
+          <div class="pbox pbox--tight">
+            <p class="pbox-t">① 빈 파일부터 만들기</p>
+            <p><b>.mcp.json</b> 빈 파일을 <b>프로젝트 루트 폴더</b>에 하나 만들어줘.</p>
+          </div>
+
+          <div class="pbox pbox--tight" style="margin-top:12px">
+            <p class="pbox-t">② 그 파일에 이 내용 넣기</p>
+            <p>방금 만든 <b>.mcp.json</b> 에 아래 내용을 그대로 넣어줘.</p>
+            <p class="mono">{</p>
+            <p class="mono">&nbsp;&nbsp;"mcpServers": {</p>
+            <p class="mono">&nbsp;&nbsp;&nbsp;&nbsp;"playwright": {</p>
+            <p class="mono">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"command": "cmd",</p>
+            <p class="mono">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"args": ["/c", "npx", "@playwright/mcp@latest",</p>
+            <p class="mono">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"--browser", "msedge"]</p>
+            <p class="mono">&nbsp;&nbsp;&nbsp;&nbsp;}</p>
+            <p class="mono">&nbsp;&nbsp;}</p>
+            <p class="mono">}</p>
+          </div>
+        </div>
+
+        <div class="split-side" style="flex:0 0 430px">
+          <div class="pbox pbox--tight">
+            <p class="pbox-t">③ Claude Code 를 껐다가</p>
+            <p>/exit</p>
+          </div>
+          <div class="pbox pbox--tight" style="margin-top:10px" data-app="VS Code 터미널">
+            <p class="pbox-t">④ 다시 켜면 &mdash; 아래 화면이 뜹니다</p>
+            <p>claude</p>
+          </div>
+
+          <div class="sub-shot" style="margin-top:12px">
+            <img src="assets/img/m3-mcp-approve.png" alt="새 MCP 서버를 찾았다며 쓸지 묻는 화면 — 두 번째 항목이 이 프로젝트에서 앞으로도 쓰기">
+            <span class="sub-mark" style="left:0.8%; top:60.8%; width:98%; height:9%"></span>
+          </div>
+          <p class="sub-cap">두 번째 &mdash; <strong>이 프로젝트에서는 앞으로도 쓰기</strong>를 고르고 Enter</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+  <!-- 45. [실습] Playwright 로 웹에서 찾아 옵니다 -------- -->
+  <section class="slide">
+    <div class="slide-head"><h2>[실습] Playwright 로 웹에서 찾아 옵니다</h2><span class="head-tag">M3-6 · 실습</span></div>
+    <div class="slide-body">
+      <div class="split">
+        <div class="split-main">
+          <div class="pbox">
+            <p>playwright 로 <b>네이버 뉴스</b>에서</p>
+            <p><b>최근 기사 하나</b>를 찾아줘.</p>
+            <p>제목과 링크, 그리고 <b>세 줄 요약</b>을 알려줘.</p>
+          </div>
+
+          <ol class="steps" style="margin-top:16px">
+            <li>도구를 써도 되냐고 물으면 <strong class="navy">허용</strong>합니다</li>
+            <li><strong class="navy">브라우저 창이 저절로 떠서</strong> 스스로 움직입니다<small>보고만 있으면 됩니다 &mdash; 손대지 않아도 됩니다</small></li>
+            <li>다 하면 <strong class="navy">요약이 터미널에</strong> 나옵니다<small>처음 한 번은 준비하느라 조금 걸립니다</small></li>
+          </ol>
+        </div>
+
+        <div class="split-side">
+          <div class="side-box">
+            <p class="side-t">무엇이 달라졌나</p>
+            <p class="side-d">붙이기 전에는 <strong>글로 시키는 것</strong>만 했습니다. 이제 <strong class="navy">브라우저를 직접 열어</strong> 보고 옵니다.</p>
+          </div>
+          <div class="side-box" style="margin-top:12px">
+            <p class="side-t">이런 것도 됩니다</p>
+            <p class="side-d">사내 위키에서 표 가져오기 &middot; 우리 화면이 제대로 뜨는지 확인 &middot; 화면 캡처</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- 46. M3 정리 ---------------------------------------------- -->
   <section class="slide" data-chapter="M3 정리">
     <div class="slide-head"><h2>M3 정리</h2><span class="head-tag">M3 · 정리</span></div>
     <div class="slide-body">
-      <p class="lead" style="margin-bottom:22px">
+      <p class="lead" style="margin-bottom:16px">
         오늘 익힌 것은 기능이 아니라 <strong class="navy">일을 맡기는 방식</strong>입니다.
       </p>
 
-      <div class="recap">
+      <div class="recap recap--tight">
         <div class="recap-row">
           <span class="recap-k">작업 폴더</span>
           <span class="recap-v">AI가 볼 수 있는 범위. <strong>폴더를 정하는 것이 첫 단추</strong></span>
@@ -1049,12 +1352,20 @@
           <span class="recap-v">이 프로젝트의 헌법. <strong>한 번 적으면 매번 지켜진다</strong></span>
         </div>
         <div class="recap-row">
+          <span class="recap-k">docs 문서</span>
+          <span class="recap-v">자주 바뀌는 양식과 명단은 <strong>밖으로 빼고 경로만</strong> 적어 둔다</span>
+        </div>
+        <div class="recap-row">
           <span class="recap-k">Skill</span>
-          <span class="recap-v">자주 쓰는 지시를 <strong>내 명령어로 저장</strong> — <span class="mono">/회의록작성 파일이름</span></span>
+          <span class="recap-v">자주 쓰는 지시를 <strong>내 명령어로 저장</strong> — <span class="mono">/minutes 파일이름</span></span>
+        </div>
+        <div class="recap-row">
+          <span class="recap-k">MCP</span>
+          <span class="recap-v">도구를 하나 더 붙이는 것 — <strong>붙이는 만큼 맡길 수 있는 일이 는다</strong></span>
         </div>
         <div class="recap-row">
           <span class="recap-k">결과물</span>
-          <span class="recap-v">대화로 끝나지 않고 <strong>회의록 PDF로 남는다</strong> — 설치한 것 없이</span>
+          <span class="recap-v">대화로 끝나지 않고 <strong>회의록 PDF로 남는다</strong></span>
         </div>
       </div>
 
@@ -1064,7 +1375,7 @@
       </div>
     </div>
   </section>
-  <!-- 37. 감사합니다. -------------------------------------------- -->
+  <!-- 47. 감사합니다. -------------------------------------------- -->
   <section class="slide slide--cover">
     <div class="cover-text">
       <h1 class="cover-title" style="font-size:64px">감사합니다.</h1>
@@ -1087,7 +1398,7 @@
 
     <div class="deck-meta">
       <span class="deck-title">M3. Claude Code로 익히는 바이브코딩</span>
-      <span class="deck-count" id="count">1 / 37</span>
+      <span class="deck-count" id="count">1 / 47</span>
     </div>
 
     <button class="deck-arrow" id="next" type="button" aria-label="다음 슬라이드" title="다음 (→)">
