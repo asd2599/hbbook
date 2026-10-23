@@ -1,0 +1,1639 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>M4. 데이터 시각화 · AI 업무도구 만들기 (뉴스 동향 분석) — AX 중급과정</title>
+<link rel="stylesheet" href="assets/css/deck.css">
+<style>
+  /* 18p — 폴더 위치 한 줄과, 주소창·터미널 두 칸.
+     창 그림은 화면 캡처 대신 직접 그린다 — 경로가 바뀌면 SVG 만 고치면 된다. */
+  .shot svg { display: block; width: 100%; height: auto; }
+
+  .cprow { display: flex; align-items: center; justify-content: center; gap: 18px; flex-wrap: wrap; }
+  .cp-box { flex: 0 0 auto; min-width: 236px; padding: 9px 20px 11px;
+            border: 1px solid var(--line); border-left: 5px solid #C3CBD8;
+            border-radius: 8px; background: #fff; }
+  .cp-box.is-now { border-left-color: var(--navy); background: #F5F7FB; }
+  .cp-t { margin: 0; font-size: 15px; font-weight: 700; letter-spacing: .04em; color: #8A94A6; }
+  .cp-box.is-now .cp-t { color: var(--navy); }
+  .cp-d { margin: 3px 0 0; font-size: 21px; font-weight: 700; color: var(--ink); letter-spacing: -.01em; }
+  .cp-f { margin: 4px 0 0; font-size: 14.5px; color: #8A94A6; letter-spacing: -.01em; }
+  .cp-ar { display: flex; flex-direction: column; align-items: center; color: var(--navy); }
+  .cp-ar b { font-size: 15px; letter-spacing: -.01em; }
+  .cp-ar span { font-size: 26px; line-height: 1.1; }
+  .cp-note { flex: 1 0 100%; margin: 9px 0 0; text-align: center;
+             font-size: 17px; color: #7C8698; letter-spacing: -.01em; }
+  .cp-note b { color: var(--navy); }
+
+  .twoup { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; margin-top: 14px; }
+  .tu-t { margin: 0 0 8px; font-size: 20px; font-weight: 700; color: var(--ink); letter-spacing: -.01em; }
+  .tu-t b { color: var(--navy); }
+  .tu-no { display: inline-block; width: 24px; height: 24px; margin-right: 7px;
+           border-radius: 50%; background: var(--navy); color: #fff;
+           font-size: 15px; line-height: 24px; text-align: center; vertical-align: 2px; }
+  .twoup .pbox { margin-top: 10px; }
+  /* 18p ③ — Claude 가 뜨면 Effort 를 high 로 */
+  .eff3 { display: grid; grid-template-columns: 1fr 236px 330px; gap: 16px; align-items: center;
+          margin-top: 14px; padding: 10px 16px; border: 1px solid var(--line); border-left: 5px solid var(--navy);
+          border-radius: 8px; background: #F5F7FB; }
+  .eff3 .tu-t { margin: 0; }
+  .eff3-d { margin: 4px 0 0; font-size: 16px; line-height: 1.45; color: #7C8698; letter-spacing: -.01em; }
+  .eff3-d b { color: var(--navy); }
+  .eff3 .pbox { margin: 0; }
+
+  /* 29p — Claude 가 써 준 PHASE.md 를 문서처럼 보여 준다 */
+  .phasedoc { border: 1px solid var(--line); border-radius: 10px; background: #fff; overflow: hidden; }
+  .phasedoc-h { padding: 8px 14px; background: #F2F2F2; border-bottom: 1px solid #D8DEE9;
+                font-size: 14.5px; font-weight: 700; color: #4A4A4A; letter-spacing: -.01em; }
+  .phasedoc ol { margin: 0; padding: 12px 16px 14px; list-style: none; }
+  .phasedoc li { position: relative; margin-bottom: 9px; padding-left: 92px;
+                 font-size: 19px; line-height: 1.4; font-weight: 700;
+                 color: var(--ink); letter-spacing: -.01em; }
+  .phasedoc li:last-child { margin-bottom: 0; }
+  .phase-no { position: absolute; left: 0; top: 2px; padding: 2px 10px; border-radius: 999px;
+              background: var(--navy); color: #fff; font-size: 14px; font-weight: 700; letter-spacing: -.01em; }
+  .phase-chk { display: block; margin-top: 3px; font-size: 16px; font-weight: 400;
+               color: #7C8698; letter-spacing: -.01em; }
+  .phase-chk b { color: var(--green); font-weight: 700; }
+
+  /* 20p — 원본 프롬프트에 걸었던 조건들 (프롬프트 상자가 아니라 읽는 목록) */
+  .spec { display: grid; grid-template-columns: 1.1fr 1fr; gap: 22px; }
+  .spec-col { padding: 14px 18px 16px; border: 1px solid var(--line);
+              border-left: 5px solid var(--navy); border-radius: 8px; background: #F5F7FB; }
+  .spec-t { margin: 0 0 9px; font-size: 19px; font-weight: 700;
+            color: var(--navy); letter-spacing: -.02em; }
+  .spec-t span { margin-left: 7px; font-size: 14.5px; font-weight: 700; color: #8A94A6; }
+  .spec-col ul { margin: 0; padding: 0; list-style: none; }
+  .spec-col li { position: relative; margin-bottom: 6px; padding-left: 15px;
+                 font-size: 17px; line-height: 1.45; color: var(--ink); letter-spacing: -.01em; }
+  .spec-col li:last-child { margin-bottom: 0; }
+  .spec-col li::before { content: "\00b7"; position: absolute; left: 4px; color: #A9BCDD; font-weight: 700; }
+
+  /* App vs AI App — 혼자 하는 테트리스 vs AI 와 대결하는 테트리스. 그림 아래에 반씩 이름을 단다 (12p) */
+  .avs-heads { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .avs-h { padding: 12px 0 0; border-top: 3px solid #C3CBD8; text-align: center; }
+  .avs-h.is-ai { border-top-color: var(--navy); }
+  .avs-t { margin: 0; font-size: 27px; font-weight: 800; color: #7C8698; letter-spacing: -.02em; }
+  .avs-h.is-ai .avs-t { color: var(--navy); }
+  .avs-d { margin: 5px 0 0; font-size: 18px; color: #7C8698; letter-spacing: -.01em; }
+  .avs-d strong { color: var(--ink); }
+  .avs-h.is-ai .avs-d strong { color: var(--navy); }
+  .avs-pic { height: 380px; overflow: hidden; }
+  .avs-pic img { display: block; width: 100%; height: 100%;
+                 object-fit: cover; object-position: 50% 40%; }
+
+  /* Claude API KEY — 그림 옆에 두 갈래 (14p) */
+  .key2 { display: flex; align-items: center; justify-content: center; gap: 22px; }
+  .key2-pic { flex: 0 0 606px; }
+  .key2-pic img { display: block; width: 100%; }
+  .key2-pic .shot-cap { margin-top: 2px; }
+  .key2-pic .shot-cap strong { color: var(--navy); }
+  .key2-side { flex: 1 1 auto; display: flex; flex-direction: column; gap: 14px; }
+
+  /* 그림 한 장을 크게 (30 · 31p) */
+  .pic1 { display: block; margin: 0 auto; }
+
+  /* 하지 말 것 한마디 + 과하게 나온 결과 (29p) */
+  .badline { display: flex; align-items: baseline; gap: 14px;
+             padding: 12px 20px; border-radius: 8px;
+             background: var(--gray-shape); border-left: 5px solid var(--red); }
+  .badline-t { flex: 0 0 auto; font-size: 16px; font-weight: 700;
+               letter-spacing: .06em; color: var(--red); }
+  .badline p { margin: 0; font-size: 22px; font-weight: 700;
+               color: var(--ink); letter-spacing: -.01em; }
+
+  /* 크게 만들고 고치기 vs 한 층씩 확인하며 — 그림 둘을 나란히, 아래에 한 줄씩 (25p) */
+  .vs2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  .vs2-pic { height: 330px; overflow: hidden; }
+  .vs2-pic img { display: block; width: 100%; height: 100%;
+                 object-fit: cover; object-position: 50% 50%; }
+  .vs2-h { padding: 10px 0 0; border-top: 3px solid var(--red); text-align: center; }
+  .vs2-h.is-ok { border-top-color: var(--navy); }
+  .vs2-t { margin: 0; font-size: 25px; font-weight: 800; color: var(--red); letter-spacing: -.02em; }
+  .vs2-h.is-ok .vs2-t { color: var(--navy); }
+  .vs2-d { margin: 4px 0 0; font-size: 19px; color: var(--ink-soft); letter-spacing: -.01em; }
+  .vs2-d strong { color: var(--ink); }
+  .vs2-chips { display: flex; justify-content: center; gap: 12px; margin: 16px 0 0; padding: 0; list-style: none; }
+  .vs2-chips li { padding: 7px 18px; border-radius: 999px; background: #F5F7FB;
+                  border: 1px solid var(--line); font-size: 18px; font-weight: 700; color: var(--navy); }
+  .vs2-chips li::before { content: "✔ "; color: var(--green); }
+
+  /* 사내 배포 가이드 — 금지 띠 + HTML / 앱 두 칸 (41p, docs/M4자료/AI로 만든 결과물.pdf) */
+  .dg-ban { display: flex; align-items: center; gap: 14px; padding: 11px 20px; border-radius: 8px;
+            background: #FFF5F5; border-left: 5px solid var(--red); }
+  .dg-ban-t { flex: 0 0 auto; font-size: 16px; font-weight: 700; letter-spacing: .06em; color: var(--red); }
+  .dg-ban p { flex: 1 1 auto; margin: 0; font-size: 18px; line-height: 1.45; color: var(--ink); }
+  .dg-ban b { color: var(--red); }
+  .dg-ban-a { flex: 0 0 auto; font-size: 17px; }
+  .dg-two { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 14px; }
+  .dg-card { padding: 15px 22px 16px; border: 1px solid var(--line); border-radius: 10px; }
+  .dg-card.is-app { background: #F5F7FB; }
+  .dg-h { margin: 0; font-size: 23px; font-weight: 800; color: var(--navy); letter-spacing: -.02em; }
+  .dg-h small { margin-left: 10px; font-size: 16px; font-weight: 600; color: #7C8698; letter-spacing: -.01em; }
+  .dg-when { margin: 4px 0 8px; font-size: 17px; color: var(--ink-soft); }
+  .dg-when b, .dg-row b { color: var(--navy); }
+  .dg-row { margin: 8px 0 0; font-size: 19px; line-height: 1.45; color: var(--ink); }
+  .dg-steps { margin: 4px 0 0; padding-left: 24px; font-size: 18px; line-height: 1.55; color: var(--ink); }
+  .dg-shot { width: 300px; margin-top: 8px; }
+  .dg-tag { display: inline-block; padding: 1px 9px; border-radius: 999px; background: var(--gray-shape);
+            border: 1px solid var(--line); font-size: 16px; font-weight: 700; color: var(--ink-soft); }
+  .dg-sub { font-size: 16px; color: #7C8698; }
+  .dg-links { display: flex; gap: 10px; margin-top: 14px; }
+  .dg-links .btn-link { padding: 10px 20px; font-size: 18px; }
+  .dg-links .btn-link::before { font-size: 14px; }
+
+  /* 좌우 두 장면 그림 + 아래 설명 두 칸 (28p) */
+  .pic2-frame { height: 330px; overflow: hidden; }
+  .pic2-frame img { display: block; width: 100%; height: 100%;
+                    object-fit: cover; object-position: 50% 50%; }
+  .pic2-caps { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 6px; }
+  .pic2-caps p { margin: 0; text-align: center; font-size: 18px; line-height: 1.45;
+                 color: #7C8698; letter-spacing: -.01em; }
+  .pic2-caps b { color: var(--navy); font-weight: 700; }
+
+  /* 사외망과 사내망 (17p) */
+  .netc { display: block; width: 684px; margin: 0 auto; }
+  .why2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 14px; }
+  .why2-box { padding: 13px 18px 15px; border-radius: 8px;
+              background: var(--gray-shape); border-left: 5px solid var(--green); }
+  .why2-box.is-in { background: #F5F7FB; border-left-color: var(--navy); }
+  .why2-t { margin: 0 0 6px; font-size: 17px; font-weight: 700; letter-spacing: .04em; color: var(--green); }
+  .why2-box.is-in .why2-t { color: var(--navy); }
+  .why2-d { margin: 0; font-size: 20px; line-height: 1.5; color: var(--ink); letter-spacing: -.01em; }
+  .why2-d b { color: var(--navy); font-weight: 700; }
+
+  /* 이런 앱을 만들어 달라고 하면 — 요청 요약 + 결과 화면 (16p) */
+  .req { display: flex; align-items: center; justify-content: center; gap: 24px; }
+  .req-list { flex: 0 0 350px; padding: 16px 20px 18px;
+              border: 1px solid var(--line); border-left: 5px solid var(--navy);
+              border-radius: 8px; background: #F5F7FB; }
+  .req-t { margin: 0 0 10px; font-size: 16px; font-weight: 700; letter-spacing: .06em; color: var(--green); }
+  .req-list ul { margin: 0; padding: 0; list-style: none; }
+  .req-list li { position: relative; margin-bottom: 9px; padding-left: 24px;
+                 font-size: 18px; line-height: 1.45; color: var(--ink); letter-spacing: -.01em; }
+  .req-list li:last-child { margin-bottom: 0; }
+  .req-list li::before { content: "\2713"; position: absolute; left: 0; top: 0;
+                         color: var(--green); font-weight: 800; }
+  .req-list li b { color: var(--navy); }
+  .req-sub { margin: 12px 0 0; padding-top: 10px; border-top: 1px dashed #DCE3EE;
+             font-size: 16px; color: #7C8698; letter-spacing: -.01em; }
+  .req-sub b { color: var(--navy); }
+  .req-shot { flex: 0 0 608px; }
+  .req-shot .shot-cap strong { color: var(--red); }
+  .fail-shot { position: relative; width: 100%; }
+  .fail-shot img { display: block; width: 100%;
+                   border: 1px solid var(--line); border-radius: 8px; }
+  .fail-mark { position: absolute; left: 4.5%; right: 4.5%; top: 54%; height: 35%;
+               border: 3px solid var(--red); border-radius: 6px; }
+
+  /* 결과 화면 두 장 나란히 (10p) */
+  .two-shot { display: flex; align-items: stretch; justify-content: center; gap: 16px; }
+  .two-shot > div { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; }
+  .two-shot .shot { width: 100%; }
+  .two-shot .shot-cap { margin: auto 0 0; padding-top: 10px; }
+  .two-shot .shot-cap strong { color: var(--navy); }
+
+  /* 오늘 만들 것 — 화면 네 장, ②에 AI 기능 표시 */
+  .prev4 { display: flex; align-items: stretch; justify-content: center; gap: 10px; }
+  .prev4-item { position: relative; flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; }
+  .prev4-item .shot { position: relative; width: 100%; background: #fff; }
+  .prev4-item.is-ai .shot { border: 2px solid var(--red); box-shadow: 0 2px 14px rgba(255, 0, 0, .14); }
+  .prev4-mark { position: absolute; left: 2%; top: 69%; width: 15.5%; height: 13.5%;
+                border: 2px solid var(--red); border-radius: 4px; }
+  .prev4-badge { position: absolute; right: -5px; top: -12px; padding: 3px 10px;
+                 border-radius: 11px; background: var(--red); color: #fff;
+                 font-size: 15px; font-weight: 700; letter-spacing: -.01em; }
+  .prev4-ar { flex: 0 0 auto; align-self: flex-start; margin: 58px 0 0; font-size: 26px; color: #C3CBD8; }
+  .prev4-t { margin: auto 0 0; padding-top: 14px; text-align: center; font-size: 19px;
+             font-weight: 700; color: var(--navy); letter-spacing: -.02em; }
+  .prev4-no { display: inline-block; width: 24px; height: 24px; margin-right: 5px;
+              border-radius: 50%; background: var(--navy); color: #fff;
+              font-size: 15px; line-height: 24px; text-align: center; vertical-align: 2px; }
+  .prev4-no--ai { background: var(--red); }
+  .prev4-d { margin: 6px 0 0; text-align: center; font-size: 16px; line-height: 1.45;
+             color: #7C8698; letter-spacing: -.01em; }
+  .prev4-d strong { color: var(--red); }
+
+  /* ---- 뉴스 동향 분석판 ---- */
+  /* 오늘의 재료 — 실제 검색 결과 몇 줄 (14p) */
+  .src { border: 1px solid var(--line); border-radius: 10px; background: #fff; overflow: hidden; }
+  .src-h { display: flex; justify-content: space-between; padding: 9px 14px; background: #F2F2F2;
+           border-bottom: 1px solid #D8DEE9; font-size: 16px; font-weight: 700; color: #4A4A4A; }
+  .src-h span { font-weight: 400; color: #7C8698; }
+  .newst { width: 100%; border-collapse: collapse; font-size: 16px; }
+  .newst th, .newst td { padding: 8px 10px; border-bottom: 1px solid #E3E8F0; text-align: left; letter-spacing: -.02em; }
+  .newst th { background: #F5F7FB; color: var(--navy); font-weight: 700; white-space: nowrap; }
+  .newst td.d, .newst td.s { white-space: nowrap; color: #7C8698; }
+  .newst tr.off td { color: #A9B1BF; }
+  .newst tr.off td.t { text-decoration: line-through; text-decoration-color: #C3CBD8; }
+  .newst tr:last-child td { color: #8A94A6; border-bottom: 0; }
+
+  /* 보고서 화면 — 위쪽만 보여 준다 */
+  .rep-top { aspect-ratio: 1440 / 900; overflow: hidden; background: #fff; }
+  .rep-top img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: 50% 0; }
+  .rep-frame { height: 486px; overflow: hidden; border: 1px solid var(--line); border-radius: 8px; background: #E9EDF3; }
+  .rep-frame img { display: block; width: 100%; }
+
+  /* 기준 한 줄 바꾸기 — 전후 비교 (40p) */
+  .bf2 { display: flex; gap: 14px; align-items: flex-start; }
+  .bf2 > div { flex: 1 1 0; min-width: 0; }
+  .bf-t { margin: 0 0 6px; font-size: 17px; font-weight: 700; letter-spacing: .02em; color: #7C8698; }
+  .bf-t.is-after { color: var(--red); }
+  .bf2 img { display: block; width: 100%; border: 1px solid var(--line); border-radius: 8px; }
+
+  /* 분석 · 대화 캡처 두 장 (39p) */
+  .ai2 { display: flex; align-items: flex-start; justify-content: center; gap: 18px; }
+  .ai2 .shot img { display: block; }
+
+  /* 자료 조사 네 단계 — 누가 하나 · 오늘 앱에서는 (16p) */
+  .rs-who { display: inline-block; margin-left: 8px; padding: 2px 9px; border-radius: 999px; font-size: 16px; font-weight: 700;
+            letter-spacing: 0; vertical-align: 3px; background: #EAF0FA; color: var(--navy); }
+  .rs-who.is-ai { background: var(--green); color: #fff; }
+  .rs-app { margin: 14px 0 0; padding-top: 12px; border-top: 1px dashed #C3CBD8; font-size: 17px; line-height: 1.5; color: var(--ink); }
+  .rs-app .nw { white-space: nowrap; }
+  .rs-app b { display: block; font-size: 16px; color: #7C8698; font-weight: 700; }
+  .flow-step .flow-desc { font-size: 18px; }
+
+</style>
+</head>
+<body data-app="Claude Code">
+
+<div class="stage">
+
+  <!-- 1. 데이터 시각화 · AI 업무도구 만들기 -------------- -->
+  <section class="slide slide--cover is-active">
+    <div class="cover-text">
+      <p class="cover-eyebrow">Module 4.</p>
+      <h1 class="cover-title">데이터 시각화 · AI 업무도구 만들기</h1>
+    </div>
+  </section>
+  <!-- 2. 오늘 만드는 것들 -------------------------------------- -->
+  <section class="slide">
+    <div class="slide-head"><h2>오늘 만드는 것들</h2><span class="head-tag">전체 흐름</span></div>
+    <div class="slide-body">
+      <p class="lead" style="margin-bottom:24px">같은 Claude Code로, 이번에는 <strong class="navy">업무도구</strong>를 만듭니다.</p>
+
+      <div class="roadmap">
+        <div class="rm-step is-done">
+          <div class="rm-pic rm-pic--duo"><img src="assets/img/m1-mypage.png" alt="말로 만들어 고친 나만의 웹페이지"><img src="assets/img/m1-idea-done.png" alt="프로젝트에서 채운 아이디어 기획서"></div>
+          <p class="rm-mod">M1</p>
+          <p class="rm-out">웹페이지 &middot; 기획서 초안</p>
+        </div>
+        <div class="rm-arrow">›</div>
+        <div class="rm-step is-done">
+          <div class="rm-pic"><img src="assets/img/m2-merged-result.png" alt="지점별 파일을 합친 통합표"></div>
+          <p class="rm-mod">M2</p>
+          <p class="rm-out">주간 실적 통합표</p>
+        </div>
+        <div class="rm-arrow">›</div>
+        <div class="rm-step is-done">
+          <div class="rm-pic"><img src="assets/img/m3-minutes-pdf.png" alt="메모에서 뽑아낸 회의록"></div>
+          <p class="rm-mod">M3</p>
+          <p class="rm-out">회의록 PDF</p>
+        </div>
+        <div class="rm-arrow">›</div>
+        <div class="rm-step is-now">
+          <div class="rm-pic"><img src="assets/img/m4n-dash.png" alt="키워드 세 개의 뉴스를 모아 키워드별로 비교하는 화면"></div>
+          <p class="rm-mod">M4</p>
+          <p class="rm-out">뉴스 동향 분석 리포트</p>
+          <p class="rm-here">지금 여기</p>
+        </div>
+        <div class="rm-arrow">›</div>
+        <div class="rm-step is-next">
+          <div class="rm-pic"><img src="assets/img/m5-poc-card.png" alt="내 업무로 가져갈 개선안"></div>
+          <p class="rm-mod">M5</p>
+          <p class="rm-out">아이디어 기획서 &middot; 목업 앱</p>
+        </div>
+      </div>
+
+      <div class="note" style="margin-top:26px">키워드를 넣으면 <strong class="navy">최근 뉴스를 모아 비교하고</strong>, AI가 <strong class="navy">보고서로 정리해 주는</strong> 앱을 만듭니다.</div>
+    </div>
+  </section>
+  <!-- 3. 이번 시간에 만들 것 ---------------------------------- -->
+  <section class="slide">
+    <div class="slide-head"><h2>이번 시간에 만들 것</h2><span class="head-tag">결과물 미리보기</span></div>
+    <div class="slide-body">
+      <p class="lead" style="margin-bottom:16px">키워드를 넣으면 <strong class="navy">뉴스 비교 · AI 분석 · 보고서 출력</strong>까지 되는 화면을 만듭니다.</p>
+
+      <div class="shots" style="gap:20px;align-items:flex-end">
+          <div>
+            <div class="shot" style="width:560px"><img src="assets/img/m4n-ai.png" alt="키워드별 뉴스를 비교하고 오른쪽에서 AI가 근거 번호를 달아 분석한 화면"></div>
+            <p class="shot-cap">① 뉴스 동향 분석 리포트 · AI 분석</p>
+          </div>
+          <div>
+            <div class="shot" style="width:270px"><img src="assets/img/m4n-dist-zip.png" alt="동료에게 줄 폴더와 압축 파일"></div>
+            <p class="shot-cap">② 압축 파일 하나로 전달</p>
+          </div>
+      </div>
+
+      <div class="note" style="margin-top:16px">이번 시간 이후, 여러분은 <strong class="navy">나만의 업무용 도구를 직접 만들 수 있습니다!</strong></div>
+    </div>
+  </section>
+  <!-- 10. 이제 본격적으로 만들어 봅시다 ------------------------ -->
+  <section class="slide">
+    <div class="slide-head"><h2>이제 본격적으로 만들어 봅시다</h2></div>
+    <div class="slide-body">
+      <p class="lead" style="margin-bottom:16px; text-align:center">
+        자, 그러면 지금부터 <strong class="navy">멋진 작품</strong>을 하나 만들어 보겠습니다.
+      </p>
+
+      <div class="two-shot">
+        <div>
+          <div class="shot"><img src="assets/img/m4n-dash.png" alt="키워드 세 개의 최근 뉴스를 모아 키워드별 · 주별 · 언론사별로 비교한 화면"></div>
+          <p class="shot-cap">키워드 세 개의 <strong>뉴스를 모아 비교</strong></p>
+        </div>
+        <div>
+          <div class="shot rep-top"><img src="assets/img/m4n-report.png" alt="숫자 표 · AI 분석 · 근거 기사 목록이 담긴 한 장짜리 보고서"></div>
+          <p class="shot-cap">AI 분석이 담긴 <strong>보고서 한 장</strong></p>
+        </div>
+      </div>
+
+      <p class="lead" style="margin-top:14px; text-align:center; font-size:22px">
+        오늘 여러분이 만들 <strong class="navy">한 화면</strong>입니다.
+      </p>
+    </div>
+  </section>
+  <!-- 11. [챕터] 작품을 만들기 위한 준비 단계 -------------- -->
+  <section class="slide slide--chapter" data-chapter="작품을 만들기 위한 준비 단계">
+    <div class="chapter">
+      <p class="ch-eyebrow">CHAPTER 1</p>
+      <h2 class="ch-title">작품을 만들기 위한 준비 단계</h2>
+      <div class="ch-rule"></div>
+      <p class="ch-desc">무엇을 만들지 정하고, AI 기능을 넣기 위한 준비물 하나를 챙깁니다.</p>
+      <ul class="ch-keys"><li>만들 것</li><li>AI 기능</li><li>Claude API KEY</li></ul>
+    </div>
+  </section>
+  <!-- 12. App vs AI App ------------------------------ -->
+  <section class="slide">
+    <div class="slide-head"><h2>App vs AI App</h2><span class="head-tag">M4-1 · 개념</span></div>
+    <div class="slide-body">
+      <div class="avs" style="width:920px; margin:0 auto">
+        <div class="avs-pic">
+          <img src="assets/img/m4-without-with-ai.png" alt="왼쪽 without AI 는 혼자 테트리스를 하는 사람, 오른쪽 with AI 는 AI 로봇과 화면 두 개로 테트리스 대결을 하는 그림">
+        </div>
+        <div class="avs-heads">
+          <div class="avs-h">
+            <p class="avs-t">App</p>
+            <p class="avs-d">혼자 하는 테트리스 &mdash; <strong>정해진 규칙대로만</strong> 움직입니다</p>
+          </div>
+          <div class="avs-h is-ai">
+            <p class="avs-t">AI App</p>
+            <p class="avs-d">AI와 대결하는 테트리스 &mdash; <strong>상대가 보고 판단합니다</strong></p>
+          </div>
+        </div>
+      </div>
+
+      <div class="note" style="margin-top:16px">
+        같은 뉴스 80건을 줘도 &mdash; 하나는 <strong class="navy">목록으로 늘어놓기만 하고</strong>,
+        하나는 <strong class="navy">읽고 무엇이 달라졌는지 정리해 줍니다.</strong>
+      </div>
+    </div>
+  </section>
+    <!-- 13. 오늘 만들 것 - 어디에 AI 기능이 들어갈까 ------ -->
+  <section class="slide">
+    <div class="slide-head"><h2>오늘 만들 것 &mdash; 어디에 AI 기능이 들어갈까</h2><span class="head-tag">M4-1 · 개념</span></div>
+    <div class="slide-body">
+      <p class="lead" style="margin-bottom:20px; text-align:center">
+        <strong class="navy">키워드</strong>를 넣으면 최근 뉴스를 모아 비교하고,
+        AI가 <strong class="navy">분석 &middot; 보고서</strong>까지 써 줍니다.
+      </p>
+
+      <div class="prev4">
+        <div class="prev4-item">
+          <div class="shot"><img src="assets/img/m4n-empty.png" alt="첫 화면 — 키워드를 넣는 검색창과 예시"></div>
+          <p class="prev4-t"><span class="prev4-no">1</span> 키워드 검색</p>
+          <p class="prev4-d">검색은 심부름꾼이 다녀옵니다</p>
+        </div>
+        <p class="prev4-ar">&rarr;</p>
+
+        <div class="prev4-item">
+          <div class="shot"><img src="assets/img/m4n-dash.png" alt="키워드별 기사 수 · 주별 추이 · 언론사를 보여 주는 화면"></div>
+          <p class="prev4-t"><span class="prev4-no">2</span> 뉴스 비교</p>
+          <p class="prev4-d">세는 일은 <strong>화면이</strong> 합니다</p>
+        </div>
+        <p class="prev4-ar">&rarr;</p>
+
+        <div class="prev4-item is-ai">
+          <div class="shot">
+            <img src="assets/img/m4n-ai.png" alt="오른쪽에서 AI가 고른 기사를 분석한 화면">
+            <span class="prev4-mark" style="left:71%; top:10%; width:27.5%; height:58%" aria-hidden="true"></span>
+          </div>
+          <span class="prev4-badge">AI 기능</span>
+          <p class="prev4-t"><span class="prev4-no prev4-no--ai">3</span> AI 분석</p>
+          <p class="prev4-d"><strong>여기서 AI가 기사를 읽습니다</strong></p>
+        </div>
+        <p class="prev4-ar">&rarr;</p>
+
+        <div class="prev4-item">
+          <div class="shot rep-top"><img src="assets/img/m4n-report.png" alt="AI 분석이 담긴 한 장짜리 보고서"></div>
+          <p class="prev4-t"><span class="prev4-no">4</span> 보고서 출력</p>
+          <p class="prev4-d"><strong>AI 분석</strong>이 한 장으로</p>
+        </div>
+      </div>
+
+      <div class="note note--warn" style="margin-top:20px">
+        ①②는 그냥 화면입니다. <strong class="hl">③④를 만들려면 AI 기능이 들어가야 하고,</strong>
+        그래서 <strong class="hl">Claude API KEY</strong>가 준비물로 필요합니다.
+      </div>
+    </div>
+  </section>
+  <!-- 13-2(뉴스). 오늘의 재료 ---------------------------------- -->
+  <section class="slide">
+    <div class="slide-head"><h2>오늘의 재료 &mdash; 키워드 하나와 공개된 뉴스</h2><span class="head-tag">M4-1 · 개념</span></div>
+    <div class="slide-body">
+      <div class="split" style="gap:22px; align-items:stretch">
+        <div class="split-main" style="min-width:0">
+          <div class="src">
+            <p class="src-h" style="margin:0">구글 뉴스 &middot; 「현대차 마케팅」 <span>최근 30일 &mdash; 48건 중 네 줄</span></p>
+            <table class="newst">
+              <tr><th>날짜</th><th>언론사</th><th>제목</th></tr>
+              <tr><td class="d">9/10</td><td class="s">더구루</td><td class="t">현대차, 美 830개 딜러망에 'AI 영업사원' 투입…마케팅 판도 변화 시동</td></tr>
+              <tr><td class="d">9/8</td><td class="s">v.daum.net</td><td class="t">현대차, UEFA 챔피언스리그 공식 파트너 선정</td></tr>
+              <tr class="off"><td class="d">9/30</td><td class="s">Histoire pour tous</td><td class="t">금액 단위를 바꿀 수 있나요? 해외 카지노 마케팅 설정 문답</td></tr>
+              <tr class="off"><td class="d">9/28</td><td class="s">brunch.co.kr</td><td class="t">소셜미디어 마케팅에서 가장 강력한 무기는 ‘공감’</td></tr>
+              <tr><td colspan="3">&middot;&middot;&middot; 한 줄이 기사 한 건입니다</td></tr>
+            </table>
+          </div>
+          <div class="note" style="margin-top:14px">
+            <strong class="navy">관계없는 기사도 섞여 옵니다</strong> &mdash; 카지노 광고, 일반 마케팅 칼럼&hellip; 빼는 것은 <strong class="hl">사람</strong>이 합니다.
+          </div>
+        </div>
+
+        <div class="split-side" style="flex:0 0 380px">
+          <div class="side-box">
+            <p class="side-t">어디서 찾나</p>
+            <p class="side-d"><strong class="navy">구글 뉴스</strong>입니다. 키도 설치도 필요 없이 <strong>server.js 가 다녀옵니다.</strong></p>
+          </div>
+          <div class="side-box" style="margin-top:12px">
+            <p class="side-t">AI가 읽는 것은 세 가지</p>
+            <p class="side-d"><strong>제목 &middot; 언론사 &middot; 날짜</strong>뿐입니다. 본문은 읽지 않으니, 원문 확인은 <strong class="navy">사람</strong>이 합니다.</p>
+          </div>
+          <div class="side-box side-box--warn" style="margin-top:12px">
+            <p class="side-t">검색어도 회사 밖으로 나갑니다</p>
+            <p class="side-d">신차 코드명 &middot; 내부 캠페인명 같은 <strong class="hl">미공개 정보는 넣지 않습니다.</strong></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- 13-3(뉴스). AI 시대의 자료 조사 — 사람의 역할 ------------ -->
+  <section class="slide">
+    <div class="slide-head"><h2>AI 시대의 자료 조사 &mdash; 사람의 역할이 바뀌었습니다</h2><span class="head-tag">M4-1 · 개념</span></div>
+    <div class="slide-body">
+      <p class="lead" style="margin-bottom:20px; text-align:center">
+        검색하는 곳은 그대로인데, <strong class="navy">사람이 하는 일</strong>이 달라졌습니다.
+      </p>
+
+      <div class="ba">
+        <div class="ba-col ba--before">
+          <p class="ba-head">예전의 자료 조사</p>
+          <div class="ba-body">
+            <span class="ba-quote">사람이 <strong>하나씩 직접 읽고</strong> 이해한다</span>
+            <ul>
+              <li>구글 검색 &rarr; 링크를 하나씩 열어 <strong>직접 읽는다</strong></li>
+              <li>유튜브 검색 &rarr; 영상을 끝까지 <strong>직접 본다</strong></li>
+              <li>열 건을 보면 열 건을 다 읽어야 한다</li>
+            </ul>
+          </div>
+        </div>
+        <div class="ba-col ba--after">
+          <p class="ba-head">AI 시대의 자료 조사</p>
+          <div class="ba-body">
+            <span class="ba-quote"><strong>좋은 출처를 찾고</strong>, AI의 도움으로 이해한다</span>
+            <ul>
+              <li>구글 &middot; 유튜브 검색 &rarr; <strong>출처(링크)만 모은다</strong></li>
+              <li>읽고 정리하는 일은 <strong>AI에게</strong> 맡긴다</li>
+              <li>사람은 <strong>무엇을 남길지 고르고 판단</strong>한다</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="note" style="margin-top:18px">
+        AI에게 <strong class="navy">출처 찾기까지</strong> 맡길 수도 있습니다. 그래도
+        <strong class="hl">정말 관련 있는 자료인지는 사람이 확인</strong>해야 합니다.<br>
+        어떤 AI 도구를 쓰든 이 역할 나눔은 같습니다.
+      </div>
+    </div>
+  </section>
+  <!-- 13-4(뉴스). 자료 조사는 네 단계 — 오늘 앱도 이 순서 -------- -->
+  <section class="slide">
+    <div class="slide-head"><h2>자료 조사는 네 단계 &mdash; 오늘 앱도 이 순서입니다</h2><span class="head-tag">M4-1 · 개념</span></div>
+    <div class="slide-body">
+      <div class="flow">
+        <div class="flow-step">
+          <span class="flow-no">STEP 1</span>
+          <p class="flow-name">목적 정하기<span class="rs-who">사람</span></p>
+          <p class="flow-desc">무엇을 알고 싶은지 <strong>먼저 적어 둡니다</strong></p>
+          <p class="rs-app"><b>오늘 앱에서는</b>보고서기준.md</p>
+        </div>
+        <div class="flow-arrow">&rarr;</div>
+        <div class="flow-step">
+          <span class="flow-no">STEP 2</span>
+          <p class="flow-name">모으기<span class="rs-who">심부름꾼</span></p>
+          <p class="flow-desc">출처를 <strong>넓게</strong> 모읍니다 &mdash; 읽는 건 나중에</p>
+          <p class="rs-app"><b>오늘 앱에서는</b>키워드 검색 <span class="nw">(Phase 2)</span></p>
+        </div>
+        <div class="flow-arrow">&rarr;</div>
+        <div class="flow-step">
+          <span class="flow-no">STEP 3</span>
+          <p class="flow-name">고르기<span class="rs-who">사람</span></p>
+          <p class="flow-desc">목적과 <strong>관계없는 것은 뺍니다</strong></p>
+          <p class="rs-app"><b>오늘 앱에서는</b>기사 체크 빼기</p>
+        </div>
+        <div class="flow-arrow">&rarr;</div>
+        <div class="flow-step is-now">
+          <span class="flow-no">STEP 4</span>
+          <p class="flow-name">분석하기<span class="rs-who is-ai">AI</span></p>
+          <p class="flow-desc"><strong>남긴 것만</strong>으로 정리하고, 문장마다 출처를 답니다</p>
+          <p class="rs-app"><b>오늘 앱에서는</b>AI 분석 + 근거 번호 <span class="nw">(Phase 3)</span></p>
+        </div>
+      </div>
+
+      <div class="split" style="gap:18px; margin-top:22px">
+        <div class="side-box" style="flex:1 1 0; margin:0">
+          <p class="side-t">고르는 사람이 결과를 정합니다</p>
+          <p class="side-d">관계없는 자료가 섞이면 AI는 <strong>그것까지 성실하게 정리</strong>합니다. 빼는 일은 <strong class="navy">사람</strong>의 몫입니다.</p>
+        </div>
+        <div class="side-box side-box--warn" style="flex:1 1 0; margin:0">
+          <p class="side-t">못 가져오는 출처도 있습니다</p>
+          <p class="side-d">수집을 막아 둔 사이트, 자막을 막아 둔 영상은 AI가 읽지 못합니다. <strong class="hl">검색에 없다고 세상에 없는 것은 아닙니다.</strong></p>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- 14. 준비물은 하나 - Claude API KEY -------- -->
+  <section class="slide">
+    <div class="slide-head"><h2>준비물은 하나 &mdash; Claude API KEY</h2><span class="head-tag">M4-1 · 개념</span></div>
+    <div class="slide-body">
+      <div class="key2">
+        <div class="key2-pic">
+          <img src="assets/img/m4-apikey.png" alt="Claude API Key 가 든 지갑에서 동전이 나가고, 알바생이 그 돈으로 PDF를 읽어 보고서와 차트를 만들어 주는 그림">
+          <p class="shot-cap">AI에게 일을 시킬 때마다 <strong>여기서 돈이 나갑니다</strong></p>
+        </div>
+
+        <div class="key2-side">
+          <div class="ba-col ba--after">
+            <p class="ba-head">메모장에 저장해 뒀다면</p>
+            <div class="ba-body" style="padding:15px 18px 17px">
+              <p style="margin:0">그대로 <strong>꺼내서 쓰면 됩니다</strong></p>
+            </div>
+          </div>
+          <div class="ba-col ba--before">
+            <p class="ba-head">저장해 두지 않았다면</p>
+            <div class="ba-body" style="padding:15px 18px 17px">
+              <p style="margin:0">발급 화면을 닫으면 <strong>다시 볼 수 없습니다</strong></p>
+              <p style="margin:7px 0 0">H Chat Pro 왼쪽 메뉴 <strong>Personal API Key</strong> 에서<br>OTP 인증 후 <strong>다시 발급</strong>받으세요</p>
+              <div class="shot" style="width:132px; margin:10px auto 0"><img src="assets/img/m4-api-otp.png" alt="OTP 인증 화면"></div>
+              <p class="shot-cap" style="font-size:15px">OTP 인증을 한 번 더</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- 15. [챕터] 가장 단순한 AI App 만들어보기 -------- -->
+  <section class="slide slide--chapter" data-chapter="가장 단순한 AI App 만들어보기">
+    <div class="chapter">
+      <p class="ch-eyebrow">CHAPTER 2</p>
+      <h2 class="ch-title">가장 단순한 AI App 만들어보기</h2>
+      <div class="ch-rule"></div>
+      <p class="ch-desc">API 키가 진짜 되는지 확인하고, 가장 단순한 AI 앱 하나를 손에 쥡니다.</p>
+      <ul class="ch-keys"><li>app.html</li><li>server.js</li><li>사내망</li><li>동작 확인</li></ul>
+    </div>
+  </section>
+  <!-- 16. 이런 앱을 만들어 달라고 하면 ------------------------ -->
+  <section class="slide">
+    <div class="slide-head"><h2>이런 앱을 만들어 달라고 하면</h2><span class="head-tag">M4-2 · 개념</span></div>
+    <div class="slide-body">
+      <p class="lead" style="margin-bottom:14px">
+        Claude에게 <strong class="navy">연결부터 확인하는 화면</strong>을 만들어 달라고 했습니다.
+      </p>
+
+      <div class="req">
+        <div class="req-list">
+          <p class="req-t">이렇게 부탁했습니다</p>
+          <ul>
+            <li><b>HTML 파일 하나</b>로만</li>
+            <li>화면에서 <b>API KEY</b>를 받고</li>
+            <li>버튼을 누르면 <b>연결 테스트</b></li>
+            <li>안 되면 <b>자세한 에러메시지</b></li>
+            <li>되면 <b>간단한 채팅 화면</b></li>
+          </ul>
+          <p class="req-sub">SDK는 설치하지 않고 &middot; 모델은 <b>Sonnet</b></p>
+        </div>
+
+        <div class="req-shot">
+          <div class="fail-shot">
+            <img src="assets/img/m4-app-fail.png" alt="키를 넣고 연결 테스트를 눌렀더니 연결 실패가 뜬 화면">
+            <span class="fail-mark" aria-hidden="true"></span>
+          </div>
+          <p class="shot-cap">그런데 눌러 보면 &mdash; <strong>연결 실패</strong></p>
+        </div>
+      </div>
+
+      <div class="note note--warn" style="margin-top:14px">
+        코드가 틀린 게 아닙니다. <strong class="hl">사외망 기준으로 만들어졌을 뿐</strong>입니다.
+      </div>
+    </div>
+  </section>
+
+  <!-- 17. 왜 막혔을까요 — 회사 안에는 문턱이 있습니다 ---- -->
+  <section class="slide">
+    <div class="slide-head"><h2>왜 막혔을까요 &mdash; 회사 안에는 문턱이 있습니다</h2><span class="head-tag">M4-2 · 개념</span></div>
+    <div class="slide-body">
+      <div class="figure" style="margin:0">
+        <img class="netc" src="assets/img/m4-net-compare.png"
+             alt="왼쪽 사외망: 열쇠를 든 사람이 문을 그대로 지나 밖의 서버로 간다. 오른쪽 사내망: 같은 열쇠로는 개찰구에 막히고, 통과권을 가진 사람만 지나 서버로 간다">
+      </div>
+
+      <div class="why2">
+        <div class="why2-box">
+          <p class="why2-t">사외망 — 집 · 카페</p>
+          <p class="why2-d">열쇠(API 키)만 있으면 화면이 <b>바로</b> 나갑니다. 세상에서 가장 흔한 방식이라, <b>AI 도 이 방식으로 만들어 줍니다.</b></p>
+        </div>
+        <div class="why2-box is-in">
+          <p class="why2-t">사내망 — 회사 안</p>
+          <p class="why2-d">같은 방법으로는 문턱에서 <strong class="hl">막힙니다</strong>. 그래서 <b>통과권을 가진 심부름꾼</b>에게 밖을 대신 다녀오게 합니다 — 그것도 <b>말로 시키면</b> 됩니다.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 18. [실습] 강의자료의 base 폴더에서 code . 다음 claude ---- -->
+  <section class="slide">
+    <div class="slide-head"><h2>[실습] base 폴더에서 Claude를 켭니다</h2><span class="head-tag">M4-2 · 실습</span></div>
+    <div class="slide-body" style="padding-top:16px">
+      <div class="cprow">
+        <div class="cp-box">
+          <p class="cp-t">강의자료</p>
+          <p class="cp-d mono">C:\work\강의자료</p>
+        </div>
+        <div class="cp-ar"><b>M4 &gt; base</b><span>&rarr;</span></div>
+        <div class="cp-box is-now">
+          <p class="cp-t">작업 폴더</p>
+          <p class="cp-d mono">C:\work\강의자료\M4\base</p>
+          <p class="cp-f">app.html &middot; server.js</p>
+        </div>
+        <p class="cp-note">복사하지 않고 <b>이 폴더에서 바로 실습</b>합니다 &mdash; 꼬이면 강사에게 base 폴더를 새로 받습니다</p>
+      </div>
+
+      <div class="twoup">
+        <div>
+          <p class="tu-t"><span class="tu-no">1</span> base 폴더의 <b>주소창</b>에 <span class="mono">code .</span></p>
+          <div class="shot">
+            <svg viewBox="0 0 520 164" role="img" aria-label="탐색기 주소창을 한 번 클릭해 경로가 파랗게 선택되면, 그 자리에 code . 을 치고 Enter 하는 그림">
+              <rect width="520" height="164" fill="#fff"/>
+              <rect x="0" y="0" width="520" height="44" fill="#F7F8FA"/>
+              <line x1="0" y1="44" x2="520" y2="44" stroke="#D8DEE9"/>
+              <text x="15" y="28" font-size="15" fill="#8A94A6">&#8249;</text>
+              <text x="35" y="28" font-size="15" fill="#8A94A6">&#8250;</text>
+              <text x="55" y="28" font-size="14" fill="#8A94A6">&#8593;</text>
+              <rect x="78" y="10" width="426" height="24" rx="4" fill="#fff" stroke="#C3CBD8"/>
+              <rect x="82" y="13" width="176" height="18" rx="2" fill="#164194"/>
+              <text x="88" y="26" font-size="12.5" fill="#fff" font-family="Consolas, monospace">C:\work\강의자료\M4\base</text>
+              <circle cx="10" cy="62" r="8.5" fill="#164194"/>
+              <text x="10" y="66" font-size="11" font-weight="700" fill="#fff" text-anchor="middle">1</text>
+              <text x="26" y="66" font-size="13.5" fill="#4A5262">주소창을 한 번 클릭 &mdash; 경로가 파랗게 선택됩니다</text>
+              <rect x="0" y="82" width="520" height="44" fill="#F7F8FA"/>
+              <line x1="0" y1="126" x2="520" y2="126" stroke="#D8DEE9"/>
+              <text x="15" y="110" font-size="15" fill="#8A94A6">&#8249;</text>
+              <text x="35" y="110" font-size="15" fill="#8A94A6">&#8250;</text>
+              <text x="55" y="110" font-size="14" fill="#8A94A6">&#8593;</text>
+              <rect x="78" y="92" width="426" height="24" rx="4" fill="#fff" stroke="#164194"/>
+              <text x="88" y="108" font-size="13" font-weight="700" fill="#1A1A1A" font-family="Consolas, monospace">code .</text>
+              <rect x="136" y="97" width="2" height="15" fill="#164194"/>
+              <circle cx="10" cy="144" r="8.5" fill="#164194"/>
+              <text x="10" y="148" font-size="11" font-weight="700" fill="#fff" text-anchor="middle">2</text>
+              <text x="26" y="148" font-size="13.5" fill="#4A5262">지워진 자리에 code . 을 치고 Enter</text>
+            </svg>
+          </div>
+          <div class="pbox pbox--tight" data-app="탐색기 주소창"><p>code .</p></div>
+        </div>
+
+        <div>
+          <p class="tu-t"><span class="tu-no">2</span> VS Code <b>터미널</b>에서 <span class="mono">claude</span></p>
+          <div class="shot">
+            <svg viewBox="0 0 520 164" role="img" aria-label="VS Code 터미널에 PS C:\work\강의자료\M4\base&gt; claude 를 입력하는 그림">
+              <rect width="520" height="164" fill="#fff"/>
+              <rect x="0" y="0" width="520" height="26" fill="#F7F8FA"/>
+              <text x="14" y="18" font-size="11.5" fill="#8A94A6">문제</text>
+              <text x="50" y="18" font-size="11.5" fill="#8A94A6">출력</text>
+              <text x="86" y="18" font-size="11.5" fill="#8A94A6">디버그 콘솔</text>
+              <text x="160" y="18" font-size="11.5" font-weight="700" fill="#164194">터미널</text>
+              <rect x="156" y="22" width="46" height="3" fill="#164194"/>
+              <text x="506" y="18" font-size="10.5" text-anchor="end" fill="#8A94A6">상단 메뉴 Terminal &gt; New Terminal</text>
+              <rect x="0" y="26" width="520" height="138" fill="#17181C"/>
+              <text x="18" y="62" font-size="14.5" fill="#C9CDD4" font-family="Consolas, monospace">PS C:\work\강의자료\M4\base&gt;</text>
+              <text x="248" y="62" font-size="14.5" font-weight="700" fill="#F2C14E" font-family="Consolas, monospace">claude</text>
+              <rect x="308" y="50" width="2" height="16" fill="#F2C14E"/>
+              <text x="18" y="98" font-size="12.5" fill="#7C838F">앞에 보이는 경로가 강의자료의 base 폴더인지 봅니다</text>
+              <text x="18" y="126" font-size="12.5" fill="#7C838F">Claude Code 가 뜨면 준비 끝</text>
+            </svg>
+          </div>
+          <div class="pbox pbox--tight" data-app="VS Code 터미널"><p>claude</p></div>
+        </div>
+      </div>
+
+      <div class="eff3">
+        <div>
+          <p class="tu-t"><span class="tu-no">3</span> Claude 가 뜨면 <span class="mono">/effort</span> &rarr; <b>high</b></p>
+          <p class="eff3-d">앱을 만드는 일은 생각할 것이 많습니다 &mdash; <b>조금 느려도 더 오래 생각</b>하게 합니다.
+            <span class="mono">&rarr;</span> 로 high 에 맞추고 <b>Enter</b></p>
+        </div>
+        <div class="pbox pbox--tight"><p>/effort</p></div>
+        <div class="shot">
+          <svg viewBox="0 0 392 74" role="img" aria-label="Effort 고르는 창 — low medium high xhigh max 중 high 에 맞춘 그림">
+            <rect width="392" height="74" fill="#17181C"/>
+            <text x="14" y="24" font-size="13" font-weight="700" fill="#E6E8EC" font-family="Consolas, monospace">Effort</text>
+            <text x="150" y="24" font-size="11.5" fill="#9AA1AC" font-family="Consolas, monospace">Faster</text>
+            <text x="378" y="24" font-size="11.5" fill="#9AA1AC" font-family="Consolas, monospace" text-anchor="end">Smarter</text>
+            <line x1="150" y1="34" x2="378" y2="34" stroke="#9AA1AC"/>
+            <polygon points="264,29 259,35 269,35" fill="#E6E8EC"/>
+            <text x="164" y="52" font-size="12.5" fill="#9AA1AC" font-family="Consolas, monospace" text-anchor="middle">low</text>
+            <text x="214" y="52" font-size="12.5" fill="#9AA1AC" font-family="Consolas, monospace" text-anchor="middle">medium</text>
+            <text x="264" y="52" font-size="12.5" font-weight="700" fill="#3CC46A" font-family="Consolas, monospace" text-anchor="middle">high</text>
+            <text x="314" y="52" font-size="12.5" fill="#9AA1AC" font-family="Consolas, monospace" text-anchor="middle">xhigh</text>
+            <text x="364" y="52" font-size="12.5" fill="#9AA1AC" font-family="Consolas, monospace" text-anchor="middle">max</text>
+            <text x="14" y="67" font-size="10.5" fill="#7C838F" font-family="Consolas, monospace">&#8592;/&#8594; to adjust &#183; Enter to confirm</text>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- 19. 두 파일이 하는 일 ------------------------------ -->
+  <section class="slide">
+    <div class="slide-head"><h2>두 파일이 하는 일</h2><span class="head-tag">M4-2 · 개념</span></div>
+    <div class="slide-body" style="padding-top:16px">
+      <div class="two-shot">
+        <div>
+          <div class="shot">
+            <svg viewBox="0 0 460 282" role="img" aria-label="VS Code 탐색기에 BASE 폴더가 열려 app.html · server.js 두 파일만 보이는 그림">
+              <rect width="460" height="282" fill="#F7F8FA"/>
+              <text x="18" y="30" font-size="16" font-weight="700" fill="#4A5262">탐색기</text>
+              <text x="18" y="62" font-size="16" font-weight="700" fill="#1A1A1A">&#8964; BASE</text>
+              <rect x="10" y="74" width="440" height="30" rx="4" fill="#DCE6F7"/>
+              <text x="40" y="95" font-size="17" font-weight="700" fill="#164194">app.html</text>
+              <rect x="10" y="106" width="440" height="30" rx="4" fill="#DCE6F7"/>
+              <text x="40" y="127" font-size="17" font-weight="700" fill="#164194">server.js</text>
+              <rect x="40" y="164" width="380" height="76" rx="6" fill="#fff" stroke="#C3CBD8" stroke-dasharray="5 4"/>
+              <text x="230" y="196" font-size="15.5" fill="#7C8698" text-anchor="middle">재료 파일은 없습니다</text>
+              <text x="230" y="222" font-size="15.5" fill="#7C8698" text-anchor="middle">뉴스는 검색으로 가져옵니다</text>
+            </svg>
+          </div>
+          <p class="shot-cap">강의자료의 base 폴더 &mdash; <strong>이 두 파일</strong></p>
+        </div>
+        <div style="flex:1.38 1 0">
+          <div class="shot"><img src="assets/img/m4-server-explain.png" alt="왼쪽 app.html 화면에서 적고 누르면, 가운데 server.js 심부름꾼이 요청을 들고 Claude 에 갔다가 응답을 들고 돌아온다"></div>
+          <p class="shot-cap">누르면 <strong>심부름꾼</strong>이 다녀옵니다</p>
+        </div>
+      </div>
+
+      <div class="why2">
+        <div class="why2-box is-in">
+          <p class="why2-t">app.html &mdash; 보는 화면</p>
+          <p class="why2-d">적는 칸 &middot; 누르는 버튼 &middot; 답이 나오는 자리. <b>사람이 보고 만지는 쪽</b>입니다.</p>
+        </div>
+        <div class="why2-box is-in">
+          <p class="why2-t">server.js &mdash; 뛰어다니는 심부름꾼</p>
+          <p class="why2-d"><b>요청</b>을 들고 나갔다가 <b>응답</b>을 들고 돌아옵니다. 화면은 밖에 나갈 일이 없습니다.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- 20. 이 두 파일은 미리 만들어 두었습니다 -------------- -->
+  <section class="slide">
+    <div class="slide-head"><h2>이 두 파일은 미리 만들어 두었습니다</h2><span class="head-tag">M4-2 · 참고</span></div>
+    <div class="slide-body" style="padding-top:16px">
+      <p class="lead" style="margin-bottom:12px">
+        아래는 이 두 파일을 만들 때 쓴 <strong class="navy">원본 프롬프트의 내용</strong>입니다 &mdash; 오늘 직접 치지는 않습니다.
+      </p>
+
+      <div class="spec">
+        <div class="spec-col">
+          <p class="spec-t">중계 서버 <span class="mono">server.js</span> 에 건 조건<span>원본 프롬프트에서는 claude-proxy.js</span></p>
+          <ul>
+            <li>설치 없이 Node 기본 모듈만 쓸 것</li>
+            <li>8787 포트에서 받고, 이미 쓰이면 하나씩 올려서 열 것</li>
+            <li>받은 요청은 사내 게이트웨이 주소로 넘길 것</li>
+            <li>인증은 Authorization: Bearer (x-api-key 아님), 키의 공백·줄바꿈은 지울 것</li>
+            <li>헤더와 길이(Content-Length)를 정확히 맞출 것</li>
+            <li>사내망이라 SSL 검증은 끌 것</li>
+            <li>보내기 전에 모델 · stream · max_tokens 를 채워 줄 것</li>
+            <li>요청마다 시각 · 상태 코드 · 걸린 시간을 터미널에 찍을 것</li>
+          </ul>
+        </div>
+
+        <div class="spec-col">
+          <p class="spec-t">화면 <span class="mono">app.html</span> 에 건 조건</p>
+          <ul>
+            <li>요청은 내 PC의 중계 서버에만 보낼 것</li>
+            <li>바깥 주소를 직접 부르는 코드는 모두 지울 것</li>
+            <li>키는 화면 입력칸에서 받아 넘길 것</li>
+            <li>실패하면 상태 코드와 응답 내용을 화면에 그대로 보여줄 것</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="note note--warn" style="margin-top:14px">
+        조건이 <strong>열 줄이 넘고</strong> 한 글자만 어긋나도 연결이 안 됩니다. 복잡한 작업이라
+        <strong class="hl">미리 만들어 검증해 두었습니다</strong> &mdash; 오늘 여러분이 만들 것은
+        <strong class="navy">그 위에 올라가는 화면</strong>입니다.
+      </div>
+    </div>
+  </section>
+  <!-- 21. [실습] 띄워 달라고 시킵니다 ------------------------ -->
+  <section class="slide">
+    <div class="slide-head"><h2>[실습] 띄워 달라고 시킵니다</h2><span class="head-tag">M4-2 · 실습</span></div>
+    <div class="slide-body" style="padding-top:12px">
+      <div class="pbox">
+        <p>이 폴더의 server.js 를 실행해서 중계 서버를 띄워줘.</p>
+        <p>서버는 꺼지지 않게 계속 띄워 두고,</p>
+        <p>터미널에 찍힌 주소를 <b>브라우저까지 열어줘.</b></p>
+      </div>
+
+      <div class="split" style="gap:24px; margin-top:10px">
+        <div class="split-main">
+          <div class="shot"><img src="assets/img/m4-localhost.png" alt="왼쪽 — app.html 을 더블클릭하면 선이 빠진 채라 화면만 뜨고 연결이 안 된다. 오른쪽 — server.js 가 localhost:8787 로 화면을 열어 주면 Claude 까지 이어진다"></div>
+          <p class="shot-cap">왼쪽처럼 <strong>더블클릭</strong>하면 선이 빠진 채입니다 &mdash; 오른쪽처럼 <strong>주소로</strong> 들어가야 이어집니다</p>
+        </div>
+
+        <div class="split-side" style="flex:0 0 510px">
+          <div class="side-box" style="padding:11px 17px 13px">
+            <p class="side-t">이렇게 뜨면 성공</p>
+            <p class="side-d" style="font-size:18px">터미널에 <span class="mono">READY http://localhost:8787</span>, 브라우저에 <strong>연결 테스트</strong> 화면.<br>안 열리면 터미널에 찍힌 <strong>그 주소</strong>를 주소창에 붙여넣습니다.</p>
+          </div>
+          <div class="side-box" style="margin-top:8px; padding:11px 17px 13px">
+            <p class="side-t">localhost 가 뭔가요</p>
+            <p class="side-d" style="font-size:18px"><strong class="navy">내 컴퓨터 자신</strong>을 부르는 이름입니다 &mdash; 밖에서는 들어올 수 없습니다. 뒤의 <span class="mono">8787</span> 은 그 안의 <strong class="navy">몇 번 창구</strong>인지입니다.</p>
+          </div>
+          <div class="side-box side-box--warn" style="margin-top:8px; padding:11px 17px 13px">
+            <p class="side-t">더블클릭하면 왜 안 되나</p>
+            <p class="side-d" style="font-size:18px">① 8787 이 이미 쓰이면 서버는 <strong>8788 로 옮겨 가는데</strong>, 더블클릭한 화면은 8787 만 부릅니다.<br>② 앱을 고치다 <strong>파일이 나뉘면</strong> 그때부터 열리지 않습니다.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- 22. [실습] 화면에 API 키를 넣고 연결합니다 -------- -->
+  <section class="slide">
+    <div class="slide-head"><h2>[실습] 화면에 API 키를 넣고 연결합니다</h2><span class="head-tag">M4-2 · 실습</span></div>
+    <div class="slide-body">
+      <div class="split">
+        <div class="split-main">
+          <ol class="steps steps--lg">
+            <li><strong>Claude API Key</strong> 칸에 키를 붙여넣습니다<small>메모장에 적어 둔 그 키입니다</small></li>
+            <li><strong>[연결 테스트]</strong> 를 누릅니다<small>&ldquo;연결 테스트 중…&rdquo; 이 잠깐 보입니다</small></li>
+            <li><strong>연결 성공</strong> 이 뜨면 채팅 화면으로 바뀝니다<small>바로 질문을 적어 보세요</small></li>
+          </ol>
+        </div>
+        <div class="split-side" style="flex:0 0 400px">
+          <div class="shot" style="width:400px"><img src="assets/img/m4-app-key.png" alt="API 키를 입력하고 연결 테스트를 누르는 화면"></div>
+          <div class="side-box side-box--warn" style="margin-top:12px">
+            <p class="side-t">키는 나만</p>
+            <p class="side-d">화면 공유 · 메신저 · 게시판에 <strong>올리지 않습니다.</strong></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- 23. 잘 동작하죠? ------------------------------------------ -->
+  <section class="slide">
+    <div class="slide-head"><h2>잘 동작하죠?</h2><span class="head-tag">M4-2 · 확인</span></div>
+    <div class="slide-body">
+      <p class="lead" style="margin-bottom:10px; text-align:center">
+        코드는 한 줄도 쓰지 않았습니다. <strong class="navy">띄워 달라고 말했을 뿐</strong>입니다.
+      </p>
+      <div class="figure" style="margin:0">
+        <div class="shot" style="width:520px; margin:0 auto"><img src="assets/img/m4-app-ok.png" alt="연결에 성공해 질문에 답이 온 채팅 화면"></div>
+      </div>
+    </div>
+  </section>
+  <!-- 24. [챕터] 멋진 AI App으로 만들기 ---------------- -->
+  <section class="slide slide--chapter" data-chapter="멋진 AI App으로 만들기">
+    <div class="chapter">
+      <p class="ch-eyebrow">CHAPTER 3</p>
+      <h2 class="ch-title">멋진 AI App으로 만들기</h2>
+      <div class="ch-rule"></div>
+      <p class="ch-desc">한 번에 다 시키지 않습니다. 계획서를 먼저 쓰게 하고, 한 단계씩 확인하며 만듭니다.</p>
+      <ul class="ch-keys"><li>PHASE.md</li><li>Human-in-the-loop</li><li>뉴스 검색</li><li>AI 분석</li><li>보고서</li></ul>
+    </div>
+  </section>
+  <!-- 25. 크게 만들고 고치기 vs 한 층씩 확인하며 ------------ -->
+  <section class="slide">
+    <div class="slide-head"><h2>크게 만들고 고치기 vs 한 층씩 확인하며</h2><span class="head-tag">M4-3 · 개념</span></div>
+    <div class="slide-body">
+      <div class="vs2">
+        <div>
+          <div class="vs2-pic">
+            <img src="assets/img/m4-bigfix.png" alt="맨 아래 빨간 블록이 삐뚤게 놓인 채 한 번에 높이 쌓은 대시보드 탑이 기울어 있고, 알바생이 사다리 위에서 윗부분에 테이프를 덧대며 고치는 동안 직장인이 맨 아래 블록을 가리키는 그림">
+          </div>
+          <div class="vs2-h">
+            <p class="vs2-t">한 번에 크게 만들고 고치면</p>
+            <p class="vs2-d">처음 엇나간 것을 대화로 <strong>고칠수록 더 꼬입니다</strong></p>
+          </div>
+        </div>
+        <div>
+          <div class="vs2-pic">
+            <img src="assets/img/m4-hitl.png" alt="직장인이 4층짜리 설계도를 들고 수평계로 새 층을 확인하고, 알바생이 반듯한 대시보드 탑을 한 층씩 올리는 그림 — 층마다 초록 체크, 한 층은 되돌려 고친 주황 화살표">
+          </div>
+          <div class="vs2-h is-ok">
+            <p class="vs2-t">한 층씩, 내가 확인하며</p>
+            <p class="vs2-d">엇나가기 전에 잡고, <strong>그 층만 고칩니다</strong></p>
+          </div>
+        </div>
+      </div>
+
+      <ul class="vs2-chips">
+        <li>정확합니다</li>
+        <li>대화가 흐려지지 않습니다</li>
+        <li>엎을 일이 줄어 덜 씁니다</li>
+      </ul>
+
+      <div class="note" style="margin-top:12px">
+        사람이 단계마다 확인하는 이 방식이 <strong class="navy">Human-in-the-loop</strong> &mdash;
+        정하는 것은 <strong class="navy">사람</strong>, 빠르게 만드는 것은 AI입니다.
+      </div>
+    </div>
+  </section>
+  <!-- 26. 오늘 실습도 이 순서로 갑니다 --------------------- -->
+  <section class="slide">
+    <div class="slide-head"><h2>오늘 실습도 이 순서로 갑니다</h2><span class="head-tag">M4-3 · 개념</span></div>
+    <div class="slide-body">
+      <p class="lead" style="margin-bottom:8px; text-align:center">
+        알바생이 한 단계 만들면 <strong class="navy">내가 보고 OK</strong> &mdash; 그래야 다음 계단으로 올라갑니다.
+      </p>
+
+      <img class="pic1" style="width:680px" src="assets/img/m4-step-check.png" alt="알바생이 만들고(worker builds) 사람이 확인하는(human checks) 일을 세 번 반복하며 계단을 올라가는 그림">
+
+      <div class="note" style="margin-top:10px">
+        <strong class="navy">지침서(CLAUDE.md) &rarr; 계획서(PHASE.md) &rarr; Phase 1 &rarr; 확인 &rarr; Phase 2 &hellip;</strong><br>
+        느려 보여도 엎고 다시 하는 일이 없어, 결국 덜 돌아갑니다.
+      </div>
+    </div>
+  </section>
+  <!-- 28. [실습] 지침부터 적어 둡니다 - CLAUDE.md ---------- -->
+  <section class="slide">
+    <div class="slide-head"><h2>[실습] 지침서부터 만듭니다 &mdash; 목적과 규칙</h2><span class="head-tag">M4-3 · 실습</span></div>
+    <div class="slide-body" style="padding-top:12px">
+      <p class="lead" style="margin-bottom:10px">
+        M3에서 만든 <strong class="navy">그 지침서</strong>입니다. 여기서도 <strong class="navy">목적</strong>과 <strong class="navy">규칙</strong>을 적어 둡니다.
+      </p>
+
+      <div class="split" style="gap:22px">
+        <div class="split-main">
+          <div class="pbox pbox--tight">
+            <p><b>CLAUDE.md</b> 를 만들고 아래 <b>목적</b>과 <b>규칙</b>을 적어줘.</p>
+            <p>[목적]</p>
+            <p>1) 키워드를 넣으면 <b>최근 뉴스를 찾아</b>, 키워드별로 <b>비교</b>해 보여준다.</p>
+            <p>2) 고른 기사를 <b>AI 가 분석하고, 보고서로 출력한다.</b></p>
+            <p>[규칙]</p>
+            <p>1) <b>AI 와 뉴스 검색은 server.js 를 거쳐 부르고</b>, API 키는 화면에서 받는다.</p>
+            <p>2) <b>새 프로그램은 설치하지 않는다.</b></p>
+            <p>3) 항상 <b>가장 단순한 방법</b>으로 만든다.</p>
+            <p>4) <b>한 번에 하나씩</b> 만들고, 끝나면 멈춰서</p>
+            <p>&nbsp;&nbsp;&nbsp;내가 <b>무엇을 확인하면 되는지</b> 알려준다.</p>
+            <p>5) <b>화면은 app.html 하나로</b> 만든다.</p>
+            <p>6) <b>기사 수 세기는 화면이</b> 하고, AI 는 <b>고른 기사만 읽고 근거 번호</b>를 단다.</p>
+          </div>
+        </div>
+
+        <div class="split-side" style="flex:0 0 358px">
+          <div class="side-box">
+            <p class="side-t">적어 두면 달라지는 것</p>
+            <p class="side-d">매번 말하지 않아도 <strong class="navy">알아서 읽습니다.</strong> 대화를 새로 켜도 그대로 남습니다.</p>
+          </div>
+          <div class="side-box side-box--warn" style="margin-top:10px">
+            <p class="side-t">6번을 넣는 이유</p>
+            <p class="side-d">AI는 그럴듯한 내용을 <strong class="hl">지어낼 수 있습니다.</strong> 번호를 달게 하면 <strong>눌러서 확인</strong>할 수 있습니다.</p>
+          </div>
+          <div class="side-box" style="margin-top:10px">
+            <p class="side-t">규칙은 짧게</p>
+            <p class="side-d">길게 적을수록 지켜지지 않습니다. <strong class="navy">필요할 때 한 줄씩</strong> 더하면 됩니다.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- 28-2(뉴스). 보고서 기준을 직접 씁니다 — CLAUDE.md 바로 다음 ---- -->
+  <section class="slide">
+    <div class="slide-head"><h2>[실습] 보고서 기준을 직접 씁니다</h2><span class="head-tag">M4-3 · 실습</span></div>
+    <div class="slide-body">
+      <p class="lead" style="margin-bottom:12px">
+        지침서 다음은 <strong class="navy">보고서 기준</strong>입니다 &mdash; 앱 안의 AI가 따를 목차를 미리 정해 둡니다.
+      </p>
+      <div class="split" style="gap:24px">
+        <div class="split-main">
+          <div class="pbox">
+            <p><b>보고서기준.md</b> 를 만들고 아래 기준을 적어줘.</p>
+            <p>1) 보고서 제목은 「키워드 뉴스 동향 보고」로 한다.</p>
+            <p>2) 목차는 <b>한눈에(세 줄) · 키워드별 비교 · 눈여겨볼 기사 3건 · 시사점</b> 순서로 쓴다.</p>
+            <p>3) 문장마다 <b>근거 기사 번호</b>를 [3] 처럼 붙인다.</p>
+            <p>4) 기사 제목에 없는 숫자나 사실은 <b>쓰지 않는다.</b></p>
+            <p>그리고 <b>CLAUDE.md 목적 3번</b>에 이 한 줄을 더해줘.</p>
+            <p>「AI 분석은 <b>보고서기준.md</b> 의 목차와 기준대로 한다.」</p>
+          </div>
+        </div>
+        <div class="split-side" style="flex:0 0 380px">
+          <div class="side-box">
+            <p class="side-t">무엇을 볼지는 사람이 정합니다</p>
+            <p class="side-d">어떤 목차로, 어디까지 쓸지 &mdash; <strong class="navy">보는 사람의 관점</strong>이 이 파일에 담깁니다.</p>
+          </div>
+          <div class="side-box" style="margin-top:12px">
+            <p class="side-t">CLAUDE.md 와 무엇이 다른가</p>
+            <p class="side-d">CLAUDE.md 는 <strong>앱을 만드는 Claude Code</strong>가 읽고, 보고서기준.md 는 <strong class="navy">앱 안의 AI</strong>가 분석할 때마다 읽습니다.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- 29. [실습] 만들기 전에 계획서부터 쓰게 합니다 -------- -->
+  <section class="slide">
+    <div class="slide-head"><h2>[실습] 만들기 전에 계획서부터 쓰게 합니다</h2><span class="head-tag">M4-3 · 실습</span></div>
+    <div class="slide-body">
+      <div class="split">
+        <div class="split-main">
+          <div class="pbox pbox--tight">
+            <p>바로 만들지 말고 <b>계획부터</b> 세워줘.</p>
+            <p>키워드를 넣으면 최근 뉴스를 모아 비교하고,</p>
+            <p>AI가 분석해 보고서로 내 주는 App 을 만들 거야.</p>
+            <p><b>PHASE.md</b> 파일에 <b>아래 네 단계로</b> 나눠 적어줘.</p>
+            <p>· <b>Phase 1</b> &mdash; 가짜 기사로 화면만 만들기</p>
+            <p>· <b>Phase 2</b> &mdash; server.js 에 구글 뉴스 검색을 붙여 실제 기사로 채우기</p>
+            <p>· <b>Phase 3</b> &mdash; 고른 기사를 보고서기준.md 대로 AI 분석 · 기사에 묻는 챗봇</p>
+            <p>· <b>Phase 4</b> &mdash; 분석 결과를 <b>PDF 보고서로 저장</b>하기 · 빈 화면 안내 다듬기</p>
+            <p>단계마다 <b>내가 무엇을 확인하면 되는지</b>도 적어주고,</p>
+            <p><b>내가 OK 할 때까지 다음 단계로 넘어가지 마.</b></p>
+          </div>
+        </div>
+        <div class="split-side" style="flex:0 0 372px">
+          <div class="side-box">
+            <p class="side-t">왜 문서로 적게 하나</p>
+            <p class="side-d">말로만 하면 다음 대화에서 <strong>잊어버립니다</strong>. 파일로 남으면 &ldquo;<strong class="navy">Phase 2 실행해줘</strong>&rdquo; 한마디로 이어집니다.</p>
+          </div>
+          <div class="side-box" style="margin-top:12px">
+            <p class="side-t">여기서는 만들지 않습니다</p>
+            <p class="side-d">계획서만 받습니다. <strong>읽어 보고 마음에 안 들면</strong> 이 단계에서 고칩니다.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- 29. 이런 계획이 나옵니다 ------------------------------ -->
+  <section class="slide">
+    <div class="slide-head"><h2>이런 계획이 나옵니다</h2><span class="head-tag">M4-3 · 확인</span></div>
+    <div class="slide-body" style="padding-top:18px">
+      <div class="split" style="gap:24px">
+        <div class="split-main">
+          <div class="phasedoc">
+            <p class="phasedoc-h">PHASE.md</p>
+            <ol>
+              <li><span class="phase-no">Phase 1</span>가짜 기사로 화면만 만들기
+                <span class="phase-chk"><b>확인</b> &mdash; 배치가 마음에 드는가</span></li>
+              <li><span class="phase-no">Phase 2</span>server.js 에 구글 뉴스 검색을 붙여 실제 기사로 채우기
+                <span class="phase-chk"><b>확인</b> &mdash; 제목을 누르면 실제 기사가 열리는가</span></li>
+              <li><span class="phase-no">Phase 3</span>고른 기사를 보고서기준.md 대로 AI 분석 · 기사에 묻는 챗봇
+                <span class="phase-chk"><b>확인</b> &mdash; 번호를 눌러 보면 정말 그 내용의 기사인가</span></li>
+              <li><span class="phase-no">Phase 4</span>분석 결과를 PDF 보고서로 저장하기 · 빈 화면 안내 다듬기
+                <span class="phase-chk"><b>확인</b> &mdash; 저장한 PDF 를 그대로 보고에 쓸 수 있는가</span></li>
+            </ol>
+          </div>
+          <p class="sub" style="margin-top:12px">표현은 조금 달라도 됩니다. <strong class="navy">네 단계로 쪼개져 있고, 확인할 것이 적혀 있으면</strong> 됩니다.</p>
+        </div>
+
+        <div class="split-side" style="flex:0 0 380px">
+          <div class="side-box">
+            <p class="side-t">이게 Human-in-the-loop</p>
+            <p class="side-d">각 단계 끝에서 <strong class="navy">멈추고 사람을 부릅니다.</strong> 내가 보고 OK 해야 다음으로 갑니다.</p>
+          </div>
+          <div class="side-box" style="margin-top:12px">
+            <p class="side-t">앞으로 할 말은 짧습니다</p>
+            <p class="side-d"><strong>&ldquo;Phase 1 실행해줘&rdquo;</strong> &rarr; 보고 &rarr; <strong>&ldquo;좋아. Phase 2 실행해줘&rdquo;</strong></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- 30. [Phase 1] 가짜 기사로 화면부터 ------------------ -->
+  <section class="slide">
+    <div class="slide-head"><h2>[Phase 1] 가짜 기사로 화면부터 만듭니다</h2><span class="head-tag">M4-3 · 실습</span></div>
+    <div class="slide-body">
+      <div class="split">
+        <div class="split-main">
+          <div class="pbox">
+            <p><b>Phase 1</b> 실행해줘.</p>
+          </div>
+          <p class="sub" style="margin-top:16px">
+            기능은 아직 넣지 않습니다. <strong class="navy">보이는 것부터</strong> 맞춥니다.
+          </p>
+        </div>
+        <div class="split-side">
+          <div class="side-box">
+            <p class="side-t">왜 가짜 데이터로</p>
+            <p class="side-d">진짜 자료를 붙이기 전이라 <strong>빨리 나오고, 마음껏 갈아엎을 수 있습니다.</strong></p>
+          </div>
+          <div class="side-box" style="margin-top:12px">
+            <p class="side-t">여기서 정할 것</p>
+            <p class="side-d">검색창은 어디에 &middot; 키워드 비교는 어떻게 &middot; 기사 목록은 몇 칸으로</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- 31. 마음에 들 때까지 다그칩니다 -------------------------- -->
+  <section class="slide">
+    <div class="slide-head"><h2>마음에 들 때까지 다그칩니다</h2><span class="head-tag">M4-3 · 실습</span></div>
+    <div class="slide-body">
+      <div style="display:flex; gap:26px; align-items:center">
+        <div class="shot" style="width:660px"><img src="assets/img/m4n-phase1.png" alt="가짜 기사로 만든 화면 초안 — 검색창 · 숫자 카드 · 차트 자리 두 개 · 기사 목록 · AI 분석 자리"></div>
+        <div style="flex:1 1 auto; min-width:0">
+          <p class="lead" style="margin-bottom:14px">
+            받아 보고 <strong class="navy">바로 되돌려 보냅니다.</strong>
+          </p>
+          <div class="pbox">
+            <p class="pbox-t">이렇게 말하면 됩니다</p>
+            <p>아니야. 다시 해와. 어느 언론사가 많이 다뤘는지가 안 보여</p>
+            <p>차트 옆에 「많이 다룬 언론사」 칸을 하나 더 만들어줘</p>
+          </div>
+          <div class="note" style="margin-top:14px">
+            마음에 들 때까지 <strong class="navy">Phase 1 안에서만</strong> 고칩니다.
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+    <!-- 32. [Phase 2] 뉴스 검색을 붙인다 ------------------------ -->
+  <section class="slide">
+    <div class="slide-head"><h2>[Phase 2] 뉴스 검색을 붙입니다</h2><span class="head-tag">M4-3 · 실습</span></div>
+    <div class="slide-body">
+      <div class="split">
+        <div class="split-main">
+          <div class="pbox">
+            <p>화면 좋아. 이제 <b>Phase 2</b> 실행해줘.</p>
+          </div>
+          <p class="sub" style="margin-top:16px">
+            다 되면 브라우저를 <strong class="navy">새로고침</strong>하고, 검색창에 <strong class="navy">현대차 마케팅, 기아 마케팅, 제네시스 마케팅</strong> 을 넣어 봅니다.
+          </p>
+          <p class="sub" style="margin-top:8px">
+            이 단계에는 <strong class="navy">AI가 없습니다.</strong> 찾아오는 일은 server.js 가, 세는 일은 화면이 합니다.
+          </p>
+        </div>
+        <div class="split-side">
+          <div class="side-box">
+            <p class="side-t">이번에는 server.js 도 고칩니다</p>
+            <p class="side-d">심부름꾼에게 <strong>&ldquo;구글 뉴스에도 다녀와&rdquo;</strong>를 가르칩니다. 검색이 안 되면 <strong class="navy">&ldquo;서버 다시 띄워줘&rdquo;</strong>.</p>
+          </div>
+          <div class="side-box side-box--warn" style="margin-top:12px">
+            <p class="side-t">사내망에서 막히면</p>
+            <p class="side-d">터미널의 오류를 보여 주며 <strong>&ldquo;검색이 안 돼. 원인 찾아서 고쳐줘&rdquo;</strong>. 그래도 안 되면 <strong class="hl">강사가 주는 server.js</strong> 로 갈아 끼웁니다.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- 33. 이런 대시보드가 나옵니다 -------------------------- -->
+  <section class="slide">
+    <div class="slide-head"><h2>이런 대시보드가 나옵니다</h2><span class="head-tag">M4-3 · 확인</span></div>
+    <div class="slide-body">
+      <div class="figure" style="margin:0">
+        <div class="shot" style="width:720px; margin:0 auto"><img src="assets/img/m4n-phase2.png" alt="키워드 세 개로 최근 30일 기사 87건을 모아 키워드별 · 주별 · 언론사별로 센 화면"></div>
+      </div>
+      <div class="note" style="margin-top:16px; text-align:center">
+        키워드 세 개, 최근 30일 기사 <strong class="navy">87건</strong>을 모아 비교했습니다 &mdash; <strong class="navy">AI 없이 화면이</strong> 셌습니다.
+        <span class="muted" style="font-size:17px">(기사 수는 검색하는 날마다 다릅니다)</span>
+      </div>
+    </div>
+  </section>
+  <!-- 33-2(뉴스). 관계없는 기사는 사람이 뺍니다 ------------- -->
+  <section class="slide">
+    <div class="slide-head"><h2>[확인] 관계없는 기사는 사람이 뺍니다</h2><span class="head-tag">M4-3 · 확인</span></div>
+    <div class="slide-body">
+      <div class="split" style="gap:24px">
+        <div class="split-main" style="min-width:0">
+          <div class="shot"><img src="assets/img/m4n-pick.png" alt="기사 목록 — 야구단 · 카지노 · 다른 회사 기사의 체크를 빼서 흐리게 보이는 화면"></div>
+          <p class="shot-cap">체크를 뺀 기사는 흐려지고 &mdash; <strong>AI에게 보내지 않습니다</strong></p>
+        </div>
+        <div class="split-side" style="flex:0 0 400px">
+          <div class="side-box side-box--warn">
+            <p class="side-t">검색은 글자만 맞춥니다</p>
+            <p class="side-d">「기아」로 찾으면 야구단 <strong>KIA</strong>, 기부 단체 <strong>기아대책</strong>도 걸립니다. <strong class="hl">무엇이 관계있는지는 사람이</strong> 압니다.</p>
+          </div>
+          <div class="side-box" style="margin-top:12px">
+            <p class="side-t">진짜 있는 기사인가</p>
+            <p class="side-d">제목을 눌러 <strong class="navy">원문이 열리는지</strong> 봅니다 &mdash; 이것이 Phase 2 의 확인입니다.</p>
+          </div>
+          <div class="pbox pbox--tight" style="margin-top:12px">
+            <p class="pbox-t">체크박스가 없으면</p>
+            <p>관계없는 기사가 섞여 있어. 기사마다 <b>체크박스</b>를 달아서,</p>
+            <p>뺀 기사는 분석에 쓰지 않게 해줘.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- 34. [Phase 3] 문서와 대화하는 챗봇 -------------------- -->
+  <section class="slide">
+    <div class="slide-head"><h2>[Phase 3] AI 분석과 챗봇을 붙입니다</h2><span class="head-tag">M4-3 · 실습</span></div>
+    <div class="slide-body">
+      <div class="split">
+        <div class="split-main">
+          <div class="pbox">
+            <p>좋아. <b>Phase 3</b> 실행해줘.</p>
+          </div>
+          <p class="sub" style="margin-top:16px">
+            기능을 <strong class="navy">더할 때도 같습니다.</strong> 한 단계씩, 확인하고 넘어갑니다.
+          </p>
+          <p class="sub" style="margin-top:8px">
+            AI는 앞에서 써 둔 <strong class="navy">보고서기준.md</strong> 의 목차대로 분석합니다.
+          </p>
+        </div>
+        <div class="split-side">
+          <div class="side-box">
+            <p class="side-t">AI에게 무엇을 보내나</p>
+            <p class="side-d"><strong class="navy">체크한 기사의 제목 &middot; 언론사 &middot; 날짜</strong>와 화면이 센 숫자, 그리고 보고서기준.md &mdash; 지침서 규칙 6번 그대로입니다.</p>
+          </div>
+          <div class="side-box" style="margin-top:12px">
+            <p class="side-t">막히면</p>
+            <p class="side-d">&ldquo;<strong>PHASE.md 다시 읽고</strong> 지금 어디까지 했는지 알려줘&rdquo; 라고 물어봅니다.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+    <!-- 35. 이런 분석과 대답이 나옵니다 ---------------------------- -->
+  <section class="slide">
+    <div class="slide-head"><h2>이런 분석과 대답이 나옵니다</h2><span class="head-tag">M4-3 · 확인</span></div>
+    <div class="slide-body" style="padding-top:12px">
+      <div class="ai2">
+        <div>
+          <div class="shot" style="width:292px"><img style="width:292px" src="assets/img/m4n-ai-crop.png" alt="AI 분석 — 한눈에, 키워드별 비교, 눈여겨볼 기사. 문장마다 근거 기사 번호가 붙어 있다"></div>
+          <p class="shot-cap">[AI 분석 받기] &mdash; <strong>문장마다 근거 번호</strong></p>
+        </div>
+        <div>
+          <div class="shot" style="width:330px"><img style="width:330px" src="assets/img/m4n-chat-crop.png" alt="제네시스는 무엇을 했냐는 질문에 AI가 기사 번호를 달아 답한 화면"></div>
+          <p class="shot-cap">묻는 말에 <strong>기사를 근거로</strong> 답합니다</p>
+        </div>
+        <div style="flex:0 0 340px">
+          <div class="side-box">
+            <p class="side-t">확인 &mdash; 번호를 눌러 봅니다</p>
+            <p class="side-d">번호를 누르면 그 기사가 열립니다. <strong>정말 그 내용인지</strong> 사람이 봅니다.</p>
+          </div>
+          <div class="side-box" style="margin-top:12px">
+            <p class="side-t">사람이 다 못 읽던 것</p>
+            <p class="side-d">80건을 다 읽지 않아도 &mdash; 세 브랜드의 <strong class="navy">결이 다르다</strong>는 것이 한눈에 보입니다.</p>
+          </div>
+          <div class="side-box side-box--warn" style="margin-top:12px">
+            <p class="side-t">제목만 읽었습니다</p>
+            <p class="side-d">성과 &middot; 규모는 <strong>원문으로 확인</strong>합니다. AI도 그렇게 적어 둡니다.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- 35-2(뉴스). 기준 한 줄 바꿔 다시 ------------------------ -->
+  <section class="slide">
+    <div class="slide-head"><h2>[실습] 기준을 한 줄 바꿔 다시 받습니다</h2><span class="head-tag">M4-3 · 실습</span></div>
+    <div class="slide-body">
+      <div class="split" style="gap:24px">
+        <div class="split-main" style="min-width:0">
+          <div class="bf2">
+            <div>
+              <p class="bf-t">바꾸기 전 &mdash; 시사점에서 끝</p>
+              <img src="assets/img/m4n-rule-before.png" alt="분석의 끝 — 시사점 세 줄">
+            </div>
+            <div>
+              <p class="bf-t is-after">바꾼 뒤 &mdash; 아이디어 3개가 붙었습니다</p>
+              <img src="assets/img/m4n-rule-after.png" alt="분석의 끝에 우리가 해 볼 만한 아이디어 3개가 새로 붙은 화면">
+            </div>
+          </div>
+        </div>
+        <div class="split-side" style="flex:0 0 380px">
+          <div class="pbox">
+            <p><b>보고서기준.md</b> 목차 끝에</p>
+            <p><b>「우리가 해 볼 만한 아이디어 3개」</b>를 더해줘.</p>
+            <p>앱은 고치지 마.</p>
+          </div>
+          <div class="side-box" style="margin-top:12px">
+            <p class="side-t">앱은 그대로, 보고서만 바뀝니다</p>
+            <p class="side-d">다시 <strong>[AI 분석 받기]</strong> &mdash; 기준 <strong class="navy">한 줄</strong>로 보고서 모양이 바뀝니다.</p>
+          </div>
+          <div class="side-box" style="margin-top:12px">
+            <p class="side-t">팀마다 다르게</p>
+            <p class="side-d">「경쟁사 대비 우리 강점」, 「다음 달 지켜볼 것」처럼 <strong>목차를 바꿔</strong> 씁니다.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- 36. [도전] Phase 4까지 끝내 완성합니다 -------------- -->
+  <section class="slide">
+    <div class="slide-head"><h2>[도전] Phase 4까지 끝내 완성합니다</h2><span class="head-tag">M4-3 · 실습</span></div>
+    <div class="slide-body">
+      <div class="split">
+        <div class="split-main">
+          <div class="pbox">
+            <p>좋아. 마지막으로 <b>Phase 4</b> 실행해줘.</p>
+          </div>
+          <div class="note" style="margin-top:12px">
+            여기까지 오면 <strong class="navy">남에게 건넬 수 있는 물건</strong>이 됩니다 &mdash;
+            다음 챕터에서 그대로 압축해 나눠 줍니다.
+          </div>
+        </div>
+        <div class="split-side" style="flex:0 0 400px">
+          <div class="side-box">
+            <p class="side-t">완성이라고 부르려면</p>
+            <p class="side-d">
+              보고서 한 장에 <strong>근거 기사 목록</strong>이 있나<br>
+              검색하기 전 화면에 <strong>안내</strong>가 있나<br>
+              처음 보는 사람도 <strong>설명 없이</strong> 쓸 수 있나
+            </p>
+          </div>
+          <div class="side-box" style="margin-top:12px">
+            <p class="side-t">더 해 보고 싶다면</p>
+            <p class="side-d">같은 키워드로 <strong>매주 다시</strong> 돌려 지난주와 비교해 보고, 업계 &middot; 경쟁 키워드로도 바꿔 봅니다.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- 36-2(뉴스). 이런 보고서가 나옵니다 -------------------------- -->
+  <section class="slide">
+    <div class="slide-head"><h2>이런 보고서가 나옵니다</h2><span class="head-tag">M4-3 · 확인</span></div>
+    <div class="slide-body">
+      <div class="split" style="gap:26px">
+        <div class="split-main" style="min-width:0">
+          <div class="rep-frame"><img src="assets/img/m4n-report.png" alt="키워드 뉴스 동향 보고 — 검색 조건, 숫자로 보면 표, AI 분석, 근거 기사 목록이 한 장에 담긴 보고서"></div>
+        </div>
+        <div class="split-side" style="flex:0 0 400px">
+          <div class="side-box">
+            <p class="side-t">[보고서 출력] &rarr; 새 창</p>
+            <p class="side-d"><strong>[인쇄 &middot; PDF로 저장]</strong> 을 누르면 그대로 <strong class="navy">PDF 한 장</strong>이 됩니다.</p>
+          </div>
+          <div class="side-box" style="margin-top:12px">
+            <p class="side-t">위에서부터 세 칸</p>
+            <p class="side-d">맨 위 표는 <strong>화면이 센 숫자</strong>, 가운데는 <strong>AI 분석</strong>, 맨 아래는 <strong class="navy">근거 기사 목록</strong>입니다.</p>
+          </div>
+          <div class="side-box side-box--warn" style="margin-top:12px">
+            <p class="side-t">보내기 전에</p>
+            <p class="side-d">근거 기사를 <strong>열어 보고</strong> 맞는 내용인지 확인한 뒤 보고에 씁니다 &mdash; <strong class="hl">판단은 사람이</strong> 합니다.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- 37. 다음 프로젝트에 그대로 쓰세요 ---------------------- -->
+  <section class="slide">
+    <div class="slide-head"><h2>다음 프로젝트에 그대로 쓰세요</h2><span class="head-tag">M4-3 · 개념</span></div>
+    <div class="slide-body">
+      <p class="lead" style="margin-bottom:20px">
+        오늘 만든 것보다, <strong class="navy">이 시키는 방법</strong>이 더 오래 남습니다.
+      </p>
+
+      <ol class="steps steps--lg">
+        <li><strong>계획서부터 쓰게 한다</strong><small>PHASE.md &mdash; 작게 쪼개고, 단계마다 확인할 것을 적게 합니다</small></li>
+        <li><strong>한 단계만 시키고 멈추게 한다</strong><small>완성될 때까지 기다리지 않습니다</small></li>
+        <li><strong>보고, 마음에 들 때까지 되돌려 보낸다</strong><small>&ldquo;여기가 엉망이야, 다시&rdquo; 한마디면 됩니다</small></li>
+      </ol>
+
+      <div class="note" style="margin-top:18px">
+        M5에서 <strong class="navy">내 업무 기획서</strong>를 쓸 때, 이 순서대로 시켜 보세요.
+      </div>
+    </div>
+  </section>
+  <!-- 38. [챕터] 배포하기 -------------------------------------- -->
+  <section class="slide slide--chapter" data-chapter="배포하기">
+    <div class="chapter">
+      <p class="ch-eyebrow">CHAPTER 4</p>
+      <h2 class="ch-title">배포하기</h2>
+      <div class="ch-rule"></div>
+      <p class="ch-desc">실행.bat 과 zip 으로 동료에게 그대로 건넵니다.</p>
+      <ul class="ch-keys"><li>실행.bat</li><li>zip</li><li>사내 배포</li></ul>
+    </div>
+  </section>
+  <!-- 39. 배포 — 폴더째 압축해서 건네줍니다 ------------------ -->
+  <section class="slide">
+    <div class="slide-head"><h2>배포 — 폴더째 압축해서 건네줍니다</h2><span class="head-tag">M4-4 · 개념</span></div>
+    <div class="slide-body">
+      <div class="split" style="gap:28px">
+        <div class="split-main">
+          <p class="lead" style="margin-bottom:16px">
+            지금 만든 화면은 <strong class="hl">중계 서버가 떠 있어야</strong> 열립니다. 그대로는 못 줍니다.<br>
+            필요한 것을 <strong class="navy">한 폴더에 모아 압축</strong>하면 그게 배포판입니다.
+          </p>
+          <ul class="dash-list">
+            <li><strong>같이 넣는 것</strong><small><strong>app.html · server.js · 보고서기준.md · 실행.bat</strong> 넷 — 받는 사람은 <strong>키워드만 넣으면</strong> 됩니다</small></li>
+            <li><strong>받는 사람 준비물</strong><small><strong>Node.js 하나</strong>. 없으면 실행.bat이 <strong>설치 안내를 띄워 줍니다</strong></small></li>
+            <li><strong>받는 사람</strong><small>압축 풀고 <strong>실행.bat 더블클릭</strong>. 그게 전부입니다</small></li>
+          </ul>
+          <div class="note note--warn" style="margin-top:16px">
+            <strong>기억할 것</strong> — 실행하면 <strong class="hl">검은 창이 하나 떠 있습니다.</strong><br>
+        그 창을 닫으면 앱도 꺼집니다. 쓰는 동안은 그대로 두세요.
+          </div>
+        </div>
+        <div class="split-side" style="flex:0 0 330px">
+          <div class="shot" style="width:340px"><img src="assets/img/m4n-dist-zip.png" alt="dist 폴더에 든 네 개의 파일과 압축 파일"></div>
+          <p class="shot-cap" style="text-align:left">넷을 모아 압축하면 끝</p>
+          <div class="side-box" style="margin-top:14px; padding:12px 16px 13px">
+            <p class="side-t">zip 은 실습 &middot; 팀 안 시연까지</p>
+            <p class="side-d" style="font-size:17px">여럿이 정식으로 쓰게 하려면 <strong class="navy">사내 배포 가이드</strong>를 따릅니다 &mdash; 두 장 뒤에 있습니다.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- 40. [실습] 배포 폴더를 만들고 압축합니다 ---------- -->
+  <section class="slide">
+    <div class="slide-head"><h2>[실습] 배포 폴더를 만들고 압축합니다</h2><span class="head-tag">M4-4 · 실습</span></div>
+    <div class="slide-body" style="padding-top:10px">
+      <p class="lead" style="margin-bottom:6px">
+        연습용을 따로 만들지 않습니다. <strong class="navy">지금까지 만든 그 앱</strong>을 그대로 묶습니다.
+      </p>
+
+      <div class="split" style="gap:26px">
+        <div class="split-main">
+          <div class="pbox pbox--tight">
+            <p>동료에게 그대로 줄 수 있게 <b>배포 폴더</b>를 만들어줘.</p>
+            <p><b>dist</b> 폴더에 <b>app.html · server.js · 보고서기준.md</b> 를 복사해줘.</p>
+            <p>더블클릭하면 서버가 뜨고 브라우저가 열리는 <b>실행.bat</b> 도 만들어서 같이 넣어줘 —</p>
+            <p>Node.js 가 없으면 설치 안내를 띄우고, 한글이 깨지지 않게, 오류가 나도 창이 바로 닫히지 않게.</p>
+            <p>윈도우 배치 파일이니 <b>줄바꿈은 반드시 CRLF</b> 로 저장해줘.</p>
+            <p>만든 다음 <b>네가 직접 실행해서</b> READY 가 찍히는지 확인하고, 안 되면 고쳐줘.</p>
+            <p>확인이 끝나면 <b>실행 중인 서버를 모두 종료</b>하고, <b>dist 폴더를 zip 으로 압축</b>해줘.</p>
+          </div>
+
+          <div class="note" style="margin-top:10px">
+            압축을 <strong class="navy">다른 폴더에 풀어</strong> 실행.bat 을 더블클릭해 봅니다 &mdash;
+            내 작업 폴더가 아닌 곳에서도 열려야 진짜 배포판입니다.
+          </div>
+        </div>
+
+        <div class="split-side" style="flex:0 0 388px">
+          <div class="side-box" style="padding:11px 17px">
+            <p class="side-t">왜 .bat 까지 만드나</p>
+            <p class="side-d">받는 사람이 <strong>터미널을 몰라도 되게</strong> 하려는 것입니다. 더블클릭 한 번으로 서버가 뜨고 화면이 열립니다.</p>
+          </div>
+          <div class="side-box" style="margin-top:10px; padding:11px 17px">
+            <p class="side-t">이 네 가지가 들어가야 합니다</p>
+            <p class="side-d">
+              Node.js 가 없으면 <strong>설치 안내</strong><br>
+              브라우저를 <strong>알아서 열어 줌</strong><br>
+              한글이 <strong>깨지지 않음</strong><br>
+              무슨 일이 생겨도 <strong class="hl">창이 바로 닫히지 않음</strong>
+            </p>
+          </div>
+          <div class="side-box side-box--warn" style="margin-top:10px; padding:11px 17px">
+            <p class="side-t">두 줄을 왜 더 넣나</p>
+            <p class="side-d">.bat 은 <strong>줄바꿈 하나로</strong> 통째로 깨집니다 &mdash;
+              검은 창이 번쩍 닫히는 게 그 증상입니다.
+              <strong class="hl">만든 사람이 직접 실행해</strong> 확인하게 시킵니다.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- 41. 사내 배포 가이드 — AI로 만든 결과물 (docs/M4자료/AI로 만든 결과물.pdf) -->
+  <section class="slide">
+    <div class="slide-head"><h2>사내 배포 가이드 &mdash; AI로 만든 결과물</h2><span class="head-tag">M4-4 · 개념</span></div>
+    <div class="slide-body" style="padding-top:20px">
+      <div class="dg-ban">
+        <span class="dg-ban-t">금지</span>
+        <p>외부 Cloud(Vercel &middot; Firebase 등) &middot; <b>.exe 배포</b> &middot; 비인가 프로그램 설치 &middot; <b>API 키를 파일에 넣어 배포</b></p>
+        <a class="site-link dg-ban-a" href="https://hmg.atlassian.net/wiki/x/6e_8Iw">보안 규정</a>
+      </div>
+
+      <div class="dg-two">
+        <div class="dg-card">
+          <p class="dg-h">① HTML 파일 하나<small>정적 &mdash; 서버 &middot; DB 없이 화면만</small></p>
+          <p class="dg-when">대시보드 &middot; 자료 소개 &middot; 결과 시각화 같은 <b>읽기 전용</b></p>
+          <p class="dg-row"><b>Confluence</b> 에 올립니다</p>
+          <ol class="dg-steps">
+            <li>html 파일을 <b>메모장</b>으로 열어 전체 복사</li>
+            <li>편집 페이지에서 <span class="mono">/HMG HTML PRO</span> 입력</li>
+            <li>Raw HTML 칸에 붙여넣기</li>
+          </ol>
+          <div class="shot dg-shot"><img src="assets/img/m4-confluence.png" alt="Confluence HMG HTML PRO 매크로"></div>
+        </div>
+        <div class="dg-card is-app">
+          <p class="dg-h">② 앱 / 웹페이지<small>동적 &mdash; 서버 &middot; DB &middot; 로그인</small></p>
+          <p class="dg-when">입력하고 결과를 받는 기능 &middot; 사내 데이터를 주기적으로 반영</p>
+          <p class="dg-row"><b>PoC</b> &rarr; 바이브코딩 기반 웹페이지 배포 환경 <span class="dg-tag">준비 중</span></p>
+          <p class="dg-row"><b>사내 데이터 &middot; 시스템 &middot; API 연동</b> &rarr; 표준 플랫폼 <b>H Cloud</b> 에서 정식 배포 &middot; 운영<br>
+            <span class="dg-sub">ICT Request 개발지원요청으로 접수</span></p>
+          <div class="dg-links">
+            <a class="btn-link" href="https://confluence.hmg-corp.io/wikikia/1-1-2-802564876.html">H Cloud 배포 안내</a>
+            <a class="btn-link" href="https://hmg.atlassian.net/servicedesk/customer/portal/1304">HMG 헬프센터</a>
+          </div>
+          <p class="dg-sub" style="margin-top:8px">링크는 사내망에서만 열립니다</p>
+        </div>
+      </div>
+
+      <div class="note" style="margin-top:14px">
+        오늘 만든 앱(app.html + server.js)은 <strong class="navy">② 의 PoC</strong> 입니다.
+        zip 으로 건네는 것은 <strong class="navy">실습 &middot; 팀 안 시연까지</strong> &mdash; 여럿이 정식으로 쓰게 하려면 이 가이드를 따릅니다.
+      </div>
+    </div>
+  </section>
+  <!-- 42. [실습] 결과물을 정리하고 공유합니다 ---------------- -->
+  <section class="slide">
+    <div class="slide-head"><h2>[실습] 결과물을 정리하고 공유합니다</h2><span class="head-tag">M4-4 · 실습</span></div>
+    <div class="slide-body">
+      <div class="split">
+        <div class="split-main">
+          <ol class="steps">
+            <li>zip 이름을 <span class="fname">M4_부서_이름_주제.zip</span> 으로 바꿉니다<small>안에 app.html &middot; server.js &middot; 보고서기준.md &middot; 실행.bat<br>예) M4_인사팀_김현복_뉴스동향분석리포트.zip</small></li>
+            <li>보내기 전에 확인합니다<small>내 <strong>API 키</strong>가 파일 안에 남아 있지 않은지, 빠진 파일이 없는지</small></li>
+            <li><a class="site-link mono" href="https://hyundai.mincoding.co.kr">hyundai.mincoding.co.kr</a> 접속 &mdash; 상단 <strong class="navy">[실습목록]</strong></li>
+            <li><strong class="navy">[Claude Code 실습] AI 업무도구 만들기</strong> 열기<small>목록의 <span class="mono">Hyundai_05</span> 입니다</small></li>
+            <li>도구모음 <strong class="navy">[파일 업로드]</strong>로 zip 과 결과 화면을 첨부하고 <strong>[등록]</strong></li>
+          </ol>
+        </div>
+        <div class="split-side">
+          <div class="sub-shot">
+            <img src="assets/img/m1-submit-list.png" alt="M4 실습 결과물 제출 목록">
+            <span class="sub-mark" style="left:5%; top:70%; width:90%; height:13.5%"></span>
+          </div>
+          <p class="sub-cap">목록에서 <strong>Hyundai_05</strong> 를 고릅니다</p>
+          <div class="side-box side-box--warn" style="margin-top:12px">
+            <p class="side-t">가장 중요한 확인</p>
+            <p class="side-d">API 키가 파일 안에 남아 있으면 <strong class="hl">그대로 유출됩니다.</strong> 반드시 먼저 확인합니다.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- 43. M4 정리 ---------------------------------------------- -->
+  <section class="slide" data-chapter="M4 정리">
+    <div class="slide-head"><h2>M4 정리</h2><span class="head-tag">M4 · 정리</span></div>
+    <div class="slide-body">
+      <div class="recap">
+        <div class="recap-row">
+          <span class="recap-k">Claude API</span>
+          <span class="recap-v">내 프로그램 안에서 AI를 부르는 열쇠. <strong>키는 나만 갖고 있는다</strong></span>
+        </div>
+        <div class="recap-row">
+          <span class="recap-k">app.html · server.js</span>
+          <span class="recap-v">이 <strong>두 파일</strong>이면 사내에서 도는 AI 앱이 된다</span>
+        </div>
+        <div class="recap-row">
+          <span class="recap-k">사내망</span>
+          <span class="recap-v">화면은 밖으로 못 나간다 — <strong>server.js 가 대신 다녀온다</strong></span>
+        </div>
+        <div class="recap-row">
+          <span class="recap-k">PHASE.md</span>
+          <span class="recap-v">만들기 전에 <strong>계획서부터</strong> — 작게 쪼개고, 단계마다 확인할 것을 적는다</span>
+        </div>
+        <div class="recap-row">
+          <span class="recap-k">Human-in-the-loop</span>
+          <span class="recap-v">한 단계만 시키고 <strong>멈추게 한 뒤, 보고 되돌려 보낸다</strong></span>
+        </div>
+        <div class="recap-row">
+          <span class="recap-k">검색 · 분석 · 판단</span>
+          <span class="recap-v">찾아오는 일은 <strong>server.js 가</strong>, 세는 일은 <strong>화면이</strong>, 읽고 정리는 <strong>AI가</strong>, 맞는지 확인은 <strong>사람이</strong></span>
+        </div>
+        <div class="recap-row">
+          <span class="recap-k">압축 배포</span>
+          <span class="recap-v">네 파일을 한 폴더에 모아 zip — <strong>0.1MB, 메일로 그냥 보낸다</strong></span>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- 45. 감사합니다. -------------------------------------------- -->
+  <section class="slide slide--cover">
+    <div class="cover-text">
+      <h1 class="cover-title" style="font-size:64px">감사합니다.</h1>
+      <p class="cover-meta">이어서 M5. 나만의 업무 혁신 아이디어 기획서</p>
+    </div>
+  </section>
+</div>
+
+<nav class="deck-bar">
+  <a class="deck-home" href="index.html">← 목차</a>
+
+  <div class="deck-nav">
+    <button class="deck-arrow" id="prev" type="button" aria-label="이전 슬라이드" title="이전 (←)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"
+           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <polyline points="15 5 8 12 15 19"></polyline>
+      </svg>
+    </button>
+
+    <div class="deck-meta">
+      <span class="deck-title">M4. 데이터 시각화 · AI 업무도구 만들기</span>
+      <span class="deck-count" id="count">1 / 45</span>
+    </div>
+
+    <button class="deck-arrow" id="next" type="button" aria-label="다음 슬라이드" title="다음 (→)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"
+           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <polyline points="9 5 16 12 9 19"></polyline>
+      </svg>
+    </button>
+  </div>
+
+  <span class="deck-hint">← → · 마우스 휠</span>
+</nav>
+
+<script src="assets/js/deck.js"></script>
+</body>
+</html>

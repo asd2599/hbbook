@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>수소사업 예산 집행 현황판</title>
+<style>
+  :root {
+    --bg: #f3f5f9; --card: #fff; --line: #dfe4ec; --ink: #1c2330; --soft: #6b7585;
+    --navy: #1f3f7a; --navy-soft: #eaf0fa; --red: #d93025; --red-soft: #fdecea;
+    --amber: #b26a00; --amber-soft: #fff4e0; --green: #1e8e3e; --teal: #0f8b8d; --teal-soft: #e3f4f4;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+         font-family: "Malgun Gothic", "맑은 고딕", -apple-system, "Segoe UI", sans-serif;
+         font-size: 14px; letter-spacing: -.01em; }
+  header { display: flex; align-items: center; gap: 16px; padding: 14px 24px;
+           background: linear-gradient(90deg, var(--navy) 0%, #1d5a86 70%, var(--teal) 100%); color: #fff; }
+  header h1 { margin: 0; font-size: 20px; font-weight: 800; }
+  header h1 i { font-style: normal; display: inline-block; margin-right: 8px; padding: 1px 8px; border-radius: 6px;
+                background: rgba(255,255,255,.18); font-size: 15px; vertical-align: 2px; }
+  header .sub { font-size: 13px; opacity: .8; }
+  header .grow { flex: 1; }
+  .btn { border: 0; border-radius: 7px; padding: 9px 15px; font: inherit; font-weight: 700;
+         cursor: pointer; background: #fff; color: var(--navy); white-space: nowrap; }
+  .btn:disabled { opacity: .45; cursor: not-allowed; }
+  .btn--red { background: var(--red); color: #fff; }
+  .btn--navy { background: var(--navy); color: #fff; }
+  .btn--ghost { background: #fff; color: var(--navy); border: 1px solid var(--line); }
+
+  .layout { display: grid; grid-template-columns: minmax(0, 1fr) 390px; gap: 18px; padding: 18px 24px 28px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; }
+  .card h2 { margin: 0 0 12px; font-size: 15px; color: var(--navy); }
+
+  /* 빈 화면 안내 */
+  .empty { display: flex; flex-direction: column; align-items: center; justify-content: center;
+           min-height: 520px; border: 2px dashed #b9c4d6; border-radius: 14px; background: #fff;
+           text-align: center; padding: 30px; transition: background .15s; }
+  .empty.is-over { background: var(--navy-soft); border-color: var(--navy); }
+  .empty .big { font-size: 22px; font-weight: 800; color: var(--navy); margin: 0 0 8px; }
+  .empty .hint { color: var(--soft); margin: 0 0 20px; font-size: 15px; }
+  .empty ol { text-align: left; margin: 22px 0 0; padding: 16px 22px 16px 38px; background: var(--bg);
+              border-radius: 10px; color: var(--ink); line-height: 1.9; font-size: 14px; }
+
+  .files { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 12px; color: var(--soft); }
+  .chip-file { background: #fff; border: 1px solid var(--line); border-radius: 20px; padding: 4px 11px; font-size: 12.5px; color: var(--ink); }
+  .chip-file.is-budget { border-color: var(--teal); color: var(--teal); font-weight: 700; }
+  .warn-line { color: var(--amber); font-weight: 700; }
+
+  .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 14px; }
+  .kpi { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
+  .kpi .k { font-size: 13px; color: var(--soft); }
+  .kpi .v { font-size: 26px; font-weight: 800; margin-top: 4px; font-variant-numeric: tabular-nums; }
+  .kpi .v small { font-size: 14px; font-weight: 700; color: var(--soft); margin-left: 3px; }
+  .kpi .v.is-behind { color: var(--amber); }
+  .kpi.is-alert { border-color: #f1b3ad; background: var(--red-soft); }
+  .kpi.is-alert .v { color: var(--red); }
+
+  .rules { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 14px; }
+  .rule { display: grid; grid-template-columns: 1fr auto; align-items: baseline; gap: 2px 8px; text-align: left;
+          border: 1px solid var(--line); background: #fff; border-radius: 9px; padding: 9px 14px; cursor: pointer; font: inherit; }
+  .rule b { color: var(--red); font-size: 18px; }
+  .rule span { grid-column: 1 / -1; color: var(--soft); font-size: 12px; }
+  .rule.is-on { border-color: var(--red); background: var(--red-soft); }
+  .rule.is-zero b { color: var(--soft); }
+
+  .charts { display: grid; grid-template-columns: 1.15fr 1fr; gap: 14px; margin-bottom: 14px; }
+  /* 월별 누적 집행률 — 점선이 정상 페이스 */
+  .pace svg { display: block; width: 100%; height: auto; }
+  /* 팀별 집행률 — 점선이 정상 페이스 */
+  .hbar { display: grid; grid-template-columns: 96px 1fr 64px; align-items: center; gap: 8px; margin: 10px 0 2px; font-size: 13px; }
+  .hbar .nm { font-weight: 700; white-space: nowrap; }
+  .hbar .track { position: relative; height: 16px; background: var(--bg); border-radius: 8px; }
+  .hbar .track i { display: block; height: 100%; background: var(--teal); border-radius: 8px; }
+  .hbar .track .mark { position: absolute; top: -4px; bottom: -4px; border-left: 2px dashed var(--red); }
+  .hbar.is-fast .track i { background: var(--red); }
+  .hbar.is-slow .track i { background: var(--amber); }
+  .hbar .n { text-align: right; font-weight: 800; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .hbar-sub { margin: 4px 0 6px 104px; font-size: 12px; color: var(--soft); }
+  .hbar-sub b { color: var(--ink); }
+  .legend { display: flex; gap: 12px; margin-top: 8px; font-size: 12px; color: var(--soft); flex-wrap: wrap; }
+
+  .tools { display: flex; gap: 8px; align-items: center; margin-bottom: 10px; flex-wrap: wrap; }
+  .tools h2 { margin: 0 auto 0 0; }
+  .tools select { font: inherit; padding: 7px 10px; border: 1px solid var(--line); border-radius: 7px; background: #fff; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; color: var(--soft); font-weight: 700; padding: 8px 8px; border-bottom: 2px solid var(--line); background: #fafbfd; white-space: nowrap; }
+  th.num, td.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  td { padding: 8px 8px; border-bottom: 1px solid #eef1f5; vertical-align: top; }
+  td:first-child { white-space: nowrap; font-weight: 700; }
+  td .team { display: block; font-size: 11.5px; font-weight: 400; color: var(--soft); }
+  .mx td.cell { cursor: pointer; }
+  .mx td.cell:hover { outline: 2px solid var(--navy-soft); outline-offset: -2px; }
+  .mx td.is-pick { outline: 2px solid var(--navy); outline-offset: -2px; }
+  td.is-flag { background: var(--red-soft); color: var(--red); font-weight: 800; }
+  td.is-slow { background: var(--amber-soft); color: var(--amber); font-weight: 800; }
+  .mx th.tot, .mx td.tot { background: #f5f7fb; font-weight: 800; color: var(--navy); }
+  .mx tr.tot td { border-top: 2px solid var(--line); background: #f5f7fb; font-weight: 800; color: var(--navy); }
+  .mx td .fl { margin-left: 5px; padding: 1px 6px; border-radius: 5px; background: var(--red); color: #fff; font-size: 11px; font-weight: 800; }
+  .mx td.is-slow .fl { background: var(--amber); }
+  .tag { display: inline-block; margin: 1px 3px 1px 0; padding: 2px 7px; border-radius: 5px; font-size: 12px; font-weight: 700;
+         background: var(--red-soft); color: var(--red); white-space: nowrap; }
+  .tag.slow { background: var(--amber-soft); color: var(--amber); }
+  .lst td { white-space: nowrap; }
+  .lst td.c { white-space: normal; min-width: 220px; }
+  .lst tr.is-flag td { background: #fff8f7; }
+  .pick-chip { display: inline-flex; gap: 6px; align-items: center; padding: 4px 10px; border-radius: 20px; background: var(--navy-soft);
+               color: var(--navy); font-size: 12.5px; font-weight: 700; }
+  .pick-chip button { border: 0; background: none; color: var(--navy); font: inherit; cursor: pointer; padding: 0; }
+  .muted { color: var(--soft); }
+  .count-line { margin: 8px 2px 0; color: var(--soft); font-size: 13px; }
+  .card + .card { margin-top: 14px; }
+  .charts .card + .card { margin-top: 0; }
+
+  /* AI 패널 — 늘 한 화면 안에, 대화 칸이 남은 높이를 다 쓴다 */
+  .ai { position: sticky; top: 18px; align-self: start; display: flex; flex-direction: column; gap: 12px;
+        height: calc(100vh - 108px); min-height: 560px; }
+  .ai .card + .card { margin-top: 0; }
+  .ai .card--chat { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
+  .keyrow-done { display: flex; align-items: center; gap: 8px; }
+  .keyrow-done .status { margin: 0; flex: 1; }
+  .link { background: none; border: 0; padding: 0; font: inherit; font-size: 12.5px; color: var(--navy); text-decoration: underline; cursor: pointer; }
+  .ai .keyrow { display: flex; gap: 6px; }
+  .ai .keyrow input { flex: 1; min-width: 0; font: inherit; padding: 8px 10px; border: 1px solid var(--line); border-radius: 7px; }
+  .status { font-size: 12.5px; margin-top: 7px; color: var(--soft); white-space: pre-wrap; word-break: break-all; }
+  .status.ok { color: var(--green); font-weight: 700; }
+  .status.err { color: var(--red); }
+  .ai-btns { display: grid; grid-template-columns: 1fr auto; gap: 6px; }
+  .summary { font-size: 13.5px; line-height: 1.6; max-height: 34vh; overflow: auto; }
+  .summary .h { display: block; margin: 10px 0 3px; font-weight: 800; color: var(--navy); }
+  .summary .h:first-child { margin-top: 0; }
+  .summary p, .bubble p { margin: 2px 0; }
+  .chatlog { flex: 1 1 auto; min-height: 120px; overflow: auto; background: var(--bg); border-radius: 8px; padding: 10px; font-size: 13.5px; line-height: 1.6; }
+  .msg { margin-bottom: 10px; }
+  .msg .who { font-size: 11.5px; font-weight: 800; color: var(--soft); margin-bottom: 2px; }
+  .msg.me { text-align: right; }
+  .msg.me .bubble { display: inline-block; background: var(--navy); color: #fff; border-radius: 10px 10px 2px 10px; padding: 7px 11px; text-align: left; }
+  .msg.bot .bubble { background: #fff; border: 1px solid var(--line); border-radius: 10px 10px 10px 2px; padding: 8px 11px; }
+  .msg.err .bubble { background: var(--red-soft); color: var(--red); border-radius: 8px; padding: 8px 11px; white-space: pre-wrap; }
+  .chatin { display: flex; gap: 6px; margin-top: 8px; }
+  .chatin textarea { flex: 1; resize: none; height: 42px; font: inherit; padding: 9px 10px; border: 1px solid var(--line); border-radius: 7px; }
+  .ai-note { font-size: 12px; color: var(--soft); margin: 8px 0 0; }
+  .loading { color: var(--soft); font-style: italic; }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1><i>H₂</i>수소사업 예산 집행 현황판</h1>
+    <div class="sub">연간예산과 팀별 집행 CSV를 올리면 프로젝트 × 계정별 집행률을 정상 페이스와 비교하고, 너무 빠르거나 느린 항목을 빨갛게 표시합니다</div>
+  </div>
+  <div class="grow"></div>
+  <button class="btn btn--ghost" id="resetBtn" style="color:#fff;background:transparent;border-color:rgba(255,255,255,.4)" hidden>처음으로</button>
+  <button class="btn" id="pickBtn">CSV 불러오기</button>
+  <input type="file" id="fileInput" accept=".csv" multiple hidden>
+</header>
+
+<div class="layout">
+  <main>
+    <!-- 빈 화면 -->
+    <section class="empty" id="empty">
+      <p class="big">연간예산 CSV 와 팀별 집행 CSV 를 여기에 끌어다 놓으세요</p>
+      <p class="hint">다섯 파일을 <b>한꺼번에</b> 올려도 됩니다 — 예산표와 집행 내역을 알아서 구분해 합칩니다</p>
+      <button class="btn btn--navy" id="pickBtn2">파일 선택</button>
+      <ol>
+        <li>연간예산 — <b>팀 · 프로젝트 · 계정 · 연간예산 · 비고</b> &nbsp;/&nbsp; 집행 내역 — <b>전표번호 · 집행일 · 팀 · 프로젝트 · 계정 · 거래처 · 적요 · 금액</b></li>
+        <li>정상 페이스(9월 말 = 9 ÷ 12 = <b>75%</b>)보다 너무 빠르거나 느린 항목은 <b style="color:var(--red)">빨갛게</b> 표시됩니다</li>
+        <li>오른쪽에 API 키를 넣으면 AI가 걸린 항목의 적요 · 비고를 읽어 <b>요약</b>하고 <b>질문</b>에 답합니다</li>
+      </ol>
+    </section>
+
+    <!-- 현황판 -->
+    <section id="dash" hidden>
+      <div class="files" id="files"></div>
+
+      <div class="kpis">
+        <div class="kpi"><div class="k">연간예산</div><div class="v" id="kBud">-</div></div>
+        <div class="kpi"><div class="k">집행 누계</div><div class="v" id="kSpent">-</div></div>
+        <div class="kpi"><div class="k">정상 페이스 대비</div><div class="v" id="kGap">-</div></div>
+        <div class="kpi is-alert"><div class="k">주의 항목</div><div class="v" id="kFlag">-</div></div>
+      </div>
+
+      <div class="rules" id="rules"></div>
+
+      <div class="charts">
+        <div class="card pace">
+          <h2>월별 누적 집행률 — 정상 페이스와 비교</h2>
+          <div id="paceChart"></div>
+          <div class="legend"><span style="color:var(--teal)">━ 실제 누적 집행률</span><span style="color:var(--red)">┅ 정상 페이스 (매달 1/12)</span></div>
+        </div>
+        <div class="card">
+          <h2>팀별 집행률</h2>
+          <div id="teamBars"></div>
+          <div class="legend"><span style="color:var(--red)">빨간 점선 = 정상 페이스</span><span>막대 = 연간예산 대비 집행</span></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="tools">
+          <h2 id="mxTitle">프로젝트 × 계정</h2>
+          <select id="metricSel">
+            <option value="rate">집행률</option>
+            <option value="spent">집행액 (백만원)</option>
+            <option value="budget">연간예산 (백만원)</option>
+            <option value="left">잔액 (백만원)</option>
+          </select>
+          <button class="btn btn--ghost" id="csvBtn">통합 집행표 내려받기 (CSV)</button><!-- 통합표 -->
+        </div>
+        <table class="mx">
+          <thead id="mxHead"></thead>
+          <tbody id="tbody"></tbody>
+        </table>
+        <p class="count-line" id="countLine"></p>
+      </div>
+
+      <div class="card">
+        <div class="tools">
+          <h2 id="lstTitle">집행 내역</h2>
+          <span id="pickChip"></span>
+          <select id="viewSel"></select>
+        </div>
+        <table class="lst">
+          <thead><tr><th>전표번호</th><th>집행일</th><th>프로젝트</th><th>계정</th><th>거래처</th><th>적요</th><th class="num">금액 (원)</th></tr></thead>
+          <tbody id="lstBody"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <!-- AI 예산 도우미 -->
+  <aside class="ai">
+    <div class="card">
+      <h2>AI 예산 도우미</h2>
+      <div id="keyBox">
+        <div class="keyrow">
+          <input type="password" id="apiKey" placeholder="Claude API 키" autocomplete="off">
+          <button class="btn btn--navy" id="connectBtn">연결</button>
+        </div>
+        <div class="status" id="keyStatus">키를 넣고 [연결]을 누르세요</div>
+      </div>
+      <div class="keyrow-done" id="keyDone" hidden>
+        <p class="status ok">✓ 연결됨</p>
+        <button class="link" id="rekeyBtn">키 다시 넣기</button>
+      </div>
+
+      <h2 style="margin-top:16px">집행 요약 · 4분기 운영 제안</h2>
+      <div class="ai-btns">
+        <button class="btn btn--red" id="sumBtn" disabled>AI 요약 받기</button>
+        <button class="btn btn--ghost" id="reportBtn" disabled>현황 보고서</button><!-- 보고서 버튼 -->
+      </div>
+      <div class="summary" id="summary" style="margin-top:10px"><span class="muted">CSV를 올리고 연결하면 누를 수 있습니다</span></div>
+      <p class="ai-note">금액과 집행률은 화면이 계산합니다. AI에게는 <b>집계와 걸린 항목의 적요 · 비고만</b> 보냅니다 — 거래처 · 전표번호는 빼고.</p>
+    </div>
+
+    <div class="card card--chat">
+      <h2>예산 현황에 물어보기</h2>
+      <div class="chatlog" id="chatlog"><div class="muted">예) 평택 충전소 설비투자는 정말 과속이야? · 4분기에 먼저 챙길 항목은?</div></div>
+      <div class="chatin">
+        <textarea id="chatIn" placeholder="질문을 입력하세요 (Enter 전송)" disabled></textarea>
+        <button class="btn btn--navy" id="chatBtn" disabled>전송</button>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<script>
+// ---------------------------------------------------------------------------
+// 예산기준 — 예산기준.md 를 그대로 옮긴 값. 기준을 바꾸면 여기와 예산기준.md 를 같이 고친다.
+// ---------------------------------------------------------------------------
+const RULES = {
+  baseDate: '2026-09-30',     // 1. 기준일 — 9월 말 마감 자료
+  months: 9,                  // 2. 정상 페이스 = 경과 개월 ÷ 12
+  fast: 15,                   // 4. 주의(과속) — 집행률이 정상 페이스보다 이만큼(%p) 이상 높은 항목
+  slow: 30                    // 5. 주의(저조) — 집행률이 정상 페이스보다 이만큼(%p) 이상 낮은 항목
+};
+const PACE = RULES.months / 12 * 100;
+const RULE_LIST = [
+  { id: '과속', desc: '집행률이 정상 페이스(' + PACE.toFixed(0) + '%)보다 ' + RULES.fast + '%p 이상 높은 항목 — 연말 전 소진 우려' },
+  { id: '저조', desc: '집행률이 정상 페이스(' + PACE.toFixed(0) + '%)보다 ' + RULES.slow + '%p 이상 낮은 항목 — 몰아 쓰기 · 이월 우려' }
+];
+const ACCOUNTS = ['설비투자', '인허가·안전', '수소 구매·운영', '용역·연구', '대외협력·출장'];
+
+// 화면을 server.js 가 열어 줬다면 같은 주소로 API 를 부른다.
+const SERVER_ORIGIN = location.protocol.startsWith('http') ? location.origin : 'http://localhost:8787';
+const API_URL = SERVER_ORIGIN + '/v1/messages';
+
+const $ = (id) => document.getElementById(id);
+let budget = [];              // 연간예산 (한 줄이 프로젝트 × 계정 하나)
+let spends = [];              // 집행 내역 (한 줄이 집행 한 건)
+const loaded = new Map();     // 올린 파일 이름 → '예산' / '집행'
+let ruleFilter = '', view = 'flag', pick = null, metric = 'rate', apiKey = '', chat = [], lastSummary = '';
+
+function esc(s) { return String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
+function p1(x) { return x == null || !isFinite(x) ? '-' : x.toFixed(1); }
+const eok = w => (w / 1e8).toFixed(1) + '억';
+const mil = w => Math.round(w / 1e6).toLocaleString('ko-KR');
+const won = w => Math.round(w).toLocaleString('ko-KR');
+const sgn = x => (x > 0 ? '+' : x < 0 ? '−' : '') + Math.abs(x).toFixed(1);
+
+// ---- CSV 읽기 -------------------------------------------------------------
+async function readText(file) {
+  const buf = await file.arrayBuffer();
+  try { return new TextDecoder('utf-8', { fatal: true }).decode(buf).replace(/^﻿/, ''); }
+  catch (e) { return new TextDecoder('euc-kr').decode(buf); }   // 엑셀에서 저장한 CSV (한글 깨짐 방지)
+}
+function parseCSV(text) {
+  const out = []; let row = [], cur = '', q = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (q) { if (c === '"' && text[i + 1] === '"') { cur += '"'; i++; } else if (c === '"') q = false; else cur += c; }
+    else if (c === '"') q = true;
+    else if (c === ',') { row.push(cur); cur = ''; }
+    else if (c === '\n' || c === '\r') { if (c === '\r' && text[i + 1] === '\n') i++; row.push(cur); out.push(row); row = []; cur = ''; }
+    else cur += c;
+  }
+  if (cur || row.length) { row.push(cur); out.push(row); }
+  return out.filter(r => r.some(v => v.trim() !== ''));
+}
+const NEED_B = ['팀', '프로젝트', '계정', '연간예산'];
+const NEED_L = ['전표번호', '집행일', '팀', '프로젝트', '계정', '적요', '금액'];
+const num = v => Number(String(v).replace(/[,\s원]/g, '')) || 0;   // 엑셀에서 쉼표가 붙어 나와도 읽는다
+async function addFiles(fileList) {
+  const errs = [];
+  for (const f of fileList) {
+    if (!/\.csv$/i.test(f.name)) { errs.push(f.name + ' — CSV 파일이 아닙니다'); continue; }
+    if (loaded.has(f.name)) continue;                       // 같은 파일을 두 번 올리면 건너뛴다
+    const table = parseCSV(await readText(f));
+    const head = table[0].map(h => h.trim());
+    const ix = n => head.indexOf(n);
+    const opt = (r, n) => ix(n) < 0 ? '' : (r[ix(n)] || '').trim();
+    if (head.includes('연간예산')) {                         // 예산표
+      const miss = NEED_B.filter(n => !head.includes(n));
+      if (miss.length) { errs.push(f.name + ' — 없는 열: ' + miss.join(', ')); continue; }
+      for (const r of table.slice(1)) {
+        const k = opt(r, '프로젝트') + '|' + opt(r, '계정');
+        budget = budget.filter(b => b.key !== k);           // 같은 항목이 다시 오면 새 값으로
+        budget.push({ key: k, team: opt(r, '팀'), proj: opt(r, '프로젝트'), acc: opt(r, '계정'), amt: num(opt(r, '연간예산')), note: opt(r, '비고') });
+      }
+      loaded.set(f.name, '예산');
+    } else {                                                  // 집행 내역
+      const miss = NEED_L.filter(n => !head.includes(n));
+      if (miss.length) { errs.push(f.name + ' — 없는 열: ' + miss.join(', ')); continue; }
+      const seen = new Set(spends.map(r => r.no));
+      for (const r of table.slice(1)) {
+        const no = opt(r, '전표번호');
+        if (seen.has(no)) continue;                           // 같은 전표가 두 파일에 있으면 한 번만
+        spends.push({ no, day: opt(r, '집행일'), team: opt(r, '팀'), proj: opt(r, '프로젝트'), acc: opt(r, '계정'),
+          vendor: opt(r, '거래처'), memo: opt(r, '적요'), amt: num(opt(r, '금액')), key: opt(r, '프로젝트') + '|' + opt(r, '계정') });
+      }
+      loaded.set(f.name, '집행');
+    }
+  }
+  render();
+  if (errs.length) alert('읽지 못한 파일이 있습니다\n\n' + errs.join('\n'));
+}
+
+// ---- 계산 (전부 화면에서) -----------------------------------------------------
+function judge(b) {
+  const rows = spends.filter(r => r.key === b.key);
+  const spent = rows.reduce((t, r) => t + r.amt, 0);
+  const rate = b.amt ? spent / b.amt * 100 : null, gap = rate == null ? null : rate - PACE;
+  const flags = [];
+  if (gap != null && gap >= RULES.fast) flags.push(RULE_LIST[0].id);
+  if (gap != null && -gap >= RULES.slow) flags.push(RULE_LIST[1].id);
+  return { ...b, rows, spent, rate, gap, left: b.amt - spent, flags };
+}
+function sumOf(ls) {
+  const bud = ls.reduce((t, l) => t + l.amt, 0), sp = ls.reduce((t, l) => t + l.spent, 0);
+  const rate = bud ? sp / bud * 100 : null;
+  return { n: ls.length, bud, spent: sp, left: bud - sp, rate, gap: rate == null ? null : rate - PACE,
+    flag: ls.filter(l => l.flags.length).length };
+}
+function stats() {
+  const lines = budget.map(judge);
+  const teams = [...new Set(lines.map(l => l.team))];
+  const projs = [...new Set(lines.map(l => l.proj))];
+  const accs = [...ACCOUNTS.filter(a => lines.some(l => l.acc === a)), ...new Set(lines.map(l => l.acc).filter(a => !ACCOUNTS.includes(a)))];
+  const byTeam = Object.fromEntries(teams.map(t => [t, sumOf(lines.filter(l => l.team === t))]));
+  const byProj = Object.fromEntries(projs.map(p => [p, sumOf(lines.filter(l => l.proj === p))]));
+  const byAcc = Object.fromEntries(accs.map(a => [a, sumOf(lines.filter(l => l.acc === a))]));
+  const line = (p, a) => lines.find(l => l.proj === p && l.acc === a);
+  const flagged = lines.filter(l => l.flags.length).sort((x, y) => Math.abs(y.gap) - Math.abs(x.gap));
+  const byRule = Object.fromEntries(RULE_LIST.map(x => [x.id, flagged.filter(l => l.flags.includes(x.id)).length]));
+  const tot = sumOf(lines);
+  const known = new Set(budget.map(b => b.key));
+  const orphan = spends.filter(r => !known.has(r.key));     // 예산표에 없는 항목으로 나간 집행
+  const cum = [];                                           // 월별 누적 집행률
+  for (let m = 1; m <= RULES.months; m++) {
+    const s = spends.filter(r => known.has(r.key) && Number(r.day.slice(5, 7)) <= m).reduce((t, r) => t + r.amt, 0);
+    cum.push(tot.bud ? s / tot.bud * 100 : 0);
+  }
+  return { lines, teams, projs, accs, byTeam, byProj, byAcc, line, flagged, byRule, tot, orphan, cum };
+}
+
+// ---- 그리기 -----------------------------------------------------------------
+function render() {
+  const has = budget.length > 0 || spends.length > 0;
+  $('empty').hidden = has; $('dash').hidden = !has; $('resetBtn').hidden = !has;
+  updateAiButtons();
+  if (!has) return;
+  const s = stats(), t = s.tot;
+
+  $('files').innerHTML = '<span>불러온 파일</span>' +
+    [...loaded].map(([n, k]) => '<span class="chip-file' + (k === '예산' ? ' is-budget' : '') + '">' + esc(n) + '</span>').join('') +
+    '<span>— 예산 ' + budget.length + '항목 · 집행 ' + spends.length + '건 · 기준일 ' + RULES.baseDate + '</span>' +
+    (!budget.length ? '<span class="warn-line">· 연간예산 CSV 도 올려 주세요</span>' : '') +
+    (budget.length && s.orphan.length ? '<span class="warn-line">· 예산표에 없는 항목의 집행 ' + s.orphan.length + '건</span>' : '');
+
+  $('kBud').innerHTML = eok(t.bud) + '<small>· ' + t.n + '개 항목</small>';
+  $('kSpent').innerHTML = eok(t.spent) + '<small>· 집행률 ' + p1(t.rate) + '%</small>';
+  $('kGap').innerHTML = sgn(t.gap || 0) + '%p<small>· 정상 ' + p1(PACE) + '%</small>';
+  $('kGap').className = 'v' + (t.gap < 0 ? ' is-behind' : '');
+  $('kFlag').innerHTML = s.flagged.length + '<small>항목 · ' + RULE_LIST.map(x => x.id + ' ' + s.byRule[x.id]).join(' · ') + '</small>';
+
+  $('rules').innerHTML = RULE_LIST.map(x =>
+    '<button class="rule' + (ruleFilter === x.id ? ' is-on' : '') + (s.byRule[x.id] ? '' : ' is-zero') +
+    '" data-rule="' + x.id + '"><strong>' + x.id + '</strong><b>' + s.byRule[x.id] + '</b><span>' + esc(x.desc) + '</span></button>'
+  ).join('');
+
+  $('paceChart').innerHTML = paceSVG(s.cum);
+
+  const maxR = Math.max(110, ...s.teams.map(tm => s.byTeam[tm].rate || 0));
+  $('teamBars').innerHTML = s.teams.map(tm => {
+    const g = s.byTeam[tm];
+    const cls = g.gap >= RULES.fast ? ' is-fast' : -g.gap >= RULES.slow ? ' is-slow' : '';
+    return '<div class="hbar' + cls + '"><span class="nm">' + esc(tm) + '</span><div class="track"><i style="width:' +
+      Math.max(2, Math.min(100, (g.rate || 0) / maxR * 100)) + '%"></i><span class="mark" style="left:' + (PACE / maxR * 100) + '%"></span></div>' +
+      '<span class="n">' + p1(g.rate) + '%</span></div>' +
+      '<p class="hbar-sub">예산 <b>' + eok(g.bud) + '</b> · 집행 <b>' + eok(g.spent) + '</b> · 주의 ' + g.flag + '항목</p>';
+  }).join('');
+
+  renderTable(s);
+  renderList(s);
+}
+// 월별 누적 집행률 — x 는 1~12월, y 는 0~100%. 실제 선은 기준월까지만
+function paceSVG(cum) {
+  const W = 520, H = 200, L = 38, R = 14, T = 12, B = 26;
+  const top = Math.max(100, Math.ceil(Math.max(...cum, PACE) / 25) * 25);
+  const x = m => L + (W - L - R) * m / 12, y = v => T + (H - T - B) * (1 - v / top);
+  let g = '';
+  for (let v = 0; v <= top; v += 25) g += '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + y(v) + '" y2="' + y(v) + '" stroke="#eef1f5"/>' +
+    '<text x="' + (L - 6) + '" y="' + (y(v) + 4) + '" font-size="11" fill="#6b7585" text-anchor="end">' + v + '%</text>';
+  for (let m = 1; m <= 12; m++) g += '<text x="' + x(m) + '" y="' + (H - 8) + '" font-size="11" fill="' + (m <= RULES.months ? '#1c2330' : '#b0b8c6') + '" text-anchor="middle">' + m + '월</text>';
+  g += '<line x1="' + x(0) + '" y1="' + y(0) + '" x2="' + x(12) + '" y2="' + y(100) + '" stroke="#d93025" stroke-width="2" stroke-dasharray="6 5"/>';
+  const pts = [[0, 0], ...cum.map((v, i) => [i + 1, v])];
+  g += '<polygon fill="rgba(15,139,141,.10)" points="' + pts.map(([m, v]) => x(m) + ',' + y(v)).join(' ') + ' ' + x(cum.length) + ',' + y(0) + '"/>';
+  g += '<polyline fill="none" stroke="#0f8b8d" stroke-width="3" points="' + pts.map(([m, v]) => x(m) + ',' + y(v)).join(' ') + '"/>';
+  g += cum.map((v, i) => '<circle cx="' + x(i + 1) + '" cy="' + y(v) + '" r="3.2" fill="#0f8b8d"/>').join('');
+  const last = cum[cum.length - 1] || 0, m = cum.length;
+  g += '<text x="' + (x(m) + 8) + '" y="' + (y(last) + 14) + '" font-size="12.5" font-weight="800" fill="#0f8b8d">' + p1(last) + '%</text>';
+  g += '<text x="' + (x(m) - 8) + '" y="' + (y(PACE) - 7) + '" font-size="12.5" font-weight="800" fill="#d93025" text-anchor="end">정상 ' + p1(PACE) + '%</text>';
+  return '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="월별 누적 집행률과 정상 페이스">' + g + '</svg>';
+}
+function cellVal(l) {
+  if (metric === 'rate') return p1(l.rate) + '%';
+  if (metric === 'spent') return mil(l.spent);
+  if (metric === 'budget') return mil(l.amt);
+  return mil(l.left);
+}
+function totVal(g) {
+  if (metric === 'rate') return p1(g.rate) + '%';
+  if (metric === 'spent') return mil(g.spent);
+  if (metric === 'budget') return mil(g.bud);
+  return mil(g.left);
+}
+function renderTable(s) {
+  const names = { rate: '집행률 (연간예산 대비)', spent: '집행액 (백만원)', budget: '연간예산 (백만원)', left: '잔액 (백만원)' };
+  $('mxTitle').textContent = '프로젝트 × 계정 — ' + names[metric];
+  $('mxHead').innerHTML = '<tr><th>프로젝트</th>' + s.accs.map(a => '<th class="num">' + esc(a) + '</th>').join('') + '<th class="num tot">합계</th></tr>';
+  const td = (p, a) => {
+    const l = s.line(p, a);
+    if (!l) return '<td class="num muted">-</td>';
+    const on = l.flags.filter(f => !ruleFilter || f === ruleFilter);
+    const cls = on.includes('과속') ? ' is-flag' : on.includes('저조') ? ' is-slow' : '';
+    return '<td class="num cell' + cls + (pick === l.key ? ' is-pick' : '') + '" data-key="' + esc(l.key) + '">' + cellVal(l) +
+      on.map(f => '<span class="fl">' + f + '</span>').join('') + '</td>';
+  };
+  $('tbody').innerHTML = s.projs.map(p => '<tr><td>' + esc(p) + '<span class="team">' + esc(s.lines.find(l => l.proj === p).team) + '</span></td>' +
+      s.accs.map(a => td(p, a)).join('') + '<td class="num tot">' + totVal(s.byProj[p]) + '</td></tr>').join('') +
+    '<tr class="tot"><td>합계</td>' + s.accs.map(a => '<td class="num">' + totVal(s.byAcc[a]) + '</td>').join('') + '<td class="num">' + totVal(s.tot) + '</td></tr>';
+  $('countLine').textContent = '빨강 = 과속 · 주황 = 저조 · 주의 ' + s.flagged.length + '항목' + (ruleFilter ? ' · 「' + ruleFilter + '」만 표시 중' : '') +
+    ' · 정상 페이스 ' + p1(PACE) + '% (' + RULES.months + ' ÷ 12개월) · 칸을 누르면 아래에 그 항목의 집행 내역이 나옵니다';
+}
+function renderList(s) {
+  if (pick && !s.lines.some(l => l.key === pick)) pick = null;
+  const flaggedKeys = new Set(s.flagged.filter(l => !ruleFilter || l.flags.includes(ruleFilter)).map(l => l.key));
+  $('viewSel').innerHTML = [['flag', '주의 항목의 집행'], ['all', '전체 집행'], ...s.teams.map(tm => ['team:' + tm, tm])].map(([v, n]) =>
+    '<option value="' + esc(v) + '"' + (v === view ? ' selected' : '') + '>' + esc(n) + '</option>').join('');
+  $('viewSel').disabled = !!pick;
+  let list;
+  if (pick) list = spends.filter(r => r.key === pick);
+  else if (view === 'flag') list = spends.filter(r => flaggedKeys.has(r.key));
+  else if (view.startsWith('team:')) list = spends.filter(r => r.team === view.slice(5));
+  else list = spends.slice();
+  list.sort((a, b) => b.amt - a.amt);
+  const l = pick && s.lines.find(x => x.key === pick);
+  $('pickChip').innerHTML = l ? '<span class="pick-chip">' + esc(l.proj) + ' · ' + esc(l.acc) + ' — 집행률 ' + p1(l.rate) + '%' +
+    (l.note ? ' · 비고: ' + esc(l.note) : '') + ' <button id="unpick" title="선택 해제">✕</button></span>' : '';
+  $('lstTitle').textContent = '집행 내역 ' + list.length + '건 · ' + eok(list.reduce((t, r) => t + r.amt, 0)) + ' — 큰 금액 순';
+  $('lstBody').innerHTML = list.map(r =>
+    '<tr' + (flaggedKeys.has(r.key) ? ' class="is-flag"' : '') + '><td>' + esc(r.no) + '</td><td>' + esc(r.day) + '</td><td>' + esc(r.proj) +
+    '</td><td>' + esc(r.acc) + '</td><td>' + esc(r.vendor) + '</td><td class="c">' + esc(r.memo) + '</td><td class="num">' + won(r.amt) + '</td></tr>'
+  ).join('') || '<tr><td colspan="7" class="muted" style="text-align:center;padding:20px">해당하는 집행이 없습니다</td></tr>';
+}
+
+// ---- AI (server.js 를 거쳐 부른다) -----------------------------------------
+async function callClaude(messages, system) {
+  let res;
+  try {
+    res = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey },
+      body: JSON.stringify({ max_tokens: 2048, system, messages })
+    });
+  } catch (e) {
+    throw new Error('중계 서버에 닿지 못했습니다 (' + API_URL + ')\nserver.js 가 떠 있는지, 이 화면을 주소로 열었는지 확인하세요.');
+  }
+  const raw = await res.text();
+  if (!res.ok) throw new Error('HTTP ' + res.status + '\n' + raw.slice(0, 500));
+  const data = JSON.parse(raw);
+  return (data.content || []).filter(b => b.type === 'text').map(b => b.text).join('\n').trim();
+}
+// AI 에게 보내는 재료 — 집계와 항목별 비고, 걸린 항목의 큰 집행 적요만. 거래처 · 전표번호는 보내지 않는다
+function context() {
+  const s = stats(), r1 = x => x == null ? null : Math.round(x * 10) / 10, m1 = w => Math.round(w / 1e5) / 10;   // 백만원, 소수 한 자리
+  const pack = g => ({ 연간예산_백만원: m1(g.bud), 집행_백만원: m1(g.spent), 잔액_백만원: m1(g.left), 집행률: r1(g.rate), 페이스차이_p: r1(g.gap), 주의항목: g.flag });
+  return JSON.stringify({
+    예산기준: { 기준일: RULES.baseDate, 정상페이스: r1(PACE) + '% (' + RULES.months + '/12개월)', 과속: '정상 페이스보다 ' + RULES.fast + '%p 이상 높음', 저조: '정상 페이스보다 ' + RULES.slow + '%p 이상 낮음' },
+    전체: pack(s.tot),
+    월별누적집행률: Object.fromEntries(s.cum.map((v, i) => [(i + 1) + '월', r1(v)])),
+    팀별: s.teams.map(t => ({ 팀: t, ...pack(s.byTeam[t]) })),
+    프로젝트별: s.projs.map(p => ({ 프로젝트: p, 팀: s.lines.find(l => l.proj === p).team, ...pack(s.byProj[p]) })),
+    계정별: s.accs.map(a => ({ 계정: a, ...pack(s.byAcc[a]) })),
+    항목: s.lines.map(l => ({ 팀: l.team, 프로젝트: l.proj, 계정: l.acc, 연간예산_백만원: m1(l.amt), 집행_백만원: m1(l.spent), 잔액_백만원: m1(l.left),
+      집행률: r1(l.rate), 페이스차이_p: r1(l.gap), 걸린기준: l.flags, 비고: l.note || '' })),
+    주의항목_주요집행: s.flagged.map(l => ({ 프로젝트: l.proj, 계정: l.acc, 걸린기준: l.flags,
+      집행: l.rows.slice().sort((a, b) => b.amt - a.amt).slice(0, 6).map(r => ({ 집행일: r.day, 적요: r.memo, 금액_백만원: m1(r.amt) })) }))
+  });
+}
+const SYSTEM = '너는 수소사업 본부(충전 인프라 · 연료전지 · 수소 생산 · 사업기획)의 연간 예산 집행 현황을 정리해 보고하는 담당자를 돕는 보조자다. ' +
+  '아래 JSON 은 화면이 이미 계산한 금액 · 집행률과, 항목별 비고 · 걸린 항목의 주요 집행 적요다. 숫자는 새로 계산하지 말고 JSON 에 있는 값만 인용한다. ' +
+  '과속 · 저조의 사정은 비고와 적요를 근거로만 말하고, 계약금처럼 시점이 앞당겨진 것인지 실제로 예산을 넘길 것인지 구분해서 전한다. ' +
+  'JSON 에 없는 내용은 모른다고 말하고, 원인은 단정하지 말고 "확인이 필요하다" 처럼 쓴다. 금액은 억 원 또는 백만 원으로 쓴다. 한국어로 짧게 답한다.\n\n';
+
+function mdLite(t) {
+  return esc(t).split('\n').map(line => {
+    const l = line.replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
+    if (/^■/.test(line)) return '<span class="h">' + l + '</span>';
+    return l.trim() ? '<p>' + l + '</p>' : '';
+  }).join('');
+}
+function updateAiButtons() {
+  const ready = !!apiKey && budget.length > 0 && spends.length > 0;
+  $('sumBtn').disabled = !ready; $('chatIn').disabled = !ready; $('chatBtn').disabled = !ready;
+  updateReportBtn();
+}
+$('connectBtn').onclick = async () => {
+  const k = $('apiKey').value.replace(/\s+/g, '');
+  if (!k) { $('keyStatus').className = 'status err'; $('keyStatus').textContent = 'API 키를 넣어 주세요'; return; }
+  $('keyStatus').className = 'status'; $('keyStatus').textContent = '연결 확인 중…';
+  apiKey = k;
+  try {
+    await callClaude([{ role: 'user', content: 'ping' }]);
+    $('keyStatus').className = 'status ok'; $('keyStatus').textContent = '✓ 연결됨';
+    $('keyBox').hidden = true; $('keyDone').hidden = false;   // 연결되면 키 칸은 접어 둔다
+  } catch (e) {
+    apiKey = ''; $('keyStatus').className = 'status err'; $('keyStatus').textContent = '연결 실패\n' + e.message;
+  }
+  updateAiButtons();
+};
+$('sumBtn').onclick = async () => {
+  $('sumBtn').disabled = true;
+  $('summary').innerHTML = '<span class="loading">AI가 집계와 적요 · 비고를 읽고 있습니다…</span>';
+  try {
+    const text = await callClaude([{ role: 'user', content:
+      '아래 네 덩어리로 정리해줘. 각 덩어리 제목은 ■ 로 시작한다.\n' +
+      '■ 한눈에 — 세 줄\n■ 먼저 챙길 항목 — 최대 3개, 이유 한 줄씩\n' +
+      '■ 적요 · 비고에서 보이는 것 — 과속 · 저조의 사정 (시점 차이인지, 실제로 넘칠지)\n■ 4분기 운영 제안 — 두세 줄' }], SYSTEM + context());
+    lastSummary = text;
+    $('summary').innerHTML = mdLite(text);
+  } catch (e) { $('summary').innerHTML = '<div class="status err">' + esc(e.message) + '</div>'; }
+  $('sumBtn').disabled = false;
+  updateReportBtn();
+};
+function addMsg(cls, html) {
+  if (!chat.length && cls === 'me') $('chatlog').innerHTML = '';
+  const d = document.createElement('div'); d.className = 'msg ' + cls;
+  d.innerHTML = (cls === 'bot' ? '<div class="who">AI</div>' : '') + '<div class="bubble">' + html + '</div>';
+  $('chatlog').appendChild(d); $('chatlog').scrollTop = $('chatlog').scrollHeight; return d;
+}
+async function sendChat() {
+  const q = $('chatIn').value.trim(); if (!q) return;
+  addMsg('me', esc(q)); $('chatIn').value = '';
+  chat.push({ role: 'user', content: q });
+  const wait = addMsg('bot', '<span class="loading">생각 중…</span>');
+  $('chatBtn').disabled = true;
+  try {
+    const a = await callClaude(chat, SYSTEM + context());
+    chat.push({ role: 'assistant', content: a });
+    wait.querySelector('.bubble').innerHTML = mdLite(a);
+  } catch (e) {
+    chat.pop(); wait.className = 'msg err'; wait.innerHTML = '<div class="bubble">' + esc(e.message) + '</div>';
+  }
+  $('chatBtn').disabled = false; $('chatIn').focus();
+}
+$('rekeyBtn').onclick = () => { apiKey = ''; $('apiKey').value = ''; $('keyBox').hidden = false; $('keyDone').hidden = true;
+  $('keyStatus').className = 'status'; $('keyStatus').textContent = '키를 넣고 [연결]을 누르세요'; updateAiButtons(); };
+$('chatBtn').onclick = sendChat;
+$('chatIn').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChat(); } });
+
+// ---- 현황 보고서 · 통합표 — 보고에 그대로 쓰는 두 가지 ----------------------------
+function updateReportBtn() { $('reportBtn').disabled = !lastSummary || !budget.length; }
+function openReport() {
+  const s = stats(), t = s.tot;
+  const th = (n, r) => '<th' + (r ? ' style="text-align:right"' : '') + '>' + n + '</th>';
+  const trow = (name, g, sum) => '<tr' + (sum ? ' class="sum"' : '') + '><td>' + esc(name) + '</td><td class="n">' + eok(g.bud) + '</td><td class="n">' + eok(g.spent) +
+    '</td><td class="n">' + p1(g.rate) + '%</td><td class="n' + (g.gap < 0 ? ' lo' : '') + '">' + sgn(g.gap) + '%p</td><td class="n">' + eok(g.left) +
+    '</td><td class="n' + (g.flag ? ' lo' : '') + '">' + g.flag + '</td></tr>';
+  const thead = '<tr>' + th('팀') + th('연간예산', 1) + th('집행', 1) + th('집행률', 1) + th('페이스 차이', 1) + th('잔액', 1) + th('주의', 1) + '</tr>';
+  const trows = s.teams.map(tm => trow(tm, s.byTeam[tm])).join('') + trow('합계', t, true);
+  const mhead = '<tr>' + th('프로젝트') + s.accs.map(a => th(esc(a), 1)).join('') + th('합계', 1) + '</tr>';
+  const mc = l => !l ? '<td class="n" style="color:#b0b8c6">-</td>' : '<td class="n' + (l.flags.length ? ' lo' : '') + '">' + p1(l.rate) + '%</td>';
+  const mrows = s.projs.map(p => '<tr><td>' + esc(p) + '</td>' + s.accs.map(a => mc(s.line(p, a))).join('') + '<td class="n">' + p1(s.byProj[p].rate) + '%</td></tr>').join('');
+  const flagRows = s.flagged.map(l => '<li><b>' + esc(l.flags.join(' · ')) + '</b> ' + esc(l.team) + ' · ' + esc(l.proj) + ' · ' + esc(l.acc) +
+    ' — 집행률 ' + p1(l.rate) + '% (' + sgn(l.gap) + '%p) · 예산 ' + mil(l.amt) + ' · 집행 ' + mil(l.spent) + ' 백만원' +
+    (l.note ? '<br><span class="c">비고: ' + esc(l.note) + '</span>' : '') + '</li>').join('');
+  const html = '<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8"><title>수소사업 예산 집행 현황 보고</title><style>' +
+    'body{margin:0;background:#e9edf3;font-family:"Malgun Gothic",sans-serif;color:#1c2330;letter-spacing:-.01em}' +
+    '.page{width:794px;margin:24px auto;background:#fff;padding:44px 52px;box-shadow:0 2px 14px rgba(0,0,0,.12)}' +
+    'h1{margin:0;font-size:25px;color:#1f3f7a}.meta{margin:8px 0 20px;padding-bottom:14px;border-bottom:2px solid #0f8b8d;color:#6b7585;font-size:13px}' +
+    'h2{font-size:16px;color:#1f3f7a;margin:22px 0 8px}table{width:100%;border-collapse:collapse;font-size:13px}' +
+    'th,td{padding:6px 8px;border-bottom:1px solid #e3e8f0;text-align:left}th{background:#f5f7fb;color:#6b7585}td.n{text-align:right;font-weight:700}' +
+    'td.lo{color:#d93025}tr.sum td{border-bottom:2px solid #1f3f7a;font-weight:800;color:#1f3f7a;background:#f5f7fb}' +
+    '.kp{display:flex;gap:10px}.kp div{flex:1;border:1px solid #e3e8f0;border-radius:8px;padding:10px 12px}.kp p{margin:0;font-size:12px;color:#6b7585}.kp b{font-size:21px}' +
+    'ul{margin:0;padding-left:18px;font-size:13.5px;line-height:1.7}ul b{color:#d93025}ul .c{color:#4a5262}' +
+    '.body{font-size:14px;line-height:1.75}.body .h{display:block;margin:14px 0 2px;font-weight:800;color:#1f3f7a}.body p{margin:1px 0}' +
+    '.foot{margin-top:24px;padding-top:10px;border-top:1px solid #e3e8f0;font-size:11.5px;color:#6b7585}' +
+    '.bar{width:794px;margin:16px auto 0;text-align:right}.bar button{border:0;border-radius:7px;padding:9px 16px;background:#1f3f7a;color:#fff;font:inherit;font-weight:700;cursor:pointer}' +
+    '@media print{body{background:#fff}.page{margin:0;box-shadow:none;padding:0;width:auto}.bar{display:none}}' +
+    '</style></head><body><div class="bar"><button onclick="print()">인쇄 · PDF로 저장</button></div><div class="page">' +
+    '<h1>수소사업 예산 집행 현황 보고 — ' + esc(RULES.baseDate.slice(0, 4) + '년 ' + Number(RULES.baseDate.slice(5, 7)) + '월 말') + '</h1>' +
+    '<div class="meta">파일 ' + loaded.size + '개 · 예산 ' + t.n + '항목 · 집행 ' + spends.length + '건 · 기준일 ' + RULES.baseDate + ' &nbsp;|&nbsp; 정상 페이스 ' + p1(PACE) +
+      '% · 주의 기준: 과속 +' + RULES.fast + '%p · 저조 −' + RULES.slow + '%p</div>' +
+    '<div class="kp"><div><p>연간예산</p><b>' + eok(t.bud) + '</b></div><div><p>집행 누계</p><b>' + eok(t.spent) + '</b></div><div><p>집행률 (정상 ' + p1(PACE) + '%)</p><b>' + p1(t.rate) +
+      '%</b></div><div><p>주의 항목</p><b style="color:#d93025">' + s.flagged.length + '개</b></div></div>' +
+    '<h2>팀별 집행 현황</h2><table>' + thead + trows + '</table>' +
+    '<h2>프로젝트 × 계정 — 집행률</h2><table>' + mhead + mrows + '</table>' +
+    '<h2>예산기준에 걸린 항목</h2><ul>' + (flagRows || '<li>없음</li>') + '</ul>' +
+    '<h2>AI 요약</h2><div class="body">' + mdLite(lastSummary) + '</div>' +
+    '<p class="foot">금액과 집행률은 화면이 연간예산 · 집행 CSV 에서 계산했고, 요약은 AI 가 그 집계와 비고 · 적요를 보고 쓴 초안입니다. 거래처 · 전표번호는 AI 에 보내지 않았습니다. 예산 조정 · 이월은 각 팀과 확인한 뒤 확정하세요.</p>' +
+    '</div></body></html>';
+  const w = window.open('', '_blank');
+  if (!w) { alert('팝업이 막혔습니다 — 주소창 오른쪽에서 이 사이트의 팝업을 허용해 주세요.'); return; }
+  w.document.open(); w.document.write(html); w.document.close();
+}
+$('reportBtn').onclick = openReport;
+// 팀별 집행 파일들을 한 장으로 — 항목의 예산 · 집행률 · 걸린 기준을 붙인다. 엑셀에서 바로 열린다 (UTF-8 BOM)
+function downloadCSV() {
+  const s = stats(), q = v => /[",\n]/.test(String(v)) ? '"' + String(v).replace(/"/g, '""') + '"' : v;
+  const by = Object.fromEntries(s.lines.map(l => [l.key, l]));
+  const head = ['전표번호', '집행일', '팀', '프로젝트', '계정', '거래처', '적요', '금액', '항목 연간예산', '항목 집행 누계', '항목 집행률(%)', '걸린 기준'];
+  const body = spends.slice().sort((a, b) => a.team.localeCompare(b.team) || a.day.localeCompare(b.day)).map(r => {
+    const l = by[r.key];
+    return [r.no, r.day, r.team, r.proj, r.acc, r.vendor, r.memo, r.amt, l ? l.amt : '', l ? l.spent : '', l ? p1(l.rate) : '', l ? l.flags.join(' · ') : '예산 없음'].map(q).join(',');
+  });
+  const blob = new Blob(['﻿' + [head.join(','), ...body].join('\r\n')], { type: 'text/csv;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = '예산집행_통합.csv';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+$('csvBtn').onclick = downloadCSV;
+
+// ---- 이벤트 -----------------------------------------------------------------
+$('pickBtn').onclick = $('pickBtn2').onclick = () => $('fileInput').click();
+$('fileInput').onchange = e => { const fs = [...e.target.files]; e.target.value = ''; addFiles(fs); };  // 목록을 먼저 복사해 둔다 — 비우면 함께 사라진다
+const drop = $('empty');
+['dragenter', 'dragover'].forEach(t => document.addEventListener(t, e => { e.preventDefault(); drop.classList.add('is-over'); }));
+['dragleave', 'drop'].forEach(t => document.addEventListener(t, e => { e.preventDefault(); drop.classList.remove('is-over'); }));
+document.addEventListener('drop', e => { if (e.dataTransfer.files.length) addFiles([...e.dataTransfer.files]); });
+$('rules').onclick = e => { const b = e.target.closest('[data-rule]'); if (!b) return;
+  ruleFilter = ruleFilter === b.dataset.rule ? '' : b.dataset.rule; render(); };
+$('metricSel').onchange = e => { metric = e.target.value; renderTable(stats()); };
+$('tbody').onclick = e => { const c = e.target.closest('[data-key]'); if (!c) return;
+  pick = pick === c.dataset.key ? null : c.dataset.key; const s = stats(); renderTable(s); renderList(s); };
+$('pickChip').onclick = e => { if (e.target.id === 'unpick') { pick = null; const s = stats(); renderTable(s); renderList(s); } };
+$('viewSel').onchange = e => { view = e.target.value; renderList(stats()); };
+$('resetBtn').onclick = () => { budget = []; spends = []; loaded.clear(); ruleFilter = ''; view = 'flag'; pick = null; chat = []; lastSummary = '';
+  $('summary').innerHTML = '<span class="muted">CSV를 올리고 연결하면 누를 수 있습니다</span>';
+  $('chatlog').innerHTML = '<div class="muted">예) 평택 충전소 설비투자는 정말 과속이야? · 4분기에 먼저 챙길 항목은?</div>'; render(); };
+render();
+</script>
+</body>
+</html>

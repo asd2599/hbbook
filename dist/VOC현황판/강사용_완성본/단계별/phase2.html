@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>고객 VOC 현황판 (Phase 2)</title>
+<style>
+  :root {
+    --bg: #f3f5f9; --card: #fff; --line: #dfe4ec; --ink: #1c2330; --soft: #6b7585;
+    --navy: #1f3f7a; --navy-soft: #eaf0fa; --red: #d93025; --red-soft: #fdecea;
+    --amber: #b26a00; --amber-soft: #fff4e0; --green: #1e8e3e; --teal: #0f8b8d;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+         font-family: "Malgun Gothic", "맑은 고딕", -apple-system, "Segoe UI", sans-serif;
+         font-size: 14px; letter-spacing: -.01em; }
+  header { display: flex; align-items: center; gap: 16px; padding: 14px 24px;
+           background: var(--navy); color: #fff; }
+  header h1 { margin: 0; font-size: 20px; font-weight: 800; }
+  header .sub { font-size: 13px; opacity: .8; }
+  header .grow { flex: 1; }
+  .btn { border: 0; border-radius: 7px; padding: 9px 15px; font: inherit; font-weight: 700;
+         cursor: pointer; background: #fff; color: var(--navy); white-space: nowrap; }
+  .btn:disabled { opacity: .45; cursor: not-allowed; }
+  .btn--red { background: var(--red); color: #fff; }
+  .btn--navy { background: var(--navy); color: #fff; }
+  .btn--ghost { background: #fff; color: var(--navy); border: 1px solid var(--line); }
+
+  .layout { display: grid; grid-template-columns: minmax(0, 1fr); gap: 18px; padding: 18px 24px 28px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; }
+  .card h2 { margin: 0 0 12px; font-size: 15px; color: var(--navy); }
+
+  /* 빈 화면 안내 */
+  .empty { display: flex; flex-direction: column; align-items: center; justify-content: center;
+           min-height: 520px; border: 2px dashed #b9c4d6; border-radius: 14px; background: #fff;
+           text-align: center; padding: 30px; transition: background .15s; }
+  .empty.is-over { background: var(--navy-soft); border-color: var(--navy); }
+  .empty .big { font-size: 22px; font-weight: 800; color: var(--navy); margin: 0 0 8px; }
+  .empty .hint { color: var(--soft); margin: 0 0 20px; font-size: 15px; }
+  .empty ol { text-align: left; margin: 22px 0 0; padding: 16px 22px 16px 38px; background: var(--bg);
+              border-radius: 10px; color: var(--ink); line-height: 1.9; font-size: 14px; }
+
+  .files { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 12px; color: var(--soft); }
+  .chip-file { background: #fff; border: 1px solid var(--line); border-radius: 20px; padding: 4px 11px; font-size: 12.5px; color: var(--ink); }
+
+  .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 14px; }
+  .kpi { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
+  .kpi .k { font-size: 13px; color: var(--soft); }
+  .kpi .v { font-size: 26px; font-weight: 800; margin-top: 4px; font-variant-numeric: tabular-nums; }
+  .kpi .v small { font-size: 14px; font-weight: 700; color: var(--soft); margin-left: 3px; }
+  .kpi.is-alert { border-color: #f1b3ad; background: var(--red-soft); }
+  .kpi.is-alert .v { color: var(--red); }
+  .up { color: var(--red); } .down { color: var(--green); }
+
+  .rules { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 14px; }
+  .rule { display: grid; grid-template-columns: 1fr auto; align-items: baseline; gap: 2px 8px; text-align: left;
+          border: 1px solid var(--line); background: #fff; border-radius: 9px; padding: 9px 14px; cursor: pointer; font: inherit; }
+  .rule b { color: var(--red); font-size: 18px; }
+  .rule span { grid-column: 1 / -1; color: var(--soft); font-size: 12px; }
+  .rule.is-on { border-color: var(--red); background: var(--red-soft); }
+  .rule.is-zero b { color: var(--soft); }
+
+  .charts { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+  /* 주별 접수 — 유형별로 쌓는다 */
+  .vbars { display: flex; align-items: flex-end; gap: 22px; height: 160px; padding: 0 14px; border-bottom: 1px solid var(--line); }
+  .vbars .col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; }
+  .vbars em { font-style: normal; font-size: 12.5px; font-weight: 800; margin-bottom: 3px; font-variant-numeric: tabular-nums; }
+  .vbars .stack { width: 58%; max-width: 54px; display: flex; flex-direction: column-reverse; border-radius: 5px 5px 0 0; overflow: hidden; }
+  .vbars .stack i { display: block; }
+  .vbars .col.is-now em { color: var(--navy); }
+  .vlabels { display: flex; gap: 22px; padding: 6px 14px 0; }
+  .vlabels div { flex: 1; text-align: center; font-size: 12.5px; font-weight: 700; white-space: nowrap; }
+  .legend { display: flex; flex-wrap: wrap; gap: 6px 12px; margin-top: 8px; font-size: 12px; color: var(--soft); }
+  .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 4px; vertical-align: -1px; }
+  /* 이번 주 많이 늘어난 곳 */
+  .hbar { display: grid; grid-template-columns: 132px 1fr 118px; align-items: center; gap: 8px; margin: 9px 0; font-size: 13px; }
+  .hbar .nm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 700; }
+  .hbar .track { position: relative; height: 15px; background: var(--bg); border-radius: 8px; overflow: hidden; }
+  .hbar .track i { position: absolute; left: 0; top: 0; bottom: 0; background: #9fb4d9; border-radius: 8px; }
+  .hbar .track i.prev { background: #d5deec; }
+  .hbar.is-flag .track i.now { background: var(--red); }
+  .hbar.is-flag .n { color: var(--red); }
+  .hbar .n { text-align: right; font-weight: 800; font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+  .tools { display: flex; gap: 8px; align-items: center; margin-bottom: 10px; flex-wrap: wrap; }
+  .tools h2 { margin: 0 auto 0 0; }
+  .tools select { font: inherit; padding: 7px 10px; border: 1px solid var(--line); border-radius: 7px; background: #fff; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; color: var(--soft); font-weight: 700; padding: 8px 8px; border-bottom: 2px solid var(--line); background: #fafbfd; white-space: nowrap; }
+  th.num, td.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  td { padding: 8px 8px; border-bottom: 1px solid #eef1f5; vertical-align: top; }
+  td:first-child { white-space: nowrap; font-weight: 700; }
+  td.is-flag { background: var(--red-soft); color: var(--red); font-weight: 800; }
+  .mx th.tot, .mx td.tot { background: #f5f7fb; font-weight: 800; color: var(--navy); }
+  .mx tr.tot td { border-top: 2px solid var(--line); background: #f5f7fb; font-weight: 800; color: var(--navy); }
+  .mx td .fl { margin-left: 5px; padding: 1px 6px; border-radius: 5px; background: var(--red); color: #fff; font-size: 11px; font-weight: 800; }
+  .tag { display: inline-block; margin: 1px 3px 1px 0; padding: 2px 7px; border-radius: 5px; font-size: 12px; font-weight: 700;
+         background: var(--red-soft); color: var(--red); white-space: nowrap; }
+  .senti { display: inline-block; padding: 1px 7px; border-radius: 5px; font-size: 12px; font-weight: 700; white-space: nowrap; }
+  .senti.neg { background: var(--red-soft); color: var(--red); }
+  .senti.pos { background: #e6f4ea; color: var(--green); }
+  .senti.neu { background: var(--bg); color: var(--soft); }
+  .topic { display: block; margin-top: 2px; font-size: 11.5px; color: var(--soft); white-space: nowrap; }
+  .lst td { white-space: nowrap; }
+  .lst tr.is-late td { background: #fff8f7; }
+  .lst td.over { color: var(--red); font-weight: 800; }
+  .lst td.c { white-space: normal; min-width: 220px; }
+  .muted { color: var(--soft); }
+  .count-line { margin: 8px 2px 0; color: var(--soft); font-size: 13px; }
+  .card + .card { margin-top: 14px; }
+  .charts .card + .card { margin-top: 0; }
+
+  /* AI 패널 — 늘 한 화면 안에, 대화 칸이 남은 높이를 다 쓴다 */
+  .ai { position: sticky; top: 18px; align-self: start; display: flex; flex-direction: column; gap: 12px;
+        height: calc(100vh - 108px); min-height: 560px; }
+  .ai .card + .card { margin-top: 0; }
+  .ai .card--chat { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
+  .keyrow-done { display: flex; align-items: center; gap: 8px; }
+  .keyrow-done .status { margin: 0; flex: 1; }
+  .link { background: none; border: 0; padding: 0; font: inherit; font-size: 12.5px; color: var(--navy); text-decoration: underline; cursor: pointer; }
+  .ai .keyrow { display: flex; gap: 6px; }
+  .ai .keyrow input { flex: 1; min-width: 0; font: inherit; padding: 8px 10px; border: 1px solid var(--line); border-radius: 7px; }
+  .status { font-size: 12.5px; margin-top: 7px; color: var(--soft); white-space: pre-wrap; word-break: break-all; }
+  .status.ok { color: var(--green); font-weight: 700; }
+  .status.err { color: var(--red); }
+  .tagrow { display: flex; flex-direction: column; gap: 6px; }
+  .tagres { font-size: 12.5px; color: var(--soft); line-height: 1.45; }
+  .tagres b.neg { color: var(--red); } .tagres b.pos { color: var(--green); }
+  .ai-btns { display: grid; grid-template-columns: 1fr auto; gap: 6px; margin-top: 8px; }
+  .summary { font-size: 13.5px; line-height: 1.6; max-height: 30vh; overflow: auto; }
+  .summary .h { display: block; margin: 10px 0 3px; font-weight: 800; color: var(--navy); }
+  .summary .h:first-child { margin-top: 0; }
+  .summary p, .bubble p { margin: 2px 0; }
+  .chatlog { flex: 1 1 auto; min-height: 120px; overflow: auto; background: var(--bg); border-radius: 8px; padding: 10px; font-size: 13.5px; line-height: 1.6; }
+  .msg { margin-bottom: 10px; }
+  .msg .who { font-size: 11.5px; font-weight: 800; color: var(--soft); margin-bottom: 2px; }
+  .msg.me { text-align: right; }
+  .msg.me .bubble { display: inline-block; background: var(--navy); color: #fff; border-radius: 10px 10px 2px 10px; padding: 7px 11px; text-align: left; }
+  .msg.bot .bubble { background: #fff; border: 1px solid var(--line); border-radius: 10px 10px 10px 2px; padding: 8px 11px; }
+  .msg.err .bubble { background: var(--red-soft); color: var(--red); border-radius: 8px; padding: 8px 11px; white-space: pre-wrap; }
+  .chatin { display: flex; gap: 6px; margin-top: 8px; }
+  .chatin textarea { flex: 1; resize: none; height: 42px; font: inherit; padding: 9px 10px; border: 1px solid var(--line); border-radius: 7px; }
+  .ai-note { font-size: 12px; color: var(--soft); margin: 8px 0 0; }
+  .loading { color: var(--soft); font-style: italic; }
+  [hidden] { display: none !important; }
+
+  /* ---- Phase 4 전 — 아직 다듬지 않은 모습 ---- */
+  header { background: #fff; color: var(--ink); border-bottom: 1px solid var(--line); }
+  header .sub { display: none; }
+  #pickBtn { background: var(--navy); color: #fff; }
+  .kpi.is-alert { background: #fff; border-color: var(--line); }
+  .empty { min-height: 180px; border-style: solid; border-width: 1px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>고객 VOC 현황판</h1>
+    <div class="sub">VOC CSV를 올리면 차종 × 유형별 주간 건수와 증감을 계산하고, 급증한 곳과 처리가 늦은 문의를 빨갛게 표시합니다</div>
+  </div>
+  <div class="grow"></div>
+  <button class="btn btn--ghost" id="resetBtn" style="color:#fff;background:transparent;border-color:rgba(255,255,255,.4)" hidden>처음으로</button>
+  <button class="btn" id="pickBtn">CSV 불러오기</button>
+  <input type="file" id="fileInput" accept=".csv" multiple hidden>
+</header>
+
+<div class="layout">
+  <main>
+    <!-- 빈 화면 -->
+    <section class="empty" id="empty">
+      <p class="hint">CSV 파일을 선택하세요</p>
+      <button class="btn btn--navy" id="pickBtn2">파일 선택</button>
+    </section>
+
+    <!-- 현황판 -->
+    <section id="dash" hidden>
+      <div class="files" id="files"></div>
+
+      <div class="kpis">
+        <div class="kpi"><div class="k">접수 (전체 기간)</div><div class="v" id="kAll">-</div></div>
+        <div class="kpi"><div class="k" id="kNowT">이번 주 접수</div><div class="v" id="kNow">-</div></div>
+        <div class="kpi"><div class="k">처리 중</div><div class="v" id="kOpen">-</div></div>
+        <div class="kpi is-alert"><div class="k">주의</div><div class="v" id="kFlag">-</div></div>
+      </div>
+
+      <div class="rules" id="rules"></div>
+
+      <div class="charts">
+        <div class="card">
+          <h2>주별 접수 — 유형별</h2>
+          <div class="vbars" id="weekBars"></div>
+          <div class="vlabels" id="weekLabels"></div>
+          <div class="legend" id="weekLegend"></div>
+        </div>
+        <div class="card">
+          <h2>이번 주 많이 늘어난 곳 — 차종 × 유형</h2>
+          <div id="riseBars"></div>
+          <div class="legend"><span>연한 막대 = 전주</span><span style="color:var(--red)">빨강 = 급증 기준에 걸림</span></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="tools">
+          <h2 id="mxTitle">차종 × 유형</h2>
+          <select id="metricSel">
+            <option value="now">이번 주 건수</option>
+            <option value="rise">전주 대비</option>
+            <option value="total">전체 기간 합계</option>
+            <option value="open">처리 중</option>
+          </select>
+        </div>
+        <table class="mx">
+          <thead id="mxHead"></thead>
+          <tbody id="tbody"></tbody>
+        </table>
+        <p class="count-line" id="countLine"></p>
+      </div>
+
+      <div class="card">
+        <div class="tools">
+          <h2 id="lstTitle">고객 문의 원문</h2>
+          <select id="pickSel"></select>
+        </div>
+        <table class="lst">
+          <thead><tr><th>접수번호</th><th>접수일</th><th>채널</th><th>차종</th><th>유형</th><th>상태</th><th class="num">경과</th><th>고객 문의</th></tr></thead>
+          <tbody id="lstBody"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+</div>
+
+<script>
+// ---------------------------------------------------------------------------
+// VOC기준 — VOC기준.md 를 그대로 옮긴 값. 기준을 바꾸면 여기와 VOC기준.md 를 같이 고친다.
+// ---------------------------------------------------------------------------
+const RULES = {
+  baseDate: '2026-09-28',   // 2. 기준일 — 자료를 뽑은 날
+  least: 10,                // 3. 급증 — 이번 주 이 건수 이상이면서
+  rise: 50,                 // 3.        전주보다 이 비율(%) 이상 늘어난 차종 × 유형
+  late: 7                   // 4. 지연 — 처리 중인데 접수 후 이 일수 이상 지난 문의
+};
+const RULE_LIST = [
+  { id: '급증', desc: '이번 주 ' + RULES.least + '건 이상이면서 전주보다 ' + RULES.rise + '% 이상 늘어난 차종 × 유형' },
+  { id: '처리 지연', desc: '처리 중인데 접수 후 ' + RULES.late + '일 이상 지난 문의' }
+];
+const TYPE_ORDER = ['품질', '서비스', '사양 문의', '판매·계약'];
+const TYPE_COLOR = ['#1f3f7a', '#0f8b8d', '#9fb4d9', '#c99a4a', '#8a94a6'];
+
+// 화면을 server.js 가 열어 줬다면 같은 주소로 API 를 부른다.
+const SERVER_ORIGIN = location.protocol.startsWith('http') ? location.origin : 'http://localhost:8787';
+const API_URL = SERVER_ORIGIN + '/v1/messages';
+
+const $ = (id) => document.getElementById(id);
+let vocs = [];                // 합친 문의 (한 줄이 문의 한 건)
+const loaded = new Set();     // 이미 올린 파일 이름
+let ruleFilter = '', pick = 'flag', metric = 'now', apiKey = '', chat = [], lastSummary = '', tagged = false;
+
+function esc(s) { return String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
+function p1(x) { return x == null ? '-' : x.toFixed(1); }
+function sgn(x) { return x == null ? '-' : (x > 0 ? '+' : '') + x.toFixed(0) + '%'; }
+const days = (a, b) => Math.round((Date.parse(b) - Date.parse(a)) / 864e5);
+// 주 — 그 달의 1~7일 = 1주, 8~14일 = 2주 …
+const weekKey = d => d.slice(0, 7) + '-' + Math.ceil(Number(d.slice(8, 10)) / 7);
+const weekName = k => Number(k.slice(5, 7)) + '월 ' + k.slice(8) + '주';
+
+// ---- CSV 읽기 -------------------------------------------------------------
+async function readText(file) {
+  const buf = await file.arrayBuffer();
+  try { return new TextDecoder('utf-8', { fatal: true }).decode(buf).replace(/^﻿/, ''); }
+  catch (e) { return new TextDecoder('euc-kr').decode(buf); }   // 엑셀에서 저장한 CSV (한글 깨짐 방지)
+}
+function parseCSV(text) {
+  const out = []; let row = [], cur = '', q = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (q) { if (c === '"' && text[i + 1] === '"') { cur += '"'; i++; } else if (c === '"') q = false; else cur += c; }
+    else if (c === '"') q = true;
+    else if (c === ',') { row.push(cur); cur = ''; }
+    else if (c === '\n' || c === '\r') { if (c === '\r' && text[i + 1] === '\n') i++; row.push(cur); out.push(row); row = []; cur = ''; }
+    else cur += c;
+  }
+  if (cur || row.length) { row.push(cur); out.push(row); }
+  return out.filter(r => r.some(v => v.trim() !== ''));
+}
+const NEED = ['접수번호', '접수일', '채널', '차종', '유형', '처리상태', '고객 문의'];
+async function addFiles(fileList) {
+  const errs = [];
+  for (const f of fileList) {
+    if (!/\.csv$/i.test(f.name)) { errs.push(f.name + ' — CSV 파일이 아닙니다'); continue; }
+    if (loaded.has(f.name)) continue;                       // 같은 파일을 두 번 올리면 건너뛴다
+    const table = parseCSV(await readText(f));
+    const head = table[0].map(h => h.trim());
+    const miss = NEED.filter(n => !head.includes(n));
+    if (miss.length) { errs.push(f.name + ' — 없는 열: ' + miss.join(', ')); continue; }
+    const ix = n => head.indexOf(n);
+    const opt = (r, n) => ix(n) < 0 ? '' : (r[ix(n)] || '').trim();
+    const seen = new Set(vocs.map(r => r.no));
+    for (const r of table.slice(1)) {
+      const no = opt(r, '접수번호');
+      if (seen.has(no)) continue;                           // 같은 문의가 두 파일에 있으면 한 번만
+      vocs.push({ no, date: opt(r, '접수일'), ch: opt(r, '채널'), car: opt(r, '차종'), type: opt(r, '유형'),
+        name: opt(r, '고객명'), st: opt(r, '처리상태'), text: opt(r, '고객 문의'), tag: null });
+    }
+    loaded.add(f.name);
+  }
+  render();
+  if (errs.length) alert('읽지 못한 파일이 있습니다\n\n' + errs.join('\n'));
+}
+
+// ---- 계산 (전부 화면에서) -----------------------------------------------------
+function stats() {
+  const weeks = [...new Set(vocs.map(r => weekKey(r.date)))].sort();
+  const cur = weeks[weeks.length - 1], prev = weeks.length > 1 ? weeks[weeks.length - 2] : null;
+  const all = vocs.map(r => {
+    const o = { ...r, week: weekKey(r.date), open: r.st !== '완료' };
+    o.age = days(r.date, RULES.baseDate);
+    o.late = o.open && o.age >= RULES.late;
+    return o;
+  });
+  const types = [...TYPE_ORDER.filter(t => all.some(r => r.type === t)), ...[...new Set(all.map(r => r.type))].filter(t => !TYPE_ORDER.includes(t)).sort()];
+  const total = rs => rs.length;
+  const cars = [...new Set(all.map(r => r.car))].sort((a, b) => total(all.filter(r => r.car === b)) - total(all.filter(r => r.car === a)) || a.localeCompare(b));
+  const pack = rs => {
+    const now = rs.filter(r => r.week === cur), pv = prev ? rs.filter(r => r.week === prev).length : 0;
+    const tg = now.filter(r => r.tag), neg = tg.filter(r => r.tag.s === '부정').length;
+    return { total: rs.length, now: now.length, prev: pv, rise: pv ? (now.length - pv) / pv * 100 : null,
+      open: rs.filter(r => r.open).length, late: rs.filter(r => r.late).length,
+      weeks: weeks.map(w => rs.filter(r => r.week === w).length), tagged: tg.length, neg, negRate: tg.length ? neg / tg.length * 100 : null };
+  };
+  const cells = [];
+  for (const car of cars) for (const type of types) {
+    const g = { car, type, ...pack(all.filter(r => r.car === car && r.type === type)) };
+    g.surge = g.now >= RULES.least && g.rise != null && g.rise >= RULES.rise;
+    cells.push(g);
+  }
+  const cell = (car, type) => cells.find(g => g.car === car && g.type === type);
+  const surge = cells.filter(g => g.surge);
+  const late = all.filter(r => r.late);
+  const byCar = Object.fromEntries(cars.map(c => [c, pack(all.filter(r => r.car === c))]));
+  const byType = Object.fromEntries(types.map(t => [t, pack(all.filter(r => r.type === t))]));
+  const nowRows = all.filter(r => r.week === cur);
+  const senti = { 긍정: 0, 부정: 0, 중립: 0 };
+  nowRows.forEach(r => { if (r.tag && senti[r.tag.s] != null) senti[r.tag.s]++; });
+  return { all, weeks, cur, prev, types, cars, cells, cell, surge, late, byCar, byType, tot: pack(all), nowRows, senti };
+}
+const gname = g => g.car + ' · ' + g.type;
+const aiCell = r => r.tag ? '<span class="senti ' + ({ 부정: 'neg', 긍정: 'pos' }[r.tag.s] || 'neu') + '">' + esc(r.tag.s) + '</span><span class="topic">' + esc(r.tag.topic || '') + '</span>' : '<span class="muted">-</span>';
+
+// ---- 그리기 -----------------------------------------------------------------
+function render() {
+  const has = vocs.length > 0;
+  $('empty').hidden = has; $('dash').hidden = !has; $('resetBtn').hidden = !has;
+  updateAiButtons();
+  if (!has) return;
+  const s = stats(), t = s.tot;
+
+  $('files').innerHTML = '<span>불러온 파일</span>' +
+    [...loaded].map(n => '<span class="chip-file">' + esc(n) + '</span>').join('') +
+    '<span>— 문의 ' + t.total + '건 · ' + s.weeks.length + '주 · 이번 주 ' + weekName(s.cur) + ' · 기준일 ' + RULES.baseDate + '</span>';
+
+  $('kAll').innerHTML = t.total + '<small>건 · ' + s.weeks.length + '주</small>';
+  $('kNowT').textContent = '이번 주 접수 (' + weekName(s.cur) + ')';
+  $('kNow').innerHTML = t.now + '<small>건 · 전주 대비 <span class="' + (t.rise > 0 ? 'up' : 'down') + '">' + sgn(t.rise) + '</span></small>';
+  $('kOpen').innerHTML = t.open + '<small>건 · 지연 ' + s.late.length + '건</small>';
+  $('kFlag').innerHTML = s.surge.length + '<small>곳 급증 · 지연 ' + s.late.length + '건</small>';
+
+  const cnt = { [RULE_LIST[0].id]: s.surge.length, [RULE_LIST[1].id]: s.late.length };
+  $('rules').innerHTML = RULE_LIST.map(x =>
+    '<button class="rule' + (ruleFilter === x.id ? ' is-on' : '') + (cnt[x.id] ? '' : ' is-zero') +
+    '" data-rule="' + x.id + '"><strong>' + x.id + '</strong><b>' + cnt[x.id] + (x.id === '급증' ? '곳' : '건') + '</b><span>' + esc(x.desc) + '</span></button>'
+  ).join('');
+
+  // 주별 접수 — 유형별로 쌓는다
+  const H = 128, maxW = Math.max(1, ...s.weeks.map((w, i) => s.types.reduce((a, ty) => a + s.byType[ty].weeks[i], 0)));
+  $('weekBars').innerHTML = s.weeks.map((w, i) => {
+    const sum = s.types.reduce((a, ty) => a + s.byType[ty].weeks[i], 0);
+    return '<div class="col' + (w === s.cur ? ' is-now' : '') + '"><em>' + sum + '</em><div class="stack">' +
+      s.types.map((ty, k) => '<i style="height:' + (s.byType[ty].weeks[i] / maxW * H) + 'px;background:' + TYPE_COLOR[k % TYPE_COLOR.length] + '"></i>').join('') + '</div></div>';
+  }).join('');
+  $('weekLabels').innerHTML = s.weeks.map(w => '<div>' + weekName(w) + '</div>').join('');
+  $('weekLegend').innerHTML = s.types.map((ty, k) => '<span><i style="background:' + TYPE_COLOR[k % TYPE_COLOR.length] + '"></i>' + esc(ty) + '</span>').join('');
+
+  // 이번 주 많이 늘어난 곳 — 늘어난 건수 순 6곳
+  const top = s.cells.filter(g => g.now > g.prev).sort((a, b) => (b.now - b.prev) - (a.now - a.prev) || b.now - a.now).slice(0, 6);
+  const maxN = Math.max(1, ...top.map(g => Math.max(g.now, g.prev)));
+  $('riseBars').innerHTML = top.map(g =>
+    '<div class="hbar' + (g.surge ? ' is-flag' : '') + '"><span class="nm" title="' + esc(gname(g)) + '">' + esc(gname(g)) + '</span><div class="track">' +
+    '<i class="now" style="width:' + (g.now / maxN * 100) + '%"></i><i class="prev" style="width:' + (g.prev / maxN * 100) + '%"></i></div>' +
+    '<span class="n">' + g.prev + ' → ' + g.now + '건 · ' + sgn(g.rise) + '</span></div>'
+  ).join('') || '<p class="muted">전주보다 늘어난 곳이 없습니다</p>';
+
+  renderTable(s);
+  renderList(s);
+}
+function cellVal(g) {
+  if (metric === 'now') return g.now ? g.now + '건' : '<span class="muted">-</span>';
+  if (metric === 'rise') return g.rise == null ? '<span class="muted">-</span>' : '<span class="' + (g.rise > 0 ? 'up' : 'down') + '">' + sgn(g.rise) + '</span>';
+  if (metric === 'total') return g.total + '건';
+  if (metric === 'open') return g.open ? g.open + '건' : '<span class="muted">-</span>';
+  return g.negRate == null ? '<span class="muted">-</span>' : p1(g.negRate) + '%';
+}
+function renderTable(s) {
+  const names = { now: '이번 주 건수 (' + weekName(s.cur) + ')', rise: '전주 대비', total: '전체 기간 합계', open: '처리 중', neg: '부정 비율 (AI 분류 · 이번 주)' };
+  $('mxTitle').textContent = '차종 × 유형 — ' + names[metric];
+  $('mxHead').innerHTML = '<tr><th>차종</th>' + s.types.map(t => '<th class="num">' + esc(t) + '</th>').join('') + '<th class="num tot">전체</th></tr>';
+  const td = (g, tot) => {
+    const hit = !tot && g.surge && ruleFilter !== RULE_LIST[1].id;
+    return '<td class="num' + (tot ? ' tot' : '') + (hit ? ' is-flag' : '') + '">' + cellVal(g) + (hit ? '<span class="fl">급증</span>' : '') + '</td>';
+  };
+  $('tbody').innerHTML = s.cars.map(c => '<tr><td>' + esc(c) + '</td>' + s.types.map(t => td(s.cell(c, t))).join('') + td(s.byCar[c], true) + '</tr>').join('') +
+    '<tr class="tot"><td>전체</td>' + s.types.map(t => td(s.byType[t], true)).join('') + td(s.tot, true) + '</tr>';
+  $('countLine').textContent = '빨간 칸이 급증 기준에 걸린 차종 × 유형입니다 · ' + s.surge.length + '곳' + (ruleFilter ? ' · 「' + ruleFilter + '」만 표시 중' : '') +
+    ' · 전주 대비 = (' + weekName(s.cur) + ' − ' + (s.prev ? weekName(s.prev) : '-') + ') ÷ ' + (s.prev ? weekName(s.prev) : '-');
+}
+function renderList(s) {
+  const opts = [['flag', '주의만 (급증 · 지연)'], ['now', '이번 주 전체 (' + s.nowRows.length + '건)'], ['open', '처리 중 전체'], ...s.surge.map(g => ['g:' + gname(g), gname(g) + ' (' + g.now + '건)'])];
+  if (!opts.some(o => o[0] === pick)) pick = 'flag';
+  $('pickSel').innerHTML = opts.map(o => '<option value="' + esc(o[0]) + '"' + (o[0] === pick ? ' selected' : '') + '>' + esc(o[1]) + '</option>').join('');
+  const inSurge = r => r.week === s.cur && s.surge.some(g => g.car === r.car && g.type === r.type);
+  let list = pick === 'now' ? s.nowRows : pick === 'open' ? s.all.filter(r => r.open)
+    : pick.startsWith('g:') ? s.nowRows.filter(r => gname(r) === pick.slice(2))
+    : s.all.filter(r => (ruleFilter !== RULE_LIST[1].id && inSurge(r)) || (ruleFilter !== RULE_LIST[0].id && r.late));
+  list = list.slice().sort((a, b) => b.late - a.late || a.car.localeCompare(b.car) || a.date.localeCompare(b.date));
+  $('lstTitle').textContent = '고객 문의 원문 — ' + list.length + '건';
+  $('lstBody').innerHTML = list.map(r =>
+    '<tr' + (r.late ? ' class="is-late"' : '') + '><td>' + esc(r.no) + '</td><td>' + esc(r.date) + '</td><td>' + esc(r.ch) + '</td><td>' + esc(r.car) + '</td><td>' + esc(r.type) +
+    '</td><td>' + (r.late ? '<span class="tag">처리 지연</span>' : esc(r.st)) + '</td><td class="num' + (r.late ? ' over' : '') + '">' + (r.open ? r.age + '일' : '-') + '</td>' +
+    '<td class="c">' + esc(r.text) + '</td></tr>'
+  ).join('') || '<tr><td colspan="9" class="muted" style="text-align:center;padding:20px">해당하는 문의가 없습니다</td></tr>';
+}
+
+function updateAiButtons() {}
+function updateReportBtn() {}
+
+// ---- 이벤트 -----------------------------------------------------------------
+$('pickBtn').onclick = $('pickBtn2').onclick = () => $('fileInput').click();
+$('fileInput').onchange = e => { const fs = [...e.target.files]; e.target.value = ''; addFiles(fs); };  // 목록을 먼저 복사해 둔다 — 비우면 함께 사라진다
+const drop = $('empty');
+['dragenter', 'dragover'].forEach(t => document.addEventListener(t, e => { e.preventDefault(); drop.classList.add('is-over'); }));
+['dragleave', 'drop'].forEach(t => document.addEventListener(t, e => { e.preventDefault(); drop.classList.remove('is-over'); }));
+document.addEventListener('drop', e => { if (e.dataTransfer.files.length) addFiles([...e.dataTransfer.files]); });
+$('rules').onclick = e => { const b = e.target.closest('[data-rule]'); if (!b) return;
+  ruleFilter = ruleFilter === b.dataset.rule ? '' : b.dataset.rule; render(); };
+$('metricSel').onchange = e => { metric = e.target.value; renderTable(stats()); };
+$('pickSel').onchange = e => { pick = e.target.value; renderList(stats()); };
+$('resetBtn').onclick = () => { vocs = []; loaded.clear(); ruleFilter = ''; pick = 'flag'; chat = []; lastSummary = ''; tagged = false;
+render(); };
+render();
+</script>
+</body>
+</html>

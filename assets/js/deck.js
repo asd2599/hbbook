@@ -363,12 +363,43 @@
     document.documentElement.style.setProperty('--scale', Math.min(scale, 1.35));
   }
 
+  /* ---- 그림 크게 보기 (data-zoom) --------------------------------------- */
+  /* <img data-zoom="assets/img/큰그림.png"> 를 누르면 그 그림을 화면 가득 띄우고,
+     어디든 한 번 더 누르면(또는 Esc) 닫힌다. 떠 있는 동안 슬라이드는 넘어가지 않는다. */
+  var zoomEl = null;
+  function closeZoom() {
+    if (!zoomEl) return;
+    zoomEl.parentNode.removeChild(zoomEl);
+    zoomEl = null;
+  }
+  document.addEventListener('click', function (e) {
+    if (zoomEl) { closeZoom(); e.preventDefault(); return; }
+    var t = e.target && e.target.closest ? e.target.closest('[data-zoom]') : null;
+    if (!t) return;
+    e.preventDefault();
+    zoomEl = document.createElement('div');
+    zoomEl.className = 'zoom-view';
+    var img = document.createElement('img');
+    img.src = t.getAttribute('data-zoom');
+    img.alt = t.getAttribute('alt') || '';
+    zoomEl.appendChild(img);
+    document.body.appendChild(zoomEl);
+  });
+
   /* ---- 키보드 ------------------------------------------------------------ */
   document.addEventListener('keydown', function (e) {
+    if (zoomEl) {                           // 크게 보는 중에는 슬라이드를 넘기지 않는다
+      if (e.key === 'Escape') closeZoom();
+      e.preventDefault();
+      return;
+    }
     if (e.defaultPrevented || e.ctrlKey || e.altKey || e.metaKey) return;
     var t = e.target;                       // 입력칸에 글을 쓰는 중이면 슬라이드를 넘기지 않는다
-    if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'VIDEO' ||
-              t.isContentEditable)) return;
+    // 음악 크기 막대(range)는 글을 쓰는 칸이 아니다 — 만진 뒤에도 스페이스로는 넘어간다 (← → 는 크기 조절에 둔다)
+    var slider = t && t.tagName === 'INPUT' && t.type === 'range';
+    if (t && !(slider && e.key === ' ') &&
+        (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'VIDEO' ||
+         t.isContentEditable)) return;
     switch (e.key) {
       case 'ArrowRight': case 'PageDown': case ' ': active.go(active.at() + 1); e.preventDefault(); break;
       case 'ArrowLeft':  case 'PageUp':          active.go(active.at() - 1); e.preventDefault(); break;
@@ -395,6 +426,7 @@
 
   window.addEventListener('wheel', function (e) {
     if (typeof window.deckIsHome === 'function' && window.deckIsHome()) return;
+    if (zoomEl) { e.preventDefault(); return; }   // 크게 보는 중
     var d = Math.abs(e.deltaY) >= Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
     if (Math.abs(d) < WHEEL_MIN) return;
     e.preventDefault();
@@ -425,6 +457,7 @@
 
   window.addEventListener('touchend', function (e) {
     if (touchX === null) return;
+    if (zoomEl) { touchX = null; return; }  // 크게 보는 중
     var dx = e.changedTouches[0].clientX - touchX;
     if (Math.abs(dx) > 60) active.go(dx < 0 ? active.at() + 1 : active.at() - 1);
     touchX = null;

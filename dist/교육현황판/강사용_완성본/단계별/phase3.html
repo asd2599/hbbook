@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>교육 만족도 현황판 (Phase 3)</title>
+<style>
+  :root {
+    --bg: #f3f5f9; --card: #fff; --line: #dfe4ec; --ink: #1c2330; --soft: #6b7585;
+    --navy: #1f3f7a; --navy-soft: #eaf0fa; --red: #d93025; --red-soft: #fdecea;
+    --amber: #b26a00; --amber-soft: #fff4e0; --green: #1e8e3e; --teal: #0f8b8d;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+         font-family: "Malgun Gothic", "맑은 고딕", -apple-system, "Segoe UI", sans-serif;
+         font-size: 14px; letter-spacing: -.01em; }
+  header { display: flex; align-items: center; gap: 16px; padding: 14px 24px;
+           background: var(--navy); color: #fff; }
+  header h1 { margin: 0; font-size: 20px; font-weight: 800; }
+  header .sub { font-size: 13px; opacity: .8; }
+  header .grow { flex: 1; }
+  .btn { border: 0; border-radius: 7px; padding: 9px 15px; font: inherit; font-weight: 700;
+         cursor: pointer; background: #fff; color: var(--navy); white-space: nowrap; }
+  .btn:disabled { opacity: .45; cursor: not-allowed; }
+  .btn--red { background: var(--red); color: #fff; }
+  .btn--navy { background: var(--navy); color: #fff; }
+  .btn--ghost { background: #fff; color: var(--navy); border: 1px solid var(--line); }
+
+  .layout { display: grid; grid-template-columns: minmax(0, 1fr) 390px; gap: 18px; padding: 18px 24px 28px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; }
+  .card h2 { margin: 0 0 12px; font-size: 15px; color: var(--navy); }
+
+  /* 빈 화면 안내 */
+  .empty { display: flex; flex-direction: column; align-items: center; justify-content: center;
+           min-height: 520px; border: 2px dashed #b9c4d6; border-radius: 14px; background: #fff;
+           text-align: center; padding: 30px; transition: background .15s; }
+  .empty.is-over { background: var(--navy-soft); border-color: var(--navy); }
+  .empty .big { font-size: 22px; font-weight: 800; color: var(--navy); margin: 0 0 8px; }
+  .empty .hint { color: var(--soft); margin: 0 0 20px; font-size: 15px; }
+  .empty ol { text-align: left; margin: 22px 0 0; padding: 16px 22px 16px 38px; background: var(--bg);
+              border-radius: 10px; color: var(--ink); line-height: 1.9; font-size: 14px; }
+
+  .files { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 12px; color: var(--soft); }
+  .chip-file { background: #fff; border: 1px solid var(--line); border-radius: 20px; padding: 4px 11px; font-size: 12.5px; color: var(--ink); }
+
+  .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 14px; }
+  .kpi { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
+  .kpi .k { font-size: 13px; color: var(--soft); }
+  .kpi .v { font-size: 26px; font-weight: 800; margin-top: 4px; font-variant-numeric: tabular-nums; }
+  .kpi .v small { font-size: 14px; font-weight: 700; color: var(--soft); margin-left: 3px; }
+  .kpi.is-alert { border-color: #f1b3ad; background: var(--red-soft); }
+  .kpi.is-alert .v { color: var(--red); }
+
+  .rules { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 14px; }
+  .rule { display: grid; grid-template-columns: 1fr auto; align-items: baseline; gap: 2px 8px; text-align: left;
+          border: 1px solid var(--line); background: #fff; border-radius: 9px; padding: 9px 14px; cursor: pointer; font: inherit; }
+  .rule b { color: var(--red); font-size: 18px; }
+  .rule span { grid-column: 1 / -1; color: var(--soft); font-size: 12px; }
+  .rule.is-on { border-color: var(--red); background: var(--red-soft); }
+  .rule.is-zero b { color: var(--soft); }
+
+  .charts { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+  .vbars { position: relative; display: flex; align-items: flex-end; gap: 10px; height: 168px; padding: 0 8px; border-bottom: 1px solid var(--line); }
+  .vbars .col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; }
+  .vbars i { display: block; width: 70%; max-width: 42px; border-radius: 5px 5px 0 0; background: #9fb4d9; }
+  .vbars .col.is-ok i { background: var(--navy); }
+  .vbars .col.is-low i { background: var(--red); }
+  .vbars em { position: relative; z-index: 1; padding: 0 2px; background: #fff; font-style: normal; font-size: 11.5px; font-weight: 700; margin-bottom: 3px; font-variant-numeric: tabular-nums; }
+  .vbars .col.is-low em { color: var(--red); }
+  .vbars .gap { flex: 0 0 6px; }
+  .vbars .goal { position: absolute; left: 0; right: 0; border-top: 2px dashed var(--navy); }
+  .vlabels { display: flex; gap: 10px; padding: 6px 8px 0; }
+  .vlabels div { flex: 1; text-align: center; font-size: 12.5px; white-space: nowrap; }
+  .vlabels .gap { flex: 0 0 6px; }
+  .vcourse { display: flex; gap: 16px; padding: 4px 8px 0; }
+  .vcourse div { flex: 1; text-align: center; font-size: 12px; font-weight: 700; color: var(--navy);
+                 border-top: 2px solid var(--navy-soft); padding-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .legend { display: flex; gap: 12px; margin-top: 8px; font-size: 12px; color: var(--soft); }
+  .hbar { display: grid; grid-template-columns: 22px 150px 1fr 92px; align-items: center; gap: 8px; margin: 9px 0; font-size: 13px; }
+  .hbar .rk { color: var(--soft); font-weight: 700; text-align: right; }
+  .hbar .nm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 700; }
+  .hbar .track { position: relative; height: 15px; background: var(--bg); border-radius: 8px; overflow: hidden; }
+  .hbar .track i { display: block; height: 100%; background: #9fb4d9; border-radius: 8px; }
+  .hbar .track .mark { position: absolute; top: 0; bottom: 0; border-left: 2px dashed var(--red); }
+  .hbar.is-flag .track i { background: var(--red); }
+  .hbar.is-flag .n { color: var(--red); }
+  .hbar .n { text-align: right; font-weight: 800; font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+  .tools { display: flex; gap: 8px; align-items: center; margin-bottom: 10px; flex-wrap: wrap; }
+  .tools h2 { margin: 0 auto 0 0; }
+  .tools select { font: inherit; padding: 7px 10px; border: 1px solid var(--line); border-radius: 7px; background: #fff; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; color: var(--soft); font-weight: 700; padding: 8px 8px; border-bottom: 2px solid var(--line); background: #fafbfd; white-space: nowrap; }
+  th.num, td.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  td { padding: 8px 8px; border-bottom: 1px solid #eef1f5; vertical-align: top; }
+  td:first-child { white-space: nowrap; font-weight: 700; }
+  td.is-flag { background: var(--red-soft); color: var(--red); font-weight: 800; }
+  .mx tr.tot td { border-top: 2px solid var(--line); background: #f5f7fb; font-weight: 800; color: var(--navy); }
+  .up { color: var(--green); } .down { color: var(--red); }
+  .tag { display: inline-block; margin: 1px 3px 1px 0; padding: 2px 7px; border-radius: 5px; font-size: 12px; font-weight: 700;
+         background: var(--red-soft); color: var(--red); white-space: nowrap; }
+  .score { display: inline-block; min-width: 26px; padding: 1px 6px; border-radius: 5px; text-align: center; font-weight: 800;
+           background: var(--red-soft); color: var(--red); }
+  .muted { color: var(--soft); }
+  .count-line { margin: 8px 2px 0; color: var(--soft); font-size: 13px; }
+  .card + .card { margin-top: 14px; }
+  .charts .card + .card { margin-top: 0; }
+  .cmt td { font-size: 13px; }
+  .cmt td.c { white-space: normal; min-width: 180px; }
+
+  /* AI 패널 — 늘 한 화면 안에, 대화 칸이 남은 높이를 다 쓴다 */
+  .ai { position: sticky; top: 18px; align-self: start; display: flex; flex-direction: column; gap: 12px;
+        height: calc(100vh - 108px); min-height: 560px; }
+  .ai .card + .card { margin-top: 0; }
+  .ai .card--chat { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
+  .keyrow-done { display: flex; align-items: center; gap: 8px; }
+  .keyrow-done .status { margin: 0; flex: 1; }
+  .link { background: none; border: 0; padding: 0; font: inherit; font-size: 12.5px; color: var(--navy); text-decoration: underline; cursor: pointer; }
+  .ai .keyrow { display: flex; gap: 6px; }
+  .ai .keyrow input { flex: 1; min-width: 0; font: inherit; padding: 8px 10px; border: 1px solid var(--line); border-radius: 7px; }
+  .status { font-size: 12.5px; margin-top: 7px; color: var(--soft); white-space: pre-wrap; word-break: break-all; }
+  .status.ok { color: var(--green); font-weight: 700; }
+  .status.err { color: var(--red); }
+  .ai-btns { display: grid; grid-template-columns: 1fr auto; gap: 6px; }
+  .summary { font-size: 13.5px; line-height: 1.6; max-height: 34vh; overflow: auto; }
+  .summary .h { display: block; margin: 10px 0 3px; font-weight: 800; color: var(--navy); }
+  .summary .h:first-child { margin-top: 0; }
+  .summary p, .bubble p { margin: 2px 0; }
+  .chatlog { flex: 1 1 auto; min-height: 120px; overflow: auto; background: var(--bg); border-radius: 8px; padding: 10px; font-size: 13.5px; line-height: 1.6; }
+  .msg { margin-bottom: 10px; }
+  .msg .who { font-size: 11.5px; font-weight: 800; color: var(--soft); margin-bottom: 2px; }
+  .msg.me { text-align: right; }
+  .msg.me .bubble { display: inline-block; background: var(--navy); color: #fff; border-radius: 10px 10px 2px 10px; padding: 7px 11px; text-align: left; }
+  .msg.bot .bubble { background: #fff; border: 1px solid var(--line); border-radius: 10px 10px 10px 2px; padding: 8px 11px; }
+  .msg.err .bubble { background: var(--red-soft); color: var(--red); border-radius: 8px; padding: 8px 11px; white-space: pre-wrap; }
+  .chatin { display: flex; gap: 6px; margin-top: 8px; }
+  .chatin textarea { flex: 1; resize: none; height: 42px; font: inherit; padding: 9px 10px; border: 1px solid var(--line); border-radius: 7px; }
+  .ai-note { font-size: 12px; color: var(--soft); margin: 8px 0 0; }
+  .loading { color: var(--soft); font-style: italic; }
+  [hidden] { display: none !important; }
+
+  /* ---- Phase 4 전 — 아직 다듬지 않은 모습 ---- */
+  header { background: #fff; color: var(--ink); border-bottom: 1px solid var(--line); }
+  header .sub { display: none; }
+  #pickBtn { background: var(--navy); color: #fff; }
+  .kpi.is-alert { background: #fff; border-color: var(--line); }
+  .empty { min-height: 180px; border-style: solid; border-width: 1px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>교육 만족도 현황판</h1>
+    <div class="sub">교육 설문 CSV를 올리면 차수별 만족도를 계산하고, 기준을 벗어난 차수와 7점 이하 응답을 빨갛게 표시합니다</div>
+  </div>
+  <div class="grow"></div>
+  <button class="btn btn--ghost" id="resetBtn" style="color:#fff;background:transparent;border-color:rgba(255,255,255,.4)" hidden>처음으로</button>
+  <button class="btn" id="pickBtn">CSV 불러오기</button>
+  <input type="file" id="fileInput" accept=".csv" multiple hidden>
+</header>
+
+<div class="layout">
+  <main>
+    <!-- 빈 화면 -->
+    <section class="empty" id="empty">
+      <p class="hint">CSV 파일을 선택하세요</p>
+      <button class="btn btn--navy" id="pickBtn2">파일 선택</button>
+    </section>
+
+    <!-- 현황판 -->
+    <section id="dash" hidden>
+      <div class="files" id="files"></div>
+
+      <div class="kpis">
+        <div class="kpi"><div class="k">응답</div><div class="v" id="kResp">-</div></div>
+        <div class="kpi"><div class="k">평균 만족도</div><div class="v" id="kSat">-</div></div>
+        <div class="kpi"><div class="k">7점 이하 응답</div><div class="v" id="kLow">-</div></div>
+        <div class="kpi is-alert"><div class="k">주의 차수</div><div class="v" id="kFlag">-</div></div>
+      </div>
+
+      <div class="rules" id="rules"></div>
+
+      <div class="charts">
+        <div class="card">
+          <h2>차수별 평균 만족도</h2>
+          <div class="vbars" id="satBars"></div>
+          <div class="vlabels" id="satLabels"></div>
+          <div class="vcourse" id="satCourses"></div>
+          <div class="legend"><span>점선 = 목표 8.5점</span><span>남색 = 목표 달성</span><span style="color:var(--red)">빨강 = 기준 미만</span><span style="margin-left:auto">세로축 6~10점</span></div>
+        </div>
+        <div class="card">
+          <h2>차수별 7점 이하 응답 비율</h2>
+          <div id="lowBars"></div>
+          <div class="legend"><span style="color:var(--red)">빨간 점선 = 20%</span><span>높은 차수부터</span></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="tools">
+          <h2>차수별 결과</h2>
+        </div>
+        <table class="mx">
+          <thead><tr><th>과정</th><th>차수</th><th class="num">응답</th><th class="num">만족도</th><th class="num">달성률</th><th class="num">과정 평균 대비</th>
+            <th class="num">이해도</th><th class="num">추천도</th><th class="num">현업적용도</th><th class="num">7점 이하</th></tr></thead>
+          <tbody id="tbody"></tbody>
+        </table>
+        <p class="count-line" id="countLine"></p>
+      </div>
+
+      <div class="card">
+        <div class="tools">
+          <h2 id="cmtTitle">만족도 7점 이하 응답 — 코멘트</h2>
+          <select id="chaSel"></select>
+        </div>
+        <table class="cmt">
+          <thead><tr><th>과정 · 차수</th><th class="num">번호</th><th>소속</th><th class="num">만족도</th><th class="num">이해도</th><th>아쉬운 점</th><th>좋았던 점</th></tr></thead>
+          <tbody id="cmtBody"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <!-- AI 교육 도우미 -->
+  <aside class="ai">
+    <div class="card">
+      <h2>AI 교육 도우미</h2>
+      <div id="keyBox">
+        <div class="keyrow">
+          <input type="password" id="apiKey" placeholder="Claude API 키" autocomplete="off">
+          <button class="btn btn--navy" id="connectBtn">연결</button>
+        </div>
+        <div class="status" id="keyStatus">키를 넣고 [연결]을 누르세요</div>
+      </div>
+      <div class="keyrow-done" id="keyDone" hidden>
+        <p class="status ok">✓ 연결됨</p>
+        <button class="link" id="rekeyBtn">키 다시 넣기</button>
+      </div>
+
+      <h2 style="margin-top:16px">결과 요약 · 개선 제안</h2>
+      <div class="ai-btns">
+        <button class="btn btn--red" id="sumBtn" disabled>AI 요약 받기</button>
+      </div>
+      <div class="summary" id="summary" style="margin-top:10px"><span class="muted">CSV를 올리고 연결하면 누를 수 있습니다</span></div>
+      <p class="ai-note">점수는 화면이 계산합니다. AI에게는 <b>차수별 집계와 코멘트만</b> 보냅니다 — 소속 · 응답번호는 빼고.</p>
+    </div>
+
+    <div class="card card--chat">
+      <h2>설문에 물어보기</h2>
+      <div class="chatlog" id="chatlog"><div class="muted">예) 리더십 2차는 왜 낮았어? · AI 업무 활용 3차는 왜 점수가 갈렸어?</div></div>
+      <div class="chatin">
+        <textarea id="chatIn" placeholder="질문을 입력하세요 (Enter 전송)" disabled></textarea>
+        <button class="btn btn--navy" id="chatBtn" disabled>전송</button>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<script>
+// ---------------------------------------------------------------------------
+// 교육기준 — 교육기준.md 를 그대로 옮긴 값. 기준을 바꾸면 여기와 교육기준.md 를 같이 고친다.
+// ---------------------------------------------------------------------------
+const RULES = {
+  goal: 8.5,        // 2. 달성률 = 차수 평균 만족도 ÷ 이 목표 점수
+  lowAvg: 8.0,      // 3. 주의 — 차수 평균 만족도 이 값 미만
+  lowScore: 7,      // 4 · 5. 이 점수 이하 응답을 「7점 이하」로 센다
+  lowShare: 20      // 4. 주의 — 7점 이하 응답이 그 차수의 이 값(%) 이상
+};
+const RULE_LIST = [
+  { id: '평균 만족도 ' + RULES.lowAvg.toFixed(1) + '점 미만', desc: '그 차수 응답자 만족도의 평균 (10점 만점)' },
+  { id: RULES.lowScore + '점 이하 ' + RULES.lowShare + '% 이상', desc: '만족도 ' + RULES.lowScore + '점 이하 응답이 그 차수의 ' + RULES.lowShare + '% 이상' }
+];
+
+// 화면을 server.js 가 열어 줬다면 같은 주소로 API 를 부른다.
+const SERVER_ORIGIN = location.protocol.startsWith('http') ? location.origin : 'http://localhost:8787';
+const API_URL = SERVER_ORIGIN + '/v1/messages';
+
+const $ = (id) => document.getElementById(id);
+let resp = [];                // 합친 응답 (한 줄이 응답자 한 명)
+const loaded = new Set();     // 이미 올린 파일 이름
+let ruleFilter = '', chaPick = '', apiKey = '', chat = [], lastSummary = '';
+
+function esc(s) { return String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
+function p1(x) { return x == null ? '-' : x.toFixed(1); }
+function p2(x) { return x == null ? '-' : x.toFixed(2); }
+function sgn(x) { return x == null ? '-' : Math.abs(x) < .005 ? '0.00' : (x > 0 ? '+' : '') + x.toFixed(2); }
+
+// ---- CSV 읽기 -------------------------------------------------------------
+async function readText(file) {
+  const buf = await file.arrayBuffer();
+  try { return new TextDecoder('utf-8', { fatal: true }).decode(buf).replace(/^﻿/, ''); }
+  catch (e) { return new TextDecoder('euc-kr').decode(buf); }   // 엑셀에서 저장한 CSV (한글 깨짐 방지)
+}
+function parseCSV(text) {
+  const out = []; let row = [], cur = '', q = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (q) { if (c === '"' && text[i + 1] === '"') { cur += '"'; i++; } else if (c === '"') q = false; else cur += c; }
+    else if (c === '"') q = true;
+    else if (c === ',') { row.push(cur); cur = ''; }
+    else if (c === '\n' || c === '\r') { if (c === '\r' && text[i + 1] === '\n') i++; row.push(cur); out.push(row); row = []; cur = ''; }
+    else cur += c;
+  }
+  if (cur || row.length) { row.push(cur); out.push(row); }
+  return out.filter(r => r.some(v => v.trim() !== ''));
+}
+const NEED = ['과정', '차수', '만족도', '이해도', '추천도', '현업적용도', '좋았던 점', '아쉬운 점'];
+async function addFiles(fileList) {
+  const errs = [];
+  for (const f of fileList) {
+    if (!/\.csv$/i.test(f.name)) { errs.push(f.name + ' — CSV 파일이 아닙니다'); continue; }
+    if (loaded.has(f.name)) continue;                       // 같은 파일을 두 번 올리면 건너뛴다
+    const table = parseCSV(await readText(f));
+    const head = table[0].map(h => h.trim());
+    const miss = NEED.filter(n => !head.includes(n));
+    if (miss.length) { errs.push(f.name + ' — 없는 열: ' + miss.join(', ')); continue; }
+    const ix = n => head.indexOf(n);
+    const val = v => Number(String(v).replace(/[^\d.-]/g, '')) || 0;
+    const opt = (r, n) => ix(n) < 0 ? '' : (r[ix(n)] || '').trim();
+    for (const r of table.slice(1)) {
+      resp.push({ course: r[ix('과정')].trim(), cha: r[ix('차수')].trim(), date: opt(r, '교육일'), no: opt(r, '응답번호'), dept: opt(r, '소속'),
+        sat: val(r[ix('만족도')]), und: val(r[ix('이해도')]), rec: val(r[ix('추천도')]), app: val(r[ix('현업적용도')]),
+        good: (r[ix('좋았던 점')] || '').trim(), bad: (r[ix('아쉬운 점')] || '').trim() });
+    }
+    loaded.add(f.name);
+  }
+  render();
+  if (errs.length) alert('읽지 못한 파일이 있습니다\n\n' + errs.join('\n'));
+}
+
+// ---- 계산 (전부 화면에서) -----------------------------------------------------
+const avg = (rs, f) => rs.length ? rs.reduce((t, r) => t + r[f], 0) / rs.length : null;
+function sum4(rs) {
+  const lowN = rs.filter(r => r.sat <= RULES.lowScore).length;
+  return { n: rs.length, sat: avg(rs, 'sat'), und: avg(rs, 'und'), rec: avg(rs, 'rec'), app: avg(rs, 'app'),
+    lowN, lowShare: rs.length ? lowN / rs.length * 100 : null };
+}
+function stats() {
+  const courses = [...new Set(resp.map(r => r.course))].sort();
+  const chaNo = c => parseInt(c, 10) || 0;
+  const groups = [], byCourse = {};
+  for (const course of courses) {
+    const rs = resp.filter(r => r.course === course);
+    byCourse[course] = { course, ...sum4(rs) };
+    byCourse[course].rate = byCourse[course].sat / RULES.goal * 100;
+    for (const cha of [...new Set(rs.map(r => r.cha))].sort((a, b) => chaNo(a) - chaNo(b))) {
+      const g = { course, cha, date: (rs.find(r => r.cha === cha) || {}).date || '', ...sum4(rs.filter(r => r.cha === cha)) };
+      g.rate = g.sat / RULES.goal * 100;
+      g.dev = g.sat - byCourse[course].sat;           // 같은 과정 평균과의 차이 (차수별 편차)
+      g.flags = [];
+      if (g.sat < RULES.lowAvg) g.flags.push(RULE_LIST[0].id);
+      if (g.lowShare >= RULES.lowShare) g.flags.push(RULE_LIST[1].id);
+      groups.push(g);
+    }
+  }
+  const all = sum4(resp); all.rate = all.sat / RULES.goal * 100;
+  const flagged = groups.filter(g => g.flags.length);
+  const byRule = Object.fromEntries(RULE_LIST.map(x => [x.id, groups.filter(g => g.flags.includes(x.id)).length]));
+  const gi = g => groups.indexOf(g);
+  const find = r => groups.find(g => g.course === r.course && g.cha === r.cha);
+  const lows = resp.filter(r => r.sat <= RULES.lowScore).sort((a, b) => gi(find(a)) - gi(find(b)) || a.sat - b.sat);
+  return { courses, groups, byCourse, all, flagged, byRule, lows, find };
+}
+const gname = g => g.course + ' ' + g.cha;
+
+// ---- 그리기 -----------------------------------------------------------------
+function render() {
+  const has = resp.length > 0;
+  $('empty').hidden = has; $('dash').hidden = !has; $('resetBtn').hidden = !has;
+  updateAiButtons();
+  if (!has) return;
+  const s = stats();
+
+  $('files').innerHTML = '<span>불러온 파일</span>' +
+    [...loaded].map(n => '<span class="chip-file">' + esc(n) + '</span>').join('') +
+    '<span>— 응답 ' + resp.length.toLocaleString() + '명 · 과정 ' + s.courses.length + ' · 차수 ' + s.groups.length + '</span>';
+
+  $('kResp').innerHTML = resp.length + '<small>명 · ' + s.groups.length + '개 차수</small>';
+  $('kSat').innerHTML = p2(s.all.sat) + '<small>점 · 달성률 ' + p1(s.all.rate) + '%</small>';
+  $('kLow').innerHTML = s.all.lowN + '<small>명 · ' + p1(s.all.lowShare) + '%</small>';
+  $('kFlag').innerHTML = s.flagged.length + '<small>곳 · ' + s.groups.length + '개 차수 중</small>';
+
+  $('rules').innerHTML = RULE_LIST.map(x =>
+    '<button class="rule' + (ruleFilter === x.id ? ' is-on' : '') + (s.byRule[x.id] ? '' : ' is-zero') +
+    '" data-rule="' + x.id + '"><strong>' + x.id + '</strong><b>' + s.byRule[x.id] + '</b><span>' + esc(x.desc) + '</span></button>'
+  ).join('');
+
+  // 차수별 평균 만족도 — 6점을 바닥으로 그린다 (차이가 보이게). 과정 사이에 틈을 둔다
+  const FLOOR = 6, TOP = 10, H = 140, hOf = v => Math.max(2, (Math.min(v, TOP) - FLOOR) / (TOP - FLOOR) * H);
+  const bars = [], labels = [];
+  s.courses.forEach((c, ci) => {
+    if (ci) { bars.push('<div class="gap"></div>'); labels.push('<div class="gap"></div>'); }
+    for (const g of s.groups.filter(x => x.course === c)) {
+      bars.push('<div class="col' + (g.sat < RULES.lowAvg ? ' is-low' : g.sat >= RULES.goal ? ' is-ok' : '') + '"><em>' + p2(g.sat) + '</em><i style="height:' + hOf(g.sat) + 'px"></i></div>');
+      labels.push('<div>' + esc(g.cha) + '</div>');
+    }
+  });
+  $('satBars').innerHTML = bars.join('') + '<div class="goal" style="bottom:' + hOf(RULES.goal) + 'px"></div>';
+  $('satLabels').innerHTML = labels.join('');
+  $('satCourses').innerHTML = s.courses.map(c => '<div title="' + esc(c) + '">' + esc(c) + '</div>').join('');
+
+  const sorted = s.groups.slice().sort((a, b) => b.lowShare - a.lowShare);
+  const maxShare = Math.max(40, ...sorted.map(g => g.lowShare));
+  $('lowBars').innerHTML = sorted.map((g, i) =>
+    '<div class="hbar' + (g.lowShare >= RULES.lowShare ? ' is-flag' : '') + '"><span class="rk">' + (i + 1) + '</span><span class="nm" title="' + esc(gname(g)) + '">' + esc(gname(g)) +
+    '</span><div class="track"><i style="width:' + Math.max(2, g.lowShare / maxShare * 100) + '%"></i><span class="mark" style="left:' + (RULES.lowShare / maxShare * 100) + '%"></span></div>' +
+    '<span class="n">' + p1(g.lowShare) + '% · ' + g.lowN + '명</span></div>'
+  ).join('');
+
+  renderTable(s);
+  renderComments(s);
+}
+function renderTable(s) {
+  const hit = (g, id) => g.flags.includes(id) && (!ruleFilter || ruleFilter === id);
+  const row = (g, tot) => '<tr' + (tot ? ' class="tot"' : '') + '><td>' + esc(tot ? g.course + ' 전체' : g.course) + '</td><td>' + (tot ? '' : esc(g.cha)) + '</td>' +
+    '<td class="num">' + g.n + '명</td>' +
+    '<td class="num' + (!tot && hit(g, RULE_LIST[0].id) ? ' is-flag' : '') + '">' + p2(g.sat) + '</td>' +
+    '<td class="num">' + p1(g.rate) + '%</td>' +
+    '<td class="num' + (tot ? '' : g.dev < 0 ? ' down' : ' up') + '">' + (tot ? '' : sgn(g.dev)) + '</td>' +
+    '<td class="num">' + p2(g.und) + '</td><td class="num">' + p2(g.rec) + '</td><td class="num">' + p2(g.app) + '</td>' +
+    '<td class="num' + (!tot && hit(g, RULE_LIST[1].id) ? ' is-flag' : '') + '">' + g.lowN + '명 · ' + p1(g.lowShare) + '%</td></tr>';
+  $('tbody').innerHTML = s.courses.map(c => s.groups.filter(g => g.course === c).map(g => row(g)).join('') + row(s.byCourse[c], true)).join('');
+  $('countLine').textContent = '빨간 칸이 교육기준에 걸린 차수입니다 · ' + s.flagged.length + '곳' + (ruleFilter ? ' · 「' + ruleFilter + '」만 표시 중' : '') +
+    ' · 과정 평균 대비 = 그 차수 만족도 − 같은 과정 전체 평균';
+}
+function renderComments(s) {
+  const keys = s.groups.map(gname);
+  if (chaPick && !keys.includes(chaPick)) chaPick = '';
+  $('chaSel').innerHTML = '<option value="">전체 차수</option>' + s.groups.map(g =>
+    '<option value="' + esc(gname(g)) + '"' + (gname(g) === chaPick ? ' selected' : '') + '>' + esc(gname(g)) + ' (' + g.lowN + '명)</option>').join('');
+  const list = s.lows.filter(r => {
+    const g = s.find(r);
+    return (!chaPick || gname(g) === chaPick) && (!ruleFilter || g.flags.includes(ruleFilter));
+  });
+  $('cmtTitle').textContent = '만족도 ' + RULES.lowScore + '점 이하 응답 — 코멘트 ' + list.length + '건';
+  $('cmtBody').innerHTML = list.map(r =>
+    '<tr><td>' + esc(r.course + ' · ' + r.cha) + '</td><td class="num">' + esc(r.no) + '</td><td>' + esc(r.dept) + '</td><td class="num"><span class="score">' + r.sat +
+    '</span></td><td class="num">' + r.und + '</td><td class="c">' + (esc(r.bad) || '<span class="muted">-</span>') + '</td><td class="c muted">' + (esc(r.good) || '-') + '</td></tr>'
+  ).join('') || '<tr><td colspan="7" class="muted" style="text-align:center;padding:20px">해당하는 응답이 없습니다</td></tr>';
+}
+
+// ---- AI (server.js 를 거쳐 부른다) -----------------------------------------
+async function callClaude(messages, system) {
+  let res;
+  try {
+    res = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey },
+      body: JSON.stringify({ max_tokens: 2048, system, messages })
+    });
+  } catch (e) {
+    throw new Error('중계 서버에 닿지 못했습니다 (' + API_URL + ')\nserver.js 가 떠 있는지, 이 화면을 주소로 열었는지 확인하세요.');
+  }
+  const raw = await res.text();
+  if (!res.ok) throw new Error('HTTP ' + res.status + '\n' + raw.slice(0, 500));
+  const data = JSON.parse(raw);
+  return (data.content || []).filter(b => b.type === 'text').map(b => b.text).join('\n').trim();
+}
+// AI 에게 보내는 재료 — 차수별 집계와 코멘트만. 소속 · 응답번호는 보내지 않는다
+function context() {
+  const s = stats(), r2 = x => x === null ? null : Math.round(x * 100) / 100, r1 = x => x === null ? null : Math.round(x * 10) / 10;
+  const pack = g => ({ 응답수: g.n, 만족도: r2(g.sat), 이해도: r2(g.und), 추천도: r2(g.rec), 현업적용도: r2(g.app), 달성률: r1(g.rate),
+    '7점이하': g.lowN, '7점이하비율': r1(g.lowShare) });
+  const cmt = {};
+  for (const g of s.groups) {
+    cmt[gname(g)] = resp.filter(r => r.course === g.course && r.cha === g.cha && (r.good || r.bad))
+      .map(r => Object.assign({ 만족도: r.sat }, r.good ? { 좋았던점: r.good } : {}, r.bad ? { 아쉬운점: r.bad } : {}));
+  }
+  return JSON.stringify({
+    교육기준: { 목표: RULES.goal + '점', 주의: RULE_LIST.map(x => x.id) },
+    전체: pack(s.all),
+    과정별: Object.fromEntries(s.courses.map(c => [c, pack(s.byCourse[c])])),
+    차수별: s.groups.map(g => ({ 과정: g.course, 차수: g.cha, 교육일: g.date, ...pack(g), 과정평균대비: r2(g.dev), 걸린기준: g.flags })),
+    주의차수: s.flagged.map(gname),
+    코멘트: cmt
+  });
+}
+const SYSTEM = '너는 사내 교육 과정의 만족도 설문 결과를 정리해 보고하는 교육 담당자를 돕는 보조자다. ' +
+  '아래 JSON 은 화면이 이미 계산한 점수와 응답자 코멘트다. 점수는 새로 계산하지 말고 JSON 에 있는 값만 인용한다. ' +
+  '코멘트는 여러 사람이 공통으로 말한 것을 묶어서 전한다. JSON 에 없는 내용은 모른다고 말한다. ' +
+  '점수가 낮은 원인은 코멘트를 근거로만 말하고, 단정하지 말고 "확인이 필요하다" 처럼 쓴다. 한국어로 짧게 답한다.\n\n';
+
+function mdLite(t) {
+  return esc(t).split('\n').map(line => {
+    const l = line.replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
+    if (/^■/.test(line)) return '<span class="h">' + l + '</span>';
+    return l.trim() ? '<p>' + l + '</p>' : '';
+  }).join('');
+}
+function updateAiButtons() {
+  const ready = !!apiKey && resp.length > 0;
+  $('sumBtn').disabled = !ready; $('chatIn').disabled = !ready; $('chatBtn').disabled = !ready;
+  updateReportBtn();
+}
+$('connectBtn').onclick = async () => {
+  const k = $('apiKey').value.replace(/\s+/g, '');
+  if (!k) { $('keyStatus').className = 'status err'; $('keyStatus').textContent = 'API 키를 넣어 주세요'; return; }
+  $('keyStatus').className = 'status'; $('keyStatus').textContent = '연결 확인 중…';
+  apiKey = k;
+  try {
+    await callClaude([{ role: 'user', content: 'ping' }]);
+    $('keyStatus').className = 'status ok'; $('keyStatus').textContent = '✓ 연결됨';
+    $('keyBox').hidden = true; $('keyDone').hidden = false;   // 연결되면 키 칸은 접어 둔다
+  } catch (e) {
+    apiKey = ''; $('keyStatus').className = 'status err'; $('keyStatus').textContent = '연결 실패\n' + e.message;
+  }
+  updateAiButtons();
+};
+$('sumBtn').onclick = async () => {
+  $('sumBtn').disabled = true;
+  $('summary').innerHTML = '<span class="loading">AI가 점수와 코멘트를 읽고 있습니다…</span>';
+  try {
+    const text = await callClaude([{ role: 'user', content:
+      '아래 네 덩어리로 정리해줘. 각 덩어리 제목은 ■ 로 시작한다.\n' +
+      '■ 한눈에 — 세 줄\n■ 먼저 볼 차수 — 최대 3곳, 이유 한 줄씩\n' +
+      '■ 코멘트에서 보이는 것 — 낮은 점수를 준 사람들이 공통으로 말한 것\n■ 다음 차수 개선 제안 — 두세 줄' }], SYSTEM + context());
+    lastSummary = text;
+    $('summary').innerHTML = mdLite(text);
+  } catch (e) { $('summary').innerHTML = '<div class="status err">' + esc(e.message) + '</div>'; }
+  $('sumBtn').disabled = false;
+  updateReportBtn();
+};
+function addMsg(cls, html) {
+  if (!chat.length && cls === 'me') $('chatlog').innerHTML = '';
+  const d = document.createElement('div'); d.className = 'msg ' + cls;
+  d.innerHTML = (cls === 'bot' ? '<div class="who">AI</div>' : '') + '<div class="bubble">' + html + '</div>';
+  $('chatlog').appendChild(d); $('chatlog').scrollTop = $('chatlog').scrollHeight; return d;
+}
+async function sendChat() {
+  const q = $('chatIn').value.trim(); if (!q) return;
+  addMsg('me', esc(q)); $('chatIn').value = '';
+  chat.push({ role: 'user', content: q });
+  const wait = addMsg('bot', '<span class="loading">생각 중…</span>');
+  $('chatBtn').disabled = true;
+  try {
+    const a = await callClaude(chat, SYSTEM + context());
+    chat.push({ role: 'assistant', content: a });
+    wait.querySelector('.bubble').innerHTML = mdLite(a);
+  } catch (e) {
+    chat.pop(); wait.className = 'msg err'; wait.innerHTML = '<div class="bubble">' + esc(e.message) + '</div>';
+  }
+  $('chatBtn').disabled = false; $('chatIn').focus();
+}
+$('rekeyBtn').onclick = () => { apiKey = ''; $('apiKey').value = ''; $('keyBox').hidden = false; $('keyDone').hidden = true;
+  $('keyStatus').className = 'status'; $('keyStatus').textContent = '키를 넣고 [연결]을 누르세요'; updateAiButtons(); };
+$('chatBtn').onclick = sendChat;
+$('chatIn').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChat(); } });
+
+function updateReportBtn() {}
+
+// ---- 이벤트 -----------------------------------------------------------------
+$('pickBtn').onclick = $('pickBtn2').onclick = () => $('fileInput').click();
+$('fileInput').onchange = e => { const fs = [...e.target.files]; e.target.value = ''; addFiles(fs); };  // 목록을 먼저 복사해 둔다 — 비우면 함께 사라진다
+const drop = $('empty');
+['dragenter', 'dragover'].forEach(t => document.addEventListener(t, e => { e.preventDefault(); drop.classList.add('is-over'); }));
+['dragleave', 'drop'].forEach(t => document.addEventListener(t, e => { e.preventDefault(); drop.classList.remove('is-over'); }));
+document.addEventListener('drop', e => { if (e.dataTransfer.files.length) addFiles([...e.dataTransfer.files]); });
+$('rules').onclick = e => { const b = e.target.closest('[data-rule]'); if (!b) return;
+  ruleFilter = ruleFilter === b.dataset.rule ? '' : b.dataset.rule; render(); };
+$('chaSel').onchange = e => { chaPick = e.target.value; renderComments(stats()); };
+$('resetBtn').onclick = () => { resp = []; loaded.clear(); ruleFilter = ''; chaPick = ''; chat = []; lastSummary = '';
+  $('summary').innerHTML = '<span class="muted">CSV를 올리고 연결하면 누를 수 있습니다</span>';
+  $('chatlog').innerHTML = '<div class="muted">예) 리더십 2차는 왜 낮았어? · AI 업무 활용 3차는 왜 점수가 갈렸어?</div>'; render(); };
+render();
+</script>
+</body>
+</html>

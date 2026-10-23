@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>보안 심의 진행 현황판</title>
+<style>
+  :root {
+    --bg: #f3f5f9; --card: #fff; --line: #dfe4ec; --ink: #1c2330; --soft: #6b7585;
+    --navy: #1f3f7a; --navy-soft: #eaf0fa; --red: #d93025; --red-soft: #fdecea;
+    --amber: #b26a00; --amber-soft: #fff4e0; --green: #1e8e3e; --teal: #0f8b8d;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+         font-family: "Malgun Gothic", "맑은 고딕", -apple-system, "Segoe UI", sans-serif;
+         font-size: 14px; letter-spacing: -.01em; }
+  header { display: flex; align-items: center; gap: 16px; padding: 14px 24px;
+           background: var(--navy); color: #fff; }
+  header h1 { margin: 0; font-size: 20px; font-weight: 800; }
+  header .sub { font-size: 13px; opacity: .8; }
+  header .grow { flex: 1; }
+  .btn { border: 0; border-radius: 7px; padding: 9px 15px; font: inherit; font-weight: 700;
+         cursor: pointer; background: #fff; color: var(--navy); white-space: nowrap; }
+  .btn:disabled { opacity: .45; cursor: not-allowed; }
+  .btn--red { background: var(--red); color: #fff; }
+  .btn--navy { background: var(--navy); color: #fff; }
+  .btn--ghost { background: #fff; color: var(--navy); border: 1px solid var(--line); }
+
+  .layout { display: grid; grid-template-columns: minmax(0, 1fr) 390px; gap: 18px; padding: 18px 24px 28px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; }
+  .card h2 { margin: 0 0 12px; font-size: 15px; color: var(--navy); }
+
+  /* 빈 화면 안내 */
+  .empty { display: flex; flex-direction: column; align-items: center; justify-content: center;
+           min-height: 520px; border: 2px dashed #b9c4d6; border-radius: 14px; background: #fff;
+           text-align: center; padding: 30px; transition: background .15s; }
+  .empty.is-over { background: var(--navy-soft); border-color: var(--navy); }
+  .empty .big { font-size: 22px; font-weight: 800; color: var(--navy); margin: 0 0 8px; }
+  .empty .hint { color: var(--soft); margin: 0 0 20px; font-size: 15px; }
+  .empty ol { text-align: left; margin: 22px 0 0; padding: 16px 22px 16px 38px; background: var(--bg);
+              border-radius: 10px; color: var(--ink); line-height: 1.9; font-size: 14px; }
+
+  .files { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 12px; color: var(--soft); }
+  .chip-file { background: #fff; border: 1px solid var(--line); border-radius: 20px; padding: 4px 11px; font-size: 12.5px; color: var(--ink); }
+
+  .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 14px; }
+  .kpi { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
+  .kpi .k { font-size: 13px; color: var(--soft); }
+  .kpi .v { font-size: 26px; font-weight: 800; margin-top: 4px; font-variant-numeric: tabular-nums; }
+  .kpi .v small { font-size: 14px; font-weight: 700; color: var(--soft); margin-left: 3px; }
+  .kpi.is-alert { border-color: #f1b3ad; background: var(--red-soft); }
+  .kpi.is-alert .v { color: var(--red); }
+
+  .rules { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 14px; }
+  .rule { display: grid; grid-template-columns: 1fr auto; align-items: baseline; gap: 2px 8px; text-align: left;
+          border: 1px solid var(--line); background: #fff; border-radius: 9px; padding: 9px 14px; cursor: pointer; font: inherit; }
+  .rule b { color: var(--red); font-size: 18px; }
+  .rule span { grid-column: 1 / -1; color: var(--soft); font-size: 12px; }
+  .rule.is-on { border-color: var(--red); background: var(--red-soft); }
+  .rule.is-zero b { color: var(--soft); }
+
+  .charts { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+  /* 절차별 평균 소요일 — 점선이 처리기한 */
+  .hbar { display: grid; grid-template-columns: 118px 1fr 112px; align-items: center; gap: 8px; margin: 10px 0 2px; font-size: 13px; }
+  .hbar .nm { font-weight: 700; white-space: nowrap; }
+  .hbar .track { position: relative; height: 16px; background: var(--bg); border-radius: 8px; }
+  .hbar .track i { display: block; height: 100%; background: var(--navy); border-radius: 8px; }
+  .hbar .track .mark { position: absolute; top: -4px; bottom: -4px; border-left: 2px dashed var(--red); }
+  .hbar.is-over .track i { background: var(--red); }
+  .hbar .n { text-align: right; font-weight: 800; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .hbar-sub { margin: 5px 0 6px 126px; font-size: 12px; color: var(--soft); }
+  .hbar-sub b { color: var(--ink); }
+  /* 진행 중 요청 — 단계별 */
+  .vbars { display: flex; align-items: flex-end; gap: 18px; height: 150px; padding: 0 14px; border-bottom: 1px solid var(--line); }
+  .vbars .col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; }
+  .vbars em { font-style: normal; font-size: 12.5px; font-weight: 800; margin-bottom: 3px; font-variant-numeric: tabular-nums; }
+  .vbars em b { color: var(--red); }
+  .vbars .stack { width: 62%; max-width: 54px; display: flex; flex-direction: column; border-radius: 5px 5px 0 0; overflow: hidden; }
+  .vbars .stack i { display: block; background: #9fb4d9; }
+  .vbars .stack i.f { background: var(--red); }
+  .vlabels { display: flex; gap: 18px; padding: 6px 14px 0; }
+  .vlabels div { flex: 1; text-align: center; font-size: 12.5px; font-weight: 700; white-space: nowrap; }
+  .legend { display: flex; gap: 12px; margin-top: 8px; font-size: 12px; color: var(--soft); }
+
+  .tools { display: flex; gap: 8px; align-items: center; margin-bottom: 10px; flex-wrap: wrap; }
+  .tools h2 { margin: 0 auto 0 0; }
+  .tools select { font: inherit; padding: 7px 10px; border: 1px solid var(--line); border-radius: 7px; background: #fff; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; color: var(--soft); font-weight: 700; padding: 8px 8px; border-bottom: 2px solid var(--line); background: #fafbfd; white-space: nowrap; }
+  th.num, td.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  td { padding: 8px 8px; border-bottom: 1px solid #eef1f5; vertical-align: top; }
+  td:first-child { white-space: nowrap; font-weight: 700; }
+  td.is-flag { background: var(--red-soft); color: var(--red); font-weight: 800; }
+  .mx th.tot, .mx td.tot { background: #f5f7fb; font-weight: 800; color: var(--navy); }
+  .mx tr.tot td { border-top: 2px solid var(--line); background: #f5f7fb; font-weight: 800; color: var(--navy); }
+  .mx td .fl { margin-left: 5px; padding: 1px 6px; border-radius: 5px; background: var(--red); color: #fff; font-size: 11px; font-weight: 800; }
+  .tag { display: inline-block; margin: 1px 3px 1px 0; padding: 2px 7px; border-radius: 5px; font-size: 12px; font-weight: 700;
+         background: var(--red-soft); color: var(--red); white-space: nowrap; }
+  .lst td { white-space: nowrap; }
+  .lst td:nth-child(8) { white-space: normal; }   /* 걸린 기준 — 태그 둘이면 두 줄로 */
+  .lst tr.is-flag td { background: #fff8f7; }
+  .lst td.over { color: var(--red); font-weight: 800; }
+  .lst td.c { white-space: normal; min-width: 200px; }
+  .muted { color: var(--soft); }
+  .count-line { margin: 8px 2px 0; color: var(--soft); font-size: 13px; }
+  .card + .card { margin-top: 14px; }
+  .charts .card + .card { margin-top: 0; }
+
+  /* AI 패널 — 늘 한 화면 안에, 대화 칸이 남은 높이를 다 쓴다 */
+  .ai { position: sticky; top: 18px; align-self: start; display: flex; flex-direction: column; gap: 12px;
+        height: calc(100vh - 108px); min-height: 560px; }
+  .ai .card + .card { margin-top: 0; }
+  .ai .card--chat { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
+  .keyrow-done { display: flex; align-items: center; gap: 8px; }
+  .keyrow-done .status { margin: 0; flex: 1; }
+  .link { background: none; border: 0; padding: 0; font: inherit; font-size: 12.5px; color: var(--navy); text-decoration: underline; cursor: pointer; }
+  .ai .keyrow { display: flex; gap: 6px; }
+  .ai .keyrow input { flex: 1; min-width: 0; font: inherit; padding: 8px 10px; border: 1px solid var(--line); border-radius: 7px; }
+  .status { font-size: 12.5px; margin-top: 7px; color: var(--soft); white-space: pre-wrap; word-break: break-all; }
+  .status.ok { color: var(--green); font-weight: 700; }
+  .status.err { color: var(--red); }
+  .ai-btns { display: grid; grid-template-columns: 1fr auto; gap: 6px; }
+  .summary { font-size: 13.5px; line-height: 1.6; max-height: 34vh; overflow: auto; }
+  .summary .h { display: block; margin: 10px 0 3px; font-weight: 800; color: var(--navy); }
+  .summary .h:first-child { margin-top: 0; }
+  .summary p, .bubble p { margin: 2px 0; }
+  .chatlog { flex: 1 1 auto; min-height: 120px; overflow: auto; background: var(--bg); border-radius: 8px; padding: 10px; font-size: 13.5px; line-height: 1.6; }
+  .msg { margin-bottom: 10px; }
+  .msg .who { font-size: 11.5px; font-weight: 800; color: var(--soft); margin-bottom: 2px; }
+  .msg.me { text-align: right; }
+  .msg.me .bubble { display: inline-block; background: var(--navy); color: #fff; border-radius: 10px 10px 2px 10px; padding: 7px 11px; text-align: left; }
+  .msg.bot .bubble { background: #fff; border: 1px solid var(--line); border-radius: 10px 10px 10px 2px; padding: 8px 11px; }
+  .msg.err .bubble { background: var(--red-soft); color: var(--red); border-radius: 8px; padding: 8px 11px; white-space: pre-wrap; }
+  .chatin { display: flex; gap: 6px; margin-top: 8px; }
+  .chatin textarea { flex: 1; resize: none; height: 42px; font: inherit; padding: 9px 10px; border: 1px solid var(--line); border-radius: 7px; }
+  .ai-note { font-size: 12px; color: var(--soft); margin: 8px 0 0; }
+  .loading { color: var(--soft); font-style: italic; }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>보안 심의 진행 현황판</h1>
+    <div class="sub">심의 요청 CSV를 올리면 절차별 · 기술분야별 건수와 소요일을 계산하고, 기한을 넘기거나 멈춘 요청을 빨갛게 표시합니다</div>
+  </div>
+  <div class="grow"></div>
+  <button class="btn btn--ghost" id="resetBtn" style="color:#fff;background:transparent;border-color:rgba(255,255,255,.4)" hidden>처음으로</button>
+  <button class="btn" id="pickBtn">CSV 불러오기</button>
+  <input type="file" id="fileInput" accept=".csv" multiple hidden>
+</header>
+
+<div class="layout">
+  <main>
+    <!-- 빈 화면 -->
+    <section class="empty" id="empty">
+      <p class="big">Jira 에서 내려받은 심의 요청 CSV 를 여기에 끌어다 놓으세요</p>
+      <p class="hint">절차별 파일을 <b>한꺼번에</b> 올려도 됩니다 — 알아서 합칩니다</p>
+      <button class="btn btn--navy" id="pickBtn2">파일 선택</button>
+      <ol>
+        <li>필요한 열 — <b>요청번호 · 절차 · 기술분야 · 접수일 · 현재단계 · 최근갱신일 · 완료일 · 최근 코멘트</b></li>
+        <li>심의기준에 걸린 요청은 <b style="color:var(--red)">빨갛게</b> 표시됩니다 — 처리기한을 넘긴 요청 · 14일 이상 멈춘 요청 (기준일 2026-09-30)</li>
+        <li>오른쪽에 API 키를 넣으면 AI가 진행 중 요청의 코멘트를 읽어 <b>요약</b>하고 <b>질문</b>에 답합니다</li>
+      </ol>
+    </section>
+
+    <!-- 현황판 -->
+    <section id="dash" hidden>
+      <div class="files" id="files"></div>
+
+      <div class="kpis">
+        <div class="kpi"><div class="k">접수</div><div class="v" id="kAll">-</div></div>
+        <div class="kpi"><div class="k">완료율</div><div class="v" id="kDone">-</div></div>
+        <div class="kpi"><div class="k">평균 소요일 (완료 건)</div><div class="v" id="kDur">-</div></div>
+        <div class="kpi is-alert"><div class="k">주의 요청</div><div class="v" id="kFlag">-</div></div>
+      </div>
+
+      <div class="rules" id="rules"></div>
+
+      <div class="charts">
+        <div class="card">
+          <h2>절차별 평균 소요일 — 완료 건</h2>
+          <div id="durBars"></div>
+          <div class="legend"><span style="color:var(--red)">빨간 점선 = 처리기한</span><span>기한 내 = 기한 안에 끝난 완료 건의 비율</span></div>
+        </div>
+        <div class="card">
+          <h2>진행 중 요청 — 단계별</h2>
+          <div class="vbars" id="stageBars"></div>
+          <div class="vlabels" id="stageLabels"></div>
+          <div class="legend"><span>파랑 = 진행 중</span><span style="color:var(--red)">빨강 = 그중 주의 요청</span></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="tools">
+          <h2 id="mxTitle">기술분야 × 절차</h2>
+          <select id="metricSel">
+            <option value="n">접수 건수</option>
+            <option value="dur">평균 소요일 (완료 건)</option>
+            <option value="rate">완료율</option>
+            <option value="open">진행 중</option>
+          </select>
+          <button class="btn btn--ghost" id="csvBtn">통합 요청표 내려받기 (CSV)</button><!-- 통합표 -->
+        </div>
+        <table class="mx">
+          <thead id="mxHead"></thead>
+          <tbody id="tbody"></tbody>
+        </table>
+        <p class="count-line" id="countLine"></p>
+      </div>
+
+      <div class="card">
+        <div class="tools">
+          <h2 id="lstTitle">진행 중 요청</h2>
+          <select id="procSel"></select>
+        </div>
+        <table class="lst">
+          <thead><tr><th>요청번호</th><th>절차</th><th>기술분야</th><th>단계</th><th>접수일</th><th class="num">경과 / 기한</th><th class="num">멈춘 일수</th><th>걸린 기준</th><th>최근 코멘트</th></tr></thead>
+          <tbody id="lstBody"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <!-- AI 심의 도우미 -->
+  <aside class="ai">
+    <div class="card">
+      <h2>AI 심의 도우미</h2>
+      <div id="keyBox">
+        <div class="keyrow">
+          <input type="password" id="apiKey" placeholder="Claude API 키" autocomplete="off">
+          <button class="btn btn--navy" id="connectBtn">연결</button>
+        </div>
+        <div class="status" id="keyStatus">키를 넣고 [연결]을 누르세요</div>
+      </div>
+      <div class="keyrow-done" id="keyDone" hidden>
+        <p class="status ok">✓ 연결됨</p>
+        <button class="link" id="rekeyBtn">키 다시 넣기</button>
+      </div>
+
+      <h2 style="margin-top:16px">현황 요약 · 다음 달 할 일</h2>
+      <div class="ai-btns">
+        <button class="btn btn--red" id="sumBtn" disabled>AI 요약 받기</button>
+        <button class="btn btn--ghost" id="reportBtn" disabled>현황 보고서</button><!-- 보고서 버튼 -->
+      </div>
+      <div class="summary" id="summary" style="margin-top:10px"><span class="muted">CSV를 올리고 연결하면 누를 수 있습니다</span></div>
+      <p class="ai-note">건수와 날짜는 화면이 계산합니다. AI에게는 <b>집계와 진행 중 요청의 코멘트만</b> 보냅니다 — 요청 제목 · 요청부서는 빼고.</p>
+    </div>
+
+    <div class="card card--chat">
+      <h2>심의 현황에 물어보기</h2>
+      <div class="chatlog" id="chatlog"><div class="muted">예) 자율주행 기술보호 심의는 왜 밀려 있어? · 이번 주에 먼저 챙길 요청은?</div></div>
+      <div class="chatin">
+        <textarea id="chatIn" placeholder="질문을 입력하세요 (Enter 전송)" disabled></textarea>
+        <button class="btn btn--navy" id="chatBtn" disabled>전송</button>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<script>
+// ---------------------------------------------------------------------------
+// 심의기준 — 심의기준.md 를 그대로 옮긴 값. 기준을 바꾸면 여기와 심의기준.md 를 같이 고친다.
+// ---------------------------------------------------------------------------
+const RULES = {
+  baseDate: '2026-09-30',     // 1. 기준일 — 자료를 뽑은 날
+  limit: { '보안성검토': 14, '기술보호 사내심의': 30, '정부 승인 신청': 45 },   // 3. 처리기한(일)
+  stall: 14                   // 5. 주의 — 진행 중인데 최근갱신일부터 이 일수 이상 멈춘 요청
+};
+const RULE_LIST = [
+  { id: '기한 초과', desc: '진행 중인데 경과일(기준일 − 접수일)이 처리기한을 넘긴 요청' },
+  { id: RULES.stall + '일 이상 멈춤', desc: '진행 중인데 최근갱신일부터 ' + RULES.stall + '일 이상 움직임이 없는 요청' }
+];
+const STAGES = ['접수', '검토', '보완 요청', '심의'];
+
+// 화면을 server.js 가 열어 줬다면 같은 주소로 API 를 부른다.
+const SERVER_ORIGIN = location.protocol.startsWith('http') ? location.origin : 'http://localhost:8787';
+const API_URL = SERVER_ORIGIN + '/v1/messages';
+
+const $ = (id) => document.getElementById(id);
+let reqs = [];                // 합친 요청 (한 줄이 요청 한 건)
+const loaded = new Set();     // 이미 올린 파일 이름
+let ruleFilter = '', procPick = '', metric = 'n', apiKey = '', chat = [], lastSummary = '';
+
+function esc(s) { return String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
+function p1(x) { return x == null ? '-' : x.toFixed(1); }
+const days = (a, b) => Math.round((Date.parse(b) - Date.parse(a)) / 864e5);
+
+// ---- CSV 읽기 -------------------------------------------------------------
+async function readText(file) {
+  const buf = await file.arrayBuffer();
+  try { return new TextDecoder('utf-8', { fatal: true }).decode(buf).replace(/^﻿/, ''); }
+  catch (e) { return new TextDecoder('euc-kr').decode(buf); }   // 엑셀에서 저장한 CSV (한글 깨짐 방지)
+}
+function parseCSV(text) {
+  const out = []; let row = [], cur = '', q = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (q) { if (c === '"' && text[i + 1] === '"') { cur += '"'; i++; } else if (c === '"') q = false; else cur += c; }
+    else if (c === '"') q = true;
+    else if (c === ',') { row.push(cur); cur = ''; }
+    else if (c === '\n' || c === '\r') { if (c === '\r' && text[i + 1] === '\n') i++; row.push(cur); out.push(row); row = []; cur = ''; }
+    else cur += c;
+  }
+  if (cur || row.length) { row.push(cur); out.push(row); }
+  return out.filter(r => r.some(v => v.trim() !== ''));
+}
+const NEED = ['요청번호', '절차', '기술분야', '접수일', '현재단계', '최근갱신일', '완료일', '최근 코멘트'];
+async function addFiles(fileList) {
+  const errs = [];
+  for (const f of fileList) {
+    if (!/\.csv$/i.test(f.name)) { errs.push(f.name + ' — CSV 파일이 아닙니다'); continue; }
+    if (loaded.has(f.name)) continue;                       // 같은 파일을 두 번 올리면 건너뛴다
+    const table = parseCSV(await readText(f));
+    const head = table[0].map(h => h.trim());
+    const miss = NEED.filter(n => !head.includes(n));
+    if (miss.length) { errs.push(f.name + ' — 없는 열: ' + miss.join(', ')); continue; }
+    const ix = n => head.indexOf(n);
+    const opt = (r, n) => ix(n) < 0 ? '' : (r[ix(n)] || '').trim();
+    const seen = new Set(reqs.map(r => r.no));
+    for (const r of table.slice(1)) {
+      const no = opt(r, '요청번호');
+      if (seen.has(no)) continue;                           // 같은 요청이 두 파일에 있으면 한 번만
+      reqs.push({ no, proc: opt(r, '절차'), field: opt(r, '기술분야'), dept: opt(r, '요청부서'), title: opt(r, '요청제목'),
+        recv: opt(r, '접수일'), stage: opt(r, '현재단계'), upd: opt(r, '최근갱신일'), done: opt(r, '완료일'), note: opt(r, '최근 코멘트') });
+    }
+    loaded.add(f.name);
+  }
+  render();
+  if (errs.length) alert('읽지 못한 파일이 있습니다\n\n' + errs.join('\n'));
+}
+
+// ---- 계산 (전부 화면에서) -----------------------------------------------------
+function judge(r) {
+  const lim = RULES.limit[r.proc] ?? null;
+  const o = { ...r, limit: lim, isDone: !!r.done, flags: [] };
+  if (o.isDone) { o.dur = days(r.recv, r.done); o.inTime = lim == null ? null : o.dur <= lim; return o; }
+  o.elapsed = days(r.recv, RULES.baseDate);
+  o.stall = days(r.upd || r.recv, RULES.baseDate);
+  if (lim != null && o.elapsed > lim) o.flags.push(RULE_LIST[0].id);
+  if (o.stall >= RULES.stall) o.flags.push(RULE_LIST[1].id);
+  return o;
+}
+function sumOf(rs) {
+  const done = rs.filter(r => r.isDone), timed = done.filter(r => r.inTime != null);
+  return { n: rs.length, done: done.length, open: rs.length - done.length, flag: rs.filter(r => r.flags.length).length,
+    rate: rs.length ? done.length / rs.length * 100 : null,
+    dur: done.length ? done.reduce((t, r) => t + r.dur, 0) / done.length : null,
+    inTime: timed.length ? timed.filter(r => r.inTime).length / timed.length * 100 : null };
+}
+function stats() {
+  const all = reqs.map(judge);
+  const procs = [...new Set(all.map(r => r.proc))].sort((a, b) => (RULES.limit[a] ?? 999) - (RULES.limit[b] ?? 999));
+  const fields = [...new Set(all.map(r => r.field))].sort();
+  const byProc = Object.fromEntries(procs.map(p => [p, sumOf(all.filter(r => r.proc === p))]));
+  const byField = Object.fromEntries(fields.map(f => [f, sumOf(all.filter(r => r.field === f))]));
+  const cell = (f, p) => sumOf(all.filter(r => r.field === f && r.proc === p));
+  const open = all.filter(r => !r.isDone)
+    .sort((a, b) => (b.flags.length > 0) - (a.flags.length > 0) || (b.elapsed / (b.limit || 99)) - (a.elapsed / (a.limit || 99)));
+  const flagged = open.filter(r => r.flags.length);
+  const byRule = Object.fromEntries(RULE_LIST.map(x => [x.id, flagged.filter(r => r.flags.includes(x.id)).length]));
+  const months = [...new Set(all.map(r => r.recv.slice(0, 7)))].sort();
+  return { all, procs, fields, byProc, byField, cell, open, flagged, byRule, months, tot: sumOf(all) };
+}
+
+// ---- 그리기 -----------------------------------------------------------------
+function render() {
+  const has = reqs.length > 0;
+  $('empty').hidden = has; $('dash').hidden = !has; $('resetBtn').hidden = !has;
+  updateAiButtons();
+  if (!has) return;
+  const s = stats(), t = s.tot;
+
+  $('files').innerHTML = '<span>불러온 파일</span>' +
+    [...loaded].map(n => '<span class="chip-file">' + esc(n) + '</span>').join('') +
+    '<span>— 요청 ' + t.n + '건 · 절차 ' + s.procs.length + ' · 기준일 ' + RULES.baseDate + '</span>';
+
+  $('kAll').innerHTML = t.n + '<small>건 · 진행 중 ' + t.open + '</small>';
+  $('kDone').innerHTML = p1(t.rate) + '<small>% · 완료 ' + t.done + '건</small>';
+  $('kDur').innerHTML = p1(t.dur) + '<small>일 · 기한 내 ' + p1(t.inTime) + '%</small>';
+  $('kFlag').innerHTML = s.flagged.length + '<small>건 · 진행 중 ' + t.open + '건 중</small>';
+
+  $('rules').innerHTML = RULE_LIST.map(x =>
+    '<button class="rule' + (ruleFilter === x.id ? ' is-on' : '') + (s.byRule[x.id] ? '' : ' is-zero') +
+    '" data-rule="' + x.id + '"><strong>' + x.id + '</strong><b>' + s.byRule[x.id] + '</b><span>' + esc(x.desc) + '</span></button>'
+  ).join('');
+
+  // 절차별 평균 소요일 — 가장 긴 처리기한의 1.3배를 끝으로
+  const maxD = Math.max(...s.procs.map(p => RULES.limit[p] || 0), ...s.procs.map(p => s.byProc[p].dur || 0)) * 1.3;
+  $('durBars').innerHTML = s.procs.map(p => {
+    const g = s.byProc[p], lim = RULES.limit[p];
+    return '<div class="hbar' + (lim != null && g.dur > lim ? ' is-over' : '') + '"><span class="nm">' + esc(p) + '</span><div class="track"><i style="width:' +
+      Math.max(2, (g.dur || 0) / maxD * 100) + '%"></i>' + (lim != null ? '<span class="mark" style="left:' + (lim / maxD * 100) + '%"></span>' : '') + '</div>' +
+      '<span class="n">' + p1(g.dur) + '일 / ' + (lim ?? '-') + '일</span></div>' +
+      '<p class="hbar-sub">완료 <b>' + g.done + '</b>건 · 기한 내 <b>' + p1(g.inTime) + '%</b> · 진행 중 ' + g.open + '건</p>';
+  }).join('');
+
+  const H = 118, maxN = Math.max(1, ...STAGES.map(st => s.open.filter(r => r.stage === st).length));
+  $('stageBars').innerHTML = STAGES.map(st => {
+    const rs = s.open.filter(r => r.stage === st), f = rs.filter(r => r.flags.length).length;
+    return '<div class="col"><em>' + rs.length + (f ? ' <b>· ' + f + '</b>' : '') + '</em><div class="stack">' +
+      '<i style="height:' + ((rs.length - f) / maxN * H) + 'px"></i><i class="f" style="height:' + (f / maxN * H) + 'px"></i></div></div>';
+  }).join('');
+  $('stageLabels').innerHTML = STAGES.map(st => '<div>' + st + '</div>').join('');
+
+  renderTable(s);
+  renderList(s);
+}
+function cellVal(g) {
+  if (!g.n) return '<span class="muted">-</span>';
+  if (metric === 'n') return g.n + '건';
+  if (metric === 'dur') return g.dur == null ? '<span class="muted">-</span>' : p1(g.dur) + '일';
+  if (metric === 'rate') return p1(g.rate) + '%';
+  return g.open + '건';
+}
+function renderTable(s) {
+  const names = { n: '접수 건수', dur: '평균 소요일 (완료 건)', rate: '완료율', open: '진행 중' };
+  $('mxTitle').textContent = '기술분야 × 절차 — ' + names[metric];
+  $('mxHead').innerHTML = '<tr><th>기술분야</th>' + s.procs.map(p => '<th class="num">' + esc(p) + '</th>').join('') + '<th class="num tot">전체</th></tr>';
+  const td = (g, tot, f, p) => {   // 그 칸에 걸린 진행 중 요청 수 — 기준 칩을 누르면 그 기준만 센다
+    const n = tot ? 0 : s.flagged.filter(r => r.field === f && r.proc === p && (!ruleFilter || r.flags.includes(ruleFilter))).length;
+    return '<td class="num' + (tot ? ' tot' : '') + (n ? ' is-flag' : '') + '">' + cellVal(g) + (n ? '<span class="fl">주의 ' + n + '</span>' : '') + '</td>';
+  };
+  $('tbody').innerHTML = s.fields.map(f => '<tr><td>' + esc(f) + '</td>' + s.procs.map(p => td(s.cell(f, p), false, f, p)).join('') + td(s.byField[f], true) + '</tr>').join('') +
+    '<tr class="tot"><td>전체</td>' + s.procs.map(p => td(s.byProc[p], true)).join('') + td(s.tot, true) + '</tr>';
+  $('countLine').textContent = '빨간 칸에 심의기준에 걸린 진행 중 요청이 있습니다 · ' + s.flagged.length + '건' + (ruleFilter ? ' · 「' + ruleFilter + '」만 표시 중' : '') +
+    ' · 처리기한 ' + s.procs.map(p => p + ' ' + (RULES.limit[p] ?? '-') + '일').join(' · ');
+}
+function renderList(s) {
+  if (procPick && !s.procs.includes(procPick)) procPick = '';
+  $('procSel').innerHTML = '<option value="">전체 절차</option>' + s.procs.map(p =>
+    '<option value="' + esc(p) + '"' + (p === procPick ? ' selected' : '') + '>' + esc(p) + ' (' + s.byProc[p].open + '건)</option>').join('');
+  const list = s.open.filter(r => (!procPick || r.proc === procPick) && (!ruleFilter || r.flags.includes(ruleFilter)));
+  $('lstTitle').textContent = '진행 중 요청 ' + list.length + '건 — 주의 ' + list.filter(r => r.flags.length).length + '건';
+  $('lstBody').innerHTML = list.map(r =>
+    '<tr' + (r.flags.length ? ' class="is-flag"' : '') + '><td>' + esc(r.no) + '</td><td>' + esc(r.proc) + '</td><td>' + esc(r.field) + '</td><td>' + esc(r.stage) + '</td><td>' + esc(r.recv) +
+    '</td><td class="num' + (r.flags.includes(RULE_LIST[0].id) ? ' over' : '') + '">' + r.elapsed + '일 / ' + (r.limit ?? '-') + '일</td>' +
+    '<td class="num' + (r.flags.includes(RULE_LIST[1].id) ? ' over' : '') + '">' + r.stall + '일</td><td>' + (r.flags.map(x => '<span class="tag">' + esc(x) + '</span>').join('') || '<span class="muted">-</span>') +
+    '</td><td class="c">' + esc(r.note) + '</td></tr>'
+  ).join('') || '<tr><td colspan="9" class="muted" style="text-align:center;padding:20px">해당하는 요청이 없습니다</td></tr>';
+}
+
+// ---- AI (server.js 를 거쳐 부른다) -----------------------------------------
+async function callClaude(messages, system) {
+  let res;
+  try {
+    res = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey },
+      body: JSON.stringify({ max_tokens: 2048, system, messages })
+    });
+  } catch (e) {
+    throw new Error('중계 서버에 닿지 못했습니다 (' + API_URL + ')\nserver.js 가 떠 있는지, 이 화면을 주소로 열었는지 확인하세요.');
+  }
+  const raw = await res.text();
+  if (!res.ok) throw new Error('HTTP ' + res.status + '\n' + raw.slice(0, 500));
+  const data = JSON.parse(raw);
+  return (data.content || []).filter(b => b.type === 'text').map(b => b.text).join('\n').trim();
+}
+// AI 에게 보내는 재료 — 집계와 진행 중 요청의 진행 정보 · 코멘트만. 요청 제목 · 요청부서는 보내지 않는다
+function context() {
+  const s = stats(), r1 = x => x == null ? null : Math.round(x * 10) / 10;
+  const pack = g => ({ 접수: g.n, 완료: g.done, 진행중: g.open, 완료율: r1(g.rate), 평균소요일: r1(g.dur), 기한내처리율: r1(g.inTime), 주의: g.flag });
+  return JSON.stringify({
+    심의기준: { 기준일: RULES.baseDate, 처리기한: RULES.limit, 주의: RULE_LIST.map(x => x.id) },
+    전체: pack(s.tot),
+    절차별: s.procs.map(p => ({ 절차: p, 처리기한: RULES.limit[p] ?? null, ...pack(s.byProc[p]) })),
+    기술분야별: s.fields.map(f => ({ 기술분야: f, ...pack(s.byField[f]) })),
+    기술분야x절차: s.fields.flatMap(f => s.procs.map(p => ({ 기술분야: f, 절차: p, ...pack(s.cell(f, p)) })).filter(x => x.접수)),
+    월별접수: Object.fromEntries(s.months.map(m => [m, Object.fromEntries(s.procs.map(p => [p, s.all.filter(r => r.proc === p && r.recv.startsWith(m)).length]))])),
+    진행중_단계별: Object.fromEntries(STAGES.map(st => [st, s.open.filter(r => r.stage === st).length])),
+    주의요청: s.flagged.map(r => r.no),
+    진행중요청: s.open.map(r => ({ 요청번호: r.no, 절차: r.proc, 기술분야: r.field, 현재단계: r.stage, 접수일: r.recv,
+      경과일: r.elapsed, 처리기한: r.limit, 멈춘일수: r.stall, 걸린기준: r.flags, 최근코멘트: r.note }))
+  });
+}
+const SYSTEM = '너는 사내 보안 심의(보안성검토 · 기술보호 사내심의 · 정부 승인 신청) 진행 현황을 정리해 보고하는 담당자를 돕는 보조자다. ' +
+  '아래 JSON 은 화면이 이미 계산한 건수 · 날짜와 진행 중 요청의 최근 코멘트다. 숫자는 새로 계산하지 말고 JSON 에 있는 값만 인용한다. ' +
+  '지연 사유는 코멘트를 근거로만 말하고, 여러 요청에 공통된 것을 묶어서 전한다. 요청 내용(기술 정보)은 받지 않았으니 추측하지 않는다. ' +
+  'JSON 에 없는 내용은 모른다고 말하고, 원인은 단정하지 말고 "확인이 필요하다" 처럼 쓴다. 한국어로 짧게 답한다.\n\n';
+
+function mdLite(t) {
+  return esc(t).split('\n').map(line => {
+    const l = line.replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
+    if (/^■/.test(line)) return '<span class="h">' + l + '</span>';
+    return l.trim() ? '<p>' + l + '</p>' : '';
+  }).join('');
+}
+function updateAiButtons() {
+  const ready = !!apiKey && reqs.length > 0;
+  $('sumBtn').disabled = !ready; $('chatIn').disabled = !ready; $('chatBtn').disabled = !ready;
+  updateReportBtn();
+}
+$('connectBtn').onclick = async () => {
+  const k = $('apiKey').value.replace(/\s+/g, '');
+  if (!k) { $('keyStatus').className = 'status err'; $('keyStatus').textContent = 'API 키를 넣어 주세요'; return; }
+  $('keyStatus').className = 'status'; $('keyStatus').textContent = '연결 확인 중…';
+  apiKey = k;
+  try {
+    await callClaude([{ role: 'user', content: 'ping' }]);
+    $('keyStatus').className = 'status ok'; $('keyStatus').textContent = '✓ 연결됨';
+    $('keyBox').hidden = true; $('keyDone').hidden = false;   // 연결되면 키 칸은 접어 둔다
+  } catch (e) {
+    apiKey = ''; $('keyStatus').className = 'status err'; $('keyStatus').textContent = '연결 실패\n' + e.message;
+  }
+  updateAiButtons();
+};
+$('sumBtn').onclick = async () => {
+  $('sumBtn').disabled = true;
+  $('summary').innerHTML = '<span class="loading">AI가 집계와 코멘트를 읽고 있습니다…</span>';
+  try {
+    const text = await callClaude([{ role: 'user', content:
+      '아래 네 덩어리로 정리해줘. 각 덩어리 제목은 ■ 로 시작한다.\n' +
+      '■ 한눈에 — 세 줄\n■ 먼저 챙길 요청 — 최대 3건, 이유 한 줄씩\n' +
+      '■ 지연 사유에서 보이는 것 — 밀린 요청들의 코멘트에 공통된 것\n■ 다음 달 할 일 — 두세 줄' }], SYSTEM + context());
+    lastSummary = text;
+    $('summary').innerHTML = mdLite(text);
+  } catch (e) { $('summary').innerHTML = '<div class="status err">' + esc(e.message) + '</div>'; }
+  $('sumBtn').disabled = false;
+  updateReportBtn();
+};
+function addMsg(cls, html) {
+  if (!chat.length && cls === 'me') $('chatlog').innerHTML = '';
+  const d = document.createElement('div'); d.className = 'msg ' + cls;
+  d.innerHTML = (cls === 'bot' ? '<div class="who">AI</div>' : '') + '<div class="bubble">' + html + '</div>';
+  $('chatlog').appendChild(d); $('chatlog').scrollTop = $('chatlog').scrollHeight; return d;
+}
+async function sendChat() {
+  const q = $('chatIn').value.trim(); if (!q) return;
+  addMsg('me', esc(q)); $('chatIn').value = '';
+  chat.push({ role: 'user', content: q });
+  const wait = addMsg('bot', '<span class="loading">생각 중…</span>');
+  $('chatBtn').disabled = true;
+  try {
+    const a = await callClaude(chat, SYSTEM + context());
+    chat.push({ role: 'assistant', content: a });
+    wait.querySelector('.bubble').innerHTML = mdLite(a);
+  } catch (e) {
+    chat.pop(); wait.className = 'msg err'; wait.innerHTML = '<div class="bubble">' + esc(e.message) + '</div>';
+  }
+  $('chatBtn').disabled = false; $('chatIn').focus();
+}
+$('rekeyBtn').onclick = () => { apiKey = ''; $('apiKey').value = ''; $('keyBox').hidden = false; $('keyDone').hidden = true;
+  $('keyStatus').className = 'status'; $('keyStatus').textContent = '키를 넣고 [연결]을 누르세요'; updateAiButtons(); };
+$('chatBtn').onclick = sendChat;
+$('chatIn').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChat(); } });
+
+// ---- 현황 보고서 · 통합표 — 보고에 그대로 쓰는 두 가지 ----------------------------
+function updateReportBtn() { $('reportBtn').disabled = !lastSummary || !reqs.length; }
+function openReport() {
+  const s = stats(), t = s.tot;
+  const prow = (name, lim, g, tot) => '<tr' + (tot ? ' class="sum"' : '') + '><td>' + esc(name) + '</td><td class="n">' + (lim ?? '') + (lim != null ? '일' : '') + '</td><td class="n">' + g.n +
+    '</td><td class="n">' + g.done + '</td><td class="n">' + g.open + '</td><td class="n">' + p1(g.rate) + '%</td><td class="n' + (lim != null && g.dur > lim ? ' lo' : '') + '">' + p1(g.dur) +
+    '일</td><td class="n">' + p1(g.inTime) + '%</td><td class="n' + (g.flag ? ' lo' : '') + '">' + g.flag + '</td></tr>';
+  const phead = '<tr><th>절차</th><th style="text-align:right">처리기한</th><th style="text-align:right">접수</th><th style="text-align:right">완료</th><th style="text-align:right">진행 중</th>' +
+    '<th style="text-align:right">완료율</th><th style="text-align:right">평균 소요</th><th style="text-align:right">기한 내</th><th style="text-align:right">주의</th></tr>';
+  const prows = s.procs.map(p => prow(p, RULES.limit[p], s.byProc[p])).join('') + prow('전체', null, t, true);
+  const fhead = '<tr><th>기술분야</th>' + s.procs.map(p => '<th style="text-align:right">' + esc(p) + '</th>').join('') + '<th style="text-align:right">전체</th></tr>';
+  const fc = g => '<td class="n' + (g.flag ? ' lo' : '') + '">' + (g.n ? g.n + '건 · ' + (g.dur == null ? '-' : p1(g.dur) + '일') : '-') + '</td>';
+  const frows = s.fields.map(f => '<tr><td>' + esc(f) + '</td>' + s.procs.map(p => fc(s.cell(f, p))).join('') + fc(s.byField[f]) + '</tr>').join('');
+  const flagRows = s.flagged.map(r => '<li><b>' + esc(r.no) + '</b> ' + esc(r.proc) + ' · ' + esc(r.field) + ' · ' + esc(r.stage) + ' — 경과 ' + r.elapsed + '일 / 기한 ' + r.limit +
+    '일 · 멈춤 ' + r.stall + '일 (' + r.flags.join(' · ') + ')<br><span class="c">' + esc(r.note) + '</span></li>').join('');
+  const html = '<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8"><title>보안 심의 진행 현황 보고</title><style>' +
+    'body{margin:0;background:#e9edf3;font-family:"Malgun Gothic",sans-serif;color:#1c2330;letter-spacing:-.01em}' +
+    '.page{width:794px;margin:24px auto;background:#fff;padding:44px 52px;box-shadow:0 2px 14px rgba(0,0,0,.12)}' +
+    'h1{margin:0;font-size:25px;color:#1f3f7a}.meta{margin:8px 0 20px;padding-bottom:14px;border-bottom:2px solid #1f3f7a;color:#6b7585;font-size:13px}' +
+    'h2{font-size:16px;color:#1f3f7a;margin:22px 0 8px}table{width:100%;border-collapse:collapse;font-size:13px}' +
+    'th,td{padding:6px 8px;border-bottom:1px solid #e3e8f0;text-align:left}th{background:#f5f7fb;color:#6b7585}td.n{text-align:right;font-weight:700}' +
+    'td.lo{color:#d93025}tr.sum td{border-bottom:2px solid #1f3f7a;font-weight:800;color:#1f3f7a;background:#f5f7fb}' +
+    '.kp{display:flex;gap:10px}.kp div{flex:1;border:1px solid #e3e8f0;border-radius:8px;padding:10px 12px}.kp p{margin:0;font-size:12px;color:#6b7585}.kp b{font-size:21px}' +
+    'ul{margin:0;padding-left:18px;font-size:13.5px;line-height:1.7}ul b{color:#d93025}ul .c{color:#4a5262}' +
+    '.body{font-size:14px;line-height:1.75}.body .h{display:block;margin:14px 0 2px;font-weight:800;color:#1f3f7a}.body p{margin:1px 0}' +
+    '.foot{margin-top:24px;padding-top:10px;border-top:1px solid #e3e8f0;font-size:11.5px;color:#6b7585}' +
+    '.bar{width:794px;margin:16px auto 0;text-align:right}.bar button{border:0;border-radius:7px;padding:9px 16px;background:#1f3f7a;color:#fff;font:inherit;font-weight:700;cursor:pointer}' +
+    '@media print{body{background:#fff}.page{margin:0;box-shadow:none;padding:0;width:auto}.bar{display:none}}' +
+    '</style></head><body><div class="bar"><button onclick="print()">인쇄 · PDF로 저장</button></div><div class="page">' +
+    '<h1>보안 심의 진행 현황 보고 — ' + esc(s.months[0] + ' ~ ' + s.months[s.months.length - 1]) + '</h1>' +
+    '<div class="meta">파일 ' + loaded.size + '개 · 요청 ' + t.n + '건 · 기준일 ' + RULES.baseDate + ' &nbsp;|&nbsp; 주의 기준: ' + RULE_LIST.map(x => x.id).join(' · ') + '</div>' +
+    '<div class="kp"><div><p>접수</p><b>' + t.n + '건</b></div><div><p>완료율</p><b>' + p1(t.rate) + '%</b></div><div><p>평균 소요일</p><b>' + p1(t.dur) +
+      '일</b></div><div><p>주의 요청</p><b style="color:#d93025">' + s.flagged.length + '건</b></div></div>' +
+    '<h2>절차별 처리 현황</h2><table>' + phead + prows + '</table>' +
+    '<h2>기술분야 × 절차 — 접수 건수 · 평균 소요일</h2><table>' + fhead + frows + '</table>' +
+    '<h2>심의기준에 걸린 요청</h2><ul>' + (flagRows || '<li>없음</li>') + '</ul>' +
+    '<h2>AI 요약</h2><div class="body">' + mdLite(lastSummary) + '</div>' +
+    '<p class="foot">건수와 날짜는 화면이 심의 요청 CSV 에서 계산했고, 요약은 AI 가 그 집계와 진행 중 요청의 코멘트를 보고 쓴 초안입니다. 요청 제목 · 요청부서는 AI 에 보내지 않았습니다. 지연 사유와 조치는 담당자 · 요청부서와 확인한 뒤 확정하세요.</p>' +
+    '</div></body></html>';
+  const w = window.open('', '_blank');
+  if (!w) { alert('팝업이 막혔습니다 — 주소창 오른쪽에서 이 사이트의 팝업을 허용해 주세요.'); return; }
+  w.document.open(); w.document.write(html); w.document.close();
+}
+$('reportBtn').onclick = openReport;
+// 절차별 요청 파일들을 한 장으로 — 엑셀에서 바로 열린다 (UTF-8 BOM)
+function downloadCSV() {
+  const s = stats(), q = v => /[",\n]/.test(String(v)) ? '"' + String(v).replace(/"/g, '""') + '"' : v;
+  const head = ['요청번호', '절차', '기술분야', '요청부서', '요청제목', '접수일', '현재단계', '최근갱신일', '완료일', '최근 코멘트', '상태', '소요·경과일', '처리기한', '멈춘 일수', '걸린 기준'];
+  const body = s.procs.flatMap(p => s.all.filter(r => r.proc === p).map(r =>
+    [r.no, r.proc, r.field, r.dept, r.title, r.recv, r.stage, r.upd, r.done, r.note, r.isDone ? '완료' : '진행 중', r.isDone ? r.dur : r.elapsed,
+     r.limit ?? '', r.isDone ? '' : r.stall, r.flags.join(' · ')].map(q).join(',')));
+  const blob = new Blob(['﻿' + [head.join(','), ...body].join('\r\n')], { type: 'text/csv;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = '심의요청_통합.csv';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+$('csvBtn').onclick = downloadCSV;
+
+// ---- 이벤트 -----------------------------------------------------------------
+$('pickBtn').onclick = $('pickBtn2').onclick = () => $('fileInput').click();
+$('fileInput').onchange = e => { const fs = [...e.target.files]; e.target.value = ''; addFiles(fs); };  // 목록을 먼저 복사해 둔다 — 비우면 함께 사라진다
+const drop = $('empty');
+['dragenter', 'dragover'].forEach(t => document.addEventListener(t, e => { e.preventDefault(); drop.classList.add('is-over'); }));
+['dragleave', 'drop'].forEach(t => document.addEventListener(t, e => { e.preventDefault(); drop.classList.remove('is-over'); }));
+document.addEventListener('drop', e => { if (e.dataTransfer.files.length) addFiles([...e.dataTransfer.files]); });
+$('rules').onclick = e => { const b = e.target.closest('[data-rule]'); if (!b) return;
+  ruleFilter = ruleFilter === b.dataset.rule ? '' : b.dataset.rule; render(); };
+$('metricSel').onchange = e => { metric = e.target.value; renderTable(stats()); };
+$('procSel').onchange = e => { procPick = e.target.value; renderList(stats()); };
+$('resetBtn').onclick = () => { reqs = []; loaded.clear(); ruleFilter = ''; procPick = ''; chat = []; lastSummary = '';
+  $('summary').innerHTML = '<span class="muted">CSV를 올리고 연결하면 누를 수 있습니다</span>';
+  $('chatlog').innerHTML = '<div class="muted">예) 자율주행 기술보호 심의는 왜 밀려 있어? · 이번 주에 먼저 챙길 요청은?</div>'; render(); };
+render();
+</script>
+</body>
+</html>

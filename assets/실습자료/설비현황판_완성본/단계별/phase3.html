@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>설비 가동률 현황판 (Phase 3)</title>
+<style>
+  :root {
+    --bg: #f3f5f9; --card: #fff; --line: #dfe4ec; --ink: #1c2330; --soft: #6b7585;
+    --navy: #1f3f7a; --navy-soft: #eaf0fa; --red: #d93025; --red-soft: #fdecea;
+    --amber: #b26a00; --amber-soft: #fff4e0; --green: #1e8e3e; --teal: #0f8b8d;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+         font-family: "Malgun Gothic", "맑은 고딕", -apple-system, "Segoe UI", sans-serif;
+         font-size: 14px; letter-spacing: -.01em; }
+  header { display: flex; align-items: center; gap: 16px; padding: 14px 24px;
+           background: var(--navy); color: #fff; }
+  header h1 { margin: 0; font-size: 20px; font-weight: 800; }
+  header .sub { font-size: 13px; opacity: .8; }
+  header .grow { flex: 1; }
+  .btn { border: 0; border-radius: 7px; padding: 9px 15px; font: inherit; font-weight: 700;
+         cursor: pointer; background: #fff; color: var(--navy); white-space: nowrap; }
+  .btn:disabled { opacity: .45; cursor: not-allowed; }
+  .btn--red { background: var(--red); color: #fff; }
+  .btn--navy { background: var(--navy); color: #fff; }
+  .btn--ghost { background: #fff; color: var(--navy); border: 1px solid var(--line); }
+
+  .layout { display: grid; grid-template-columns: minmax(0, 1fr) 390px; gap: 18px; padding: 18px 24px 28px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; }
+  .card h2 { margin: 0 0 12px; font-size: 15px; color: var(--navy); }
+
+  /* 빈 화면 안내 */
+  .empty { display: flex; flex-direction: column; align-items: center; justify-content: center;
+           min-height: 520px; border: 2px dashed #b9c4d6; border-radius: 14px; background: #fff;
+           text-align: center; padding: 30px; transition: background .15s; }
+  .empty.is-over { background: var(--navy-soft); border-color: var(--navy); }
+  .empty .big { font-size: 22px; font-weight: 800; color: var(--navy); margin: 0 0 8px; }
+  .empty .hint { color: var(--soft); margin: 0 0 20px; font-size: 15px; }
+  .empty ol { text-align: left; margin: 22px 0 0; padding: 16px 22px 16px 38px; background: var(--bg);
+              border-radius: 10px; color: var(--ink); line-height: 1.9; font-size: 14px; }
+
+  .files { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 12px; color: var(--soft); }
+  .chip-file { background: #fff; border: 1px solid var(--line); border-radius: 20px; padding: 4px 11px; font-size: 12.5px; color: var(--ink); }
+  .files select { margin-left: auto; font: inherit; font-weight: 700; color: var(--navy); padding: 6px 10px;
+                  border: 1px solid var(--navy); border-radius: 7px; background: #fff; }
+
+  .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 14px; }
+  .kpi { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
+  .kpi .k { font-size: 13px; color: var(--soft); }
+  .kpi .v { font-size: 26px; font-weight: 800; margin-top: 4px; font-variant-numeric: tabular-nums; }
+  .kpi .v small { font-size: 14px; font-weight: 700; color: var(--soft); margin-left: 3px; }
+  .kpi.is-alert { border-color: #f1b3ad; background: var(--red-soft); }
+  .kpi.is-alert .v { color: var(--red); }
+
+  .rules { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 14px; }
+  .rule { display: grid; grid-template-columns: 1fr auto; align-items: baseline; gap: 2px 8px; text-align: left;
+          border: 1px solid var(--line); background: #fff; border-radius: 9px; padding: 9px 14px; cursor: pointer; font: inherit; }
+  .rule b { color: var(--red); font-size: 18px; }
+  .rule span { grid-column: 1 / -1; color: var(--soft); font-size: 12px; }
+  .rule.is-on { border-color: var(--red); background: var(--red-soft); }
+  .rule.is-zero b { color: var(--soft); }
+
+  .charts { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+  .bars { display: flex; align-items: flex-end; gap: 26px; height: 168px; padding: 0 14px; border-bottom: 1px solid var(--line); }
+  .grp { flex: 1; display: flex; align-items: flex-end; justify-content: center; gap: 6px; height: 100%; }
+  .grp div { width: 34px; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; }
+  .grp i { display: block; width: 100%; border-radius: 5px 5px 0 0; }
+  .grp em { font-style: normal; font-size: 11.5px; font-weight: 700; margin-bottom: 3px; font-variant-numeric: tabular-nums; }
+  .bar-labels { display: flex; gap: 26px; padding: 6px 14px 0; }
+  .bar-labels div { flex: 1; text-align: center; font-size: 13px; }
+  .bar-labels div.is-cur { font-weight: 800; color: var(--navy); }
+  .legend { display: flex; gap: 12px; margin-top: 8px; font-size: 12px; color: var(--soft); }
+  .legend span { display: inline-flex; align-items: center; gap: 4px; }
+  .legend i { width: 9px; height: 9px; border-radius: 2px; }
+  .hbar { display: grid; grid-template-columns: 26px 128px 1fr 58px; align-items: center; gap: 8px; margin: 9px 0; font-size: 13px; }
+  .hbar .rk { color: var(--soft); font-weight: 700; text-align: right; }
+  .hbar .nm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 700; }
+  .hbar .track { height: 15px; background: var(--bg); border-radius: 8px; overflow: hidden; }
+  .hbar .track i { display: block; height: 100%; background: #9fb4d9; border-radius: 8px; }
+  .hbar.is-flag .track i { background: var(--red); }
+  .hbar.is-flag .n { color: var(--red); }
+  .hbar .n { text-align: right; font-weight: 800; font-variant-numeric: tabular-nums; }
+
+  .tools { display: flex; gap: 8px; align-items: center; margin-bottom: 10px; flex-wrap: wrap; }
+  .tools h2 { margin: 0 auto 0 0; }
+  .tools select { font: inherit; padding: 7px 10px; border: 1px solid var(--line); border-radius: 7px; background: #fff; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; color: var(--soft); font-weight: 700; padding: 8px 8px; border-bottom: 2px solid var(--line); background: #fafbfd; position: sticky; top: 0; white-space: nowrap; }
+  th.num, td.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  th.is-cur { color: var(--navy); }
+  td { padding: 8px 8px; border-bottom: 1px solid #eef1f5; vertical-align: top; }
+  td:nth-child(1), td:nth-child(2) { white-space: nowrap; }
+  td.is-flag { background: var(--red-soft); color: var(--red); font-weight: 800; }
+  td.is-cur { font-weight: 700; }
+  tr.has-flag td:nth-child(2) { color: var(--red); font-weight: 700; }
+  .up { color: var(--green); } .down { color: var(--red); }
+  .tbl-wrap { max-height: 420px; overflow: auto; border: 1px solid var(--line); border-radius: 8px; }
+  .tag { display: inline-block; margin: 1px 3px 1px 0; padding: 2px 7px; border-radius: 5px; font-size: 12px; font-weight: 700;
+         background: var(--red-soft); color: var(--red); white-space: nowrap; }
+  .muted { color: var(--soft); }
+  .count-line { margin: 8px 2px 0; color: var(--soft); font-size: 13px; }
+
+  /* AI 패널 — 늘 한 화면 안에, 대화 칸이 남은 높이를 다 쓴다 */
+  .ai { position: sticky; top: 18px; align-self: start; display: flex; flex-direction: column; gap: 12px;
+        height: calc(100vh - 108px); min-height: 560px; }
+  .ai .card--chat { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
+  .keyrow-done { display: flex; align-items: center; gap: 8px; }
+  .keyrow-done .status { margin: 0; flex: 1; }
+  .link { background: none; border: 0; padding: 0; font: inherit; font-size: 12.5px; color: var(--navy); text-decoration: underline; cursor: pointer; }
+  .ai .keyrow { display: flex; gap: 6px; }
+  .ai .keyrow input { flex: 1; min-width: 0; font: inherit; padding: 8px 10px; border: 1px solid var(--line); border-radius: 7px; }
+  .status { font-size: 12.5px; margin-top: 7px; color: var(--soft); white-space: pre-wrap; word-break: break-all; }
+  .status.ok { color: var(--green); font-weight: 700; }
+  .status.err { color: var(--red); }
+  .ai-btns { display: grid; grid-template-columns: 1fr auto; gap: 6px; }
+  .summary { font-size: 13.5px; line-height: 1.6; max-height: 34vh; overflow: auto; }
+  .summary .h { display: block; margin: 10px 0 3px; font-weight: 800; color: var(--navy); }
+  .summary .h:first-child { margin-top: 0; }
+  .summary p, .bubble p { margin: 2px 0; }
+  .chatlog { flex: 1 1 auto; min-height: 120px; overflow: auto; background: var(--bg); border-radius: 8px; padding: 10px; font-size: 13.5px; line-height: 1.6; }
+  .msg { margin-bottom: 10px; }
+  .msg .who { font-size: 11.5px; font-weight: 800; color: var(--soft); margin-bottom: 2px; }
+  .msg.me { text-align: right; }
+  .msg.me .bubble { display: inline-block; background: var(--navy); color: #fff; border-radius: 10px 10px 2px 10px; padding: 7px 11px; text-align: left; }
+  .msg.bot .bubble { background: #fff; border: 1px solid var(--line); border-radius: 10px 10px 10px 2px; padding: 8px 11px; }
+  .msg.err .bubble { background: var(--red-soft); color: var(--red); border-radius: 8px; padding: 8px 11px; white-space: pre-wrap; }
+  .chatin { display: flex; gap: 6px; margin-top: 8px; }
+  .chatin textarea { flex: 1; resize: none; height: 42px; font: inherit; padding: 9px 10px; border: 1px solid var(--line); border-radius: 7px; }
+  .ai-note { font-size: 12px; color: var(--soft); margin: 8px 0 0; }
+  .loading { color: var(--soft); font-style: italic; }
+  [hidden] { display: none !important; }
+
+  /* ---- Phase 4 전 — 아직 다듬지 않은 모습 ---- */
+  header { background: #fff; color: var(--ink); border-bottom: 1px solid var(--line); }
+  header .sub { display: none; }
+  #pickBtn { background: var(--navy); color: #fff; }
+  .kpi.is-alert { background: #fff; border-color: var(--line); }
+  .empty { min-height: 180px; border-style: solid; border-width: 1px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>설비 가동률 현황판</h1>
+    <div class="sub">설비가동 CSV를 올리면 설비별 · 월별 가동률을 계산하고, 기준을 벗어난 설비를 빨갛게 표시합니다</div>
+  </div>
+  <div class="grow"></div>
+  <button class="btn btn--ghost" id="resetBtn" style="color:#fff;background:transparent;border-color:rgba(255,255,255,.4)" hidden>처음으로</button>
+  <button class="btn" id="pickBtn">CSV 불러오기</button>
+  <input type="file" id="fileInput" accept=".csv" multiple hidden>
+</header>
+
+<div class="layout">
+  <main>
+    <!-- 빈 화면 -->
+    <section class="empty" id="empty">
+      <p class="hint">CSV 파일을 선택하세요</p>
+      <button class="btn btn--navy" id="pickBtn2">파일 선택</button>
+    </section>
+
+    <!-- 현황판 -->
+    <section id="dash" hidden>
+      <div class="files" id="files"></div>
+
+      <div class="kpis">
+        <div class="kpi"><div class="k" id="kRateK">가동률</div><div class="v" id="kRate">-</div></div>
+        <div class="kpi"><div class="k" id="kFailK">고장정지율</div><div class="v" id="kFail">-</div></div>
+        <div class="kpi"><div class="k" id="kCntK">고장 건수</div><div class="v" id="kCnt">-</div></div>
+        <div class="kpi is-alert"><div class="k">주의 설비 (전체 기간)</div><div class="v" id="kFlag">-</div></div>
+      </div>
+
+      <div class="rules" id="rules"></div>
+
+      <div class="charts">
+        <div class="card">
+          <h2>라인별 월 가동률</h2>
+          <div class="bars" id="lineBars"></div>
+          <div class="bar-labels" id="lineLabels"></div>
+          <div class="legend" id="legend"></div>
+        </div>
+        <div class="card">
+          <h2 id="worstTitle">워스트 설비 5대</h2>
+          <div id="worstBars"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="tools">
+          <h2>설비별 가동률</h2>
+          <select id="lineSel"><option value="">전체 라인</option></select>
+          <button class="btn btn--ghost" id="flagBtn">주의 설비만 보기</button>
+        </div>
+        <div class="tbl-wrap">
+          <table>
+            <thead id="thead"></thead>
+            <tbody id="tbody"></tbody>
+          </table>
+        </div>
+        <p class="count-line" id="countLine"></p>
+      </div>
+    </section>
+  </main>
+
+  <!-- AI 설비 도우미 -->
+  <aside class="ai">
+    <div class="card">
+      <h2>AI 설비 도우미</h2>
+      <div id="keyBox">
+        <div class="keyrow">
+          <input type="password" id="apiKey" placeholder="Claude API 키" autocomplete="off">
+          <button class="btn btn--navy" id="connectBtn">연결</button>
+        </div>
+        <div class="status" id="keyStatus">키를 넣고 [연결]을 누르세요</div>
+      </div>
+      <div class="keyrow-done" id="keyDone" hidden>
+        <p class="status ok">✓ 연결됨</p>
+        <button class="link" id="rekeyBtn">키 다시 넣기</button>
+      </div>
+
+      <h2 style="margin-top:16px">주의 설비 요약</h2>
+      <div class="ai-btns">
+        <button class="btn btn--red" id="sumBtn" disabled>AI 요약 받기</button>
+      </div>
+      <div class="summary" id="summary" style="margin-top:10px"><span class="muted">CSV를 올리고 연결하면 누를 수 있습니다</span></div>
+      <p class="ai-note">가동률은 화면이 계산합니다. AI에게는 <b>설비별 월 집계 · 주의 설비 · 고장 원인별 건수만</b> 보냅니다.</p>
+    </div>
+
+    <div class="card card--chat">
+      <h2>데이터에 물어보기</h2>
+      <div class="chatlog" id="chatlog"><div class="muted">예) 크랭크 연삭기 #2 는 왜 계속 떨어져? · 변속기 라인은 괜찮아?</div></div>
+      <div class="chatin">
+        <textarea id="chatIn" placeholder="질문을 입력하세요 (Enter 전송)" disabled></textarea>
+        <button class="btn btn--navy" id="chatBtn" disabled>전송</button>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<script>
+// ---------------------------------------------------------------------------
+// 설비기준 — 설비기준.md 를 그대로 옮긴 값. 기준을 바꾸면 여기와 설비기준.md 를 같이 고친다.
+// ---------------------------------------------------------------------------
+const RULES = {
+  lowRate: 85,      // 3. 주의 — 월 가동률 이 값(%) 미만
+  dropPt: 5,        // 4. 주의 — 전월보다 가동률이 이 값(%p) 이상 하락
+  worstN: 5         // 5. 워스트 설비 — 그달 가동률 하위 몇 대
+};
+const RULE_LIST = [
+  { id: '가동률 ' + RULES.lowRate + '% 미만', desc: '월 가동률 = (계획가동 − 비가동) ÷ 계획가동' },
+  { id: '전월 대비 ' + RULES.dropPt + '%p 하락', desc: '전월보다 가동률이 ' + RULES.dropPt + '%p 이상 떨어진 달' }
+];
+const LINE_COLORS = ['#1f3f7a', '#0f8b8d', '#c26a00'];
+
+// 화면을 server.js 가 열어 줬다면 같은 주소로 API 를 부른다.
+const SERVER_ORIGIN = location.protocol.startsWith('http') ? location.origin : 'http://localhost:8787';
+const API_URL = SERVER_ORIGIN + '/v1/messages';
+
+const $ = (id) => document.getElementById(id);
+let rows = [];            // 합친 전체 일별 기록
+const loaded = new Set(); // 이미 올린 파일 이름
+let month = '', onlyFlag = false, ruleFilter = '', apiKey = '', chat = [], lastSummary = '';
+
+function esc(s) { return String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
+function pct(x) { return x.toFixed(1); }
+function mLabel(m) { return Number(m.slice(5)) + '월'; }
+
+// ---- CSV 읽기 -------------------------------------------------------------
+async function readText(file) {
+  const buf = await file.arrayBuffer();
+  try { return new TextDecoder('utf-8', { fatal: true }).decode(buf).replace(/^﻿/, ''); }
+  catch (e) { return new TextDecoder('euc-kr').decode(buf); }   // 엑셀에서 저장한 CSV (한글 깨짐 방지)
+}
+function parseCSV(text) {
+  const out = []; let row = [], cur = '', q = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (q) { if (c === '"' && text[i + 1] === '"') { cur += '"'; i++; } else if (c === '"') q = false; else cur += c; }
+    else if (c === '"') q = true;
+    else if (c === ',') { row.push(cur); cur = ''; }
+    else if (c === '\n' || c === '\r') { if (c === '\r' && text[i + 1] === '\n') i++; row.push(cur); out.push(row); row = []; cur = ''; }
+    else cur += c;
+  }
+  if (cur || row.length) { row.push(cur); out.push(row); }
+  return out.filter(r => r.some(v => v.trim() !== ''));
+}
+const NEED = ['일자', '라인', '설비', '계획가동(분)', '비가동(분)', '고장건수', '고장시간(분)', '주요원인'];
+async function addFiles(fileList) {
+  const errs = [];
+  for (const f of fileList) {
+    if (!/\.csv$/i.test(f.name)) { errs.push(f.name + ' — CSV 파일이 아닙니다'); continue; }
+    if (loaded.has(f.name)) continue;                       // 같은 파일을 두 번 올리면 건너뛴다
+    const table = parseCSV(await readText(f));
+    const head = table[0].map(h => h.trim());
+    const miss = NEED.filter(n => !head.includes(n));
+    if (miss.length) { errs.push(f.name + ' — 없는 열: ' + miss.join(', ')); continue; }
+    const ix = Object.fromEntries(NEED.map(n => [n, head.indexOf(n)]));
+    const num = v => Number(String(v).replace(/[^\d.-]/g, '')) || 0;
+    for (const r of table.slice(1)) {
+      rows.push({
+        date: r[ix['일자']].trim(), line: r[ix['라인']].trim(), eq: r[ix['설비']].trim(),
+        plan: num(r[ix['계획가동(분)']]), down: num(r[ix['비가동(분)']]),
+        fcnt: num(r[ix['고장건수']]), ftime: num(r[ix['고장시간(분)']]),
+        cause: r[ix['주요원인']].trim(), file: f.name
+      });
+    }
+    loaded.add(f.name);
+  }
+  const months = [...new Set(rows.map(r => r.date.slice(0, 7)))].sort();
+  if (!months.includes(month)) month = months[months.length - 1] || '';
+  render();
+  if (errs.length) alert('읽지 못한 파일이 있습니다\n\n' + errs.join('\n'));
+}
+
+// ---- 계산 (전부 화면에서) -----------------------------------------------------
+function stats() {
+  const months = [...new Set(rows.map(r => r.date.slice(0, 7)))].sort();
+  const lines = [...new Set(rows.map(r => r.line))];
+  const eqs = [], agg = {}, byLine = {};
+  for (const r of rows) {
+    const m = r.date.slice(0, 7);
+    if (!agg[r.eq]) { agg[r.eq] = {}; eqs.push({ eq: r.eq, line: r.line }); }
+    const a = agg[r.eq][m] = agg[r.eq][m] || { plan: 0, down: 0, fcnt: 0, ftime: 0, causes: {} };
+    a.plan += r.plan; a.down += r.down; a.fcnt += r.fcnt; a.ftime += r.ftime;
+    if (r.fcnt && r.cause && r.cause !== '-') a.causes[r.cause] = (a.causes[r.cause] || 0) + r.fcnt;
+    byLine[r.line] = byLine[r.line] || {};
+    const L = byLine[r.line][m] = byLine[r.line][m] || { plan: 0, down: 0 };
+    L.plan += r.plan; L.down += r.down;
+  }
+  const rate = a => a ? (a.plan - a.down) / a.plan * 100 : null;
+  const cells = [];
+  for (const { eq, line } of eqs) {
+    months.forEach((m, i) => {
+      const a = agg[eq][m]; if (!a) return;
+      const r = rate(a), prev = i ? rate(agg[eq][months[i - 1]]) : null;
+      const flags = [];
+      if (r < RULES.lowRate) flags.push(RULE_LIST[0].id);
+      if (prev !== null && prev - r >= RULES.dropPt) flags.push(RULE_LIST[1].id);
+      const top = Object.entries(a.causes).sort((x, y) => y[1] - x[1]);
+      cells.push({ eq, line, m, rate: r, prev, diff: prev === null ? null : r - prev,
+        fail: a.ftime / a.plan * 100, fcnt: a.fcnt, ftime: a.ftime, plan: a.plan, down: a.down,
+        causes: a.causes, top: top.length ? top[0][0] : '', flags });
+    });
+  }
+  const cur = cells.filter(c => c.m === month);
+  const sum = (arr, k) => arr.reduce((s, c) => s + c[k], 0);
+  const flagged = cells.filter(c => c.flags.length);
+  const byRule = Object.fromEntries(RULE_LIST.map(x => [x.id, cells.filter(c => c.flags.includes(x.id)).length]));
+  const worst = [...cur].sort((a, b) => a.rate - b.rate).slice(0, RULES.worstN);
+  const lineRate = {};
+  for (const l of lines) lineRate[l] = Object.fromEntries(months.map(m => [m, byLine[l][m] ? rate(byLine[l][m]) : null]));
+  const curPlan = sum(cur, 'plan');
+  return { months, lines, eqs, cells, cur, flagged, byRule, worst, lineRate,
+    curRate: curPlan ? (curPlan - sum(cur, 'down')) / curPlan * 100 : 0,
+    curFail: curPlan ? sum(cur, 'ftime') / curPlan * 100 : 0, curCnt: sum(cur, 'fcnt') };
+}
+
+// ---- 그리기 -----------------------------------------------------------------
+function render() {
+  const has = rows.length > 0;
+  $('empty').hidden = has; $('dash').hidden = !has; $('resetBtn').hidden = !has;
+  updateAiButtons();
+  if (!has) return;
+  const s = stats();
+
+  $('files').innerHTML = '<span>불러온 파일</span>' +
+    [...loaded].map(n => '<span class="chip-file">' + esc(n) + '</span>').join('') +
+    '<span>— ' + rows.length.toLocaleString() + '행 · 설비 ' + s.eqs.length + '대</span>' +
+    '<select id="monthSel">' + s.months.map(m => '<option value="' + m + '"' + (m === month ? ' selected' : '') + '>기준 월 ' + mLabel(m) + '</option>').join('') + '</select>';
+  $('monthSel').onchange = e => { month = e.target.value; render(); };
+
+  $('kRateK').textContent = mLabel(month) + ' 가동률';
+  $('kFailK').textContent = mLabel(month) + ' 고장정지율';
+  $('kCntK').textContent = mLabel(month) + ' 고장 건수';
+  const prevM = s.months[s.months.indexOf(month) - 1];
+  const prevRate = prevM ? allRate(s, prevM) : null;
+  $('kRate').innerHTML = pct(s.curRate) + '<small>%' + (prevRate !== null ? ' · 전월 ' + (s.curRate - prevRate >= 0 ? '+' : '') + pct(s.curRate - prevRate) + '%p' : '') + '</small>';
+  $('kFail').innerHTML = pct(s.curFail) + '<small>%</small>';
+  $('kCnt').innerHTML = s.curCnt + '<small>건</small>';
+  $('kFlag').innerHTML = s.flagged.length + '<small>건 · 이번 달 ' + s.cur.filter(c => c.flags.length).length + '대</small>';
+
+  $('rules').innerHTML = RULE_LIST.map(x =>
+    '<button class="rule' + (ruleFilter === x.id ? ' is-on' : '') + (s.byRule[x.id] ? '' : ' is-zero') +
+    '" data-rule="' + x.id + '"><strong>' + x.id + '</strong><b>' + s.byRule[x.id] + '</b><span>' + esc(x.desc) + '</span></button>'
+  ).join('');
+
+  // 라인별 월 가동률 — 80% 를 바닥으로 그린다 (차이가 보이게)
+  const FLOOR = 80;
+  $('lineBars').innerHTML = s.months.map(m => '<div class="grp">' + s.lines.map((l, i) => {
+    const v = s.lineRate[l][m];
+    return '<div><em>' + (v === null ? '' : pct(v)) + '</em><i style="height:' + (v === null ? 0 : Math.max(2, (v - FLOOR) / (100 - FLOOR) * 130)) +
+      'px;background:' + LINE_COLORS[i] + '"></i></div>';
+  }).join('') + '</div>').join('');
+  $('lineLabels').innerHTML = s.months.map(m => '<div' + (m === month ? ' class="is-cur"' : '') + '>' + mLabel(m) + '</div>').join('');
+  $('legend').innerHTML = s.lines.map((l, i) => '<span><i style="background:' + LINE_COLORS[i] + '"></i>' + esc(l) + '</span>').join('') +
+    '<span style="margin-left:auto">세로축 80~100%</span>';
+
+  $('worstTitle').textContent = '워스트 설비 ' + RULES.worstN + '대 — ' + mLabel(month);
+  $('worstBars').innerHTML = s.worst.map((c, i) =>
+    '<div class="hbar' + (c.flags.length ? ' is-flag' : '') + '"><span class="rk">' + (i + 1) + '</span><span class="nm" title="' + esc(c.eq) + '">' + esc(c.eq) +
+    '</span><div class="track"><i style="width:' + Math.max(2, (c.rate - FLOOR) / (100 - FLOOR) * 100) + '%"></i></div><span class="n">' + pct(c.rate) + '%</span></div>' +
+    '<div class="muted" style="margin:-6px 0 4px 34px;font-size:12px">' + esc(c.line) + ' · 고장 ' + c.fcnt + '건' + (c.top ? ' · ' + esc(c.top) : '') + '</div>'
+  ).join('');
+
+  const sel = $('lineSel'), cv = sel.value;
+  sel.innerHTML = '<option value="">전체 라인</option>' + s.lines.map(l => '<option>' + esc(l) + '</option>').join('');
+  sel.value = cv;
+  renderTable(s);
+}
+// 그달 전체 설비를 합친 가동률
+function allRate(s, m) {
+  const cs = s.cells.filter(c => c.m === m), plan = cs.reduce((t, c) => t + c.plan, 0);
+  return plan ? (plan - cs.reduce((t, c) => t + c.down, 0)) / plan * 100 : null;
+}
+function renderTable(s) {
+  s = s || stats();
+  const line = $('lineSel').value;
+  let list = s.eqs.filter(e => !line || e.line === line);
+  const cellOf = (eq, m) => s.cells.find(c => c.eq === eq && c.m === m);
+  if (onlyFlag) list = list.filter(e => s.cells.some(c => c.eq === e.eq && c.flags.length));
+  if (ruleFilter) list = list.filter(e => s.cells.some(c => c.eq === e.eq && c.flags.includes(ruleFilter)));
+  $('thead').innerHTML = '<tr><th>라인</th><th>설비</th>' + s.months.map(m => '<th class="num' + (m === month ? ' is-cur' : '') + '">' + mLabel(m) + '</th>').join('') +
+    '<th class="num">전월 대비</th><th class="num">고장</th><th class="num">고장정지율</th><th>주요 원인 (' + mLabel(month) + ')</th><th>걸린 기준</th></tr>';
+  $('tbody').innerHTML = list.map(e => {
+    const c = cellOf(e.eq, month) || {};
+    const flags = s.cells.filter(x => x.eq === e.eq && x.flags.length);
+    return '<tr class="' + (flags.length ? 'has-flag' : '') + '"><td>' + esc(e.line) + '</td><td>' + esc(e.eq) + '</td>' +
+      s.months.map(m => { const x = cellOf(e.eq, m); return '<td class="num' + (x && x.flags.length ? ' is-flag' : '') + (m === month ? ' is-cur' : '') + '">' + (x ? pct(x.rate) : '-') + '</td>'; }).join('') +
+      '<td class="num ' + (c.diff == null ? '' : c.diff < 0 ? 'down' : 'up') + '">' + (c.diff == null ? '-' : (c.diff >= 0 ? '+' : '') + pct(c.diff) + '%p') + '</td>' +
+      '<td class="num">' + (c.fcnt || 0) + '건</td><td class="num">' + (c.fail != null ? pct(c.fail) + '%' : '-') + '</td>' +
+      '<td>' + (c.top ? esc(c.top) + (Object.keys(c.causes).length > 1 ? ' 외' : '') : '<span class="muted">-</span>') + '</td><td>' +
+      (flags.map(x => '<span class="tag">' + mLabel(x.m) + ' ' + x.flags.join(' · ') + '</span>').join('') || '<span class="muted">-</span>') + '</td></tr>';
+  }).join('') || '<tr><td colspan="10" class="muted" style="text-align:center;padding:24px">조건에 맞는 설비가 없습니다</td></tr>';
+  $('flagBtn').textContent = onlyFlag ? '전체 설비 보기' : '주의 설비만 보기';
+  $('countLine').textContent = list.length + '대 표시 중 · 빨간 칸이 설비기준에 걸린 달입니다 · 가동률 단위 %';
+}
+
+// ---- AI (server.js 를 거쳐 부른다) -----------------------------------------
+async function callClaude(messages, system) {
+  let res;
+  try {
+    res = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey },
+      body: JSON.stringify({ max_tokens: 2048, system, messages })
+    });
+  } catch (e) {
+    throw new Error('중계 서버에 닿지 못했습니다 (' + API_URL + ')\nserver.js 가 떠 있는지, 이 화면을 주소로 열었는지 확인하세요.');
+  }
+  const raw = await res.text();
+  if (!res.ok) throw new Error('HTTP ' + res.status + '\n' + raw.slice(0, 500));
+  const data = JSON.parse(raw);
+  return (data.content || []).filter(b => b.type === 'text').map(b => b.text).join('\n').trim();
+}
+// AI 에게 보내는 재료 — 일별 원본이 아니라 설비별 월 집계 · 주의 설비 · 원인별 건수만
+function context() {
+  const s = stats(), r1 = x => Math.round(x * 10) / 10;
+  return JSON.stringify({
+    설비기준: { 주의: RULE_LIST.map(x => x.id), 워스트: '그달 가동률 하위 ' + RULES.worstN + '대' },
+    기준월: month,
+    라인별월가동률: Object.fromEntries(s.lines.map(l => [l, Object.fromEntries(s.months.map(m => [m, s.lineRate[l][m] === null ? null : r1(s.lineRate[l][m])]))])),
+    설비별월집계: s.cells.map(c => ({ 라인: c.line, 설비: c.eq, 월: c.m, 가동률: r1(c.rate), 전월대비: c.diff === null ? null : r1(c.diff),
+      고장건수: c.fcnt, 고장시간: c.ftime, 고장정지율: r1(c.fail), 원인별건수: c.causes, 걸린기준: c.flags })),
+    워스트: s.worst.map(c => c.eq + ' ' + r1(c.rate) + '%'),
+    주의건수: s.flagged.length
+  });
+}
+const SYSTEM = '너는 생산 설비 담당자의 월간 설비 점검을 돕는 보조자다. 아래 JSON 은 화면이 이미 계산한 결과다. ' +
+  '숫자는 새로 계산하지 말고 JSON 에 있는 값만 인용한다. JSON 에 없는 내용은 모른다고 말한다. ' +
+  '고장 원인을 단정하지 말고 "점검이 필요하다", "확인이 필요하다" 처럼 쓴다. 한국어로 짧게 답한다.\n\n';
+
+function mdLite(t) {
+  return esc(t).split('\n').map(line => {
+    const l = line.replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
+    if (/^■/.test(line)) return '<span class="h">' + l + '</span>';
+    return l.trim() ? '<p>' + l + '</p>' : '';
+  }).join('');
+}
+function updateAiButtons() {
+  const ready = !!apiKey && rows.length > 0;
+  $('sumBtn').disabled = !ready; $('chatIn').disabled = !ready; $('chatBtn').disabled = !ready;
+  updateReportBtn();
+}
+$('connectBtn').onclick = async () => {
+  const k = $('apiKey').value.replace(/\s+/g, '');
+  if (!k) { $('keyStatus').className = 'status err'; $('keyStatus').textContent = 'API 키를 넣어 주세요'; return; }
+  $('keyStatus').className = 'status'; $('keyStatus').textContent = '연결 확인 중…';
+  apiKey = k;
+  try {
+    await callClaude([{ role: 'user', content: 'ping' }]);
+    $('keyStatus').className = 'status ok'; $('keyStatus').textContent = '✓ 연결됨';
+    $('keyBox').hidden = true; $('keyDone').hidden = false;   // 연결되면 키 칸은 접어 둔다
+  } catch (e) {
+    apiKey = ''; $('keyStatus').className = 'status err'; $('keyStatus').textContent = '연결 실패\n' + e.message;
+  }
+  updateAiButtons();
+};
+$('sumBtn').onclick = async () => {
+  $('sumBtn').disabled = true;
+  $('summary').innerHTML = '<span class="loading">AI가 주의 설비를 읽고 있습니다…</span>';
+  try {
+    const text = await callClaude([{ role: 'user', content:
+      mLabel(month) + ' 기준으로 아래 네 덩어리로 정리해줘. 각 덩어리 제목은 ■ 로 시작한다.\n' +
+      '■ 한눈에 — 세 줄\n■ 먼저 볼 설비 — 최대 3대, 이유 한 줄씩\n' +
+      '■ 반복되는 고장 원인\n■ 점검 제안 — 두세 줄' }], SYSTEM + context());
+    lastSummary = text;
+    $('summary').innerHTML = mdLite(text);
+  } catch (e) { $('summary').innerHTML = '<div class="status err">' + esc(e.message) + '</div>'; }
+  $('sumBtn').disabled = false;
+  updateReportBtn();
+};
+function addMsg(cls, html) {
+  if (!chat.length && cls === 'me') $('chatlog').innerHTML = '';
+  const d = document.createElement('div'); d.className = 'msg ' + cls;
+  d.innerHTML = (cls === 'bot' ? '<div class="who">AI</div>' : '') + '<div class="bubble">' + html + '</div>';
+  $('chatlog').appendChild(d); $('chatlog').scrollTop = $('chatlog').scrollHeight; return d;
+}
+async function sendChat() {
+  const q = $('chatIn').value.trim(); if (!q) return;
+  addMsg('me', esc(q)); $('chatIn').value = '';
+  chat.push({ role: 'user', content: q });
+  const wait = addMsg('bot', '<span class="loading">생각 중…</span>');
+  $('chatBtn').disabled = true;
+  try {
+    const a = await callClaude(chat, SYSTEM + context());
+    chat.push({ role: 'assistant', content: a });
+    wait.querySelector('.bubble').innerHTML = mdLite(a);
+  } catch (e) {
+    chat.pop(); wait.className = 'msg err'; wait.innerHTML = '<div class="bubble">' + esc(e.message) + '</div>';
+  }
+  $('chatBtn').disabled = false; $('chatIn').focus();
+}
+$('rekeyBtn').onclick = () => { apiKey = ''; $('apiKey').value = ''; $('keyBox').hidden = false; $('keyDone').hidden = true;
+  $('keyStatus').className = 'status'; $('keyStatus').textContent = '키를 넣고 [연결]을 누르세요'; updateAiButtons(); };
+$('chatBtn').onclick = sendChat;
+$('chatIn').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChat(); } });
+
+function updateReportBtn() {}
+
+// ---- 이벤트 -----------------------------------------------------------------
+$('pickBtn').onclick = $('pickBtn2').onclick = () => $('fileInput').click();
+$('fileInput').onchange = e => { const fs = [...e.target.files]; e.target.value = ''; addFiles(fs); };  // 목록을 먼저 복사해 둔다 — 비우면 함께 사라진다
+const drop = $('empty');
+['dragenter', 'dragover'].forEach(t => document.addEventListener(t, e => { e.preventDefault(); drop.classList.add('is-over'); }));
+['dragleave', 'drop'].forEach(t => document.addEventListener(t, e => { e.preventDefault(); drop.classList.remove('is-over'); }));
+document.addEventListener('drop', e => { if (e.dataTransfer.files.length) addFiles([...e.dataTransfer.files]); });
+$('rules').onclick = e => { const b = e.target.closest('[data-rule]'); if (!b) return;
+  ruleFilter = ruleFilter === b.dataset.rule ? '' : b.dataset.rule; render(); };
+$('lineSel').onchange = () => renderTable();
+$('flagBtn').onclick = () => { onlyFlag = !onlyFlag; renderTable(); };
+$('resetBtn').onclick = () => { rows = []; loaded.clear(); month = ''; ruleFilter = ''; onlyFlag = false; chat = []; lastSummary = '';
+  $('summary').innerHTML = '<span class="muted">CSV를 올리고 연결하면 누를 수 있습니다</span>';
+  $('chatlog').innerHTML = '<div class="muted">예) 크랭크 연삭기 #2 는 왜 계속 떨어져? · 변속기 라인은 괜찮아?</div>'; render(); };
+render();
+</script>
+</body>
+</html>

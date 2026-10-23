@@ -6,7 +6,7 @@
 <title>M5. 나만의 업무 혁신 아이디어 기획서 — AX 중급과정</title>
 <link rel="stylesheet" href="assets/css/deck.css">
 <style>
-  /* 7p — 복사·붙여넣기 한 줄과, 주소창·터미널 두 칸 (M4 18p 과 같은 모양) */
+  /* 12p — 폴더 위치 한 줄과, 주소창·터미널 두 칸 (M4 12p 과 같은 모양) */
   .shot svg { display: block; width: 100%; height: auto; }
 
   .cprow { display: flex; align-items: center; justify-content: center; gap: 18px; flex-wrap: wrap; }
@@ -30,7 +30,7 @@
            font-size: 15px; line-height: 24px; text-align: center; vertical-align: 2px; }
   .twoup .pbox { margin-top: 10px; }
 
-  /* 9p — 실습 진행 순서. 실습 시간 동안 타이머와 함께 띄워 둔다.
+  /* 15p — 실습 진행 순서. 실습 시간 동안 타이머와 함께 띄워 둔다.
      「현재 실습 중」 표시는 .is-now 로 옮긴다 (강사용에서는 눌러서 옮길 수 있다). */
   .plan { display: flex; flex-direction: column; gap: 12px; }
   .plan-step {
@@ -54,6 +54,21 @@
     font-size: 17px; font-weight: 700; letter-spacing: -.01em;
   }
   .plan-step.is-now .plan-now { display: block; }
+
+  /* 작품 미리보기 — 사례 결과물 다섯 개를 한 줄로 */
+  .works { display: flex; gap: 12px; align-items: flex-start; justify-content: center; }
+  .wk-item { flex: 0 0 208px; text-align: center; }
+  .wk-pic {
+    height: 132px; border-radius: 10px; overflow: hidden;
+    border: 2px solid var(--line); background: #F5F7FB;
+  }
+  .wk-pic img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: 50% 0; }
+  .wk-name { margin: 11px 0 0; font-size: 19px; font-weight: 700; color: var(--navy); letter-spacing: -.02em; }
+  .wk-sub  { margin: 4px 0 0; font-size: 16px; line-height: 1.4; color: #7C8698; letter-spacing: -.01em; }
+
+  /* 사례 원본 링크 */
+  .case-link { margin: 14px 0 0; font-size: 17px; }
+  .case-link a { color: var(--navy); font-weight: 700; }
 </style>
 </head>
 <body data-app="H Chat Pro">
@@ -76,9 +91,9 @@
 
       <div class="roadmap">
         <div class="rm-step is-done">
-          <div class="rm-pic rm-pic--duo"><img src="assets/img/m1-mypage.png" alt="말로 만들어 고친 나만의 웹페이지"><img src="assets/img/m1-report-done.png" alt="프로젝트에서 만든 업무보고서"></div>
+          <div class="rm-pic rm-pic--duo"><img src="assets/img/m1-mypage.png" alt="말로 만들어 고친 나만의 웹페이지"><img src="assets/img/m1-idea-done.png" alt="프로젝트에서 채운 아이디어 기획서"></div>
           <p class="rm-mod">M1</p>
-          <p class="rm-out">웹페이지 &middot; 업무보고서</p>
+          <p class="rm-out">웹페이지 &middot; 기획서 초안</p>
         </div>
         <div class="rm-arrow">›</div>
         <div class="rm-step is-done">
@@ -123,7 +138,7 @@
           </p>
         </div>
         <div style="flex:1 1 0; min-width:0; display:flex; flex-direction:column">
-          <div class="shot"><img src="assets/img/m4-dist-zip.png" alt="app.html·server.js·실행.bat 이 든 dist 폴더와 그것을 묶은 zip 파일"></div>
+          <div class="shot"><img src="assets/img/m4-dist-zip.png" alt="배포 폴더(dist)와 그것을 묶은 zip 파일 — M5 에서는 목업 html 도 함께 들어간다"></div>
           <p class="shot-cap" style="margin:auto 0 0; padding-top:14px; font-size:22px">
             <strong class="navy">② 배포 zip</strong> &mdash; 동료가 <strong>더블클릭만 하면 뜨는</strong> 압축 파일
           </p>
@@ -133,7 +148,169 @@
     </div>
   </section>
 
-  <!-- 4. 다른 사람들은 이런 걸 만들었습니다 ------------------ -->
+  <!-- 4. 이번 시간을 마치면 ------------------------------------- -->
+  <section class="slide">
+    <div class="slide-head"><h2>이번 시간을 마치면</h2><span class="head-tag">결과물 미리보기</span></div>
+    <div class="slide-body">
+      <p class="lead" style="margin-bottom:20px">
+        다음과 같은 <strong class="navy">멋진 작품</strong>도 만들 수 있습니다.
+      </p>
+
+      <div class="works">
+        <div class="wk-item">
+          <div class="wk-pic"><img src="assets/img/m4-case-a.png" alt="팀원 평가 대시보드 화면"></div>
+          <p class="wk-name">팀원 평가 대시보드</p>
+          <p class="wk-sub">흩어진 기록 → 피드백 초안</p>
+        </div>
+        <div class="wk-item">
+          <div class="wk-pic"><img src="assets/img/m4-case-schedule-a.png" alt="실시간 일정 관리 화면"></div>
+          <p class="wk-name">실시간 일정 관리</p>
+          <p class="wk-sub">메일·메신저를 한 줄 요약으로</p>
+        </div>
+        <div class="wk-item">
+          <div class="wk-pic"><img src="assets/img/m4-case-order-a.png" alt="지시사항 이행관리 화면"></div>
+          <p class="wk-name">지시사항 이행관리</p>
+          <p class="wk-sub">회의록에서 할 일과 기한을</p>
+        </div>
+        <div class="wk-item">
+          <div class="wk-pic"><img src="assets/img/m4-case-market-a.png" alt="신시장 인텔리전스 화면"></div>
+          <p class="wk-name">신시장 인텔리전스</p>
+          <p class="wk-sub">흩어진 조사 자료를 한 화면에</p>
+        </div>
+        <div class="wk-item">
+          <div class="wk-pic"><img src="assets/img/m4-case-steel-a.png" alt="설비고장 도제 시스템 화면"></div>
+          <p class="wk-name">설비고장 도제 시스템</p>
+          <p class="wk-sub">30년 노하우를 물어보는 화면으로</p>
+        </div>
+      </div>
+    
+    </div>
+  </section>
+  <!-- 5. [우수 사례] 팀원 평가 · 자동 피드백 대시보드 ---- -->
+  <section class="slide">
+    <div class="slide-head"><h2>[우수 사례] 팀원 평가 · 자동 피드백 대시보드</h2><span class="head-tag">M5 · 사례</span></div>
+    <div class="slide-body">
+      <p class="lead" style="margin-bottom:14px">
+        흩어진 기록을 모아 <strong class="navy">근거가 붙은 피드백 초안</strong>까지
+      </p>
+
+      <div class="shots" style="gap:20px">
+        <div>
+          <div class="shot" style="width:404px"><img src="assets/img/m4-case-a.png" alt="수시 보고와 자가 평가를 나란히 놓고 교차 검증하는 화면"></div>
+          <p class="shot-cap">① 흩어진 기록을 모아 <strong>자가 평가와 대조</strong></p>
+        </div>
+        <div>
+          <div class="shot" style="width:404px"><img src="assets/img/m4-case-b.png" alt="AI가 근거를 들어 피드백 초안을 생성한 화면"></div>
+          <p class="shot-cap">② <strong>근거를 달아 피드백 초안</strong>까지 자동 생성</p>
+        </div>
+      </div>
+
+      <div class="note" style="margin-top:14px">
+        기술이 화려해서가 아니라 <strong class="navy">고른 문제</strong>가 좋았습니다 —
+        리더라면 누구나 겪는 일을, 기억이 아니라 <strong class="navy">기록으로</strong>, 판단은 <strong class="navy">사람이 마지막에</strong>.
+      </div>
+    
+      <p class="case-link"><a href="우수사례/case1-feedback.html" target="_blank" rel="noopener">원본 결과물 열어 보기 &rarr;</a></p>
+    </div>
+  </section>
+  <!-- 6. [우수 사례] 실시간 일정 관리 AI Agent ---- -->
+  <section class="slide">
+    <div class="slide-head"><h2>[우수 사례] 실시간 일정 관리 AI Agent</h2><span class="head-tag">M5 · 사례</span></div>
+    <div class="slide-body">
+      <p class="lead" style="margin-bottom:14px">
+        메일 · 메신저 · 회의 초청이 <strong class="navy">하루 종일 섞여</strong> 들어온다
+      </p>
+
+      <div class="shots" style="gap:16px">
+        <div>
+          <div class="shot" style="width:498px"><img src="assets/img/m4-case-schedule-a.png" alt="받은 메시지를 분류하고 오늘의 일정과 충돌을 보여 주는 대시보드"></div>
+          <p class="shot-cap">① <strong>긴급 · 일반 · 참고</strong>로 자동 분류, 일정 충돌은 미리 경고</p>
+        </div>
+        <div>
+          <div class="shot" style="width:498px"><img src="assets/img/m4-case-schedule-b.png" alt="원문 요약과 함께 답변 초안이 생성된 화면"></div>
+          <p class="shot-cap">② <strong>답변 초안</strong>까지 준비 — 보낼지는 본인이 결정</p>
+        </div>
+      </div>
+
+      <div class="note" style="margin-top:14px">
+        <strong class="navy">검토 의견</strong> — 사내 아웃룩 / 팀즈와 연동하여
+        <strong class="navy">일정 관리 · 메일 초안 작성 자동화 비서봇</strong> 설계 시도
+      </div>
+    
+      <p class="case-link"><a href="우수사례/case2-schedule.html" target="_blank" rel="noopener">원본 결과물 열어 보기 &rarr;</a></p>
+    </div>
+  </section>
+  <!-- 7. [우수 사례] 지시사항 이행관리 시스템 -------------- -->
+  <section class="slide">
+    <div class="slide-head"><h2>[우수 사례] 지시사항 이행관리 시스템</h2><span class="head-tag">M5 · 사례</span></div>
+    <div class="slide-body">
+      <p class="lead" style="margin-bottom:14px">
+        회의록은 쌓이는데 <strong class="navy">누가 언제까지</strong> 하는지는 흩어진다
+      </p>
+
+      <div class="shots" style="gap:16px">
+        <div>
+          <div class="shot" style="width:498px"><img src="assets/img/m4-case-order-a.png" alt="회의 녹음을 올려 회의록과 지시사항을 자동 생성하는 화면"></div>
+          <p class="shot-cap">① 회의 녹음을 받아써서 <strong>회의록 초안 → 지시사항</strong> 추출</p>
+        </div>
+        <div>
+          <div class="shot" style="width:498px"><img src="assets/img/m4-case-order-b.png" alt="담당과 기한, 이행 상태가 표로 정리된 이행관리 화면"></div>
+          <p class="shot-cap">② <strong>담당 · 기한 · 이행 상태</strong>가 표로 남고, 기한 전에 자동 안내</p>
+        </div>
+      </div>
+
+      <div class="note" style="margin-top:14px">
+        <strong class="navy">검토 의견</strong> — 회의 실시간 녹음을 기반으로
+        <strong class="navy">내용 요약 · 지시사항 정리</strong>를 위한 시스템 내 받아쓰기 기능 구현
+      </div>
+    
+      <p class="case-link"><a href="우수사례/case3-orders.html" target="_blank" rel="noopener">원본 결과물 열어 보기 &rarr;</a></p>
+    </div>
+  </section>
+  <!-- 8. [우수 사례] 신시장 인텔리전스 대시보드 ------------ -->
+  <section class="slide">
+    <div class="slide-head"><h2>[우수 사례] 신시장 인텔리전스 대시보드</h2><span class="head-tag">M5 · 사례</span></div>
+    <div class="slide-body">
+      <p class="lead" style="margin-bottom:10px">
+        신시장 조사는 <strong class="navy">흩어진 자료를 사람이</strong> 읽고 정리해야 했다
+      </p>
+
+      <div class="shots">
+        <div>
+          <div class="shot" style="width:560px"><img src="assets/img/m4-case-market-a.png" alt="분석 주제를 한 줄로 입력받는 시작 화면"></div>
+          <p class="shot-cap">궁금한 것을 <strong>한 줄로 적으면</strong> — 찾는 일은 웹 검색에, 정리는 AI에</p>
+        </div>
+      </div>
+
+      <div class="note" style="margin-top:10px">
+        <strong class="navy">검토 의견</strong> — 웹 검색 자료 분석과
+        <strong class="navy">보고서 자동 생성 기능</strong>을 탑재한 챗봇 + 대시보드 화면 구현
+      </div>
+    
+      <p class="case-link" style="margin-top:8px"><a href="우수사례/case4-market.html" target="_blank" rel="noopener">원본 결과물 열어 보기 &rarr;</a></p>
+    </div>
+  </section>
+  <!-- 9. [우수 사례] 설비고장 도제 시스템 ------------------ -->
+  <section class="slide">
+    <div class="slide-head"><h2>[우수 사례] 설비고장 도제 시스템</h2><span class="head-tag">M5 · 사례</span></div>
+    <div class="slide-body">
+      <div style="display:flex; gap:26px; align-items:center">
+        <div class="shot" style="width:600px"><img src="assets/img/m4-case-steel-a.png" alt="설비 고장 원인을 묻고 분석받는 STEEL MIND 화면"></div>
+        <div style="flex:1 1 auto; min-width:0">
+          <p class="lead" style="margin-bottom:14px">
+            30년 노하우를 <strong class="navy">물어보는 화면</strong>으로
+          </p>
+          <ul class="dash-list">
+            <li><strong>정비 보고서를 재료로</strong><small>쌓여만 있던 문서를 AI가 읽게 했습니다</small></li>
+            <li><strong>고장 현상을 적으면 원인과 조치</strong><small>베테랑에게 묻던 것을 화면에서 바로</small></li>
+            <li><strong>현장 용어 사전까지</strong><small>처음 온 사람도 같은 기준으로 판단합니다</small></li>
+          </ul>
+          <p class="case-link"><a href="우수사례/case5-steel.html" target="_blank" rel="noopener">원본 결과물 열어 보기 &rarr;</a></p>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- 10. 다른 사람들은 이런 걸 만들었습니다 ------------------ -->
   <section class="slide">
     <div class="slide-head"><h2>다른 사람들은 이런 걸 만들었습니다</h2><span class="head-tag">M5 · 개념</span></div>
     <div class="slide-body">
@@ -157,59 +334,60 @@
     </div>
   </section>
 
-  <!-- 5. [작성] 아이디어 기획서 Work Sheet ------------------ -->
+  <!-- 11. [작성] M1 에서 채운 기획서를 꺼내 다듬습니다 ---------- -->
   <section class="slide">
-    <div class="slide-head"><h2>[작성] 아이디어 기획서 Work Sheet</h2><span class="head-tag">M5 · 작성</span></div>
+    <div class="slide-head"><h2>[작성] M1 에서 채운 기획서를 꺼내 다듬습니다</h2><span class="head-tag">M5 · 작성</span></div>
     <div class="slide-body" style="padding-top:16px">
       <div class="split" style="gap:26px; align-items:center">
         <div class="split-main">
-          <div class="shot"><img src="assets/img/m5-worksheet.png" alt="M5 나만의 업무 혁신 PoC 아이디어기획서 Work Sheet — 01 문제 정의, 02 AI 활용 방식, 03 기대 결과물, 04 검증 방법과 각 칸의 「왜 작성하는가」 설명"></div>
+          <div class="shot"><img src="assets/img/m1-idea-done.png" alt="M1 프로젝트 실습에서 AI 와 주고받으며 채운 아이디어 기획서 — 01 문제 정의, 02 AI 활용 방식, 03 기대 결과물, 04 검증 방법"></div>
+          <p class="shot-cap">M1 에서 채운 기획서 (예시)</p>
         </div>
 
-        <div class="split-side" style="flex:0 0 372px">
+        <div class="split-side" style="flex:0 0 430px">
           <div class="side-box">
             <p class="side-t">어디에 있나요</p>
-            <p class="side-d">강의자료 <span class="mono">M5</span> 폴더의 <strong class="navy">Work Sheet</strong> 입니다. 맨 위 <strong>본부 · 팀 · 이름</strong>부터 적습니다.</p>
+            <p class="side-d">H Chat 의 <strong class="navy">「아이디어 기획서」 방</strong> &mdash; M1 에서 받은 기획서.html 도 같은 내용입니다.</p>
+          </div>
+          <div class="pbox pbox--tight" style="margin-top:14px">
+            <p class="pbox-t">그 방에서 이어서</p>
+            <p>오늘 이 기획서로 <b>가짜 데이터 목업 화면</b>을 만들 거야.</p>
+            <p>03 결과물이 <b>화면 한 장</b>으로 그려지게 네 칸을 다듬어줘.</p>
           </div>
           <div class="side-box" style="margin-top:12px">
-            <p class="side-t">네 칸만 채웁니다</p>
-            <p class="side-d"><strong class="navy">01 문제 정의</strong> &rarr; <strong class="navy">02 AI 활용 방식</strong> &rarr; <strong class="navy">03 기대 결과물</strong> &rarr; <strong class="navy">04 검증 방법</strong><br>
-              오른쪽의 <strong>「왜 작성하는가」</strong> 를 읽으면서 채우면 됩니다.</p>
-          </div>
-          <div class="side-box" style="margin-top:12px">
-            <p class="side-t">작게 하나만</p>
-            <p class="side-d">반복 · 수작업 · 시간이 걸리는 일 <strong>한 개</strong>만 고릅니다. 검증에는 <strong class="navy">사람 검토</strong>를 꼭 넣습니다.</p>
+            <p class="side-t">Copilot 으로 보완해도 됩니다</p>
+            <p class="side-d"><strong class="navy">Copilot</strong> 에 기획서를 보여 주고 &ldquo;빠진 점이나 다른 아이디어를 물어봐줘&rdquo; 처럼 <strong>브레인스토밍 상대</strong>로 써서 빈 곳을 채웁니다.</p>
           </div>
         </div>
       </div>
 
       <div class="note" style="margin-top:14px">
-        여기 적은 네 칸이 곧 <strong class="navy">다음 실습에서 시킬 말</strong>이 됩니다 &mdash;
-        <strong class="navy">기획서대로 만들어 달라</strong>고 하면 됩니다.
+        다듬은 네 칸이 곧 <strong class="navy">다음 실습에서 시킬 말</strong>이 됩니다 &mdash;
+        일은 <strong>한 개</strong>만, 04 검증에는 <strong class="navy">사람 검토</strong>를 꼭 넣습니다.
       </div>
     </div>
   </section>
 
-  <!-- 6. [실습] poc 폴더를 복사하고 기획서대로 만듭니다 ---- -->
+  <!-- 12. [실습] poc 폴더에서 기획서대로 만듭니다 ---- -->
   <section class="slide">
-    <div class="slide-head"><h2>[실습] poc 폴더를 복사하고 기획서대로 만듭니다</h2><span class="head-tag">M5 · 실습</span></div>
+    <div class="slide-head"><h2>[실습] poc 폴더에서 기획서대로 만듭니다</h2><span class="head-tag">M5 · 실습</span></div>
     <div class="slide-body" style="padding-top:14px">
       <div class="cprow">
         <div class="cp-box">
           <p class="cp-t">강의자료</p>
-          <p class="cp-d">M5 &gt; poc</p>
+          <p class="cp-d mono">C:\work\강의자료</p>
         </div>
-        <div class="cp-ar"><b>복사 &rarr; 붙여넣기</b><span>&rarr;</span></div>
+        <div class="cp-ar"><b>M5 &gt; poc</b><span>&rarr;</span></div>
         <div class="cp-box is-now">
-          <p class="cp-t">내 PC</p>
-          <p class="cp-d mono">C:\work\poc</p>
+          <p class="cp-t">작업 폴더</p>
+          <p class="cp-d mono">C:\work\강의자료\M5\poc</p>
           <p class="cp-f">app.html &middot; server.js</p>
         </div>
       </div>
 
       <div class="twoup">
         <div>
-          <p class="tu-t"><span class="tu-no">1</span> 붙여넣은 폴더의 <b>주소창</b>에 <span class="mono">code .</span></p>
+          <p class="tu-t"><span class="tu-no">1</span> poc 폴더의 <b>주소창</b>에 <span class="mono">code .</span></p>
           <div class="shot">
             <svg viewBox="0 0 520 164" role="img" aria-label="탐색기 주소창을 한 번 클릭해 경로가 파랗게 선택되면, 그 자리에 code . 을 치고 Enter 하는 그림">
               <rect width="520" height="164" fill="#fff"/>
@@ -219,8 +397,8 @@
               <text x="35" y="28" font-size="15" fill="#8A94A6">&#8250;</text>
               <text x="55" y="28" font-size="14" fill="#8A94A6">&#8593;</text>
               <rect x="78" y="10" width="426" height="24" rx="4" fill="#fff" stroke="#C3CBD8"/>
-              <rect x="82" y="13" width="146" height="18" rx="2" fill="#164194"/>
-              <text x="88" y="26" font-size="12.5" fill="#fff" font-family="Consolas, monospace">C:\work\poc</text>
+              <rect x="82" y="13" width="169" height="18" rx="2" fill="#164194"/>
+              <text x="88" y="26" font-size="12.5" fill="#fff" font-family="Consolas, monospace">C:\work\강의자료\M5\poc</text>
               <circle cx="10" cy="62" r="8.5" fill="#164194"/>
               <text x="10" y="66" font-size="11" font-weight="700" fill="#fff" text-anchor="middle">1</text>
               <text x="26" y="66" font-size="13.5" fill="#4A5262">주소창을 한 번 클릭 &mdash; 경로가 파랗게 선택됩니다</text>
@@ -243,7 +421,7 @@
         <div>
           <p class="tu-t"><span class="tu-no">2</span> VS Code <b>터미널</b>에서 <span class="mono">claude</span></p>
           <div class="shot">
-            <svg viewBox="0 0 520 164" role="img" aria-label="VS Code 터미널에 PS C:\work\poc&gt; claude 를 입력하는 그림">
+            <svg viewBox="0 0 520 164" role="img" aria-label="VS Code 터미널에 PS C:\work\강의자료\M5\poc&gt; claude 를 입력하는 그림">
               <rect width="520" height="164" fill="#fff"/>
               <rect x="0" y="0" width="520" height="26" fill="#F7F8FA"/>
               <text x="14" y="18" font-size="11.5" fill="#8A94A6">문제</text>
@@ -253,10 +431,10 @@
               <rect x="156" y="22" width="46" height="3" fill="#164194"/>
               <text x="506" y="18" font-size="10.5" text-anchor="end" fill="#8A94A6">상단 메뉴 Terminal &gt; New Terminal</text>
               <rect x="0" y="26" width="520" height="138" fill="#17181C"/>
-              <text x="18" y="62" font-size="14.5" fill="#C9CDD4" font-family="Consolas, monospace">PS C:\work\poc&gt;</text>
-              <text x="168" y="62" font-size="14.5" font-weight="700" fill="#F2C14E" font-family="Consolas, monospace">claude</text>
-              <rect x="228" y="50" width="2" height="16" fill="#F2C14E"/>
-              <text x="18" y="98" font-size="12.5" fill="#7C838F">앞에 보이는 경로가 복사해 넣은 그 폴더인지 봅니다</text>
+              <text x="18" y="62" font-size="14.5" fill="#C9CDD4" font-family="Consolas, monospace">PS C:\work\강의자료\M5\poc&gt;</text>
+              <text x="240" y="62" font-size="14.5" font-weight="700" fill="#F2C14E" font-family="Consolas, monospace">claude</text>
+              <rect x="300" y="50" width="2" height="16" fill="#F2C14E"/>
+              <text x="18" y="98" font-size="12.5" fill="#7C838F">앞에 보이는 경로가 강의자료의 poc 폴더인지 봅니다</text>
               <text x="18" y="126" font-size="12.5" fill="#7C838F">Claude Code 가 뜨면 준비 끝</text>
             </svg>
           </div>
@@ -265,11 +443,11 @@
       </div>
 
       <div class="note" style="margin-top:12px">
-        Claude 가 뜨면 <strong class="navy">Work Sheet 에 쓴 대로</strong> 만들어 달라고 시킵니다 — 가짜 데이터로 <strong class="navy">화면부터</strong>.
+        M1 에서 받은 <span class="mono">기획서.html</span> 을 <strong class="navy">poc 폴더에 같이 넣어 두고</strong>, 다음 장의 설치 준비부터 한 뒤 <strong class="navy">기획서대로</strong> 가짜 데이터 <strong class="navy">화면부터</strong> 만들어 달라고 시킵니다.
       </div>
     </div>
   </section>
-  <!-- 7. [실습] 무엇이든 설치할 수 있게 준비합니다 --------- -->
+  <!-- 13. [실습] 무엇이든 설치할 수 있게 준비합니다 --------- -->
   <section class="slide">
     <div class="slide-head"><h2>[실습] 무엇이든 설치할 수 있게 준비합니다</h2><span class="head-tag">M5 · 실습</span></div>
     <div class="slide-body" style="padding-top:0">
@@ -298,7 +476,7 @@
           </div>
 
           <div class="pbox pbox--tight" style="margin-top:7px" data-app="Claude Code">
-            <p class="pbox-t">④ 만든 화면을 볼 때 &mdash; 서버를 띄웁니다</p>
+            <p class="pbox-t">④ 기획서대로 목업을 만든 뒤, 볼 때 &mdash; 서버를 띄웁니다</p>
             <p>이 폴더의 server.js 를 실행해서 중계 서버를 띄워줘.</p>
             <p>꺼지지 않게 계속 띄워 두고, 터미널에 찍힌 주소를 <b>브라우저까지 열어줘.</b></p>
           </div>
@@ -324,47 +502,7 @@
     </div>
   </section>
 
-  <!-- 8. [실습] 목업과 실행파일을 압축해 올립니다 ---------- -->
-  <section class="slide">
-    <div class="slide-head"><h2>[실습] 압축해서 올립니다</h2><span class="head-tag">M5 · 제출</span></div>
-    <div class="slide-body" style="padding-top:2px">
-      <div class="split" style="gap:24px">
-        <div class="split-main">
-          <div class="pbox pbox--tight" data-app="Claude Code">
-            <p class="pbox-t">M4에서 쓴 그 문장에 세 줄을 더합니다</p>
-            <p>동료에게 그대로 줄 수 있게 <b>배포 폴더</b>를 만들어줘.</p>
-            <p><b>dist</b> 폴더에 <b>app.html &middot; server.js</b> 와 <b>실행.bat</b>,</p>
-            <p>방금 만든 <b>가짜 데이터 목업 html</b> 을 넣어줘.</p>
-            <p><b>실행.bat 으로 열면 그 목업이 첫 화면으로</b> 뜨게 하고,</p>
-            <p>한글이 깨지지 않게, 창이 바로 닫히지 않게 해줘.</p>
-            <p><b>줄바꿈은 CRLF 로 저장하고, 직접 실행해 확인해줘.</b></p>
-            <p>다 되면 <b>소속_이름_주제.zip</b> 으로 압축해줘.</p>
-          </div>
-
-          <ol class="steps" style="margin-top:14px">
-            <li><strong class="navy">압축이 됐는지 봅니다</strong><small>폴더에 <span class="mono">소속_이름_주제.zip</span> 이 생겼으면 성공</small></li>
-            <li>교육 플랫폼 <strong class="navy">[문제목록]</strong> &gt; <strong class="navy">Hyundai_06</strong> 를 엽니다<small><strong>[Claude Code 실습] 나만의 업무 혁신 아이디어 기획서 및 도구 만들기</strong> 입니다</small></li>
-            <li><strong class="navy">zip 하나</strong>를 올리고 제출합니다<small>안에 목업 html &middot; app.html &middot; server.js &middot; 실행.bat 이 함께 들어 있습니다</small></li>
-          </ol>
-        </div>
-
-        <div class="split-side" style="flex:0 0 520px">
-          <div class="sub-shot">
-            <img src="assets/img/m1-submit-list.png" alt="실습 결과물 제출 목록">
-            <span class="sub-mark" style="left:5%; top:87%; width:90%; height:12%"></span>
-          </div>
-          <p class="sub-cap">목록에서 <strong>Hyundai_06</strong> 을 고릅니다</p>
-
-          <div class="side-box" style="margin-top:12px; padding:13px 18px 15px">
-            <p class="side-t">zip 안에 들어가는 것</p>
-            <p class="side-d"><strong class="navy">목업 html</strong>(가짜 데이터 화면) &middot;
-              <strong class="navy">app.html &middot; server.js</strong> &middot; <strong class="navy">실행.bat</strong></p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-  <!-- 9. 실습 진행 순서 ------------------------------------ -->
+  <!-- 14. 실습 진행 순서 ------------------------------------ -->
   <section class="slide">
     <div class="slide-head"><h2>실습 진행 순서</h2><span class="head-tag">M5 · 안내</span></div>
     <div class="slide-body" style="padding-top:16px">
@@ -374,7 +512,7 @@
             <div class="plan-step is-now">
               <span class="plan-now">현재 실습 중</span>
               <p class="plan-t">Step 1. 아이디어 기획서 작성 / 제출<span class="plan-time">60분</span></p>
-              <p class="plan-d">Work Sheet 작성 / 도구 만들기 &middot; 결과물 제출</p>
+              <p class="plan-d">M1 기획서 다듬기 / 도구 만들기 &middot; 결과물 제출</p>
             </div>
             <div class="plan-step">
               <span class="plan-now">현재 실습 중</span>
@@ -401,7 +539,48 @@
       </div>
     </div>
   </section>
-  <!-- 10. 내일 아침, 첫 행동 하나 ---------------------------- -->
+  <!-- 15. [실습] 목업과 실행파일을 압축해 올립니다 ---------- -->
+  <section class="slide">
+    <div class="slide-head"><h2>[실습] 압축해서 올립니다</h2><span class="head-tag">M5 · 제출</span></div>
+    <div class="slide-body" style="padding-top:2px">
+      <div class="split" style="gap:24px">
+        <div class="split-main">
+          <div class="pbox pbox--tight" data-app="Claude Code">
+            <p class="pbox-t">M4에서 쓴 그 문장에 목업 · 첫 화면 · zip 이름을 더합니다</p>
+            <p>동료에게 그대로 줄 수 있게 <b>배포 폴더</b>를 만들어줘.</p>
+            <p><b>dist</b> 에 <b>app.html &middot; server.js &middot; 목업 html</b> 을 넣고,</p>
+            <p><b>실행.bat</b> 도 만들어 <b>목업이 첫 화면</b>으로 뜨게 해줘.</p>
+            <p>Node 가 없으면 설치 안내 &middot; 한글 안 깨지게 &middot; 창 안 닫히게.</p>
+            <p><b>줄바꿈은 반드시 CRLF</b> 로 저장해줘.</p>
+            <p><b>네가 직접 실행해서</b> READY 를 확인하고, 안 되면 고쳐줘.</p>
+            <p>확인이 끝나면 <b>실행 중인 서버를 모두 종료</b>하고,</p>
+            <p><b>M5_부서_이름_주제.zip</b> 으로 압축해줘.</p>
+          </div>
+
+          <ol class="steps" style="margin-top:10px">
+            <li>붙여넣고 <span class="fname">M5_부서_이름_주제</span> 를 <strong class="navy">내 것으로 바꿉니다</strong><small>예) M5_인사팀_김현복_회의록.zip &mdash; 폴더에 zip 이 생겼으면 성공</small></li>
+            <li><a class="site-link mono" href="https://hyundai.mincoding.co.kr">hyundai.mincoding.co.kr</a> 상단 <strong class="navy">[실습목록]</strong> &gt; <strong class="navy">Hyundai_06</strong> 을 엽니다</li>
+            <li><strong class="navy">zip 하나</strong>를 올리고 제출합니다<small>안에 목업 html &middot; app.html &middot; server.js &middot; 실행.bat 이 함께 들어 있습니다</small></li>
+          </ol>
+        </div>
+
+        <div class="split-side" style="flex:0 0 400px">
+          <div class="sub-shot">
+            <img src="assets/img/m1-submit-list.png" alt="실습 결과물 제출 목록">
+            <span class="sub-mark" style="left:5%; top:87%; width:90%; height:12%"></span>
+          </div>
+          <p class="sub-cap">목록에서 <strong>Hyundai_06</strong> 을 고릅니다</p>
+
+          <div class="side-box" style="margin-top:12px; padding:13px 18px 15px">
+            <p class="side-t">zip 안에 들어가는 것</p>
+            <p class="side-d"><strong class="navy">목업 html</strong>(가짜 데이터 화면) &middot;
+              <strong class="navy">app.html &middot; server.js</strong> &middot; <strong class="navy">실행.bat</strong></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- 16. 내일 아침, 첫 행동 하나 ---------------------------- -->
   <section class="slide">
     <div class="slide-head"><h2>내일 아침, 첫 행동 하나</h2><span class="head-tag">마무리</span></div>
     <div class="slide-body">
@@ -421,7 +600,7 @@
     </div>
   </section>
 
-  <!-- 11. 오늘 배운 것 — 한 줄 요약 ------------------------ -->
+  <!-- 17. 오늘 배운 것 — 한 줄 요약 ------------------------ -->
   <section class="slide">
     <div class="slide-head"><h2>오늘 배운 것 — 한 줄 요약</h2><span class="head-tag">마무리</span></div>
     <div class="slide-body">
@@ -454,7 +633,7 @@
     </div>
   </section>
 
-  <!-- 12. 수고하셨습니다. ---------------------------------------- -->
+  <!-- 18. 수고하셨습니다. ---------------------------------------- -->
   <section class="slide slide--cover">
     <div class="cover-text">
       <h1 class="cover-title" style="font-size:64px">수고하셨습니다.</h1>
@@ -477,7 +656,7 @@
 
     <div class="deck-meta">
       <span class="deck-title">M5. 나만의 업무 혁신 아이디어 기획서</span>
-      <span class="deck-count" id="count">1 / 12</span>
+      <span class="deck-count" id="count">1 / 18</span>
     </div>
 
     <button class="deck-arrow" id="next" type="button" aria-label="다음 슬라이드" title="다음 (→)">

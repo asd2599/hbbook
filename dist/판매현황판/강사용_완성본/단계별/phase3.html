@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>판매 실적 현황판 (Phase 3)</title>
+<style>
+  :root {
+    --bg: #f3f5f9; --card: #fff; --line: #dfe4ec; --ink: #1c2330; --soft: #6b7585;
+    --navy: #1f3f7a; --navy-soft: #eaf0fa; --red: #d93025; --red-soft: #fdecea;
+    --amber: #b26a00; --amber-soft: #fff4e0; --green: #1e8e3e; --teal: #0f8b8d;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+         font-family: "Malgun Gothic", "맑은 고딕", -apple-system, "Segoe UI", sans-serif;
+         font-size: 14px; letter-spacing: -.01em; }
+  header { display: flex; align-items: center; gap: 16px; padding: 14px 24px;
+           background: var(--navy); color: #fff; }
+  header h1 { margin: 0; font-size: 20px; font-weight: 800; }
+  header .sub { font-size: 13px; opacity: .8; }
+  header .grow { flex: 1; }
+  .btn { border: 0; border-radius: 7px; padding: 9px 15px; font: inherit; font-weight: 700;
+         cursor: pointer; background: #fff; color: var(--navy); white-space: nowrap; }
+  .btn:disabled { opacity: .45; cursor: not-allowed; }
+  .btn--red { background: var(--red); color: #fff; }
+  .btn--navy { background: var(--navy); color: #fff; }
+  .btn--ghost { background: #fff; color: var(--navy); border: 1px solid var(--line); }
+
+  .layout { display: grid; grid-template-columns: minmax(0, 1fr) 390px; gap: 18px; padding: 18px 24px 28px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; }
+  .card h2 { margin: 0 0 12px; font-size: 15px; color: var(--navy); }
+
+  /* 빈 화면 안내 */
+  .empty { display: flex; flex-direction: column; align-items: center; justify-content: center;
+           min-height: 520px; border: 2px dashed #b9c4d6; border-radius: 14px; background: #fff;
+           text-align: center; padding: 30px; transition: background .15s; }
+  .empty.is-over { background: var(--navy-soft); border-color: var(--navy); }
+  .empty .big { font-size: 22px; font-weight: 800; color: var(--navy); margin: 0 0 8px; }
+  .empty .hint { color: var(--soft); margin: 0 0 20px; font-size: 15px; }
+  .empty ol { text-align: left; margin: 22px 0 0; padding: 16px 22px 16px 38px; background: var(--bg);
+              border-radius: 10px; color: var(--ink); line-height: 1.9; font-size: 14px; }
+
+  .files { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 12px; color: var(--soft); }
+  .chip-file { background: #fff; border: 1px solid var(--line); border-radius: 20px; padding: 4px 11px; font-size: 12.5px; color: var(--ink); }
+  .files select { margin-left: auto; font: inherit; font-weight: 700; color: var(--navy); padding: 6px 10px;
+                  border: 1px solid var(--navy); border-radius: 7px; background: #fff; }
+
+  .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 14px; }
+  .kpi { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
+  .kpi .k { font-size: 13px; color: var(--soft); }
+  .kpi .v { font-size: 26px; font-weight: 800; margin-top: 4px; font-variant-numeric: tabular-nums; }
+  .kpi .v small { font-size: 14px; font-weight: 700; color: var(--soft); margin-left: 3px; }
+  .kpi.is-alert { border-color: #f1b3ad; background: var(--red-soft); }
+  .kpi.is-alert .v { color: var(--red); }
+
+  .rules { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 14px; }
+  .rule { display: grid; grid-template-columns: 1fr auto; align-items: baseline; gap: 2px 8px; text-align: left;
+          border: 1px solid var(--line); background: #fff; border-radius: 9px; padding: 9px 14px; cursor: pointer; font: inherit; }
+  .rule b { color: var(--red); font-size: 18px; }
+  .rule span { grid-column: 1 / -1; color: var(--soft); font-size: 12px; }
+  .rule.is-on { border-color: var(--red); background: var(--red-soft); }
+  .rule.is-zero b { color: var(--soft); }
+
+  .charts { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+  .vbars { position: relative; display: flex; align-items: flex-end; gap: 10px; height: 168px; padding: 0 8px; border-bottom: 1px solid var(--line); }
+  .vbars .col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; }
+  .vbars i { display: block; width: 70%; max-width: 42px; border-radius: 5px 5px 0 0; background: #9fb4d9; }
+  .vbars .col.is-ok i { background: var(--navy); }
+  .vbars .col.is-low i { background: var(--red); }
+  .vbars em { position: relative; z-index: 1; padding: 0 2px; background: #fff; font-style: normal; font-size: 11.5px; font-weight: 700; margin-bottom: 3px; font-variant-numeric: tabular-nums; }
+  .vbars .col.is-low em { color: var(--red); }
+  .vbars .goal { position: absolute; left: 0; right: 0; border-top: 2px dashed var(--navy); }
+  .vlabels { display: flex; gap: 10px; padding: 6px 8px 0; }
+  .vlabels div { flex: 1; text-align: center; font-size: 12.5px; white-space: nowrap; }
+  .legend { display: flex; gap: 12px; margin-top: 8px; font-size: 12px; color: var(--soft); }
+  .hbar { display: grid; grid-template-columns: 22px 138px 1fr 62px; align-items: center; gap: 8px; margin: 9px 0; font-size: 13px; }
+  .hbar .rk { color: var(--soft); font-weight: 700; text-align: right; }
+  .hbar .nm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 700; }
+  .hbar .track { height: 15px; background: var(--bg); border-radius: 8px; overflow: hidden; }
+  .hbar .track i { display: block; height: 100%; background: #9fb4d9; border-radius: 8px; }
+  .hbar.is-flag .track i { background: var(--red); }
+  .hbar.is-flag .n { color: var(--red); }
+  .hbar .n { text-align: right; font-weight: 800; font-variant-numeric: tabular-nums; }
+
+  .tools { display: flex; gap: 8px; align-items: center; margin-bottom: 10px; flex-wrap: wrap; }
+  .tools h2 { margin: 0 auto 0 0; }
+  .tools select { font: inherit; padding: 7px 10px; border: 1px solid var(--line); border-radius: 7px; background: #fff; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; color: var(--soft); font-weight: 700; padding: 8px 8px; border-bottom: 2px solid var(--line); background: #fafbfd; white-space: nowrap; }
+  th.num, td.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  td { padding: 8px 8px; border-bottom: 1px solid #eef1f5; vertical-align: top; }
+  td:first-child { white-space: nowrap; font-weight: 700; }
+  td.is-flag { background: var(--red-soft); color: var(--red); font-weight: 800; }
+  .mx th.tot, .mx td.tot { background: #f5f7fb; font-weight: 800; color: var(--navy); }
+  .mx tr.tot td { border-top: 2px solid var(--line); background: #f5f7fb; font-weight: 800; color: var(--navy); }
+  .up { color: var(--green); } .down { color: var(--red); }
+  .tag { display: inline-block; margin: 1px 3px 1px 0; padding: 2px 7px; border-radius: 5px; font-size: 12px; font-weight: 700;
+         background: var(--red-soft); color: var(--red); white-space: nowrap; }
+  .muted { color: var(--soft); }
+  .count-line { margin: 8px 2px 0; color: var(--soft); font-size: 13px; }
+  .card + .card { margin-top: 14px; }
+
+  /* AI 패널 — 늘 한 화면 안에, 대화 칸이 남은 높이를 다 쓴다 */
+  .ai { position: sticky; top: 18px; align-self: start; display: flex; flex-direction: column; gap: 12px;
+        height: calc(100vh - 108px); min-height: 560px; }
+  .ai .card + .card { margin-top: 0; }
+  .ai .card--chat { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
+  .keyrow-done { display: flex; align-items: center; gap: 8px; }
+  .keyrow-done .status { margin: 0; flex: 1; }
+  .link { background: none; border: 0; padding: 0; font: inherit; font-size: 12.5px; color: var(--navy); text-decoration: underline; cursor: pointer; }
+  .ai .keyrow { display: flex; gap: 6px; }
+  .ai .keyrow input { flex: 1; min-width: 0; font: inherit; padding: 8px 10px; border: 1px solid var(--line); border-radius: 7px; }
+  .status { font-size: 12.5px; margin-top: 7px; color: var(--soft); white-space: pre-wrap; word-break: break-all; }
+  .status.ok { color: var(--green); font-weight: 700; }
+  .status.err { color: var(--red); }
+  .ai-btns { display: grid; grid-template-columns: 1fr auto; gap: 6px; }
+  .summary { font-size: 13.5px; line-height: 1.6; max-height: 34vh; overflow: auto; }
+  .summary .h { display: block; margin: 10px 0 3px; font-weight: 800; color: var(--navy); }
+  .summary .h:first-child { margin-top: 0; }
+  .summary p, .bubble p { margin: 2px 0; }
+  .chatlog { flex: 1 1 auto; min-height: 120px; overflow: auto; background: var(--bg); border-radius: 8px; padding: 10px; font-size: 13.5px; line-height: 1.6; }
+  .msg { margin-bottom: 10px; }
+  .msg .who { font-size: 11.5px; font-weight: 800; color: var(--soft); margin-bottom: 2px; }
+  .msg.me { text-align: right; }
+  .msg.me .bubble { display: inline-block; background: var(--navy); color: #fff; border-radius: 10px 10px 2px 10px; padding: 7px 11px; text-align: left; }
+  .msg.bot .bubble { background: #fff; border: 1px solid var(--line); border-radius: 10px 10px 10px 2px; padding: 8px 11px; }
+  .msg.err .bubble { background: var(--red-soft); color: var(--red); border-radius: 8px; padding: 8px 11px; white-space: pre-wrap; }
+  .chatin { display: flex; gap: 6px; margin-top: 8px; }
+  .chatin textarea { flex: 1; resize: none; height: 42px; font: inherit; padding: 9px 10px; border: 1px solid var(--line); border-radius: 7px; }
+  .ai-note { font-size: 12px; color: var(--soft); margin: 8px 0 0; }
+  .loading { color: var(--soft); font-style: italic; }
+  [hidden] { display: none !important; }
+
+  /* ---- Phase 4 전 — 아직 다듬지 않은 모습 ---- */
+  header { background: #fff; color: var(--ink); border-bottom: 1px solid var(--line); }
+  header .sub { display: none; }
+  #pickBtn { background: var(--navy); color: #fff; }
+  .kpi.is-alert { background: #fff; border-color: var(--line); }
+  .empty { min-height: 180px; border-style: solid; border-width: 1px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>판매 실적 현황판</h1>
+    <div class="sub">판매실적 CSV를 올리면 지역 × 차종별 BP 달성률을 계산하고, 기준을 벗어난 곳을 빨갛게 표시합니다</div>
+  </div>
+  <div class="grow"></div>
+  <button class="btn btn--ghost" id="resetBtn" style="color:#fff;background:transparent;border-color:rgba(255,255,255,.4)" hidden>처음으로</button>
+  <button class="btn" id="pickBtn">CSV 불러오기</button>
+  <input type="file" id="fileInput" accept=".csv" multiple hidden>
+</header>
+
+<div class="layout">
+  <main>
+    <!-- 빈 화면 -->
+    <section class="empty" id="empty">
+      <p class="hint">CSV 파일을 선택하세요</p>
+      <button class="btn btn--navy" id="pickBtn2">파일 선택</button>
+    </section>
+
+    <!-- 현황판 -->
+    <section id="dash" hidden>
+      <div class="files" id="files"></div>
+
+      <div class="kpis">
+        <div class="kpi"><div class="k" id="kSalesK">판매</div><div class="v" id="kSales">-</div></div>
+        <div class="kpi"><div class="k" id="kRateK">BP 달성률</div><div class="v" id="kRate">-</div></div>
+        <div class="kpi"><div class="k" id="kYoyK">전년비</div><div class="v" id="kYoy">-</div></div>
+        <div class="kpi is-alert"><div class="k">주의 (전체 기간)</div><div class="v" id="kFlag">-</div></div>
+      </div>
+
+      <div class="rules" id="rules"></div>
+
+      <div class="charts">
+        <div class="card">
+          <h2 id="regTitle">지역별 BP 달성률</h2>
+          <div class="vbars" id="regBars"></div>
+          <div class="vlabels" id="regLabels"></div>
+          <div class="legend"><span>점선 = 목표 100%</span><span>남색 = 달성</span><span style="color:var(--red)">빨강 = 기준 미만</span><span style="margin-left:auto">세로축 80~110%</span></div>
+        </div>
+        <div class="card">
+          <h2 id="gapTitle">BP 미달 상위 5</h2>
+          <div id="gapBars"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="tools">
+          <h2 id="mxTitle">차종 × 지역</h2>
+          <select id="metricSel">
+            <option value="rate">BP 달성률 (%)</option>
+            <option value="yoy">전년비 (%)</option>
+            <option value="mom">전월비 (%)</option>
+            <option value="sales">판매대수</option>
+          </select>
+        </div>
+        <table class="mx">
+          <thead id="thead"></thead>
+          <tbody id="tbody"></tbody>
+        </table>
+        <p class="count-line" id="countLine"></p>
+      </div>
+
+      <div class="card">
+        <h2>기준에 걸린 곳 — 전체 기간</h2>
+        <table>
+          <thead><tr><th>월</th><th>지역</th><th>차종</th><th class="num">판매</th><th class="num">목표</th><th class="num">달성률</th><th class="num">전년비</th><th>걸린 기준</th></tr></thead>
+          <tbody id="flagBody"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <!-- AI 판매 도우미 -->
+  <aside class="ai">
+    <div class="card">
+      <h2>AI 판매 도우미</h2>
+      <div id="keyBox">
+        <div class="keyrow">
+          <input type="password" id="apiKey" placeholder="Claude API 키" autocomplete="off">
+          <button class="btn btn--navy" id="connectBtn">연결</button>
+        </div>
+        <div class="status" id="keyStatus">키를 넣고 [연결]을 누르세요</div>
+      </div>
+      <div class="keyrow-done" id="keyDone" hidden>
+        <p class="status ok">✓ 연결됨</p>
+        <button class="link" id="rekeyBtn">키 다시 넣기</button>
+      </div>
+
+      <h2 style="margin-top:16px">실적 요약 · 다음 할 일</h2>
+      <div class="ai-btns">
+        <button class="btn btn--red" id="sumBtn" disabled>AI 요약 받기</button>
+      </div>
+      <div class="summary" id="summary" style="margin-top:10px"><span class="muted">CSV를 올리고 연결하면 누를 수 있습니다</span></div>
+      <p class="ai-note">달성률은 화면이 계산합니다. AI에게는 <b>지역 × 차종 월 집계 · 기준에 걸린 곳만</b> 보냅니다.</p>
+    </div>
+
+    <div class="card card--chat">
+      <h2>데이터에 물어보기</h2>
+      <div class="chatlog" id="chatlog"><div class="muted">예) 아이오닉 5 는 왜 수도권만 떨어졌어? · 부산경남 그랜저는 괜찮아?</div></div>
+      <div class="chatin">
+        <textarea id="chatIn" placeholder="질문을 입력하세요 (Enter 전송)" disabled></textarea>
+        <button class="btn btn--navy" id="chatBtn" disabled>전송</button>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<script>
+// ---------------------------------------------------------------------------
+// 판매기준 — 판매기준.md 를 그대로 옮긴 값. 기준을 바꾸면 여기와 판매기준.md 를 같이 고친다.
+// ---------------------------------------------------------------------------
+const RULES = {
+  lowRate: 85,      // 3. 주의 — 달성률 이 값(%) 미만
+  yoyDrop: 10,      // 4. 주의 — 전년 동월보다 이 값(%) 이상 감소
+  gapN: 5           // 5. 미달 상위 — 그달 목표보다 덜 판 대수가 큰 곳 몇 개
+};
+const RULE_LIST = [
+  { id: '달성률 ' + RULES.lowRate + '% 미만', desc: '달성률 = 판매대수 ÷ 목표대수(BP), 지역 × 차종 월 합계' },
+  { id: '전년비 -' + RULES.yoyDrop + '% 이하', desc: '전년 동월보다 ' + RULES.yoyDrop + '% 이상 덜 판 달' }
+];
+
+// 화면을 server.js 가 열어 줬다면 같은 주소로 API 를 부른다.
+const SERVER_ORIGIN = location.protocol.startsWith('http') ? location.origin : 'http://localhost:8787';
+const API_URL = SERVER_ORIGIN + '/v1/messages';
+
+const $ = (id) => document.getElementById(id);
+let sales = [];               // 합친 실적 (한 줄이 지점 하나의 한 차종)
+const loaded = new Set();     // 이미 올린 파일 이름
+let month = '', metric = 'rate', ruleFilter = '', apiKey = '', chat = [], lastSummary = '';
+
+function esc(s) { return String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
+function pct(x) { return x == null ? '-' : x.toFixed(1); }
+function sgn(x) { return x == null ? '-' : Math.abs(x) < .05 ? '0.0' : (x > 0 ? '+' : '') + x.toFixed(1); }
+function num(n) { return Number(n).toLocaleString(); }
+function mLabel(m) { return Number(m.slice(5)) + '월'; }
+
+// ---- CSV 읽기 -------------------------------------------------------------
+async function readText(file) {
+  const buf = await file.arrayBuffer();
+  try { return new TextDecoder('utf-8', { fatal: true }).decode(buf).replace(/^﻿/, ''); }
+  catch (e) { return new TextDecoder('euc-kr').decode(buf); }   // 엑셀에서 저장한 CSV (한글 깨짐 방지)
+}
+function parseCSV(text) {
+  const out = []; let row = [], cur = '', q = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (q) { if (c === '"' && text[i + 1] === '"') { cur += '"'; i++; } else if (c === '"') q = false; else cur += c; }
+    else if (c === '"') q = true;
+    else if (c === ',') { row.push(cur); cur = ''; }
+    else if (c === '\n' || c === '\r') { if (c === '\r' && text[i + 1] === '\n') i++; row.push(cur); out.push(row); row = []; cur = ''; }
+    else cur += c;
+  }
+  if (cur || row.length) { row.push(cur); out.push(row); }
+  return out.filter(r => r.some(v => v.trim() !== ''));
+}
+const NEED = ['월', '지역', '지점', '차종', '판매대수', '목표대수', '전년동월'];
+async function addFiles(fileList) {
+  const errs = [];
+  for (const f of fileList) {
+    if (!/\.csv$/i.test(f.name)) { errs.push(f.name + ' — CSV 파일이 아닙니다'); continue; }
+    if (loaded.has(f.name)) continue;                       // 같은 파일을 두 번 올리면 건너뛴다
+    const table = parseCSV(await readText(f));
+    const head = table[0].map(h => h.trim());
+    const miss = NEED.filter(n => !head.includes(n));
+    if (miss.length) { errs.push(f.name + ' — 없는 열: ' + miss.join(', ')); continue; }
+    const ix = Object.fromEntries(NEED.map(n => [n, head.indexOf(n)]));
+    const val = v => Number(String(v).replace(/[^\d.-]/g, '')) || 0;
+    for (const r of table.slice(1)) {
+      sales.push({ m: r[ix['월']].trim().slice(0, 7), reg: r[ix['지역']].trim(), mdl: r[ix['차종']].trim(), br: r[ix['지점']].trim(),
+        sales: val(r[ix['판매대수']]), plan: val(r[ix['목표대수']]), prev: val(r[ix['전년동월']]) });
+    }
+    loaded.add(f.name);
+  }
+  const months = [...new Set(sales.map(r => r.m))].sort();
+  if (!months.includes(month)) month = months[months.length - 1] || '';
+  render();
+  if (errs.length) alert('읽지 못한 파일이 있습니다\n\n' + errs.join('\n'));
+}
+
+// ---- 계산 (전부 화면에서) -----------------------------------------------------
+function rateOf(a) { return a && a.plan ? a.sales / a.plan * 100 : null; }
+function yoyOf(a) { return a && a.prev ? (a.sales / a.prev - 1) * 100 : null; }
+function stats() {
+  const months = [...new Set(sales.map(r => r.m))].sort();
+  const regs = [], mdls = [], agg = {};
+  const key = (reg, mdl, m) => reg + '|' + mdl + '|' + m;
+  const add = (k, f, v) => { agg[k] = agg[k] || { sales: 0, prev: 0, plan: 0 }; agg[k][f] += v; };
+  for (const r of sales) {
+    if (!regs.includes(r.reg)) regs.push(r.reg);
+    if (!mdls.includes(r.mdl)) mdls.push(r.mdl);
+    // 지역 × 차종 · 지역 합계 · 차종 합계 · 전국을 한 번에 더한다
+    for (const k of [key(r.reg, r.mdl, r.m), key(r.reg, '*', r.m), key('*', r.mdl, r.m), key('*', '*', r.m)]) {
+      add(k, 'sales', r.sales); add(k, 'plan', r.plan); add(k, 'prev', r.prev);
+    }
+  }
+  const get = (reg, mdl, m) => {
+    const a = agg[key(reg, mdl, m)]; if (!a) return null;
+    const i = months.indexOf(m), b = i > 0 ? agg[key(reg, mdl, months[i - 1])] : null;
+    return { reg, mdl, m, sales: a.sales, prev: a.prev, plan: a.plan, rate: rateOf(a), yoy: yoyOf(a),
+      mom: b && b.sales ? (a.sales / b.sales - 1) * 100 : null };
+  };
+  const cells = [];
+  for (const reg of regs) for (const mdl of mdls) for (const m of months) {
+    const c = get(reg, mdl, m); if (!c) continue;
+    c.flags = [];
+    if (c.rate !== null && c.rate < RULES.lowRate) c.flags.push(RULE_LIST[0].id);
+    if (c.yoy !== null && c.yoy <= -RULES.yoyDrop) c.flags.push(RULE_LIST[1].id);
+    cells.push(c);
+  }
+  const cur = cells.filter(c => c.m === month);
+  const flagged = cells.filter(c => c.flags.length);
+  const byRule = Object.fromEntries(RULE_LIST.map(x => [x.id, cells.filter(c => c.flags.includes(x.id)).length]));
+  const gaps = cur.filter(c => c.plan > c.sales).sort((a, b) => (b.plan - b.sales) - (a.plan - a.sales)).slice(0, RULES.gapN);
+  return { months, regs, mdls, cells, cur, flagged, byRule, gaps, get };
+}
+
+// ---- 그리기 -----------------------------------------------------------------
+function render() {
+  const has = sales.length > 0;
+  $('empty').hidden = has; $('dash').hidden = !has; $('resetBtn').hidden = !has;
+  updateAiButtons();
+  if (!has) return;
+  const s = stats();
+
+  $('files').innerHTML = '<span>불러온 파일</span>' +
+    [...loaded].map(n => '<span class="chip-file">' + esc(n) + '</span>').join('') +
+    '<span>— 실적 ' + sales.length.toLocaleString() + '행 · 지역 ' + s.regs.length + ' · 차종 ' + s.mdls.length + '</span>' +
+    '<select id="monthSel">' + s.months.map(m => '<option value="' + m + '"' + (m === month ? ' selected' : '') + '>기준 월 ' + mLabel(m) + '</option>').join('') + '</select>';
+  $('monthSel').onchange = e => { month = e.target.value; render(); };
+
+  const all = s.get('*', '*', month);
+  $('kSalesK').textContent = mLabel(month) + ' 판매';
+  $('kRateK').textContent = mLabel(month) + ' BP 달성률';
+  $('kYoyK').textContent = mLabel(month) + ' 전년비';
+  $('kSales').innerHTML = num(all.sales) + '<small>대' + (all.mom !== null ? ' · 전월 ' + sgn(all.mom) + '%' : '') + '</small>';
+  $('kRate').innerHTML = pct(all.rate) + '<small>%' + (all.plan ? ' · 목표 ' + num(all.plan) + '대' : '') + '</small>';
+  $('kYoy').innerHTML = '<span class="' + (all.yoy < 0 ? 'down' : 'up') + '">' + sgn(all.yoy) + '</span><small>%</small>';
+  $('kFlag').innerHTML = s.flagged.length + '<small>건 · 이번 달 ' + s.cur.filter(c => c.flags.length).length + '곳</small>';
+
+  $('rules').innerHTML = RULE_LIST.map(x =>
+    '<button class="rule' + (ruleFilter === x.id ? ' is-on' : '') + (s.byRule[x.id] ? '' : ' is-zero') +
+    '" data-rule="' + x.id + '"><strong>' + x.id + '</strong><b>' + s.byRule[x.id] + '</b><span>' + esc(x.desc) + '</span></button>'
+  ).join('');
+
+  // 지역별 BP 달성률 — 80% 를 바닥으로 그린다 (차이가 보이게)
+  const FLOOR = 80, TOP = 110, H = 140, hOf = v => Math.max(2, (Math.min(v, TOP) - FLOOR) / (TOP - FLOOR) * H);
+  $('regTitle').textContent = '지역별 BP 달성률 — ' + mLabel(month);
+  $('regBars').innerHTML = s.regs.map(reg => {
+    const r = s.get(reg, '*', month), v = r ? r.rate : null;
+    return '<div class="col' + (v === null ? '' : v < RULES.lowRate ? ' is-low' : v >= 100 ? ' is-ok' : '') + '"><em>' + pct(v) + '</em><i style="height:' + (v === null ? 0 : hOf(v)) + 'px"></i></div>';
+  }).join('') + '<div class="goal" style="bottom:' + hOf(100) + 'px"></div>';
+  $('regLabels').innerHTML = s.regs.map(reg => '<div>' + esc(reg) + '</div>').join('');
+
+  $('gapTitle').textContent = 'BP 미달 상위 ' + RULES.gapN + ' — ' + mLabel(month);
+  const maxGap = Math.max(1, ...s.gaps.map(c => c.plan - c.sales));
+  $('gapBars').innerHTML = s.gaps.map((c, i) =>
+    '<div class="hbar' + (c.flags.length ? ' is-flag' : '') + '"><span class="rk">' + (i + 1) + '</span><span class="nm" title="' + esc(c.reg + ' · ' + c.mdl) + '">' + esc(c.reg + ' · ' + c.mdl) +
+    '</span><div class="track"><i style="width:' + Math.max(3, (c.plan - c.sales) / maxGap * 100) + '%"></i></div><span class="n">-' + num(c.plan - c.sales) + '대</span></div>' +
+    '<div class="muted" style="margin:-6px 0 4px 30px;font-size:12px">달성률 ' + pct(c.rate) + '% · 전년비 ' + sgn(c.yoy) + '%</div>'
+  ).join('') || '<p class="muted">이번 달은 목표에 못 미친 곳이 없습니다</p>';
+
+  renderTable(s);
+  renderFlags(s);
+}
+function cellText(c) {
+  if (!c) return '-';
+  if (metric === 'sales') return num(c.sales);
+  if (metric === 'rate') return pct(c.rate);
+  return sgn(c[metric]);
+}
+function renderTable(s) {
+  s = s || stats();
+  const names = { rate: 'BP 달성률 (%)', yoy: '전년비 (%)', mom: '전월비 (%)', sales: '판매대수' };
+  $('mxTitle').textContent = '차종 × 지역 — ' + mLabel(month) + ' · ' + names[metric];
+  const cls = c => {
+    if (!c) return '';
+    const hit = c.flags && c.flags.length && (!ruleFilter || c.flags.includes(ruleFilter));
+    if (hit) return ' is-flag';
+    if (metric === 'yoy' || metric === 'mom') return c[metric] == null ? '' : c[metric] < 0 ? ' down' : ' up';
+    return '';
+  };
+  $('thead').innerHTML = '<tr><th>차종</th>' + s.regs.map(r => '<th class="num">' + esc(r) + '</th>').join('') + '<th class="num tot">전국</th></tr>';
+  $('tbody').innerHTML = s.mdls.map(mdl =>
+    '<tr><td>' + esc(mdl) + '</td>' + s.regs.map(reg => { const c = s.cells.find(x => x.reg === reg && x.mdl === mdl && x.m === month); return '<td class="num' + cls(c) + '">' + cellText(c) + '</td>'; }).join('') +
+    '<td class="num tot">' + cellText(s.get('*', mdl, month)) + '</td></tr>'
+  ).join('') +
+    '<tr class="tot"><td>합계</td>' + s.regs.map(reg => '<td class="num">' + cellText(s.get(reg, '*', month)) + '</td>').join('') +
+    '<td class="num">' + cellText(s.get('*', '*', month)) + '</td></tr>';
+  const n = s.cur.filter(c => c.flags.length).length;
+  $('countLine').textContent = '빨간 칸이 판매기준에 걸린 곳입니다 · ' + mLabel(month) + ' ' + n + '곳' + (ruleFilter ? ' · 「' + ruleFilter + '」만 표시 중' : '');
+}
+function renderFlags(s) {
+  const list = s.flagged.filter(c => !ruleFilter || c.flags.includes(ruleFilter));
+  $('flagBody').innerHTML = list.map(c =>
+    '<tr><td>' + mLabel(c.m) + '</td><td>' + esc(c.reg) + '</td><td>' + esc(c.mdl) + '</td><td class="num">' + num(c.sales) + '</td><td class="num">' + num(c.plan) +
+    '</td><td class="num' + (c.rate < RULES.lowRate ? ' down' : '') + '">' + pct(c.rate) + '%</td><td class="num' + (c.yoy <= -RULES.yoyDrop ? ' down' : '') + '">' + sgn(c.yoy) + '%</td><td>' +
+    c.flags.map(f => '<span class="tag">' + f + '</span>').join('') + '</td></tr>'
+  ).join('') || '<tr><td colspan="8" class="muted" style="text-align:center;padding:20px">기준에 걸린 곳이 없습니다</td></tr>';
+}
+
+// ---- AI (server.js 를 거쳐 부른다) -----------------------------------------
+async function callClaude(messages, system) {
+  let res;
+  try {
+    res = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey },
+      body: JSON.stringify({ max_tokens: 2048, system, messages })
+    });
+  } catch (e) {
+    throw new Error('중계 서버에 닿지 못했습니다 (' + API_URL + ')\nserver.js 가 떠 있는지, 이 화면을 주소로 열었는지 확인하세요.');
+  }
+  const raw = await res.text();
+  if (!res.ok) throw new Error('HTTP ' + res.status + '\n' + raw.slice(0, 500));
+  const data = JSON.parse(raw);
+  return (data.content || []).filter(b => b.type === 'text').map(b => b.text).join('\n').trim();
+}
+// AI 에게 보내는 재료 — 지점별 원본이 아니라 지역 × 차종 월 집계 · 합계 · 기준에 걸린 곳만
+function context() {
+  const s = stats(), r1 = x => x === null ? null : Math.round(x * 10) / 10;
+  const pack = c => c && { 판매: c.sales, 목표: c.plan, 달성률: r1(c.rate), 전년비: r1(c.yoy), 전월비: r1(c.mom) };
+  return JSON.stringify({
+    판매기준: { 주의: RULE_LIST.map(x => x.id), 미달상위: '그달 목표보다 덜 판 대수가 큰 ' + RULES.gapN + '곳' },
+    기준월: month,
+    전국월별: Object.fromEntries(s.months.map(m => [m, pack(s.get('*', '*', m))])),
+    지역월별: Object.fromEntries(s.regs.map(r => [r, Object.fromEntries(s.months.map(m => [m, pack(s.get(r, '*', m))]))])),
+    차종월별: Object.fromEntries(s.mdls.map(d => [d, Object.fromEntries(s.months.map(m => [m, pack(s.get('*', d, m))]))])),
+    지역차종월집계: s.cells.map(c => ({ 지역: c.reg, 차종: c.mdl, 월: c.m, ...pack(c), 걸린기준: c.flags })),
+    미달상위: s.gaps.map(c => c.reg + ' ' + c.mdl + ' -' + (c.plan - c.sales) + '대'),
+    주의건수: s.flagged.length
+  });
+}
+const SYSTEM = '너는 국내 판매 실적을 매달 보고하는 담당자를 돕는 보조자다. 아래 JSON 은 화면이 이미 계산한 결과다. ' +
+  '숫자는 새로 계산하지 말고 JSON 에 있는 값만 인용한다. JSON 에 없는 내용은 모른다고 말한다. ' +
+  '실적이 떨어진 원인은 데이터에 없으므로 단정하지 말고 "확인이 필요하다" 처럼 쓴다. 한국어로 짧게 답한다.\n\n';
+
+function mdLite(t) {
+  return esc(t).split('\n').map(line => {
+    const l = line.replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
+    if (/^■/.test(line)) return '<span class="h">' + l + '</span>';
+    return l.trim() ? '<p>' + l + '</p>' : '';
+  }).join('');
+}
+function updateAiButtons() {
+  const ready = !!apiKey && sales.length > 0;
+  $('sumBtn').disabled = !ready; $('chatIn').disabled = !ready; $('chatBtn').disabled = !ready;
+  updateReportBtn();
+}
+$('connectBtn').onclick = async () => {
+  const k = $('apiKey').value.replace(/\s+/g, '');
+  if (!k) { $('keyStatus').className = 'status err'; $('keyStatus').textContent = 'API 키를 넣어 주세요'; return; }
+  $('keyStatus').className = 'status'; $('keyStatus').textContent = '연결 확인 중…';
+  apiKey = k;
+  try {
+    await callClaude([{ role: 'user', content: 'ping' }]);
+    $('keyStatus').className = 'status ok'; $('keyStatus').textContent = '✓ 연결됨';
+    $('keyBox').hidden = true; $('keyDone').hidden = false;   // 연결되면 키 칸은 접어 둔다
+  } catch (e) {
+    apiKey = ''; $('keyStatus').className = 'status err'; $('keyStatus').textContent = '연결 실패\n' + e.message;
+  }
+  updateAiButtons();
+};
+$('sumBtn').onclick = async () => {
+  $('sumBtn').disabled = true;
+  $('summary').innerHTML = '<span class="loading">AI가 실적을 읽고 있습니다…</span>';
+  try {
+    const text = await callClaude([{ role: 'user', content:
+      mLabel(month) + ' 기준으로 아래 네 덩어리로 정리해줘. 각 덩어리 제목은 ■ 로 시작한다.\n' +
+      '■ 한눈에 — 세 줄\n■ 먼저 볼 곳 — 지역 · 차종 최대 3곳, 이유 한 줄씩\n' +
+      '■ 눈에 띄는 흐름\n■ 다음 달 할 일 — 두세 줄' }], SYSTEM + context());
+    lastSummary = text;
+    $('summary').innerHTML = mdLite(text);
+  } catch (e) { $('summary').innerHTML = '<div class="status err">' + esc(e.message) + '</div>'; }
+  $('sumBtn').disabled = false;
+  updateReportBtn();
+};
+function addMsg(cls, html) {
+  if (!chat.length && cls === 'me') $('chatlog').innerHTML = '';
+  const d = document.createElement('div'); d.className = 'msg ' + cls;
+  d.innerHTML = (cls === 'bot' ? '<div class="who">AI</div>' : '') + '<div class="bubble">' + html + '</div>';
+  $('chatlog').appendChild(d); $('chatlog').scrollTop = $('chatlog').scrollHeight; return d;
+}
+async function sendChat() {
+  const q = $('chatIn').value.trim(); if (!q) return;
+  addMsg('me', esc(q)); $('chatIn').value = '';
+  chat.push({ role: 'user', content: q });
+  const wait = addMsg('bot', '<span class="loading">생각 중…</span>');
+  $('chatBtn').disabled = true;
+  try {
+    const a = await callClaude(chat, SYSTEM + context());
+    chat.push({ role: 'assistant', content: a });
+    wait.querySelector('.bubble').innerHTML = mdLite(a);
+  } catch (e) {
+    chat.pop(); wait.className = 'msg err'; wait.innerHTML = '<div class="bubble">' + esc(e.message) + '</div>';
+  }
+  $('chatBtn').disabled = false; $('chatIn').focus();
+}
+$('rekeyBtn').onclick = () => { apiKey = ''; $('apiKey').value = ''; $('keyBox').hidden = false; $('keyDone').hidden = true;
+  $('keyStatus').className = 'status'; $('keyStatus').textContent = '키를 넣고 [연결]을 누르세요'; updateAiButtons(); };
+$('chatBtn').onclick = sendChat;
+$('chatIn').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChat(); } });
+
+function updateReportBtn() {}
+
+// ---- 이벤트 -----------------------------------------------------------------
+$('pickBtn').onclick = $('pickBtn2').onclick = () => $('fileInput').click();
+$('fileInput').onchange = e => { const fs = [...e.target.files]; e.target.value = ''; addFiles(fs); };  // 목록을 먼저 복사해 둔다 — 비우면 함께 사라진다
+const drop = $('empty');
+['dragenter', 'dragover'].forEach(t => document.addEventListener(t, e => { e.preventDefault(); drop.classList.add('is-over'); }));
+['dragleave', 'drop'].forEach(t => document.addEventListener(t, e => { e.preventDefault(); drop.classList.remove('is-over'); }));
+document.addEventListener('drop', e => { if (e.dataTransfer.files.length) addFiles([...e.dataTransfer.files]); });
+$('rules').onclick = e => { const b = e.target.closest('[data-rule]'); if (!b) return;
+  ruleFilter = ruleFilter === b.dataset.rule ? '' : b.dataset.rule; render(); };
+$('metricSel').onchange = e => { metric = e.target.value; renderTable(); };
+$('resetBtn').onclick = () => { sales = []; loaded.clear(); month = ''; ruleFilter = ''; chat = []; lastSummary = '';
+  $('summary').innerHTML = '<span class="muted">CSV를 올리고 연결하면 누를 수 있습니다</span>';
+  $('chatlog').innerHTML = '<div class="muted">예) 아이오닉 5 는 왜 수도권만 떨어졌어? · 부산경남 그랜저는 괜찮아?</div>'; render(); };
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>법인카드 이상징후 대시보드 (Phase 1 · 가짜 데이터)</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #f3f5f9; color: #1c2330; font-family: "Malgun Gothic", sans-serif; font-size: 14px; }
+  header { display: flex; align-items: center; padding: 14px 24px; background: #1f3f7a; color: #fff; }
+  header h1 { margin: 0; font-size: 20px; }
+  header button { margin-left: auto; border: 0; border-radius: 7px; padding: 9px 15px; font: inherit; font-weight: 700; background: #fff; color: #1f3f7a; }
+  .fake { margin: 14px 24px 0; padding: 9px 14px; border-radius: 8px; background: #fff4e0; color: #8a5200; font-weight: 700; }
+  main { padding: 14px 24px 28px; }
+  .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 14px; }
+  .kpi { background: #fff; border: 1px solid #dfe4ec; border-radius: 12px; padding: 14px 16px; }
+  .kpi .k { color: #6b7585; font-size: 13px; }
+  .kpi .v { font-size: 26px; font-weight: 800; margin-top: 4px; }
+  .kpi.red .v { color: #d93025; }
+  .charts { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+  .card { background: #fff; border: 1px solid #dfe4ec; border-radius: 12px; padding: 16px 18px; }
+  .card h2 { margin: 0 0 12px; font-size: 15px; color: #1f3f7a; }
+  .ph { height: 170px; border-radius: 8px; background: repeating-linear-gradient(45deg, #eef1f6, #eef1f6 10px, #f7f9fc 10px, #f7f9fc 20px);
+        display: flex; align-items: center; justify-content: center; color: #8a94a6; font-weight: 700; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; color: #6b7585; padding: 8px; border-bottom: 2px solid #dfe4ec; }
+  td { padding: 8px; border-bottom: 1px solid #eef1f5; }
+  td.num { text-align: right; }
+  .tag { padding: 2px 7px; border-radius: 5px; font-size: 12px; font-weight: 700; background: #fdecea; color: #d93025; }
+</style>
+</head>
+<body>
+<header>
+  <h1>법인카드 이상징후 대시보드</h1>
+  <button>CSV 불러오기</button>
+</header>
+<p class="fake">⚠ 지금 보이는 숫자는 모두 가짜 데이터입니다 (Phase 1 — 화면 배치 확인용)</p>
+<main>
+  <div class="kpis">
+    <div class="kpi"><div class="k">총 사용액</div><div class="v">12,340,000원</div></div>
+    <div class="kpi"><div class="k">사용 건수</div><div class="v">150건</div></div>
+    <div class="kpi red"><div class="k">점검 대상</div><div class="v">7건</div></div>
+    <div class="kpi red"><div class="k">점검 대상 금액</div><div class="v">2,100,000원</div></div>
+  </div>
+  <div class="charts">
+    <div class="card"><h2>월별 사용액</h2><div class="ph">차트 자리 (가짜)</div></div>
+    <div class="card"><h2>부서별 점검 대상</h2><div class="ph">차트 자리 (가짜)</div></div>
+  </div>
+  <div class="card">
+    <h2>점검 대상 목록</h2>
+    <table>
+      <thead><tr><th>승인일시</th><th>부서</th><th>사용자</th><th>가맹점</th><th style="text-align:right">금액</th><th>적요</th><th>걸린 기준</th></tr></thead>
+      <tbody>
+        <tr><td>2026-01-05 23:10</td><td>가나팀</td><td>홍길동</td><td>가짜식당</td><td class="num">120,000</td><td>회식</td><td><span class="tag">심야 사용</span></td></tr>
+        <tr><td>2026-01-10 14:00</td><td>다라팀</td><td>김철수</td><td>가짜마트</td><td class="num">85,000</td><td>비품</td><td><span class="tag">주말 사용</span></td></tr>
+        <tr><td>2026-01-15 19:30</td><td>가나팀</td><td>이영희</td><td>가짜한정식</td><td class="num">650,000</td><td>접대</td><td><span class="tag">한도 초과</span></td></tr>
+        <tr><td>2026-01-20 11:00</td><td>마바팀</td><td>박민수</td><td>가짜CC</td><td class="num">300,000</td><td>미팅</td><td><span class="tag">제한 업종</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</main>
+</body>
+</html>

@@ -207,6 +207,23 @@ html, body {
   font-family: "Consolas", "D2Coding", ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: .95em;
 }
+/* 교육 플랫폼 주소 — 누르면 새 탭에서 열린다 (제출 장마다) */
+a.site-link {
+  color: var(--navy);
+  font-weight: 700;
+  text-decoration: none;
+  border-bottom: 2px solid #A9BCDD;
+}
+a.site-link:hover { border-bottom-color: var(--navy); }
+/* 올릴 파일 이름 양식 — M1_부서_이름_주제 */
+.fname {
+  display: inline-block;
+  padding: 1px 8px;
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--navy);
+  font-weight: 700;
+}
 
 .block-title {
   margin: 0 0 10px;
@@ -1176,4 +1193,25 @@ html, body {
 @media print {
   .quiz-row { display: none; }
   .quiz-ans { display: block !important; }
+}
+
+/* ---------- 그림 크게 보기 — <img data-zoom="…"> (deck.js) --------------- */
+[data-zoom] { cursor: zoom-in; }
+.zoom-view {
+  position: fixed;
+  inset: 0;
+  z-index: 300;                     /* 상단 바 · 챕터 서랍 · 강사용 화면보다 위 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(32, 66, 115, .92);   /* --navy-deep */
+  cursor: zoom-out;
+}
+.zoom-view img {
+  display: block;
+  max-width: 96vw;
+  max-height: 94vh;
+  border-radius: 6px;
+  background: #fff;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, .35);
 }

@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>계약 만료 관리 현황판 (Phase 3)</title>
+<style>
+  :root {
+    --bg: #f3f5f9; --card: #fff; --line: #dfe4ec; --ink: #1c2330; --soft: #6b7585;
+    --navy: #1f3f7a; --navy-soft: #eaf0fa; --red: #d93025; --red-soft: #fdecea;
+    --amber: #b26a00; --amber-soft: #fff4e0; --green: #1e8e3e; --green-soft: #e6f4ea; --teal: #0f8b8d;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+         font-family: "Malgun Gothic", "맑은 고딕", -apple-system, "Segoe UI", sans-serif;
+         font-size: 14px; letter-spacing: -.01em; }
+  header { display: flex; align-items: center; gap: 16px; padding: 14px 24px;
+           background: var(--navy); color: #fff; }
+  header h1 { margin: 0; font-size: 20px; font-weight: 800; }
+  header .sub { font-size: 13px; opacity: .8; }
+  header .grow { flex: 1; }
+  .btn { border: 0; border-radius: 7px; padding: 9px 15px; font: inherit; font-weight: 700;
+         cursor: pointer; background: #fff; color: var(--navy); white-space: nowrap; }
+  .btn:disabled { opacity: .45; cursor: not-allowed; }
+  .btn--red { background: var(--red); color: #fff; }
+  .btn--navy { background: var(--navy); color: #fff; }
+  .btn--ghost { background: #fff; color: var(--navy); border: 1px solid var(--line); }
+
+  .layout { display: grid; grid-template-columns: minmax(0, 1fr) 390px; gap: 18px; padding: 18px 24px 28px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; }
+  .card h2 { margin: 0 0 12px; font-size: 15px; color: var(--navy); }
+
+  /* 빈 화면 안내 */
+  .empty { display: flex; flex-direction: column; align-items: center; justify-content: center;
+           min-height: 520px; border: 2px dashed #b9c4d6; border-radius: 14px; background: #fff;
+           text-align: center; padding: 30px; transition: background .15s; }
+  .empty.is-over { background: var(--navy-soft); border-color: var(--navy); }
+  .empty .big { font-size: 22px; font-weight: 800; color: var(--navy); margin: 0 0 8px; }
+  .empty .hint { color: var(--soft); margin: 0 0 20px; font-size: 15px; }
+  .empty ol { text-align: left; margin: 22px 0 0; padding: 16px 22px 16px 38px; background: var(--bg);
+              border-radius: 10px; color: var(--ink); line-height: 1.9; font-size: 14px; }
+
+  .files { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 12px; color: var(--soft); }
+  .chip-file { background: #fff; border: 1px solid var(--line); border-radius: 20px; padding: 4px 11px; font-size: 12.5px; color: var(--ink); }
+
+  .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 14px; }
+  .kpi { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
+  .kpi .k { font-size: 13px; color: var(--soft); }
+  .kpi .v { font-size: 26px; font-weight: 800; margin-top: 4px; font-variant-numeric: tabular-nums; }
+  .kpi .v small { font-size: 14px; font-weight: 700; color: var(--soft); margin-left: 3px; }
+  .kpi.is-alert { border-color: #f1b3ad; background: var(--red-soft); }
+  .kpi.is-alert .v { color: var(--red); }
+
+  .rules { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 14px; }
+  .rule { display: grid; grid-template-columns: 1fr auto; align-items: baseline; gap: 2px 8px; text-align: left;
+          border: 1px solid var(--line); background: #fff; border-radius: 9px; padding: 9px 14px; cursor: pointer; font: inherit; }
+  .rule b { color: var(--red); font-size: 18px; }
+  .rule span { grid-column: 1 / -1; color: var(--soft); font-size: 12px; }
+  .rule.is-on { border-color: var(--red); background: var(--red-soft); }
+  .rule.is-zero b { color: var(--soft); }
+
+  .charts { display: grid; grid-template-columns: 1.2fr 1fr; gap: 14px; margin-bottom: 14px; }
+  /* 월별 만료 일정 — 종료월 기준, 상태별로 쌓는다 */
+  .vbars { display: flex; align-items: flex-end; gap: 6px; height: 150px; padding: 0 4px; border-bottom: 1px solid var(--line); }
+  .vbars .col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; }
+  .vbars em { font-style: normal; font-size: 12px; font-weight: 800; margin-bottom: 3px; font-variant-numeric: tabular-nums; }
+  .vbars .stack { width: 70%; max-width: 30px; display: flex; flex-direction: column; border-radius: 4px 4px 0 0; overflow: hidden; }
+  .vbars .stack i { display: block; }
+  .vbars .stack i.f { background: var(--red); }
+  .vbars .stack i.w { background: #f2c27a; }
+  .vbars .stack i.g { background: #9fb4d9; }
+  .vlabels { display: flex; gap: 6px; padding: 6px 4px 0; }
+  .vlabels div { flex: 1; text-align: center; font-size: 11.5px; font-weight: 700; white-space: nowrap; color: var(--soft); }
+  .vlabels div.is-near { color: var(--ink); }
+  .legend { display: flex; gap: 12px; margin-top: 8px; font-size: 12px; color: var(--soft); flex-wrap: wrap; }
+  .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 4px; vertical-align: -1px; }
+  /* 분류별 연간금액 */
+  .hbar { display: grid; grid-template-columns: 70px 1fr 112px; align-items: center; gap: 8px; margin: 9px 0 2px; font-size: 13px; }
+  .hbar .nm { font-weight: 700; white-space: nowrap; }
+  .hbar .track { position: relative; height: 16px; background: var(--bg); border-radius: 8px; }
+  .hbar .track i { display: block; height: 100%; background: var(--navy); border-radius: 8px; }
+  .hbar .n { text-align: right; font-weight: 800; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .hbar .n small { font-weight: 700; color: var(--soft); margin-left: 4px; }
+  .hbar .n small.up { color: var(--red); }
+
+  .tools { display: flex; gap: 8px; align-items: center; margin-bottom: 10px; flex-wrap: wrap; }
+  .tools h2 { margin: 0 auto 0 0; }
+  .tools select { font: inherit; padding: 7px 10px; border: 1px solid var(--line); border-radius: 7px; background: #fff; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; color: var(--soft); font-weight: 700; padding: 8px 8px; border-bottom: 2px solid var(--line); background: #fafbfd; white-space: nowrap; }
+  th.num, td.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  td { padding: 8px 8px; border-bottom: 1px solid #eef1f5; vertical-align: top; }
+  td:first-child { white-space: nowrap; font-weight: 700; }
+  .mx td.cell { cursor: pointer; }
+  .mx td.cell:hover { outline: 2px solid var(--navy-soft); outline-offset: -2px; }
+  .mx td.is-pick { outline: 2px solid var(--navy); outline-offset: -2px; }
+  td.is-flag { background: var(--red-soft); color: var(--red); font-weight: 800; }
+  .mx th.tot, .mx td.tot { background: #f5f7fb; font-weight: 800; color: var(--navy); }
+  .mx tr.tot td { border-top: 2px solid var(--line); background: #f5f7fb; font-weight: 800; color: var(--navy); }
+  .mx td .fl { margin-left: 5px; padding: 1px 6px; border-radius: 5px; background: var(--red); color: #fff; font-size: 11px; font-weight: 800; }
+  .tag { display: inline-block; margin: 1px 3px 1px 0; padding: 2px 7px; border-radius: 5px; font-size: 12px; font-weight: 700;
+         background: var(--red-soft); color: var(--red); white-space: nowrap; }
+  .st { display: inline-block; padding: 2px 7px; border-radius: 5px; font-size: 12px; font-weight: 700; white-space: nowrap; background: var(--bg); color: var(--soft); }
+  .st.todo { background: var(--amber-soft); color: var(--amber); }
+  .st.done { background: var(--green-soft); color: var(--green); }
+  .lst td { white-space: nowrap; }
+  .lst td.nm { white-space: normal; min-width: 150px; }
+  .lst td small.au { display: block; font-weight: 400; color: var(--soft); font-size: 11.5px; }
+  .lst td.tg { white-space: normal; }
+  .lst td.nm small { display: block; font-weight: 400; color: var(--soft); font-size: 11.5px; }
+  .lst td.c { white-space: normal; min-width: 130px; color: #4a5262; }
+  .lst td.over { color: var(--red); font-weight: 800; }
+  .lst tr.is-flag td { background: #fff8f7; }
+  .pick-chip { display: inline-flex; gap: 6px; align-items: center; padding: 4px 10px; border-radius: 20px; background: var(--navy-soft);
+               color: var(--navy); font-size: 12.5px; font-weight: 700; }
+  .pick-chip button { border: 0; background: none; color: var(--navy); font: inherit; cursor: pointer; padding: 0; }
+  .muted { color: var(--soft); }
+  .count-line { margin: 8px 2px 0; color: var(--soft); font-size: 13px; }
+  .card + .card { margin-top: 14px; }
+  .charts .card + .card { margin-top: 0; }
+
+  /* AI 패널 — 늘 한 화면 안에, 대화 칸이 남은 높이를 다 쓴다 */
+  .ai { position: sticky; top: 18px; align-self: start; display: flex; flex-direction: column; gap: 12px;
+        height: calc(100vh - 108px); min-height: 560px; }
+  .ai .card + .card { margin-top: 0; }
+  .ai .card--chat { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
+  .keyrow-done { display: flex; align-items: center; gap: 8px; }
+  .keyrow-done .status { margin: 0; flex: 1; }
+  .link { background: none; border: 0; padding: 0; font: inherit; font-size: 12.5px; color: var(--navy); text-decoration: underline; cursor: pointer; }
+  .ai .keyrow { display: flex; gap: 6px; }
+  .ai .keyrow input { flex: 1; min-width: 0; font: inherit; padding: 8px 10px; border: 1px solid var(--line); border-radius: 7px; }
+  .status { font-size: 12.5px; margin-top: 7px; color: var(--soft); white-space: pre-wrap; word-break: break-all; }
+  .status.ok { color: var(--green); font-weight: 700; }
+  .status.err { color: var(--red); }
+  .ai-btns { display: grid; grid-template-columns: 1fr auto; gap: 6px; }
+  .summary { font-size: 13.5px; line-height: 1.6; max-height: 34vh; overflow: auto; }
+  .summary .h { display: block; margin: 10px 0 3px; font-weight: 800; color: var(--navy); }
+  .summary .h:first-child { margin-top: 0; }
+  .summary p, .bubble p { margin: 2px 0; }
+  .chatlog { flex: 1 1 auto; min-height: 120px; overflow: auto; background: var(--bg); border-radius: 8px; padding: 10px; font-size: 13.5px; line-height: 1.6; }
+  .msg { margin-bottom: 10px; }
+  .msg .who { font-size: 11.5px; font-weight: 800; color: var(--soft); margin-bottom: 2px; }
+  .msg.me { text-align: right; }
+  .msg.me .bubble { display: inline-block; background: var(--navy); color: #fff; border-radius: 10px 10px 2px 10px; padding: 7px 11px; text-align: left; }
+  .msg.bot .bubble { background: #fff; border: 1px solid var(--line); border-radius: 10px 10px 10px 2px; padding: 8px 11px; }
+  .msg.err .bubble { background: var(--red-soft); color: var(--red); border-radius: 8px; padding: 8px 11px; white-space: pre-wrap; }
+  .chatin { display: flex; gap: 6px; margin-top: 8px; }
+  .chatin textarea { flex: 1; resize: none; height: 42px; font: inherit; padding: 9px 10px; border: 1px solid var(--line); border-radius: 7px; }
+  .ai-note { font-size: 12px; color: var(--soft); margin: 8px 0 0; }
+  .loading { color: var(--soft); font-style: italic; }
+  [hidden] { display: none !important; }
+
+  /* ---- Phase 4 전 — 아직 다듬지 않은 모습 ---- */
+  header { background: #fff; color: var(--ink); border-bottom: 1px solid var(--line); }
+  header .sub { display: none; }
+  #pickBtn { background: var(--navy); color: #fff; }
+  .kpi.is-alert { background: #fff; border-color: var(--line); }
+  .empty { min-height: 180px; border-style: solid; border-width: 1px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>계약 만료 관리 현황판</h1>
+    <div class="sub">부서별 계약 대장 CSV를 올리면 결정 마감일과 금액 변화를 계산하고, 갱신 준비가 늦거나 금액이 크게 오른 계약을 빨갛게 표시합니다</div>
+  </div>
+  <div class="grow"></div>
+  <button class="btn btn--ghost" id="resetBtn" style="color:#fff;background:transparent;border-color:rgba(255,255,255,.4)" hidden>처음으로</button>
+  <button class="btn" id="pickBtn">CSV 불러오기</button>
+  <input type="file" id="fileInput" accept=".csv" multiple hidden>
+</header>
+
+<div class="layout">
+  <main>
+    <!-- 빈 화면 -->
+    <section class="empty" id="empty">
+      <p class="hint">CSV 파일을 선택하세요</p>
+      <button class="btn btn--navy" id="pickBtn2">파일 선택</button>
+    </section>
+
+    <!-- 현황판 -->
+    <section id="dash" hidden>
+      <div class="files" id="files"></div>
+
+      <div class="kpis">
+        <div class="kpi"><div class="k">계약</div><div class="v" id="kAll">-</div></div>
+        <div class="kpi"><div class="k">결정 마감 90일 안</div><div class="v" id="kNear">-</div></div>
+        <div class="kpi"><div class="k">연간금액 전년 대비</div><div class="v" id="kGrow">-</div></div>
+        <div class="kpi is-alert"><div class="k">주의 계약</div><div class="v" id="kFlag">-</div></div>
+      </div>
+
+      <div class="rules" id="rules"></div>
+
+      <div class="charts">
+        <div class="card">
+          <h2 id="monthTitle">월별 만료 일정 — 종료월 기준</h2>
+          <div class="vbars" id="monthBars"></div>
+          <div class="vlabels" id="monthLabels"></div>
+          <div class="legend"><span><i style="background:var(--red)"></i>주의 계약</span><span><i style="background:#f2c27a"></i>미착수</span><span><i style="background:#9fb4d9"></i>협의 중 · 품의 완료 · 갱신 완료</span></div>
+        </div>
+        <div class="card">
+          <h2>분류별 연간금액 · 전년 대비</h2>
+          <div id="catBars"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="tools">
+          <h2 id="mxTitle">부서 × 분류</h2>
+          <select id="metricSel">
+            <option value="n">계약 건수</option>
+            <option value="amt">연간금액 (백만원)</option>
+            <option value="grow">전년 대비</option>
+            <option value="near">결정 마감 90일 안</option>
+          </select>
+        </div>
+        <table class="mx">
+          <thead id="mxHead"></thead>
+          <tbody id="tbody"></tbody>
+        </table>
+        <p class="count-line" id="countLine"></p>
+      </div>
+
+      <div class="card">
+        <div class="tools">
+          <h2 id="lstTitle">계약 목록</h2>
+          <span id="pickChip"></span>
+          <select id="viewSel"></select>
+        </div>
+        <table class="lst">
+          <thead><tr><th>계약번호</th><th>계약명</th><th>종료일</th><th class="num">결정 마감</th><th>갱신상태</th><th class="num">연간금액</th><th class="num">전년 대비</th><th>걸린 기준</th><th>비고</th></tr></thead>
+          <tbody id="lstBody"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <!-- AI 계약 도우미 -->
+  <aside class="ai">
+    <div class="card">
+      <h2>AI 계약 도우미</h2>
+      <div id="keyBox">
+        <div class="keyrow">
+          <input type="password" id="apiKey" placeholder="Claude API 키" autocomplete="off">
+          <button class="btn btn--navy" id="connectBtn">연결</button>
+        </div>
+        <div class="status" id="keyStatus">키를 넣고 [연결]을 누르세요</div>
+      </div>
+      <div class="keyrow-done" id="keyDone" hidden>
+        <p class="status ok">✓ 연결됨</p>
+        <button class="link" id="rekeyBtn">키 다시 넣기</button>
+      </div>
+
+      <h2 style="margin-top:16px">계약 현황 요약 · 다음 달 할 일</h2>
+      <div class="ai-btns">
+        <button class="btn btn--red" id="sumBtn" disabled>AI 요약 받기</button>
+      </div>
+      <div class="summary" id="summary" style="margin-top:10px"><span class="muted">CSV를 올리고 연결하면 누를 수 있습니다</span></div>
+      <p class="ai-note">날짜와 금액은 화면이 계산합니다. AI에게는 <b>집계와 계약의 상태 · 비고만</b> 보냅니다 — 상대방(업체명)은 빼고.</p>
+    </div>
+
+    <div class="card card--chat">
+      <h2>계약 현황에 물어보기</h2>
+      <div class="chatlog" id="chatlog"><div class="muted">예) 법인차량 렌터카는 넉 달 남았는데 왜 주의야? · 이번 달에 먼저 결정할 계약은?</div></div>
+      <div class="chatin">
+        <textarea id="chatIn" placeholder="질문을 입력하세요 (Enter 전송)" disabled></textarea>
+        <button class="btn btn--navy" id="chatBtn" disabled>전송</button>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<script>
+// ---------------------------------------------------------------------------
+// 계약기준 — 계약기준.md 를 그대로 옮긴 값. 기준을 바꾸면 여기와 계약기준.md 를 같이 고친다.
+// ---------------------------------------------------------------------------
+const RULES = {
+  baseDate: '2026-09-30',     // 1. 기준일 — 자료를 뽑은 날
+  window: 60,                 // 4. 주의(준비 늦음) — 결정 마감일까지 이 일수 이하인데 갱신상태가 「미착수」
+  jump: 15                    // 5. 주의(금액 급증) — 연간금액이 전년보다 이만큼(%) 이상 오른 계약
+};
+const RULE_LIST = [
+  { id: '준비 늦음', desc: '결정 마감일까지 ' + RULES.window + '일 이하인데 갱신상태가 「미착수」인 계약' },
+  { id: '금액 급증', desc: '연간금액이 전년보다 ' + RULES.jump + '% 이상 오른 계약' }
+];
+const CATS = ['임차', '용역', '유지보수', '라이선스', '구매'];
+const NEAR = 90;              // 화면에서 「곧 결정할 계약」 으로 모아 보는 범위(일)
+
+// 화면을 server.js 가 열어 줬다면 같은 주소로 API 를 부른다.
+const SERVER_ORIGIN = location.protocol.startsWith('http') ? location.origin : 'http://localhost:8787';
+const API_URL = SERVER_ORIGIN + '/v1/messages';
+
+const $ = (id) => document.getElementById(id);
+let cons = [];                // 합친 계약 (한 줄이 계약 하나)
+const loaded = new Set();     // 이미 올린 파일 이름
+let ruleFilter = '', view = 'flag', pick = null, metric = 'n', apiKey = '', chat = [], lastSummary = '';
+
+function esc(s) { return String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
+function p1(x) { return x == null || !isFinite(x) ? '-' : x.toFixed(1); }
+const eok = w => (w / 1e8).toFixed(1) + '억';
+const mil = w => Math.round(w / 1e6).toLocaleString('ko-KR');
+const dday = n => n >= 0 ? 'D-' + n : 'D+' + (-n);
+const sgn = x => x == null ? '-' : (x > 0 ? '+' : x < 0 ? '−' : '') + Math.abs(x).toFixed(1);
+const days = (a, b) => Math.round((Date.parse(b) - Date.parse(a)) / 864e5);
+const addDays = (d, n) => new Date(Date.parse(d) + n * 864e5).toISOString().slice(0, 10);
+
+// ---- CSV 읽기 -------------------------------------------------------------
+async function readText(file) {
+  const buf = await file.arrayBuffer();
+  try { return new TextDecoder('utf-8', { fatal: true }).decode(buf).replace(/^﻿/, ''); }
+  catch (e) { return new TextDecoder('euc-kr').decode(buf); }   // 엑셀에서 저장한 CSV (한글 깨짐 방지)
+}
+function parseCSV(text) {
+  const out = []; let row = [], cur = '', q = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (q) { if (c === '"' && text[i + 1] === '"') { cur += '"'; i++; } else if (c === '"') q = false; else cur += c; }
+    else if (c === '"') q = true;
+    else if (c === ',') { row.push(cur); cur = ''; }
+    else if (c === '\n' || c === '\r') { if (c === '\r' && text[i + 1] === '\n') i++; row.push(cur); out.push(row); row = []; cur = ''; }
+    else cur += c;
+  }
+  if (cur || row.length) { row.push(cur); out.push(row); }
+  return out.filter(r => r.some(v => v.trim() !== ''));
+}
+const NEED = ['계약번호', '부서', '계약명', '분류', '종료일', '연간금액', '전년금액', '자동연장', '해지통보기한(일)', '갱신상태'];
+const num = v => { const t = String(v).replace(/[,\s원]/g, ''); return t === '' ? null : Number(t) || 0; };   // 엑셀에서 쉼표가 붙어 나와도 읽는다
+async function addFiles(fileList) {
+  const errs = [];
+  for (const f of fileList) {
+    if (!/\.csv$/i.test(f.name)) { errs.push(f.name + ' — CSV 파일이 아닙니다'); continue; }
+    if (loaded.has(f.name)) continue;                       // 같은 파일을 두 번 올리면 건너뛴다
+    const table = parseCSV(await readText(f));
+    const head = table[0].map(h => h.trim());
+    const miss = NEED.filter(n => !head.includes(n));
+    if (miss.length) { errs.push(f.name + ' — 없는 열: ' + miss.join(', ')); continue; }
+    const ix = n => head.indexOf(n);
+    const opt = (r, n) => ix(n) < 0 ? '' : (r[ix(n)] || '').trim();
+    const seen = new Set(cons.map(c => c.no));
+    for (const r of table.slice(1)) {
+      const no = opt(r, '계약번호');
+      if (seen.has(no)) continue;                           // 같은 계약이 두 파일에 있으면 한 번만
+      cons.push({ no, dept: opt(r, '부서'), name: opt(r, '계약명'), cat: opt(r, '분류'), vendor: opt(r, '상대방'),
+        start: opt(r, '시작일'), end: opt(r, '종료일'), amt: num(opt(r, '연간금액')) || 0, prev: num(opt(r, '전년금액')),
+        auto: opt(r, '자동연장').toUpperCase() === 'Y', notice: num(opt(r, '해지통보기한(일)')), status: opt(r, '갱신상태'), note: opt(r, '비고') });
+    }
+    loaded.add(f.name);
+  }
+  render();
+  if (errs.length) alert('읽지 못한 파일이 있습니다\n\n' + errs.join('\n'));
+}
+
+// ---- 계산 (전부 화면에서) -----------------------------------------------------
+function judge(c) {
+  const dl = c.auto && c.notice != null ? addDays(c.end, -c.notice) : c.end;   // 결정 마감일
+  const left = days(RULES.baseDate, dl);
+  const grow = c.prev ? (c.amt / c.prev - 1) * 100 : null;
+  const flags = [];
+  if (left <= RULES.window && c.status === '미착수') flags.push(RULE_LIST[0].id);
+  if (grow != null && grow >= RULES.jump) flags.push(RULE_LIST[1].id);
+  return { ...c, dl, left, grow, flags, key: c.dept + '|' + c.cat };
+}
+function sumOf(cs) {
+  const withPrev = cs.filter(c => c.prev);
+  const amt = cs.reduce((t, c) => t + c.amt, 0);
+  const a2 = withPrev.reduce((t, c) => t + c.amt, 0), p2 = withPrev.reduce((t, c) => t + c.prev, 0);
+  return { n: cs.length, amt, grow: p2 ? (a2 / p2 - 1) * 100 : null,
+    near: cs.filter(c => c.left <= NEAR).length, todo: cs.filter(c => c.left <= NEAR && c.status === '미착수').length,
+    flag: cs.filter(c => c.flags.length).length };
+}
+function stats() {
+  const all = cons.map(judge);
+  const depts = [...new Set(all.map(c => c.dept))];
+  const cats = [...CATS.filter(x => all.some(c => c.cat === x)), ...new Set(all.map(c => c.cat).filter(x => !CATS.includes(x)))];
+  const byDept = Object.fromEntries(depts.map(d => [d, sumOf(all.filter(c => c.dept === d))]));
+  const byCat = Object.fromEntries(cats.map(x => [x, sumOf(all.filter(c => c.cat === x))]));
+  const cell = (d, x) => sumOf(all.filter(c => c.dept === d && c.cat === x));
+  const flagged = all.filter(c => c.flags.length).sort((a, b) => a.left - b.left);
+  const byRule = Object.fromEntries(RULE_LIST.map(x => [x.id, flagged.filter(c => c.flags.includes(x.id)).length]));
+  const months = [];                                        // 기준월 다음 달부터 12개월
+  for (let i = 1; i <= 12; i++) { const d = new Date(Date.parse(RULES.baseDate.slice(0, 7) + '-01')); d.setMonth(d.getMonth() + i); months.push(d.toISOString().slice(0, 7)); }
+  return { all, depts, cats, byDept, byCat, cell, flagged, byRule, months, tot: sumOf(all) };
+}
+
+// ---- 그리기 -----------------------------------------------------------------
+function render() {
+  const has = cons.length > 0;
+  $('empty').hidden = has; $('dash').hidden = !has; $('resetBtn').hidden = !has;
+  updateAiButtons();
+  if (!has) return;
+  const s = stats(), t = s.tot;
+
+  $('files').innerHTML = '<span>불러온 파일</span>' +
+    [...loaded].map(n => '<span class="chip-file">' + esc(n) + '</span>').join('') +
+    '<span>— 계약 ' + t.n + '건 · 부서 ' + s.depts.length + ' · 기준일 ' + RULES.baseDate + '</span>';
+
+  $('kAll').innerHTML = t.n + '<small>건 · 부서 ' + s.depts.length + '</small>';
+  $('kNear').innerHTML = t.near + '<small>건 · 그중 미착수 ' + t.todo + '</small>';
+  $('kGrow').innerHTML = sgn(t.grow) + '%<small>· 연간 ' + eok(t.amt) + '</small>';
+  $('kFlag').innerHTML = s.flagged.length + '<small>건 · 아래 기준 칩 참고</small>';
+
+  $('rules').innerHTML = RULE_LIST.map(x =>
+    '<button class="rule' + (ruleFilter === x.id ? ' is-on' : '') + (s.byRule[x.id] ? '' : ' is-zero') +
+    '" data-rule="' + x.id + '"><strong>' + x.id + '</strong><b>' + s.byRule[x.id] + '</b><span>' + esc(x.desc) + '</span></button>'
+  ).join('');
+
+  const H = 120, per = s.months.map(m => s.all.filter(c => c.end.startsWith(m)));
+  const maxN = Math.max(1, ...per.map(cs => cs.length));
+  $('monthBars').innerHTML = per.map(cs => {
+    const f = cs.filter(c => c.flags.length).length, w = cs.filter(c => !c.flags.length && c.status === '미착수').length, g = cs.length - f - w;
+    return '<div class="col"><em>' + (cs.length || '') + '</em><div class="stack">' +
+      '<i class="f" style="height:' + (f / maxN * H) + 'px"></i><i class="w" style="height:' + (w / maxN * H) + 'px"></i><i class="g" style="height:' + (g / maxN * H) + 'px"></i></div></div>';
+  }).join('');
+  const nearEnd = addDays(RULES.baseDate, NEAR).slice(0, 7);
+  $('monthTitle').textContent = '월별 만료 일정 — ' + s.months[0].replace('-', '.') + ' ~ ' + s.months[11].replace('-', '.') + ' 종료월 기준';
+  $('monthLabels').innerHTML = s.months.map(m => '<div' + (m <= nearEnd ? ' class="is-near"' : '') + '>' + Number(m.slice(5)) + '월</div>').join('');
+
+  const maxA = Math.max(...s.cats.map(x => s.byCat[x].amt));
+  $('catBars').innerHTML = s.cats.map(x => {
+    const g = s.byCat[x];
+    return '<div class="hbar"><span class="nm">' + esc(x) + '</span><div class="track"><i style="width:' + Math.max(2, g.amt / maxA * 100) + '%"></i></div>' +
+      '<span class="n">' + eok(g.amt) + '<small' + (g.grow >= RULES.jump ? ' class="up"' : '') + '>' + sgn(g.grow) + '%</small></span></div>';
+  }).join('') + '<p class="count-line">막대 = 연간금액 · 옆 숫자 = 전년 대비 (' + s.cats.map(x => x + ' ' + s.byCat[x].n + '건').join(' · ') + ')</p>';
+
+  renderTable(s);
+  renderList(s);
+}
+function cellVal(g) {
+  if (!g.n) return '<span class="muted">-</span>';
+  if (metric === 'n') return g.n + '건';
+  if (metric === 'amt') return mil(g.amt);
+  if (metric === 'grow') return g.grow == null ? '<span class="muted">신규</span>' : sgn(g.grow) + '%';
+  return g.near + '건';
+}
+function renderTable(s) {
+  const names = { n: '계약 건수', amt: '연간금액 (백만원)', grow: '연간금액 전년 대비', near: '결정 마감 90일 안' };
+  $('mxTitle').textContent = '부서 × 분류 — ' + names[metric];
+  $('mxHead').innerHTML = '<tr><th>부서</th>' + s.cats.map(x => '<th class="num">' + esc(x) + '</th>').join('') + '<th class="num tot">전체</th></tr>';
+  const td = (d, x) => {
+    const g = s.cell(d, x), key = d + '|' + x;
+    const n = s.flagged.filter(c => c.key === key && (!ruleFilter || c.flags.includes(ruleFilter))).length;
+    if (!g.n) return '<td class="num"><span class="muted">-</span></td>';
+    return '<td class="num cell' + (n ? ' is-flag' : '') + (pick === key ? ' is-pick' : '') + '" data-key="' + esc(key) + '">' + cellVal(g) +
+      (n ? '<span class="fl">주의 ' + n + '</span>' : '') + '</td>';
+  };
+  $('tbody').innerHTML = s.depts.map(d => '<tr><td>' + esc(d) + '</td>' + s.cats.map(x => td(d, x)).join('') + '<td class="num tot">' + cellVal(s.byDept[d]) + '</td></tr>').join('') +
+    '<tr class="tot"><td>전체</td>' + s.cats.map(x => '<td class="num">' + cellVal(s.byCat[x]) + '</td>').join('') + '<td class="num">' + cellVal(s.tot) + '</td></tr>';
+  $('countLine').textContent = '빨간 칸에 계약기준에 걸린 계약이 있습니다 · ' + s.flagged.length + '건' + (ruleFilter ? ' · 「' + ruleFilter + '」만 표시 중' : '') +
+    ' · 칸을 누르면 아래에 그 계약들이 나옵니다';
+}
+function stCls(st) { return st === '미착수' ? ' todo' : st === '갱신 완료' || st === '품의 완료' ? ' done' : ''; }
+function renderList(s) {
+  $('viewSel').innerHTML = [['flag', '주의 계약'], ['near', '결정 마감 90일 안'], ['all', '전체 계약'], ...s.depts.map(d => ['dept:' + d, d])].map(([v, n]) =>
+    '<option value="' + esc(v) + '"' + (v === view ? ' selected' : '') + '>' + esc(n) + '</option>').join('');
+  $('viewSel').disabled = !!pick;
+  let list;
+  if (pick) list = s.all.filter(c => c.key === pick);
+  else if (view === 'flag') list = s.flagged.filter(c => !ruleFilter || c.flags.includes(ruleFilter));
+  else if (view === 'near') list = s.all.filter(c => c.left <= NEAR);
+  else if (view.startsWith('dept:')) list = s.all.filter(c => c.dept === view.slice(5));
+  else list = s.all.slice();
+  list = list.slice().sort((a, b) => a.left - b.left);
+  $('pickChip').innerHTML = pick ? '<span class="pick-chip">' + esc(pick.replace('|', ' · ')) + ' <button id="unpick" title="선택 해제">✕</button></span>' : '';
+  $('lstTitle').textContent = '계약 ' + list.length + '건 — 결정 마감이 가까운 순';
+  $('lstBody').innerHTML = list.map(c =>
+    '<tr' + (c.flags.length ? ' class="is-flag"' : '') + '><td>' + esc(c.no) + '</td><td class="nm">' + esc(c.name) + '<small>' + esc(c.dept) + ' · ' + esc(c.cat) + '</small></td>' +
+    '<td>' + esc(c.end) + '</td><td class="num' + (c.flags.includes(RULE_LIST[0].id) ? ' over' : '') + '">' + esc(c.dl.slice(5)) + ' (' + dday(c.left) + ')' + (c.auto ? '<small class="au">자동연장 · 통보 ' + c.notice + '일 전</small>' : '') + '</td>' +
+    '<td><span class="st' + stCls(c.status) + '">' + esc(c.status) + '</span></td><td class="num">' + mil(c.amt) + '</td>' +
+    '<td class="num' + (c.flags.includes(RULE_LIST[1].id) ? ' over' : '') + '">' + (c.grow == null ? '신규' : sgn(c.grow) + '%') + '</td>' +
+    '<td class="tg">' + (c.flags.map(x => '<span class="tag">' + esc(x) + '</span>').join('') || '<span class="muted">-</span>') + '</td><td class="c">' + esc(c.note) + '</td></tr>'
+  ).join('') || '<tr><td colspan="9" class="muted" style="text-align:center;padding:20px">해당하는 계약이 없습니다</td></tr>';
+}
+
+// ---- AI (server.js 를 거쳐 부른다) -----------------------------------------
+async function callClaude(messages, system) {
+  let res;
+  try {
+    res = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey },
+      body: JSON.stringify({ max_tokens: 2048, system, messages })
+    });
+  } catch (e) {
+    throw new Error('중계 서버에 닿지 못했습니다 (' + API_URL + ')\nserver.js 가 떠 있는지, 이 화면을 주소로 열었는지 확인하세요.');
+  }
+  const raw = await res.text();
+  if (!res.ok) throw new Error('HTTP ' + res.status + '\n' + raw.slice(0, 500));
+  const data = JSON.parse(raw);
+  return (data.content || []).filter(b => b.type === 'text').map(b => b.text).join('\n').trim();
+}
+// AI 에게 보내는 재료 — 집계와 계약의 날짜 · 금액 계산 결과 · 상태 · 비고. 상대방(업체명)은 보내지 않는다
+function context() {
+  const s = stats(), r1 = x => x == null ? null : Math.round(x * 10) / 10, m1 = w => Math.round(w / 1e5) / 10;
+  const pack = g => ({ 계약: g.n, 연간금액_백만원: m1(g.amt), 전년대비: r1(g.grow), 마감90일안: g.near, 그중미착수: g.todo, 주의: g.flag });
+  return JSON.stringify({
+    계약기준: { 기준일: RULES.baseDate, 결정마감일: '자동연장이면 종료일 − 해지통보기한, 아니면 종료일', 주의: RULE_LIST.map(x => x.desc) },
+    전체: pack(s.tot),
+    부서별: s.depts.map(d => ({ 부서: d, ...pack(s.byDept[d]) })),
+    분류별: s.cats.map(x => ({ 분류: x, ...pack(s.byCat[x]) })),
+    월별만료: Object.fromEntries(s.months.map(m => [m, s.all.filter(c => c.end.startsWith(m)).length])),
+    주의계약: s.flagged.map(c => c.no),
+    계약: s.all.slice().sort((a, b) => a.left - b.left).map(c => ({ 계약번호: c.no, 부서: c.dept, 계약명: c.name, 분류: c.cat, 종료일: c.end,
+      자동연장: c.auto, 해지통보기한: c.notice, 결정마감일: c.dl, 마감까지일수: c.left, 갱신상태: c.status,
+      연간금액_백만원: m1(c.amt), 전년대비: r1(c.grow), 걸린기준: c.flags, 비고: c.note }))
+  });
+}
+const SYSTEM = '너는 회사 경영지원 부서(총무 · 시설관리 · 인사 · IT지원)의 계약 대장을 관리하고 보고하는 담당자를 돕는 보조자다. ' +
+  '아래 JSON 은 화면이 이미 계산한 결정 마감일 · 남은 일수 · 금액 변화와 계약별 갱신상태 · 비고다. 날짜와 숫자는 새로 계산하지 말고 JSON 에 있는 값만 인용한다. ' +
+  '자동연장 계약은 종료일이 아니라 해지 통보 마감일이 결정 마감이라는 점을 놓치지 않는다. 사정은 비고를 근거로만 말하고, 상대방(업체)은 받지 않았으니 추측하지 않는다. ' +
+  'JSON 에 없는 내용은 모른다고 말하고, 원인은 단정하지 말고 "확인이 필요하다" 처럼 쓴다. 금액은 백만 원 또는 억 원으로 쓴다. 한국어로 짧게 답한다.\n\n';
+
+function mdLite(t) {
+  return esc(t).split('\n').map(line => {
+    const l = line.replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
+    if (/^■/.test(line)) return '<span class="h">' + l + '</span>';
+    return l.trim() ? '<p>' + l + '</p>' : '';
+  }).join('');
+}
+function updateAiButtons() {
+  const ready = !!apiKey && cons.length > 0;
+  $('sumBtn').disabled = !ready; $('chatIn').disabled = !ready; $('chatBtn').disabled = !ready;
+  updateReportBtn();
+}
+$('connectBtn').onclick = async () => {
+  const k = $('apiKey').value.replace(/\s+/g, '');
+  if (!k) { $('keyStatus').className = 'status err'; $('keyStatus').textContent = 'API 키를 넣어 주세요'; return; }
+  $('keyStatus').className = 'status'; $('keyStatus').textContent = '연결 확인 중…';
+  apiKey = k;
+  try {
+    await callClaude([{ role: 'user', content: 'ping' }]);
+    $('keyStatus').className = 'status ok'; $('keyStatus').textContent = '✓ 연결됨';
+    $('keyBox').hidden = true; $('keyDone').hidden = false;   // 연결되면 키 칸은 접어 둔다
+  } catch (e) {
+    apiKey = ''; $('keyStatus').className = 'status err'; $('keyStatus').textContent = '연결 실패\n' + e.message;
+  }
+  updateAiButtons();
+};
+$('sumBtn').onclick = async () => {
+  $('sumBtn').disabled = true;
+  $('summary').innerHTML = '<span class="loading">AI가 집계와 비고를 읽고 있습니다…</span>';
+  try {
+    const text = await callClaude([{ role: 'user', content:
+      '아래 네 덩어리로 정리해줘. 각 덩어리 제목은 ■ 로 시작한다.\n' +
+      '■ 한눈에 — 세 줄\n■ 먼저 결정할 계약 — 최대 3건, 이유 한 줄씩 (재입찰 · 단순 갱신 · 해지 검토 중 무엇이 맞을지)\n' +
+      '■ 비고에서 보이는 것 — 걸린 계약들의 사정\n■ 다음 달 할 일 — 두세 줄' }], SYSTEM + context());
+    lastSummary = text;
+    $('summary').innerHTML = mdLite(text);
+  } catch (e) { $('summary').innerHTML = '<div class="status err">' + esc(e.message) + '</div>'; }
+  $('sumBtn').disabled = false;
+  updateReportBtn();
+};
+function addMsg(cls, html) {
+  if (!chat.length && cls === 'me') $('chatlog').innerHTML = '';
+  const d = document.createElement('div'); d.className = 'msg ' + cls;
+  d.innerHTML = (cls === 'bot' ? '<div class="who">AI</div>' : '') + '<div class="bubble">' + html + '</div>';
+  $('chatlog').appendChild(d); $('chatlog').scrollTop = $('chatlog').scrollHeight; return d;
+}
+async function sendChat() {
+  const q = $('chatIn').value.trim(); if (!q) return;
+  addMsg('me', esc(q)); $('chatIn').value = '';
+  chat.push({ role: 'user', content: q });
+  const wait = addMsg('bot', '<span class="loading">생각 중…</span>');
+  $('chatBtn').disabled = true;
+  try {
+    const a = await callClaude(chat, SYSTEM + context());
+    chat.push({ role: 'assistant', content: a });
+    wait.querySelector('.bubble').innerHTML = mdLite(a);
+  } catch (e) {
+    chat.pop(); wait.className = 'msg err'; wait.innerHTML = '<div class="bubble">' + esc(e.message) + '</div>';
+  }
+  $('chatBtn').disabled = false; $('chatIn').focus();
+}
+$('rekeyBtn').onclick = () => { apiKey = ''; $('apiKey').value = ''; $('keyBox').hidden = false; $('keyDone').hidden = true;
+  $('keyStatus').className = 'status'; $('keyStatus').textContent = '키를 넣고 [연결]을 누르세요'; updateAiButtons(); };
+$('chatBtn').onclick = sendChat;
+$('chatIn').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChat(); } });
+
+function updateReportBtn() {}
+
+// ---- 이벤트 -----------------------------------------------------------------
+$('pickBtn').onclick = $('pickBtn2').onclick = () => $('fileInput').click();
+$('fileInput').onchange = e => { const fs = [...e.target.files]; e.target.value = ''; addFiles(fs); };  // 목록을 먼저 복사해 둔다 — 비우면 함께 사라진다
+const drop = $('empty');
+['dragenter', 'dragover'].forEach(t => document.addEventListener(t, e => { e.preventDefault(); drop.classList.add('is-over'); }));
+['dragleave', 'drop'].forEach(t => document.addEventListener(t, e => { e.preventDefault(); drop.classList.remove('is-over'); }));
+document.addEventListener('drop', e => { if (e.dataTransfer.files.length) addFiles([...e.dataTransfer.files]); });
+$('rules').onclick = e => { const b = e.target.closest('[data-rule]'); if (!b) return;
+  ruleFilter = ruleFilter === b.dataset.rule ? '' : b.dataset.rule; render(); };
+$('metricSel').onchange = e => { metric = e.target.value; renderTable(stats()); };
+$('tbody').onclick = e => { const c = e.target.closest('[data-key]'); if (!c) return;
+  pick = pick === c.dataset.key ? null : c.dataset.key; const s = stats(); renderTable(s); renderList(s); };
+$('pickChip').onclick = e => { if (e.target.id === 'unpick') { pick = null; const s = stats(); renderTable(s); renderList(s); } };
+$('viewSel').onchange = e => { view = e.target.value; renderList(stats()); };
+$('resetBtn').onclick = () => { cons = []; loaded.clear(); ruleFilter = ''; view = 'flag'; pick = null; chat = []; lastSummary = '';
+  $('summary').innerHTML = '<span class="muted">CSV를 올리고 연결하면 누를 수 있습니다</span>';
+  $('chatlog').innerHTML = '<div class="muted">예) 법인차량 렌터카는 넉 달 남았는데 왜 주의야? · 이번 달에 먼저 결정할 계약은?</div>'; render(); };
+render();
+</script>
+</body>
+</html>

@@ -11,18 +11,17 @@ AX 중급과정 HTML 교안의 **화면 구조·조작·마크업 규칙**을 �
 ## 1. 파일 구조
 
 ```
-index.html            목차 — 스크롤 없이 한 화면. OT·M1~M5 카드에서 각 교안으로 진입
-ot.html               OT 교안 (9장)
-m1.html               M1 교안 (20장)
-m2.html               M2 교안 (25장)
-m3.html               M3 교안 (37장)
-m4.html               M4 교안 (44장)
-m5.html               M5 교안 (16장)
-timer.html            실습 타이머 — 강사가 직접 여는 작은 창 (`?m=분`)
+index.html            목차 — 스크롤 없이 한 화면. M1~M5 카드에서 각 교안으로 진입
+m1.html ~ m5.html     모듈 교안 (장수는 CLAUDE.md 「진행 상태」 표가 기준)
+m4-audit.html 등      M4 변형판 (감사실 · 뉴스 동향 분석 · 설비 가동률 현황판)
 assets/css/deck.css   공통 슬라이드 스타일 (전 모듈 공유)
 assets/js/deck.js     슬라이드 이동 · 화면 맞춤 스케일 · 해시 동기화
+assets/css/teacher.css · assets/js/teacher.js   강사용 전용 — [실습 시작] · [쉬는 시간]
 assets/img/           화면 캡처 · 로고
 ```
+
+(2026-10-06 갱신 — 예전 목록의 `ot.html` 은 M1 로 합쳐졌고, `timer.html` 은 강사용 [실습 시작] 버튼으로 바뀌었다.
+ 새 교안은 아래 「`ot.html` 을 복제」 대신 **`m1.html` 을 골격으로** 복제한다.)
 
 - 교안 HTML은 **프로젝트 루트**에 둡니다. 이미지·CSS·JS 경로가 `assets/...` 상대경로이므로 하위 폴더로 옮기면 깨집니다.
 - 새 교안은 `ot.html`을 복제해 만듭니다. CSS·JS는 공통 파일을 그대로 링크하고,
@@ -287,6 +286,7 @@ scale = min((innerWidth - 48) / 1280, (innerHeight - 128) / 720)   // 최대 1.3
 |---|---|
 | `.shots` / `.shot` / `.shot-cap` | 화면 캡처 나열 / 테두리 박스 / 캡션 |
 | `.figure` | 이미지 1장 가운데 정렬 |
+| `<img data-zoom="assets/img/큰그림.png">` | **누르면 그 그림을 화면 가득** 띄운다(`.zoom-view`, deck.js). 아무 데나 한 번 더 누르거나 `Esc` 로 닫는다. 떠 있는 동안 키보드 · 휠 · 스와이프로 슬라이드가 넘어가지 않는다. 슬라이드에는 작은 그림을, `data-zoom` 에는 **다른 큰 그림**을 줄 수 있다(M3 48p — `m3-cc-lab.png` → `m3-cc-hub.jpg`, 2026-10-16). 배포본 빌드가 `data-zoom` 경로도 본문에 넣는다 |
 
 ### 구조 컴포넌트
 

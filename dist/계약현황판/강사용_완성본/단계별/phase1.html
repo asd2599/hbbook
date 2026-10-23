@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>계약 만료 관리 현황판 (Phase 1 · 가짜 데이터)</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #f3f5f9; color: #1c2330; font-family: "Malgun Gothic", sans-serif; font-size: 14px; }
+  header { display: flex; align-items: center; padding: 14px 24px; background: #1f3f7a; color: #fff; }
+  header h1 { margin: 0; font-size: 20px; }
+  header button { margin-left: auto; border: 0; border-radius: 7px; padding: 9px 15px; font: inherit; font-weight: 700; background: #fff; color: #1f3f7a; }
+  .fake { margin: 14px 24px 0; padding: 9px 14px; border-radius: 8px; background: #fff4e0; color: #8a5200; font-weight: 700; }
+  main { padding: 14px 24px 28px; }
+  .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 14px; }
+  .kpi { background: #fff; border: 1px solid #dfe4ec; border-radius: 12px; padding: 14px 16px; }
+  .kpi .k { color: #6b7585; font-size: 13px; }
+  .kpi .v { font-size: 26px; font-weight: 800; margin-top: 4px; }
+  .kpi.red .v { color: #d93025; }
+  .card { background: #fff; border: 1px solid #dfe4ec; border-radius: 12px; padding: 16px 18px; margin-bottom: 14px; }
+  .card h2 { margin: 0 0 12px; font-size: 15px; color: #1f3f7a; }
+  .ph { height: 170px; border-radius: 8px; background: repeating-linear-gradient(45deg, #eef1f6, #eef1f6 10px, #f7f9fc 10px, #f7f9fc 20px);
+        display: flex; align-items: center; justify-content: center; color: #8a94a6; font-weight: 700; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; color: #6b7585; padding: 8px; border-bottom: 2px solid #dfe4ec; }
+  td { padding: 8px; border-bottom: 1px solid #eef1f5; }
+  td.num, th.num { text-align: right; }
+</style>
+</head>
+<body>
+<header>
+  <h1>계약 만료 관리 현황판</h1>
+  <button>CSV 불러오기</button>
+</header>
+<p class="fake">⚠ 지금 보이는 숫자는 모두 가짜 데이터입니다 (Phase 1 — 화면 배치 확인용)</p>
+<main>
+  <div class="kpis">
+    <div class="kpi"><div class="k">계약</div><div class="v">40건</div></div>
+    <div class="kpi"><div class="k">결정 마감 90일 안</div><div class="v">8건</div></div>
+    <div class="kpi"><div class="k">전년 대비</div><div class="v">+3.0%</div></div>
+    <div class="kpi red"><div class="k">주의 계약</div><div class="v">3건</div></div>
+  </div>
+  <div class="card"><h2>분류별 연간금액</h2><div class="ph">차트 자리 (가짜)</div></div>
+  <div class="card">
+    <h2>부서 × 분류 — 계약 건수</h2>
+    <table>
+      <tr><th>부서</th><th class="num">분류 A</th><th class="num">분류 B</th><th class="num">분류 C</th><th class="num">전체</th></tr>
+      <tr><td>부서 1</td><td class="num">4건</td><td class="num">3건</td><td class="num">2건</td><td class="num">9건</td></tr>
+      <tr><td>부서 2</td><td class="num">2건</td><td class="num">5건</td><td class="num">-</td><td class="num">7건</td></tr>
+      <tr><td>부서 3</td><td class="num">1건</td><td class="num">3건</td><td class="num">4건</td><td class="num">8건</td></tr>
+    </table>
+  </div>
+  <div class="card">
+    <h2>계약 목록</h2>
+    <table>
+      <tr><th>계약번호</th><th>계약명</th><th>종료일</th><th>갱신상태</th><th class="num">연간금액</th><th>비고</th></tr>
+      <tr><td>AA-001</td><td>(가짜) 청소 용역</td><td>2026-11-30</td><td>미착수</td><td class="num">100,000,000</td><td>(가짜 비고) 재입찰 예정</td></tr>
+      <tr><td>BB-002</td><td>(가짜) 장비 임대</td><td>2027-03-31</td><td>협의 중</td><td class="num">30,000,000</td><td>(가짜 비고) 단가 인상 통보</td></tr>
+    </table>
+  </div>
+</main>
+</body>
+</html>

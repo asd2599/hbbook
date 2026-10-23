@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>고객 VOC 현황판 (Phase 1 · 가짜 데이터)</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #f3f5f9; color: #1c2330; font-family: "Malgun Gothic", sans-serif; font-size: 14px; }
+  header { display: flex; align-items: center; padding: 14px 24px; background: #1f3f7a; color: #fff; }
+  header h1 { margin: 0; font-size: 20px; }
+  header button { margin-left: auto; border: 0; border-radius: 7px; padding: 9px 15px; font: inherit; font-weight: 700; background: #fff; color: #1f3f7a; }
+  .fake { margin: 14px 24px 0; padding: 9px 14px; border-radius: 8px; background: #fff4e0; color: #8a5200; font-weight: 700; }
+  main { padding: 14px 24px 28px; }
+  .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 14px; }
+  .kpi { background: #fff; border: 1px solid #dfe4ec; border-radius: 12px; padding: 14px 16px; }
+  .kpi .k { color: #6b7585; font-size: 13px; }
+  .kpi .v { font-size: 26px; font-weight: 800; margin-top: 4px; }
+  .kpi.red .v { color: #d93025; }
+  .card { background: #fff; border: 1px solid #dfe4ec; border-radius: 12px; padding: 16px 18px; margin-bottom: 14px; }
+  .card h2 { margin: 0 0 12px; font-size: 15px; color: #1f3f7a; }
+  .ph { height: 170px; border-radius: 8px; background: repeating-linear-gradient(45deg, #eef1f6, #eef1f6 10px, #f7f9fc 10px, #f7f9fc 20px);
+        display: flex; align-items: center; justify-content: center; color: #8a94a6; font-weight: 700; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; color: #6b7585; padding: 8px; border-bottom: 2px solid #dfe4ec; }
+  td { padding: 8px; border-bottom: 1px solid #eef1f5; }
+  td.num, th.num { text-align: right; }
+</style>
+</head>
+<body>
+<header>
+  <h1>고객 VOC 현황판</h1>
+  <button>CSV 불러오기</button>
+</header>
+<p class="fake">⚠ 지금 보이는 숫자는 모두 가짜 데이터입니다 (Phase 1 — 화면 배치 확인용)</p>
+<main>
+  <div class="kpis">
+    <div class="kpi"><div class="k">접수</div><div class="v">400건</div></div>
+    <div class="kpi"><div class="k">이번 주 접수</div><div class="v">110건</div></div>
+    <div class="kpi"><div class="k">처리 중</div><div class="v">30건</div></div>
+    <div class="kpi red"><div class="k">주의</div><div class="v">1곳</div></div>
+  </div>
+  <div class="card"><h2>주별 접수</h2><div class="ph">차트 자리 (가짜)</div></div>
+  <div class="card">
+    <h2>차종 × 유형 — 이번 주 건수</h2>
+    <table>
+      <tr><th>차종</th><th class="num">유형 A</th><th class="num">유형 B</th><th class="num">유형 C</th><th class="num">전체</th></tr>
+      <tr><td>차종 1</td><td class="num">5건</td><td class="num">3건</td><td class="num">4건</td><td class="num">12건</td></tr>
+      <tr><td>차종 2</td><td class="num">8건</td><td class="num">2건</td><td class="num">6건</td><td class="num">16건</td></tr>
+      <tr><td>차종 3</td><td class="num">2건</td><td class="num">4건</td><td class="num">3건</td><td class="num">9건</td></tr>
+    </table>
+  </div>
+  <div class="card">
+    <h2>고객 문의 원문</h2>
+    <table>
+      <tr><th>접수번호</th><th>차종</th><th>유형</th><th>고객 문의</th></tr>
+      <tr><td>VOC-0001</td><td>차종 1</td><td>유형 A</td><td>(가짜 문의) 주행 중 소음이 납니다</td></tr>
+      <tr><td>VOC-0002</td><td>차종 2</td><td>유형 B</td><td>(가짜 문의) 예약이 늦게 잡힙니다</td></tr>
+    </table>
+  </div>
+</main>
+</body>
+</html>
